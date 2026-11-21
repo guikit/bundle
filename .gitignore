@@ -1,5 +1,8 @@
 build/
 build-*/
+build_wasm/
+dist/
+.emsdk/
 .cache/
 .DS_Store
 *.user

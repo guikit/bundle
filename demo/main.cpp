@@ -1,7 +1,12 @@
 #include "bundle_screens.hpp"
 #include "demo_window.hpp"
 
+namespace guikit::demo {
+void RegisterDemoEmbeddedAssets() noexcept;
+} // namespace guikit::demo
+
 int main(int /*argc*/, char* /*argv*/[]) {
+    guikit::demo::RegisterDemoEmbeddedAssets();
     guikit::demo::DemoWindow demo;
 
     demo.RegisterExtension({

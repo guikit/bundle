@@ -50,7 +50,7 @@ void RenderMenuBarInspector(guikit::Context& ui, DemoContext&) {
     keel::i32 styleIdx = keel::as<keel::i32>(s_mb.style);
     if (auto el = ui.Element({.label = "MenuBar Style"})) {
         if (ui.Segmented(styleIdx, kStyleLabels).changed) {
-            s_mb.style = static_cast<guikit::MenuBarStyle>(styleIdx);
+            s_mb.style = keel::from_underlying<guikit::MenuBarStyle>(styleIdx);
             ui.InvalidateAll();
         }
     }

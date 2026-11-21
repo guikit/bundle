@@ -265,7 +265,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
 
             if (auto pop = ui.Popover(s_ov.popoverOpen, {
                 .anchorRect = popBtn.rect,
-                .placement = static_cast<guikit::PopoverPlacement>(s_ov.popoverPlacementIdx),
+                .placement = keel::from_underlying<guikit::PopoverPlacement>(s_ov.popoverPlacementIdx),
                 .offset = s_ov.popoverOffset,
                 .closeOnClickOutside = s_ov.popoverCloseOutside,
                 .closeOnEscape = s_ov.popoverCloseEscape
@@ -637,7 +637,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
     }
 
     ui.ToastHost({
-        .placement = static_cast<guikit::ToastPlacement>(s_ov.toastPlacementIdx),
+        .placement = keel::from_underlying<guikit::ToastPlacement>(s_ov.toastPlacementIdx),
         .width = s_ov.toastWidth,
         .maxVisible = keel::as<keel::usize>(keel::max(1, s_ov.toastMaxVisible)),
         .pauseOnHover = s_ov.toastPauseOnHover,

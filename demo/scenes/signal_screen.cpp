@@ -375,7 +375,7 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
     keel::usize cmapIdx = keel::as<keel::usize>(s_sig.colormap);
     if (auto el = ui.Element({.label = "Spectrogram Colormap"})) {
         if (ui.Select(cmapIdx, guikit::GetAllColormapNames()).changed) {
-            s_sig.colormap = static_cast<guikit::Colormap>(cmapIdx);
+            s_sig.colormap = keel::from_underlying<guikit::Colormap>(cmapIdx);
         }
     }
 

@@ -52,7 +52,7 @@ void RenderBreadcrumbInspector(guikit::Context& ui, DemoContext& ctx) {
     };
     if (auto el = ui.Element({.label = "Separator Style"})) {
         if (ui.Segmented(s_bc.separatorIdx, kSepNames).changed) {
-            s_bc.separator = static_cast<guikit::BreadcrumbSeparator>(s_bc.separatorIdx);
+            s_bc.separator = keel::from_underlying<guikit::BreadcrumbSeparator>(s_bc.separatorIdx);
             ui.InvalidateAll();
         }
     }

@@ -324,7 +324,7 @@ void RenderCarDashboardInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     keel::usize mfdIdx = keel::as<keel::usize>(s_car.centerMfd);
     if (auto el = ui.Element({.label = "Center MFD Screen"})) {
         if (ui.Select(mfdIdx, kMfdPages).changed) {
-            s_car.centerMfd = static_cast<guikit::ClusterCenterMfd>(mfdIdx);
+            s_car.centerMfd = keel::from_underlying<guikit::ClusterCenterMfd>(mfdIdx);
         }
     }
 
@@ -427,12 +427,12 @@ void RenderCarDashboardStage(guikit::Context& ui, DemoContext& /*ctx*/) {
 
     // Main Autonomous CarClusterView Widget
     s_car.lastResp = guikit::cockpit::CarClusterView(ui, {
-        .layoutMode = static_cast<guikit::ClusterLayoutMode>(s_car.layoutModeIndex),
-        .powertrain = static_cast<guikit::PowertrainMode>(s_car.powertrainIndex),
-        .driveTheme = static_cast<guikit::ClusterDriveTheme>(s_car.driveThemeIndex),
+        .layoutMode = keel::from_underlying<guikit::ClusterLayoutMode>(s_car.layoutModeIndex),
+        .powertrain = keel::from_underlying<guikit::PowertrainMode>(s_car.powertrainIndex),
+        .driveTheme = keel::from_underlying<guikit::ClusterDriveTheme>(s_car.driveThemeIndex),
         .centerMfd = s_car.centerMfd,
-        .speedUnit = static_cast<guikit::SpeedUnit>(s_car.speedUnitIndex),
-        .gearSelector = static_cast<guikit::GearSelector>(s_car.gearSelectorIndex),
+        .speedUnit = keel::from_underlying<guikit::SpeedUnit>(s_car.speedUnitIndex),
+        .gearSelector = keel::from_underlying<guikit::GearSelector>(s_car.gearSelectorIndex),
         .speedKmh = s_car.speedKmh,
         .maxSpeedKmh = s_car.maxSpeedKmh,
         .cruiseTargetKmh = s_car.cruiseTargetKmh,

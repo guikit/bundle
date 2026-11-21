@@ -181,7 +181,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
                 m_selectedExtension = activeIdx - kBaseCount;
             } else {
                 m_selectedExtension = -1;
-                m_selectedCategory = static_cast<NavCategory>(activeIdx);
+                m_selectedCategory = keel::from_underlying<NavCategory>(activeIdx);
             }
         }
         if (m_selectedCategory != prevCat || m_selectedExtension != prevExt) {

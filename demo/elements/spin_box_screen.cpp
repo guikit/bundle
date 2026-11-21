@@ -37,7 +37,7 @@ void RenderSpinBoxInspector(guikit::Context& ui, DemoContext&) {
         .description = "None, Inline inside box, Detached square buttons after box, or Split sides"
     })) {
         if (ui.Segmented(styleIdx, stepStyleLabels).changed) {
-            s_state.stepStyle = static_cast<guikit::SpinBoxStepStyle>(keel::clamp(styleIdx, 0, 3));
+            s_state.stepStyle = keel::from_underlying<guikit::SpinBoxStepStyle>(keel::clamp(styleIdx, 0, 3));
             ui.InvalidateAll();
         }
     }

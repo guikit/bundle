@@ -440,7 +440,7 @@ void RenderSonarInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         .size = guikit::UiSize::Sm
     })) {
         if (ui.Select(cmapIdx, guikit::GetAllColormapNames(), {.size = guikit::UiSize::Sm}).changed) {
-            s_sonar.colormap = static_cast<guikit::Colormap>(cmapIdx);
+            s_sonar.colormap = keel::from_underlying<guikit::Colormap>(cmapIdx);
         }
     }
 
@@ -548,8 +548,8 @@ void RenderSonarStage(guikit::Context& ui, DemoContext& /*ctx*/) {
     s_sonar.lastResp = guikit::signal::SonarView(ui, s_sonar.polarMatrix, {
         .numBeams = s_sonar.numBeams,
         .numRangeBins = s_sonar.numRangeBins,
-        .displayMode = static_cast<guikit::SonarDisplayMode>(s_sonar.displayModeIndex),
-        .scanMode = static_cast<guikit::SonarScanMode>(s_sonar.scanModeIndex),
+        .displayMode = keel::from_underlying<guikit::SonarDisplayMode>(s_sonar.displayModeIndex),
+        .scanMode = keel::from_underlying<guikit::SonarScanMode>(s_sonar.scanModeIndex),
         .colormap = s_sonar.colormap,
         .maxRangeMeters = s_sonar.maxRangeMeters,
         .headingDeg = s_sonar.headingDeg,

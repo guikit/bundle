@@ -95,7 +95,7 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
     keel::usize alignIdx = keel::as<keel::usize>(s_state.align);
     if (auto el = ui.Element({.label = "Alignment"})) {
         if (ui.Segmented(alignIdx, kLabelAlignNames).changed) {
-            s_state.align = static_cast<guikit::Align>(alignIdx);
+            s_state.align = keel::from_underlying<guikit::Align>(alignIdx);
             ui.InvalidateAll();
         }
     }

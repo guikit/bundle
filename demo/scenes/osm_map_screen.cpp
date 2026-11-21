@@ -132,7 +132,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
     keel::usize palIdx = keel::as<keel::usize>(s_state.renderConfig.chartPalette);
     if (auto el = ui.Element({.label = "Chart Color Palette (S-52 / ENC)"})) {
         if (ui.Select(palIdx, GisScreenState::paletteNames).changed) {
-            s_state.renderConfig.chartPalette = static_cast<guikit::ChartPalette>(palIdx);
+            s_state.renderConfig.chartPalette = keel::from_underlying<guikit::ChartPalette>(palIdx);
             ui.InvalidateAll();
         }
     }
@@ -150,7 +150,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
     keel::usize crsIdx = keel::as<keel::usize>(s_state.crs);
     if (auto el = ui.Element({.label = "Projection (CRS)"})) {
         if (ui.Select(crsIdx, GisScreenState::crsNames).changed) {
-            s_state.crs = static_cast<guikit::MapCrs>(crsIdx);
+            s_state.crs = keel::from_underlying<guikit::MapCrs>(crsIdx);
             ui.InvalidateAll();
         }
     }
@@ -158,7 +158,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
     keel::usize fmtIdx = keel::as<keel::usize>(s_state.coordFormat);
     if (auto el = ui.Element({.label = "Coordinate Format"})) {
         if (ui.Select(fmtIdx, GisScreenState::coordFormatNames).changed) {
-            s_state.coordFormat = static_cast<guikit::GeoCoordFormat>(fmtIdx);
+            s_state.coordFormat = keel::from_underlying<guikit::GeoCoordFormat>(fmtIdx);
             ui.InvalidateAll();
         }
     }

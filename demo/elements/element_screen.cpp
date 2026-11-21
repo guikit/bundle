@@ -144,7 +144,7 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
     keel::usize presetIdx = keel::as<keel::usize>(s_state.slotPreset);
     if (auto el = ui.Element({.label = "Control Slot"})) {
         if (ui.Select(presetIdx, kSlotNames).changed) {
-            s_state.slotPreset = static_cast<ElementSlotPreset>(presetIdx);
+            s_state.slotPreset = keel::from_underlying<ElementSlotPreset>(presetIdx);
             ui.InvalidateAll();
         }
     }
@@ -172,7 +172,7 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
     keel::usize alignIdx = keel::as<keel::usize>(s_state.align);
     if (auto el = ui.Element({.label = "Alignment"})) {
         if (ui.Segmented(alignIdx, kLabelAlignNames).changed) {
-            s_state.align = static_cast<guikit::Align>(alignIdx);
+            s_state.align = keel::from_underlying<guikit::Align>(alignIdx);
             ui.InvalidateAll();
         }
     }

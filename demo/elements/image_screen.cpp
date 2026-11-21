@@ -54,7 +54,7 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
     keel::usize axIdx = keel::as<keel::usize>(s_state.alignX);
     if (auto el = ui.Element({.label = "Horizontal Fit Align"})) {
         if (ui.Segmented(axIdx, kLabelAlignNames).changed) {
-            s_state.alignX = static_cast<guikit::Align>(axIdx);
+            s_state.alignX = keel::from_underlying<guikit::Align>(axIdx);
             ui.InvalidateAll();
         }
     }
@@ -62,7 +62,7 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
     keel::usize ayIdx = keel::as<keel::usize>(s_state.alignY);
     if (auto el = ui.Element({.label = "Vertical Fit Align"})) {
         if (ui.Segmented(ayIdx, kLabelAlignNames).changed) {
-            s_state.alignY = static_cast<guikit::Align>(ayIdx);
+            s_state.alignY = keel::from_underlying<guikit::Align>(ayIdx);
             ui.InvalidateAll();
         }
     }

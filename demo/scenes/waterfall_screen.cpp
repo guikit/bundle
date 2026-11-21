@@ -463,7 +463,7 @@ void RenderWaterfallInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         .size = guikit::UiSize::Sm
     })) {
         if (ui.Select(cmapIdx, guikit::GetAllColormapNames(), {.size = guikit::UiSize::Sm}).changed) {
-            s_wf.colormap = static_cast<guikit::Colormap>(cmapIdx);
+            s_wf.colormap = keel::from_underlying<guikit::Colormap>(cmapIdx);
         }
     }
 
@@ -603,8 +603,8 @@ void RenderWaterfallStage(guikit::Context& ui, DemoContext& /*ctx*/) {
 
     // Main Autonomous Hardware-Accelerated WaterfallView Widget
     s_wf.lastResp = guikit::signal::WaterfallView(ui, s_wf.currentSliceDb, {
-        .mode = static_cast<guikit::WaterfallMode>(s_wf.modeIndex),
-        .viewLayout = static_cast<guikit::WaterfallLayout>(s_wf.layoutIndex),
+        .mode = keel::from_underlying<guikit::WaterfallMode>(s_wf.modeIndex),
+        .viewLayout = keel::from_underlying<guikit::WaterfallLayout>(s_wf.layoutIndex),
         .colormap = s_wf.colormap,
         .numBins = s_wf.numBins,
         .historyRows = s_wf.historyRows,

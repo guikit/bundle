@@ -910,7 +910,7 @@ struct DemoContext {
         keel::usize elemAlignIdx = keel::as<keel::usize>(elemAlign);
         if (auto el = ui.Element({.label = "Alignment"})) {
             if (ui.Segmented(elemAlignIdx, kLabelAlignNames).changed) {
-                elemAlign = static_cast<guikit::Align>(elemAlignIdx);
+                elemAlign = keel::from_underlying<guikit::Align>(elemAlignIdx);
                 ui.InvalidateAll();
             }
         }

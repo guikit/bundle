@@ -400,12 +400,12 @@ void RenderAttitudeStage(guikit::Context& ui, DemoContext& /*ctx*/) {
 
     // Main Autonomous AttitudeView Widget
     s_att.lastResp = guikit::cockpit::AttitudeView(ui, {
-        .displayMode = static_cast<guikit::AttitudeDisplayMode>(s_att.displayModeIndex),
-        .viewportMode = static_cast<guikit::AttitudeViewportMode>(s_att.viewportModeIndex),
-        .referenceMode = static_cast<guikit::HorizonReferenceMode>(s_att.referenceModeIndex),
-        .colorScheme = static_cast<guikit::AttitudeColorScheme>(s_att.colorSchemeIndex),
-        .flightDirectorStyle = static_cast<guikit::FlightDirectorStyle>(s_att.fdStyleIndex),
-        .aircraftSymbol = static_cast<guikit::AircraftSymbolStyle>(s_att.aircraftSymbolIndex),
+        .displayMode = keel::from_underlying<guikit::AttitudeDisplayMode>(s_att.displayModeIndex),
+        .viewportMode = keel::from_underlying<guikit::AttitudeViewportMode>(s_att.viewportModeIndex),
+        .referenceMode = keel::from_underlying<guikit::HorizonReferenceMode>(s_att.referenceModeIndex),
+        .colorScheme = keel::from_underlying<guikit::AttitudeColorScheme>(s_att.colorSchemeIndex),
+        .flightDirectorStyle = keel::from_underlying<guikit::FlightDirectorStyle>(s_att.fdStyleIndex),
+        .aircraftSymbol = keel::from_underlying<guikit::AircraftSymbolStyle>(s_att.aircraftSymbolIndex),
         .rollDeg = s_att.rollDeg,
         .pitchDeg = s_att.pitchDeg,
         .headingDeg = s_att.headingDeg,

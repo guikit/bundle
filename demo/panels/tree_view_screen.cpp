@@ -80,7 +80,7 @@ void RenderTreeViewInspector(guikit::Context& ui, DemoContext& ctx) {
     keel::usize guideIdx = keel::as<keel::usize>(s_tree.guides);
     if (auto el = ui.Element({.label = "Hierarchy Guides"})) {
         if (ui.Segmented(guideIdx, kGuideNames).changed) {
-            s_tree.guides = static_cast<guikit::TreeGuides>(guideIdx);
+            s_tree.guides = keel::from_underlying<guikit::TreeGuides>(guideIdx);
             ui.InvalidateAll();
         }
     }

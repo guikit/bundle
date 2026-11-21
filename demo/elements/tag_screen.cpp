@@ -70,7 +70,7 @@ void RenderTagInspector(guikit::Context& ui, DemoContext&) {
     keel::i32 styleIdx = keel::as<keel::i32>(s_state.style);
     if (auto el = ui.Element({.label = "Tag Style"})) {
         if (ui.Segmented(styleIdx, kStyleLabels).changed) {
-            s_state.style = static_cast<guikit::TagStyle>(styleIdx);
+            s_state.style = keel::from_underlying<guikit::TagStyle>(styleIdx);
             ui.InvalidateAll();
         }
     }

@@ -71,7 +71,7 @@ void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
         if (ui.Select(valPlaceIdx, valPlaceNames, {
             .disabled = !s_state.showValue
         }).changed) {
-            s_state.valuePlacement = static_cast<guikit::Placement>(valPlaceIdx);
+            s_state.valuePlacement = keel::from_underlying<guikit::Placement>(valPlaceIdx);
             ui.InvalidateAll();
         }
     }

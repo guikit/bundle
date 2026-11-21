@@ -49,7 +49,7 @@ void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
         if (ui.Segmented(placeIdx, placeNames, {
             .disabled = !(s_state.showIcons && s_state.showText)
         }).changed) {
-            s_state.iconPlacement = static_cast<guikit::Placement>(placeIdx);
+            s_state.iconPlacement = keel::from_underlying<guikit::Placement>(placeIdx);
             ui.InvalidateAll();
         }
     }

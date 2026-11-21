@@ -65,7 +65,7 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
         keel::usize overflowIdx = keel::as<keel::usize>(s_tb.overflow);
         if (auto el = ui.Element({.label = "Overflow Policy", .layout = guikit::ElementLayout::Stacked})) {
             if (ui.Segmented(overflowIdx, kOverflowLabels).changed) {
-                s_tb.overflow = static_cast<guikit::ToolbarOverflow>(overflowIdx);
+                s_tb.overflow = keel::from_underlying<guikit::ToolbarOverflow>(overflowIdx);
                 ui.InvalidateAll();
             }
         }

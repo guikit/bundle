@@ -286,7 +286,7 @@ inline void RenderPreviewViewport(
     keel::StringRef displayTitle,
     ContentFn&& renderClientContent
 ) {
-    const PreviewFormFactor formFactor = static_cast<PreviewFormFactor>(
+    const PreviewFormFactor formFactor = keel::from_underlying<PreviewFormFactor>(
         keel::min<keel::usize>(demoCtx.previewFormFactorIdx, 3)
     );
     const bool isDeviceMode = (formFactor == PreviewFormFactor::Tablet || formFactor == PreviewFormFactor::Phone);
@@ -330,7 +330,7 @@ inline void RenderPreviewViewport(
         const keel::f32 targetW       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitH : basePortraitW) : demoCtx.previewWindowW;
         const keel::f32 targetH       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitW : basePortraitH) : demoCtx.previewWindowH;
 
-        const PreviewZoomMode zoomMode = static_cast<PreviewZoomMode>(
+        const PreviewZoomMode zoomMode = keel::from_underlying<PreviewZoomMode>(
             keel::min<keel::usize>(demoCtx.previewZoomModeIdx, keel::as<keel::usize>(PreviewZoomMode::Custom))
         );
 

@@ -525,7 +525,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
                 keel::usize tk = keel::as<keel::usize>(selNode->taskType);
                 if (auto el = ui.Element({.label = "Task Subtype"})) {
                     if (ui.Select(tk, kTaskKindNames).changed) {
-                        selNode->taskType = static_cast<guikit::BpmnTaskType>(tk);
+                        selNode->taskType = keel::from_underlying<guikit::BpmnTaskType>(tk);
                         ui.InvalidateAll();
                     }
                 }
@@ -543,7 +543,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
             keel::usize gk = keel::as<keel::usize>(selNode->gatewayType);
             if (auto el = ui.Element({.label = "Gateway Semantics"})) {
                 if (ui.Select(gk, kGwNames).changed) {
-                    selNode->gatewayType = static_cast<guikit::BpmnGatewayType>(gk);
+                    selNode->gatewayType = keel::from_underlying<guikit::BpmnGatewayType>(gk);
                     ui.InvalidateAll();
                 }
             }
@@ -557,7 +557,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
             keel::usize ek = keel::as<keel::usize>(selNode->eventDef);
             if (auto el = ui.Element({.label = "Event Trigger / Result"})) {
                 if (ui.Select(ek, kEvNames).changed) {
-                    selNode->eventDef = static_cast<guikit::BpmnEventDefinition>(ek);
+                    selNode->eventDef = keel::from_underlying<guikit::BpmnEventDefinition>(ek);
                     ui.InvalidateAll();
                 }
             }
@@ -584,7 +584,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
         keel::usize fk = keel::as<keel::usize>(selEdge->flowType);
         if (auto el = ui.Element({.label = "Flow Type"})) {
             if (ui.Select(fk, kFlowNames).changed) {
-                selEdge->flowType = static_cast<guikit::BpmnFlowType>(fk);
+                selEdge->flowType = keel::from_underlying<guikit::BpmnFlowType>(fk);
                 ui.InvalidateAll();
             }
         }

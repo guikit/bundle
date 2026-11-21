@@ -1,27 +1,31 @@
 cmake_minimum_required(VERSION 3.21)
 project(guikit_bundle VERSION 1.0.0 LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if (PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    endif()
 endif()
 
-option(GUIKIT_BUNDLE_BUILD_DEMO "Build full GuiKit interactive showcase demo (guikit_demo)" ON)
-option(GUIKIT_BUNDLE_BUILD_TESTS "Build and run unit tests for all GuiKit ecosystem repositories" ON)
+option(GUIKIT_BUNDLE_BUILD_DEMO "Build full GuiKit interactive showcase demo (guikit_demo)" ${PROJECT_IS_TOP_LEVEL})
+option(GUIKIT_BUNDLE_BUILD_TESTS "Build and run unit tests for all GuiKit ecosystem repositories" ${PROJECT_IS_TOP_LEVEL})
 
 if (GUIKIT_BUNDLE_BUILD_TESTS)
     enable_testing()
 endif()
 
-# Forward unified example/test switches into submodules so one CMake + CTest covers the entire ecosystem
-set(GUIKIT_BUILD_EXAMPLES ${GUIKIT_BUNDLE_BUILD_DEMO} CACHE BOOL "" FORCE)
-set(GUIKIT_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS} CACHE BOOL "" FORCE)
-set(GUIKIT_GEO_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS} CACHE BOOL "" FORCE)
-set(GUIKIT_SIGNAL_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS} CACHE BOOL "" FORCE)
-set(GUIKIT_COCKPIT_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS} CACHE BOOL "" FORCE)
-set(GUIKIT_DIAGRAM_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS} CACHE BOOL "" FORCE)
+# Forward unified example/test switches into submodules via normal variables (CMP0077)
+# so including guikit/bundle via add_subdirectory() never pollutes parent project cache.
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+set(GUIKIT_BUILD_EXAMPLES ${GUIKIT_BUNDLE_BUILD_DEMO})
+set(GUIKIT_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS})
+set(GUIKIT_GEO_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS})
+set(GUIKIT_SIGNAL_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS})
+set(GUIKIT_COCKPIT_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS})
+set(GUIKIT_DIAGRAM_BUILD_TESTS ${GUIKIT_BUNDLE_BUILD_TESTS})
 
 add_subdirectory(guikit)
 add_subdirectory(geo)

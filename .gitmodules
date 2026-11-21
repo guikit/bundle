@@ -1,0 +1,15 @@
+[submodule "guikit"]
+	path = guikit
+	url = https://github.com/guikit/guikit.git
+[submodule "geo"]
+	path = geo
+	url = https://github.com/guikit/geo.git
+[submodule "signal"]
+	path = signal
+	url = https://github.com/guikit/signal.git
+[submodule "cockpit"]
+	path = cockpit
+	url = https://github.com/guikit/cockpit.git
+[submodule "diagram"]
+	path = diagram
+	url = https://github.com/guikit/diagram.git

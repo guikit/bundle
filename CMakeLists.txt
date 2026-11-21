@@ -44,7 +44,7 @@ target_link_libraries(guikit_all INTERFACE
     guikit::diagram
 )
 
-if (GUIKIT_BUNDLE_BUILD_DEMO)
+if (GUIKIT_BUNDLE_BUILD_DEMO AND TARGET guikit::backend_sdl3)
     set(GUIKIT_DEMO_GENERATED_ASSETS_CPP "${CMAKE_CURRENT_BINARY_DIR}/generated/demo_embedded_assets.cpp")
     file(GLOB_RECURSE GUIKIT_DEMO_ASSET_FILES CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/demo/assets/*"

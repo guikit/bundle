@@ -89,6 +89,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO)
         demo/panels/tab_bar_screen.cpp
         demo/panels/breadcrumb_screen.cpp
         demo/panels/pagination_screen.cpp
+        demo/panels/menu_bar_screen.cpp
         demo/panels/toolbar_screen.cpp
         demo/panels/sidebar_screen.cpp
         demo/panels/tree_view_screen.cpp

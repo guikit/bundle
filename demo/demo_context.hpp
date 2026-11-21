@@ -33,6 +33,7 @@ enum class NavCategory : keel::u8 {
     PanelTabBar,
     PanelBreadcrumb,
     PanelPagination,
+    PanelMenuBar,
     PanelToolbar,
     PanelSidebar,
     PanelTreeView,
@@ -59,6 +60,7 @@ constexpr bool IsSandboxCategory(NavCategory cat) noexcept {
 constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
     return cat == NavCategory::PanelSplitView ||
            cat == NavCategory::PanelSidebar ||
+           cat == NavCategory::PanelMenuBar ||
            cat == NavCategory::PanelTreeView ||
            cat == NavCategory::PanelTable ||
            cat == NavCategory::ContentMarkdown ||
@@ -130,6 +132,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::PanelTabBar:       return "TabBar — Scrollable & Closable Tabs";
         case NavCategory::PanelBreadcrumb:   return "Breadcrumb — Hierarchical Path Trail";
         case NavCategory::PanelPagination:   return "Pagination — Page Navigation & Ellipsis";
+        case NavCategory::PanelMenuBar:      return "MenuBar — Desktop Menu Bar & Cascading Submenus";
         case NavCategory::PanelToolbar:      return "Toolbar — Command Strip & Tool Palettes";
         case NavCategory::PanelSidebar:      return "Sidebar — Application Workbench Shell";
         case NavCategory::PanelTreeView:     return "TreeView — Hierarchical Node Explorer";
@@ -1286,6 +1289,10 @@ keel::String GenerateTableCode(const DemoContext& ctx);
 void RenderOverlaysInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateOverlaysCode(const DemoContext& ctx);
+
+void RenderMenuBarInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateMenuBarCode(const DemoContext& ctx);
 
 void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx);

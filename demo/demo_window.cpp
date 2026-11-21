@@ -147,6 +147,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelTabBar),       {.text = "TabBar",       .icon = guikit::Icon::Folder()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelBreadcrumb),   {.text = "Breadcrumb",   .icon = guikit::Icon::Folder()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelPagination),   {.text = "Pagination",   .icon = guikit::Icon::ArrowRight()});
+            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelMenuBar),      {.text = "MenuBar",      .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelToolbar),      {.text = "Toolbar",      .icon = guikit::Icon::Settings()});
 
             menu.Section("DATA");
@@ -528,7 +529,7 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
 void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using InspectorFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<InspectorFn, 33> kInspectors = {
+    static constexpr keel::StaticArray<InspectorFn, 34> kInspectors = {
         // 1. ELEMENTS
         &RenderHeadingInspector,
         &RenderElementInspector,
@@ -556,6 +557,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderTabBarInspector,
         &RenderBreadcrumbInspector,
         &RenderPaginationInspector,
+        &RenderMenuBarInspector,
         &RenderToolbarInspector,
         &RenderSidebarInspector,
         &RenderTreeViewInspector,
@@ -580,7 +582,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
 
 void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using StageFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<StageFn, 33> kStages = {
+    static constexpr keel::StaticArray<StageFn, 34> kStages = {
         // 1. ELEMENTS
         &RenderHeadingStage,
         &RenderElementStage,
@@ -608,6 +610,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderTabBarStage,
         &RenderBreadcrumbStage,
         &RenderPaginationStage,
+        &RenderMenuBarStage,
         &RenderToolbarStage,
         &RenderSidebarStage,
         &RenderTreeViewStage,
@@ -632,7 +635,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
 
 keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContext& ctx) {
     using CodeGenFn = keel::String (*)(const DemoContext&);
-    static constexpr keel::StaticArray<CodeGenFn, 33> kGenerators = {
+    static constexpr keel::StaticArray<CodeGenFn, 34> kGenerators = {
         // 1. ELEMENTS
         &GenerateHeadingCode,
         &GenerateElementCode,
@@ -660,6 +663,7 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateTabBarCode,
         &GenerateBreadcrumbCode,
         &GeneratePaginationCode,
+        &GenerateMenuBarCode,
         &GenerateToolbarCode,
         &GenerateSidebarCode,
         &GenerateTreeViewCode,

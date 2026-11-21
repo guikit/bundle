@@ -77,6 +77,8 @@ if (GUIKIT_BUNDLE_BUILD_DEMO)
         demo/elements/color_picker_screen.cpp
         demo/elements/date_picker_screen.cpp
         demo/elements/level_meter_screen.cpp
+        demo/elements/readout_screen.cpp
+        demo/elements/tag_screen.cpp
         demo/elements/tag_input_screen.cpp
         demo/elements/switch_screen.cpp
         demo/elements/checkbox_screen.cpp

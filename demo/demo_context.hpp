@@ -12,9 +12,11 @@ enum class NavCategory : keel::u8 {
     ElemButton,
     ElemSlider,
     ElemLevelMeter,
+    ElemReadout,
     ElemKnob,
     ElemSpinBox,
     ElemInputField,
+    ElemTag,
     ElemTagInput,
     ElemSelect,
     ElemSegmented,
@@ -109,9 +111,11 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::ElemButton:        return "Button — Interactive Push Control";
         case NavCategory::ElemSlider:        return "Slider & StepSlider — Continuous & Discrete";
         case NavCategory::ElemLevelMeter:    return "LevelMeter — Segmented Audio/DSP VU Meter";
+        case NavCategory::ElemReadout:       return "Readout — Interactive Telemetry Channel Display";
         case NavCategory::ElemKnob:          return "Knob — Rotary Parameter Control";
         case NavCategory::ElemSpinBox:       return "SpinBox — Precision Numeric Stepper";
         case NavCategory::ElemInputField:    return "InputField — Text & Validated Input";
+        case NavCategory::ElemTag:           return "Tag — Status Badges & Clickable Chips";
         case NavCategory::ElemTagInput:      return "TagInput — Editable Multi-Tag Chips";
         case NavCategory::ElemSelect:        return "Select & MultiSelect — Dropdown & ComboBox";
         case NavCategory::ElemSegmented:     return "Segmented — Mutually Exclusive Pill Bar";
@@ -1203,6 +1207,14 @@ keel::String GenerateSpinBoxCode(const DemoContext& ctx);
 void RenderInputInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderInputStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateInputCode(const DemoContext& ctx);
+
+void RenderReadoutInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateReadoutCode(const DemoContext& ctx);
+
+void RenderTagInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderTagStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateTagCode(const DemoContext& ctx);
 
 void RenderTagInputInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderTagInputStage(guikit::Context& ui, DemoContext& ctx);

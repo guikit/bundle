@@ -122,9 +122,11 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSlider),        {.text = "Slider",       .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemLevelMeter),    {.text = "LevelMeter",   .icon = guikit::Icon::Play()});
+            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemReadout),       {.text = "Readout",      .icon = guikit::Icon::Target()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemKnob),          {.text = "Knob",         .icon = guikit::Icon::Refresh()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemInputField),    {.text = "Input",        .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemTag),           {.text = "Tag",          .icon = guikit::Icon::Check()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
             menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSegmented),     {.text = "Segmented",    .icon = guikit::Icon::Settings()});
@@ -526,16 +528,18 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
 void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using InspectorFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<InspectorFn, 31> kInspectors = {
+    static constexpr keel::StaticArray<InspectorFn, 33> kInspectors = {
         // 1. ELEMENTS
         &RenderHeadingInspector,
         &RenderElementInspector,
         &RenderButtonInspector,
         &RenderSliderInspector,
         &RenderLevelMeterInspector,
+        &RenderReadoutInspector,
         &RenderKnobInspector,
         &RenderSpinBoxInspector,
         &RenderInputInspector,
+        &RenderTagInspector,
         &RenderTagInputInspector,
         &RenderSelectInspector,
         &RenderSegmentedInspector,
@@ -576,16 +580,18 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
 
 void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using StageFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<StageFn, 31> kStages = {
+    static constexpr keel::StaticArray<StageFn, 33> kStages = {
         // 1. ELEMENTS
         &RenderHeadingStage,
         &RenderElementStage,
         &RenderButtonStage,
         &RenderSliderStage,
         &RenderLevelMeterStage,
+        &RenderReadoutStage,
         &RenderKnobStage,
         &RenderSpinBoxStage,
         &RenderInputStage,
+        &RenderTagStage,
         &RenderTagInputStage,
         &RenderSelectStage,
         &RenderSegmentedStage,
@@ -626,16 +632,18 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
 
 keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContext& ctx) {
     using CodeGenFn = keel::String (*)(const DemoContext&);
-    static constexpr keel::StaticArray<CodeGenFn, 31> kGenerators = {
+    static constexpr keel::StaticArray<CodeGenFn, 33> kGenerators = {
         // 1. ELEMENTS
         &GenerateHeadingCode,
         &GenerateElementCode,
         &GenerateButtonCode,
         &GenerateSliderCode,
         &GenerateLevelMeterCode,
+        &GenerateReadoutCode,
         &GenerateKnobCode,
         &GenerateSpinBoxCode,
         &GenerateInputCode,
+        &GenerateTagCode,
         &GenerateTagInputCode,
         &GenerateSelectCode,
         &GenerateSegmentedCode,

@@ -11,6 +11,7 @@ enum class NavCategory : keel::u8 {
     ElemElement,
     ElemButton,
     ElemSlider,
+    ElemProgressBar,
     ElemLevelMeter,
     ElemReadout,
     ElemKnob,
@@ -111,7 +112,8 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::ElemHeading:       return "Heading — Section & Title Typography";
         case NavCategory::ElemElement:       return "Element — Form-Field Wrapper & Slot Anatomy";
         case NavCategory::ElemButton:        return "Button — Interactive Push Control";
-        case NavCategory::ElemSlider:        return "Slider & StepSlider — Continuous & Discrete";
+        case NavCategory::ElemSlider:        return "Slider & StepSlider — Continuous, Discrete & Range";
+        case NavCategory::ElemProgressBar:   return "ProgressBar — Smooth, Segmented & Indeterminate";
         case NavCategory::ElemLevelMeter:    return "LevelMeter — Segmented Audio/DSP VU Meter";
         case NavCategory::ElemReadout:       return "Readout — Interactive Telemetry Channel Display";
         case NavCategory::ElemKnob:          return "Knob — Rotary Parameter Control";
@@ -152,6 +154,7 @@ constexpr keel::StringRef CategoryControlName(NavCategory cat) noexcept {
         case NavCategory::ElemElement:       return "Element";
         case NavCategory::ElemButton:        return "Button";
         case NavCategory::ElemSlider:        return "Slider";
+        case NavCategory::ElemProgressBar:   return "ProgressBar";
         case NavCategory::ElemLevelMeter:    return "LevelMeter";
         case NavCategory::ElemKnob:          return "Knob";
         case NavCategory::ElemSpinBox:       return "SpinBox";
@@ -1042,6 +1045,7 @@ struct DemoContext {
         const bool hasControlVariant = (
             cat == NavCategory::ElemButton ||
             cat == NavCategory::ElemSlider ||
+            cat == NavCategory::ElemProgressBar ||
             cat == NavCategory::ElemLevelMeter ||
             cat == NavCategory::ElemKnob ||
             cat == NavCategory::ElemSpinBox ||
@@ -1194,6 +1198,10 @@ keel::String GenerateButtonCode(const DemoContext& ctx);
 void RenderSliderInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderSliderStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateSliderCode(const DemoContext& ctx);
+
+void RenderProgressBarInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderProgressBarStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateProgressBarCode(const DemoContext& ctx);
 
 void RenderLevelMeterInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx);

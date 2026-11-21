@@ -95,6 +95,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/elements/element_screen.cpp
         demo/elements/button_screen.cpp
         demo/elements/slider_screen.cpp
+        demo/elements/progress_bar_screen.cpp
         demo/elements/knob_screen.cpp
         demo/elements/spin_box_screen.cpp
         demo/elements/input_screen.cpp

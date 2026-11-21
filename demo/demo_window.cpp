@@ -131,6 +131,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Section("CONTROLS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSlider),        {.text = "Slider",       .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemProgressBar),   {.text = "ProgressBar",  .icon = guikit::Icon::Flash()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemLevelMeter),    {.text = "LevelMeter",   .icon = guikit::Icon::Play()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemReadout),       {.text = "Readout",      .icon = guikit::Icon::Target()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemKnob),          {.text = "Knob",         .icon = guikit::Icon::Refresh()});
@@ -539,12 +540,13 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
 void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using InspectorFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<InspectorFn, 34> kInspectors = {
+    static constexpr keel::StaticArray<InspectorFn, 35> kInspectors = {
         // 1. ELEMENTS
         &RenderHeadingInspector,
         &RenderElementInspector,
         &RenderButtonInspector,
         &RenderSliderInspector,
+        &RenderProgressBarInspector,
         &RenderLevelMeterInspector,
         &RenderReadoutInspector,
         &RenderKnobInspector,
@@ -592,12 +594,13 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
 
 void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using StageFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<StageFn, 34> kStages = {
+    static constexpr keel::StaticArray<StageFn, 35> kStages = {
         // 1. ELEMENTS
         &RenderHeadingStage,
         &RenderElementStage,
         &RenderButtonStage,
         &RenderSliderStage,
+        &RenderProgressBarStage,
         &RenderLevelMeterStage,
         &RenderReadoutStage,
         &RenderKnobStage,
@@ -645,12 +648,13 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
 
 keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContext& ctx) {
     using CodeGenFn = keel::String (*)(const DemoContext&);
-    static constexpr keel::StaticArray<CodeGenFn, 34> kGenerators = {
+    static constexpr keel::StaticArray<CodeGenFn, 35> kGenerators = {
         // 1. ELEMENTS
         &GenerateHeadingCode,
         &GenerateElementCode,
         &GenerateButtonCode,
         &GenerateSliderCode,
+        &GenerateProgressBarCode,
         &GenerateLevelMeterCode,
         &GenerateReadoutCode,
         &GenerateKnobCode,

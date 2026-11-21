@@ -4,20 +4,13 @@ namespace guikit::demo {
 
 namespace {
 struct SliderDemoState {
-    keel::usize modeIdx = 0; // 0 = Slider, 1 = StepSlider, 2 = RangeSlider, 3 = ProgressBar
+    keel::usize modeIdx = 0; // 0 = Slider, 1 = StepSlider, 2 = RangeSlider
     keel::f32 val = 65.0f;
     keel::usize stepIdx = 2;
     keel::f32 rangeLow = 22.0f;
     keel::f32 rangeHigh = 78.0f;
     keel::f32 rangeMinSpan = 10.0f;
     bool quantizeStep = false;
-
-    keel::u32 progressSegments = 20;
-    bool progressSegmented = false;
-    bool progressMultiZone = true;
-    bool progressShowPeak = true;
-    keel::f32 progressPeakVal = 86.0f;
-    keel::f32 progressBarHeight = 10.0f;
 
     bool showTicks = true;
     bool showLabels = true;
@@ -36,10 +29,10 @@ constexpr keel::StringRef OrientationEnumName(guikit::Orientation o) noexcept {
 } // namespace
 
 void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
-    static constexpr keel::StaticArray<keel::StringRef, 4> modeNames = {"Slider", "Step", "Range", "Progress"};
+    static constexpr keel::StaticArray<keel::StringRef, 3> modeNames = {"Slider", "Step", "Range"};
     if (auto el = ui.Element({
-        .label = "Track Control Mode",
-        .description = "Slider / StepSlider / RangeSlider / ProgressBar"
+        .label = "Slider Mode",
+        .description = "Slider / StepSlider / RangeSlider"
     })) {
         if (ui.Segmented(s_state.modeIdx, modeNames).changed) {
             ui.InvalidateAll();
@@ -118,49 +111,6 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
                 ui.InvalidateAll();
             }
         }
-    } else if (s_state.modeIdx == 3) {
-        if (auto el = ui.Element({.label = "Simulated Signal / Progress"})) {
-            if (ui.Slider(s_state.val, 0.0f, 100.0f, {
-                .valueFormat = "%.1f %%"
-            }).changed) {
-                if (s_state.val > s_state.progressPeakVal) {
-                    s_state.progressPeakVal = s_state.val;
-                }
-                ui.InvalidateAll();
-            }
-        }
-        if (auto el = ui.Element({
-            .label = "Segmented LED / VU Meter",
-            .description = "Discrete LED cells vs Smooth bar"
-        })) {
-            if (ui.Switch(s_state.progressSegmented).changed) ui.InvalidateAll();
-        }
-        if (s_state.progressSegmented) {
-            if (auto el = ui.Element({.label = "LED Segment Count"})) {
-                if (ui.Slider(s_state.progressSegments, 8u, 36u, {
-                    .valueFormat = "%u segs"
-                }).changed) ui.InvalidateAll();
-            }
-        }
-        if (auto el = ui.Element({.label = "Bar Thickness"})) {
-            if (ui.Slider(s_state.progressBarHeight, 4.0f, 20.0f, {
-                .valueFormat = "%.0f dp",
-                .step = 1.0f
-            }).changed) ui.InvalidateAll();
-        }
-        if (auto el = ui.Element({.label = "3-Zone Colors (Green/Warn/Danger)"})) {
-            if (ui.Switch(s_state.progressMultiZone).changed) ui.InvalidateAll();
-        }
-        if (auto el = ui.Element({.label = "Show Peak-Hold Marker"})) {
-            if (ui.Switch(s_state.progressShowPeak).changed) ui.InvalidateAll();
-        }
-        if (s_state.progressShowPeak) {
-            if (auto el = ui.Element({.label = "Peak-Hold Level"})) {
-                if (ui.Slider(s_state.progressPeakVal, 0.0f, 100.0f, {
-                    .valueFormat = "%.1f %%"
-                }).changed) ui.InvalidateAll();
-            }
-        }
     }
 }
 
@@ -204,7 +154,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.height = hSize;
             opts.color = ctx.GetControlColor();
             ui.StepSlider(s_state.stepIdx, stepItems, opts);
-        } else if (s_state.modeIdx == 2) {
+        } else {
             guikit::RangeSliderOptions opts{};
             opts.orientation = s_state.orientation;
             opts.textLeft = s_state.textLeft;
@@ -220,26 +170,6 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.height = hSize;
             opts.color = ctx.GetControlColor();
             ui.RangeSlider(s_state.rangeLow, s_state.rangeHigh, 0.0f, 100.0f, opts);
-        } else {
-            guikit::ProgressBarOptions opts{};
-            opts.orientation = s_state.orientation;
-            opts.textLeft = s_state.textLeft;
-            opts.textRight = s_state.textRight;
-            opts.valueFormat = "%.1f %%";
-            opts.peakHoldValue = s_state.progressShowPeak
-                ? keel::Optional<keel::f64>(s_state.progressPeakVal)
-                : keel::kNullOpt;
-            opts.segments = s_state.progressSegmented ? s_state.progressSegments : 0u;
-            opts.trackHeight = s_state.progressBarHeight;
-            opts.showValue = s_state.showValue;
-            opts.valuePlacement = s_state.valuePlacement;
-            opts.multiZoneColor = s_state.progressMultiZone;
-            opts.disabled = ctx.elemDisabled;
-            opts.size = ctx.controlsSize;
-            opts.width = wSize;
-            opts.height = hSize;
-            opts.color = ctx.GetControlColor();
-            ui.ProgressBar(s_state.val, 0.0, 100.0, opts);
         }
     });
 }
@@ -321,51 +251,16 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
         out.append(ctx.WrapInElementCode(ctrl));
         return out;
     }
-    if (s_state.modeIdx == 2) {
-        const keel::String ctrl = keel::format(
-            "ui.RangeSlider(bandLow, bandHigh, 0.0f, 100.0f, {{\n"
-            "    .orientation = guikit::Orientation::{},\n"
-            "    .textLeft = \"{}\",\n"
-            "    .textRight = \"{}\",\n"
-            "    .valueFormat = \"%.0f %%\",\n"
-            "    .step = {},\n"
-            "    .minSpan = {:.1f},\n"
-            "    .showValue = {},\n"
-            "    .valuePlacement = guikit::Placement::{},\n"
-            "    .disabled = {},\n"
-            "{}"
-            "    .width = {},\n"
-            "    .height = {},\n"
-            "    .color = {}\n"
-            "}});",
-            OrientationEnumName(s_state.orientation),
-            s_state.textLeft,
-            s_state.textRight,
-            s_state.quantizeStep ? "5.0" : "keel::kNullOpt",
-            s_state.rangeMinSpan,
-            s_state.showValue ? "true" : "false",
-            PlacementName(s_state.valuePlacement),
-            ctx.elemDisabled ? "true" : "false",
-            sizeLine,
-            ctx.FormatCtrlWidthCode(),
-            heightCode,
-            ctx.FormatControlColorCode()
-        );
-        return ctx.WrapInElementCode(ctrl);
-    }
-
     const keel::String ctrl = keel::format(
-        "ui.ProgressBar(signalLevel, 0.0, 100.0, {{\n"
+        "ui.RangeSlider(bandLow, bandHigh, 0.0f, 100.0f, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .textLeft = \"{}\",\n"
         "    .textRight = \"{}\",\n"
-        "    .valueFormat = \"%.1f %%\",\n"
-        "    .peakHoldValue = {},\n"
-        "    .segments = {},\n"
-        "    .trackHeight = {:.1f}f,\n"
+        "    .valueFormat = \"%.0f %%\",\n"
+        "    .step = {},\n"
+        "    .minSpan = {:.1f},\n"
         "    .showValue = {},\n"
         "    .valuePlacement = guikit::Placement::{},\n"
-        "    .multiZoneColor = {},\n"
         "    .disabled = {},\n"
         "{}"
         "    .width = {},\n"
@@ -375,14 +270,10 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
         OrientationEnumName(s_state.orientation),
         s_state.textLeft,
         s_state.textRight,
-        s_state.progressShowPeak
-            ? keel::format_fixed<32>("{:.1f}", s_state.progressPeakVal)
-            : keel::FixedString<32>("keel::kNullOpt"),
-        s_state.progressSegmented ? s_state.progressSegments : 0u,
-        s_state.progressBarHeight,
+        s_state.quantizeStep ? "5.0" : "keel::kNullOpt",
+        s_state.rangeMinSpan,
         s_state.showValue ? "true" : "false",
         PlacementName(s_state.valuePlacement),
-        s_state.progressMultiZone ? "true" : "false",
         ctx.elemDisabled ? "true" : "false",
         sizeLine,
         ctx.FormatCtrlWidthCode(),

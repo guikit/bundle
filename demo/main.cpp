@@ -1,5 +1,8 @@
 #include "bundle_screens.hpp"
 #include "demo_window.hpp"
+#if defined(GUIKIT_HAS_BACKEND_SDL3) && GUIKIT_HAS_BACKEND_SDL3
+#include "guikit/sdl.hpp"
+#endif
 
 namespace guikit::demo {
 void RegisterDemoEmbeddedAssets() noexcept;

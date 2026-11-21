@@ -13,3 +13,12 @@
 [submodule "diagram"]
 	path = diagram
 	url = https://github.com/guikit/diagram.git
+[submodule "text"]
+	path = text
+	url = https://github.com/guikit/text.git
+[submodule "sdl"]
+	path = sdl
+	url = https://github.com/guikit/sdl.git
+[submodule "native"]
+	path = native
+	url = https://github.com/guikit/native.git

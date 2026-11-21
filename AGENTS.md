@@ -10,7 +10,10 @@ This repository (`guikit/bundle`) is the unified workspace aggregating the entir
 
 | Path | Upstream Repo | CMake Target | Primary Umbrella Header | Scope |
 | :--- | :--- | :--- | :--- | :--- |
-| `guikit/` | `guikit/guikit` | `guikit::guikit` / `guikit::core` | `"guikit/guikit.hpp"` | Core immediate-mode GUI, layout engine, widgets, panels, `Scene`, `ImageView`, backends, `guikit_minimal` |
+| `guikit/` | `guikit/guikit` | `guikit::guikit` / `guikit::core` | `"guikit/guikit.hpp"` | Pure C++20 core (0BSD, `keel` only): immediate-mode GUI, layout engine, widgets, panels, `Scene`, `ImageView`, `NullCanvas`, `IPlatformWindow`, `PlatformWindowBackend`, `guikit_headless` |
+| `text/` | `guikit/text` | `guikit::text` | `"guikit/text.hpp"` | Standalone FreeType hinted glyph rasterizer & LRU glyph cache shared across CPU & GPU canvases |
+| `sdl/` | `guikit/sdl` | `guikit::sdl` (`backend_sdl3`, `backend_thorvg`) | `"guikit/sdl.hpp"` | Cross-platform SDL3 windowing, OpenGL ES2/3 / WebGL2 shader underlays, ThorVG CPU vector rasterizer, `guikit_minimal` |
+| `native/` | `guikit/native` | `guikit::native` | `"guikit/native.hpp"` | Lightweight native platform windowing (X11 / Wayland / Win32) and OpenGL ES3 / GL3 2D renderer (zero SDL3, zero ThorVG) |
 | `geo/` | `guikit/geo` | `guikit::geo` | `"guikit/geo.hpp"` | Multi-CRS geodesy (`MapGrid`), GeoJSON I/O, S-52/ENC GIS engine, OSM tiles, `guikit::geo::MapView` |
 | `signal/` | `guikit/signal` | `guikit::signal` | `"guikit/signal.hpp"` | `guikit::signal::SignalView`, `SonarView`, `WaterfallView` (GLSL underlays + CPU fallback) |
 | `cockpit/` | `guikit/cockpit` | `guikit::cockpit` | `"guikit/cockpit.hpp"` | `guikit::cockpit::AttitudeView` (PFD), `CarClusterView` (automotive cockpit) |

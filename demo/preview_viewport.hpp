@@ -426,6 +426,9 @@ inline void RenderPreviewViewport(
             })) {
                 renderClientContent();
             }
+            if (!ui.HasToastHostVisited()) {
+                ui.ToastHost({.confineToParent = true});
+            }
         };
 
         // Each simulated window/device/artboard carries the preview theme, zoom scale and layout density in its `.zone`;

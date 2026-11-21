@@ -6,17 +6,13 @@ namespace guikit::demo {
 namespace {
 
 struct TagDemoState {
-    keel::SmallString<64> label{"In Method"};
+    keel::SmallString<64> label{"v2.4.0"};
     guikit::UiVariant variant = guikit::UiVariant::Success;
     guikit::TagStyle style = guikit::TagStyle::Soft;
     bool pill = false;
     bool clickable = true;
     bool closable = false;
     bool showIcon = false;
-    keel::i32 clickCount = 0;
-    keel::i32 closeCount = 0;
-    keel::SmallString<64> catalogFilter{};
-    keel::i32 selectedAlgo = -1;
 };
 
 TagDemoState s_state;
@@ -46,53 +42,6 @@ keel::StringRef TagStyleName(guikit::TagStyle st) noexcept {
         case guikit::TagStyle::Solid:   return "Solid";
         default:                        return "Soft";
     }
-}
-
-struct AlgoItem {
-    keel::StringRef title;
-    keel::StringRef symbol;
-    keel::StringRef unit;
-    keel::StringRef desc;
-    bool inMethod;
-    keel::StaticArray<keel::StringRef, 4> tags;
-};
-
-constexpr keel::StaticArray<AlgoItem, 2> kCatalogAlgos = {{
-    {
-        "Peak Tensile Force",
-        "(P_max)",
-        "[kN]",
-        "Absolute peak load on the stress-strain curve and corresponding crosshead displacement.",
-        true,
-        {{"# strength", "# tensile", "# metals", "# iso-6892"}}
-    },
-    {
-        "Upper Yield Strength",
-        "(ReH)",
-        "[MPa]",
-        "Stress at the first force maximum prior to load drop at the yield plateau.",
-        true,
-        {{"# strength", "# yield", "# metals", "# iso-6892"}}
-    }
-}};
-
-bool MatchesFilter(const AlgoItem& item, keel::StringRef filter) noexcept {
-    if (filter.empty()) return true;
-    auto containsI = [](keel::StringRef hay, keel::StringRef needle) noexcept -> bool {
-        if (needle.empty()) return true;
-        if (needle.size() > hay.size()) return false;
-        for (keel::usize i = 0; i + needle.size() <= hay.size(); ++i) {
-            if (hay.substr(i, needle.size()).equals_ignore_ascii_case(needle)) return true;
-        }
-        return false;
-    };
-    if (containsI(item.title, filter) || containsI(item.symbol, filter) || containsI(item.desc, filter)) {
-        return true;
-    }
-    for (const auto& t : item.tags) {
-        if (containsI(t, filter)) return true;
-    }
-    return false;
 }
 
 } // namespace
@@ -141,12 +90,13 @@ void RenderTagInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderTagStage(guikit::Context& ui, DemoContext& ctx) {
-    if (auto col = ui.Column({.gap = 16.0f, .width = guikit::SizeMode::Stretch})) {
-        ctx.RunElementStage(ui, [&]() {
+    ctx.RunElementStage(ui, [&]() {
+        const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
+        if (auto wrap = ui.Wrap({.gap = 8.0f})) {
             guikit::TagOptions opts{};
             opts.variant = s_state.variant;
             opts.style = s_state.style;
-            opts.size = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
+            opts.size = effSize;
             opts.pill = s_state.pill;
             opts.clickable = s_state.clickable;
             opts.closable = s_state.closable;
@@ -156,102 +106,33 @@ void RenderTagStage(guikit::Context& ui, DemoContext& ctx) {
             }
             const auto r = ui.Tag(s_state.label.as_ref(), opts);
             if (r.clicked) {
-                ++s_state.clickCount;
                 ui.ShowToast({.title = "Tag clicked", .message = s_state.label.as_ref(), .variant = s_state.variant});
             }
             if (r.closed) {
-                ++s_state.closeCount;
                 ui.ShowToast({.title = "Tag closed", .message = s_state.label.as_ref(), .variant = guikit::UiVariant::Warning});
             }
-        });
 
-        // Composite Pattern Showcase: Algorithm Catalog Card (Card + Tag + Wrap + Button)
-        if (auto catalog = ui.Card({
-            .gap = 10.0f,
-            .padding = guikit::Padding::All(14.0f)
-        })) {
-            ui.Heading({
-                .label = "Algorithm & Formula Catalog",
-                .description = "Composite pattern: Card + hover border + clickable Tag chips + status Tag + action Button",
-                .level = guikit::HeadingLevel::H4
-            });
-
-            ui.InputField(s_state.catalogFilter, {
-                .placeholder = "Filter by name, symbol, or click any #tag below...",
-                .clearable = true
-            });
-
-            const auto& pal = ui.GetTheme().palette;
-            for (keel::usize i = 0; i < kCatalogAlgos.size(); ++i) {
-                const auto& item = kCatalogAlgos[i];
-                if (!MatchesFilter(item, s_state.catalogFilter.as_ref())) {
-                    continue;
-                }
-                const bool isSel = (s_state.selectedAlgo == static_cast<keel::i32>(i));
-                if (auto itemCard = ui.Card({
-                    .padding = guikit::Padding::Symmetric(10.0f, 12.0f),
-                    .border = {
-                        .width = 1.0f,
-                        .radius = 8.0f,
-                        .color = {
-                            .normal = isSel ? pal.accent.WithAlphaF(0.75f) : pal.border,
-                            .hover = pal.accent.WithAlphaF(0.65f)
-                        }
-                    }
-                })) {
-                    if (auto row = ui.Row({.gap = 12.0f, .align = guikit::Alignment::Center, .width = guikit::SizeMode::Stretch})) {
-                        if (auto left = ui.Column({.gap = 4.0f, .width = guikit::SizeMode::Stretch})) {
-                            if (auto titleRow = ui.Row({.gap = 6.0f, .align = guikit::Alignment::Center})) {
-                                ui.Text(item.title, {.role = guikit::TextRole::TitleSmall});
-                                ui.Text(item.symbol, {.role = guikit::TextRole::TitleSmall, .variant = guikit::UiVariant::Info});
-                                ui.Text(item.unit, {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Muted});
-                            }
-                            ui.Text(item.desc, {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Muted});
-                            if (auto tagWrap = ui.Wrap({.gap = 6.0f})) {
-                                for (const auto& t : item.tags) {
-                                    if (ui.Tag(t, {
-                                        .variant = guikit::UiVariant::Default,
-                                        .style = guikit::TagStyle::Soft,
-                                        .size = guikit::UiSize::Xs,
-                                        .clickable = true
-                                    }).clicked) {
-                                        s_state.catalogFilter.assign(t);
-                                        ui.InvalidateAll();
-                                    }
-                                }
-                            }
-                        }
-
-                        if (item.inMethod) {
-                            ui.Tag("In Method", {
-                                .variant = guikit::UiVariant::Success,
-                                .style = guikit::TagStyle::Soft,
-                                .size = guikit::UiSize::Sm
-                            });
-                        }
-
-                        if (ui.Button({
-                            .icon = guikit::Icon::ChevronRight(),
-                            .size = guikit::UiSize::Sm,
-                            .background = guikit::StateColor::Secondary()
-                        }).clicked) {
-                            s_state.selectedAlgo = static_cast<keel::i32>(i);
-                            ui.ShowToast({
-                                .title = item.title,
-                                .message = "Opened formula configuration",
-                                .variant = guikit::UiVariant::Info
-                            });
-                        }
-                    }
-                }
+            // Companion semantic chips mirroring current style/size/pill settings
+            struct SampleChip { keel::StringRef text; guikit::UiVariant var; };
+            static constexpr keel::StaticArray<SampleChip, 4> kSamples = {{
+                {"# cpp20",   guikit::UiVariant::Default},
+                {"Stable",    guikit::UiVariant::Info},
+                {"Beta",      guikit::UiVariant::Warning},
+                {"Breaking",  guikit::UiVariant::Danger}
+            }};
+            for (const auto& chip : kSamples) {
+                guikit::TagOptions sampleOpts = opts;
+                sampleOpts.variant = chip.var;
+                sampleOpts.icon = {};
+                (void)ui.Tag(chip.text, sampleOpts);
             }
         }
-    }
+    });
 }
 
 keel::String GenerateTagCode(const DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
-    return keel::format(
+    const keel::String ctrl = keel::format(
         "if (auto r = ui.Tag(\"{}\", {{\n"
         "    .variant = guikit::UiVariant::{},\n"
         "    .style = guikit::TagStyle::{},\n"
@@ -260,7 +141,7 @@ keel::String GenerateTagCode(const DemoContext& ctx) {
         "    .clickable = {},\n"
         "    .closable = {}\n"
         "}}); r.clicked) {{\n"
-        "    // Handle tag click\n"
+        "    // Handle click\n"
         "}}",
         s_state.label,
         VariantName(s_state.variant),
@@ -270,6 +151,7 @@ keel::String GenerateTagCode(const DemoContext& ctx) {
         s_state.clickable ? "true" : "false",
         s_state.closable ? "true" : "false"
     );
+    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

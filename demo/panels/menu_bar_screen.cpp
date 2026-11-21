@@ -196,9 +196,9 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
             }
         }
 
-        // 2. Interactive workspace area supporting Right-Click RAII ContextMenu with cascading submenus
+        // 2. Clean workspace area supporting Right-Click RAII ContextMenu with cascading submenus
         if (auto body = ui.Column({
-            .gap = 12.0f,
+            .gap = 8.0f,
             .padding = guikit::Padding::All(18.0f),
             .align = guikit::Alignment::Center,
             .justify = guikit::Justify::Center,
@@ -212,40 +212,10 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
                 ui.InvalidateAll();
             }
 
-            if (auto infoCard = ui.Card({
-                .maxWidth = 520.0f,
-                .width = guikit::SizeMode::Stretch,
-                .gap = 8.0f,
-                .padding = guikit::Padding::All(16.0f)
-            })) {
-                ui.Heading({
-                    .label = "Desktop MenuBar & Cascading Menus",
-                    .description = guikit::UiText(
-                        "Try hover-scrubbing across menus, 3-level submenus (File -> Export -> Structured Data), "
-                        "keyboard arrows, scrollable menus (Tools), or Right-Click anywhere here.",
-                        guikit::TextWrap{.maxLines = 0}
-                    ),
-                    .level = guikit::HeadingLevel::H4
-                });
-                if (auto statusRow = ui.Wrap({.gap = 6.0f})) {
-                    (void)ui.Tag(s_mb.showGrid ? "Grid: ON" : "Grid: OFF", {
-                        .variant = s_mb.showGrid ? guikit::UiVariant::Success : guikit::UiVariant::Muted,
-                        .size = guikit::UiSize::Xs
-                    });
-                    (void)ui.Tag(s_mb.showMinimap ? "Minimap: ON" : "Minimap: OFF", {
-                        .variant = s_mb.showMinimap ? guikit::UiVariant::Success : guikit::UiVariant::Muted,
-                        .size = guikit::UiSize::Xs
-                    });
-                    (void)ui.Tag(s_mb.showRulers ? "Rulers: ON" : "Rulers: OFF", {
-                        .variant = s_mb.showRulers ? guikit::UiVariant::Success : guikit::UiVariant::Muted,
-                        .size = guikit::UiSize::Xs
-                    });
-                }
-                ui.Text(s_mb.lastAction.as_ref(), {
-                    .role = guikit::TextRole::CodeSmall,
-                    .variant = guikit::UiVariant::Info
-                });
-            }
+            ui.Text(s_mb.lastAction.as_ref(), {
+                .role = guikit::TextRole::BodySmall,
+                .variant = guikit::UiVariant::Muted
+            });
 
             // Right-click RAII ContextMenu using the exact same cascading engine
             if (auto ctxMenu = ui.ContextMenu(s_mb.ctxMenuOpen, {

@@ -11,7 +11,7 @@ struct TreeDemoState {
 
     guikit::TreeGuides guides = guikit::TreeGuides::Connected;
     guikit::TreeSelectionStyle selectionStyle = guikit::TreeSelectionStyle::Pill;
-    float indent = 18.0f;
+    keel::f32 indent = 18.0f;
     bool showColumns = false;
     bool gridLines = true;
     bool searchable = true;
@@ -35,9 +35,9 @@ struct TreeDemoState {
 
     // Embedded control states inside TreeItem rows
     bool sceneActive = true;
-    float envExposure = 1.15f;
+    keel::f32 envExposure = 1.15f;
     bool sunEnabled = true;
-    float fogDensity = 35.0f;
+    keel::f32 fogDensity = 35.0f;
     keel::usize sonarModeIdx = 0;
     bool wfTracking = true;
     bool imuEnabled = true;
@@ -77,7 +77,7 @@ void RenderTreeViewInspector(guikit::Context& ui, DemoContext& ctx) {
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 3> kGuideNames = {"None", "Vertical", "Connected"};
-    keel::usize guideIdx = static_cast<keel::usize>(s_tree.guides);
+    keel::usize guideIdx = keel::as<keel::usize>(s_tree.guides);
     if (auto el = ui.Element({.label = "Hierarchy Guides"})) {
         if (ui.Segmented(guideIdx, kGuideNames).changed) {
             s_tree.guides = static_cast<guikit::TreeGuides>(guideIdx);

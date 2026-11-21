@@ -6,7 +6,7 @@ namespace {
 
 struct CardDemoState {
     bool fullWidth = false;
-    float minWidth = 280.0f;
+    keel::f32 minWidth = 280.0f;
     keel::usize bgIdx = 1;     // 0=None/Off, 1=Surface, 2=Primary, 3=Secondary, 4=Success, 5=Warning, 6=Danger, 7=Info, 8=Ghost
     keel::usize borderIdx = 0; // 0=Default, 1=Primary, 2=Secondary, 3=Success, 4=Warning, 5=Danger, 6=Info, 7=Ghost
     bool showHeader = true;
@@ -117,7 +117,7 @@ void RenderCardInspector(guikit::Context& ui, DemoContext& ctx) {
 
 void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
     if (auto card = ui.Card({
-        .minWidth = s_card.fullWidth ? keel::Optional<float>{keel::kNullOpt} : keel::Optional<float>{s_card.minWidth},
+        .minWidth = s_card.fullWidth ? keel::Optional<keel::f32>{keel::kNullOpt} : keel::Optional<keel::f32>{s_card.minWidth},
         .width = s_card.fullWidth ? guikit::SizeMode::Stretch : guikit::SizeMode::Fit,
         .gap = ctx.cardGap,
         .padding = guikit::Padding::All(ctx.cardPadding),

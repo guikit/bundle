@@ -15,13 +15,13 @@ struct GisScreenState {
     keel::usize totalVertices{0};
 
     guikit::GeoCoord initialCenter{44.6020, 33.4950};
-    float initialTileZoom{13.4f};
+    keel::f32 initialTileZoom{13.4f};
 
     guikit::MapCrs crs{guikit::MapCrs::EPSG3857_WebMercator};
     guikit::GeoCoordFormat coordFormat{guikit::GeoCoordFormat::NauticalDMM};
     guikit::GisRenderConfig renderConfig{};
 
-    float worldSize{2048.0f};
+    keel::f32 worldSize{2048.0f};
     keel::i32 baseZoom{3};
     bool showTileGrid{false};
     bool showSubTileQuadtree{false};
@@ -30,14 +30,14 @@ struct GisScreenState {
     bool showScaleBarOverlay{true};
     bool showControls{true};
     bool showScrollbars{true};
-    float radius{8.0f};
+    keel::f32 radius{8.0f};
 
     guikit::MapViewState lastView{};
     guikit::GisRenderStats lastStats{};
     keel::u64 selectedFeatureUid{0};
 
     keel::Optional<guikit::GeoCoord> pendingCenterGeo{};
-    keel::Optional<float> pendingTileZoom{};
+    keel::Optional<keel::f32> pendingTileZoom{};
     bool requestResetView{false};
 
     static constexpr keel::StaticArray<keel::StringRef, 4> paletteNames = {
@@ -84,11 +84,11 @@ struct GisScreenState {
 
             if (chartBounds.IsValid()) {
                 initialCenter = chartBounds.Center();
-                const double spanLon = keel::max(0.005, chartBounds.SpanLon());
-                const double spanLat = keel::max(0.005, chartBounds.SpanLat());
-                const double maxSpan = keel::max(spanLon, spanLat * 1.35);
+                const keel::f64 spanLon = keel::max(0.005, chartBounds.SpanLon());
+                const keel::f64 spanLat = keel::max(0.005, chartBounds.SpanLat());
+                const keel::f64 maxSpan = keel::max(spanLon, spanLat * 1.35);
                 initialTileZoom = keel::clamp(
-                    static_cast<float>(keel::log2(360.0 / (maxSpan * 1.35))),
+                    keel::as<keel::f32>(keel::log2(360.0 / (maxSpan * 1.35))),
                     2.0f,
                     16.5f
                 );
@@ -129,7 +129,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
     }
 
     // 2. S-52 / ENC Palette & Bathymetry Safety Thresholds
-    keel::usize palIdx = static_cast<keel::usize>(s_state.renderConfig.chartPalette);
+    keel::usize palIdx = keel::as<keel::usize>(s_state.renderConfig.chartPalette);
     if (auto el = ui.Element({.label = "Chart Color Palette (S-52 / ENC)"})) {
         if (ui.Select(palIdx, GisScreenState::paletteNames).changed) {
             s_state.renderConfig.chartPalette = static_cast<guikit::ChartPalette>(palIdx);
@@ -147,7 +147,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
     }
 
     // 3. Projection (CRS), Coordinate Readout Format & Tile Size
-    keel::usize crsIdx = static_cast<keel::usize>(s_state.crs);
+    keel::usize crsIdx = keel::as<keel::usize>(s_state.crs);
     if (auto el = ui.Element({.label = "Projection (CRS)"})) {
         if (ui.Select(crsIdx, GisScreenState::crsNames).changed) {
             s_state.crs = static_cast<guikit::MapCrs>(crsIdx);
@@ -155,7 +155,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    keel::usize fmtIdx = static_cast<keel::usize>(s_state.coordFormat);
+    keel::usize fmtIdx = keel::as<keel::usize>(s_state.coordFormat);
     if (auto el = ui.Element({.label = "Coordinate Format"})) {
         if (ui.Select(fmtIdx, GisScreenState::coordFormatNames).changed) {
             s_state.coordFormat = static_cast<guikit::GeoCoordFormat>(fmtIdx);
@@ -314,14 +314,14 @@ keel::String GenerateOsmMapCode(const DemoContext&) {
         "        .showFeatureCallouts = {}\n"
         "    }}, selectedFeatureUid);\n"
         "}}",
-        crsEnumNames[static_cast<keel::usize>(s_state.crs)],
-        fmtEnumNames[static_cast<keel::usize>(s_state.coordFormat)],
+        crsEnumNames[keel::as<keel::usize>(s_state.crs)],
+        fmtEnumNames[keel::as<keel::usize>(s_state.coordFormat)],
         s_state.initialTileZoom,
         s_state.showNauticalGraticule ? "true" : "false",
         s_state.showBorderRulers ? "true" : "false",
         s_state.showScaleBarOverlay ? "true" : "false",
         s_state.showTileGrid ? "true" : "false",
-        palEnumNames[static_cast<keel::usize>(s_state.renderConfig.chartPalette)],
+        palEnumNames[keel::as<keel::usize>(s_state.renderConfig.chartPalette)],
         s_state.renderConfig.safetyContourM,
         s_state.renderConfig.tileSizePx,
         s_state.renderConfig.showLoadingTilePlaceholders ? "true" : "false",

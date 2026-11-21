@@ -84,7 +84,7 @@ void RenderBreadcrumbInspector(guikit::Context& ui, DemoContext& ctx) {
 
 void RenderBreadcrumbStage(guikit::Context& ui, DemoContext& ctx) {
     const guikit::StateColor activeCol = guikit::StateColor::FromVariant(ctx.btnVariant);
-    const keel::u32 maxVis = (s_bc.maxVisibleItems >= 2) ? static_cast<keel::u32>(s_bc.maxVisibleItems) : 0u;
+    const keel::u32 maxVis = (s_bc.maxVisibleItems >= 2) ? keel::as<keel::u32>(s_bc.maxVisibleItems) : 0u;
 
     const keel::StaticArray<guikit::BreadcrumbItem, 5> crumbs = {{
         {.label = "Workspace",  .icon = s_bc.showCrumbIcons ? guikit::Icon::Folder()   : guikit::Icon{}},
@@ -119,7 +119,7 @@ void RenderBreadcrumbStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateBreadcrumbCode(const DemoContext& ctx) {
-    const keel::u32 maxVis = (s_bc.maxVisibleItems >= 2) ? static_cast<keel::u32>(s_bc.maxVisibleItems) : 0u;
+    const keel::u32 maxVis = (s_bc.maxVisibleItems >= 2) ? keel::as<keel::u32>(s_bc.maxVisibleItems) : 0u;
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLineIndented = hasCustomSize
         ? keel::format_fixed<64>("        .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))

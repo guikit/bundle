@@ -59,10 +59,10 @@ void RenderSelectInspector(guikit::Context& ui, DemoContext&) {
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    float maxItemsFloat = static_cast<float>(s_state.maxItems);
+    keel::f32 maxItemsFloat = keel::as<keel::f32>(s_state.maxItems);
     if (auto el = ui.Element({.label = "Max Visible Menu Items"})) {
         if (ui.Slider(maxItemsFloat, 2.0f, 8.0f, {.valueFormat = "%.0f items", .step = 1.0f}).changed) {
-            s_state.maxItems = static_cast<keel::u32>(maxItemsFloat);
+            s_state.maxItems = keel::as<keel::u32>(maxItemsFloat);
             ui.InvalidateAll();
         }
     }

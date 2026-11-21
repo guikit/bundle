@@ -377,12 +377,12 @@ struct BpmnDemoState {
     bool showGrid{true};
     bool snapToGrid{true};
     bool smartGuides{true};
-    float gridStep{20.0f};
+    keel::f32 gridStep{20.0f};
     bool readOnly{false};
 
     bool tokenSimulation{false};
     bool autoSpawnTokens{true};
-    float simulationSpeed{1.0f};
+    keel::f32 simulationSpeed{1.0f};
     bool showSlaHeatmap{false};
 
     keel::u32 selectedNodeId{0};
@@ -522,7 +522,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
                     "None", "User Task", "Service Task", "Send Task", "Receive Task",
                     "Script Task", "Manual Task", "Business Rule (DMN)", "Call Activity"
                 };
-                keel::usize tk = static_cast<keel::usize>(selNode->taskType);
+                keel::usize tk = keel::as<keel::usize>(selNode->taskType);
                 if (auto el = ui.Element({.label = "Task Subtype"})) {
                     if (ui.Select(tk, kTaskKindNames).changed) {
                         selNode->taskType = static_cast<guikit::BpmnTaskType>(tk);
@@ -540,7 +540,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
             static constexpr keel::StaticArray<keel::StringRef, 4> kGwNames = {
                 "Exclusive (XOR x)", "Parallel (AND +)", "Inclusive (OR o)", "Event-Based"
             };
-            keel::usize gk = static_cast<keel::usize>(selNode->gatewayType);
+            keel::usize gk = keel::as<keel::usize>(selNode->gatewayType);
             if (auto el = ui.Element({.label = "Gateway Semantics"})) {
                 if (ui.Select(gk, kGwNames).changed) {
                     selNode->gatewayType = static_cast<guikit::BpmnGatewayType>(gk);
@@ -554,7 +554,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
             static constexpr keel::StaticArray<keel::StringRef, 7> kEvNames = {
                 "None", "Message", "Timer", "Error", "Signal", "Escalation", "Terminate"
             };
-            keel::usize ek = static_cast<keel::usize>(selNode->eventDef);
+            keel::usize ek = keel::as<keel::usize>(selNode->eventDef);
             if (auto el = ui.Element({.label = "Event Trigger / Result"})) {
                 if (ui.Select(ek, kEvNames).changed) {
                     selNode->eventDef = static_cast<guikit::BpmnEventDefinition>(ek);
@@ -581,7 +581,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
         static constexpr keel::StaticArray<keel::StringRef, 5> kFlowNames = {
             "Sequence Flow", "Conditional Flow (Diamond)", "Default Flow (Slash \\)", "Message Flow (Dashed)", "Association (Dotted)"
         };
-        keel::usize fk = static_cast<keel::usize>(selEdge->flowType);
+        keel::usize fk = keel::as<keel::usize>(selEdge->flowType);
         if (auto el = ui.Element({.label = "Flow Type"})) {
             if (ui.Select(fk, kFlowNames).changed) {
                 selEdge->flowType = static_cast<guikit::BpmnFlowType>(fk);
@@ -696,7 +696,7 @@ keel::String GenerateBpmnCode(const DemoContext&) {
         "keel::String xml = guikit::BpmnEditor::ExportBpmnXml(diagram);\n"
         "guikit::BpmnEditor::ImportBpmnXml(xml, diagram);",
         (s_bpmn.routingMode == guikit::BpmnRoutingMode::Orthogonal) ? "Orthogonal" : "Bezier",
-        kThemeEnum[static_cast<keel::usize>(s_bpmn.themePreset)],
+        kThemeEnum[keel::as<keel::usize>(s_bpmn.themePreset)],
         s_bpmn.showLeftPalette ? "true" : "false",
         s_bpmn.showTopBar ? "true" : "false",
         s_bpmn.showContextPad ? "true" : "false",

@@ -22,7 +22,7 @@ struct CodeEditorState {
     bool showHoverDataTips = true;
     bool showDiagnostics = true;
     bool showWhitespace = false;
-    float zoom = 1.0f;
+    keel::f32 zoom = 1.0f;
 
     keel::usize syntaxMode = 0; // 0 = C++20, 1 = MATLAB, 2 = JSON, 3 = Python, 4 = Custom
     static constexpr keel::StaticArray<keel::StringRef, 5> syntaxLabels = {
@@ -114,8 +114,8 @@ struct CodeEditorState {
                 });
             }
             if (showInlineValues && executionLine > 0) {
-                const float gainVal = 1.85f + 0.05f * static_cast<float>(stepCounter % 5);
-                const float rmsVal = 0.707f * gainVal;
+                const keel::f32 gainVal = 1.85f + 0.05f * keel::as<keel::f32>(stepCounter % 5);
+                const keel::f32 rmsVal = 0.707f * gainVal;
                 const keel::usize loopLine = FindLineContaining("for (size_t k", 16);
                 const keel::usize accLine = FindLineContaining("float weighted", 18);
                 inlineValues.push_back({11, "sampleRate = 48000.0 Hz, nyquist = 24000.0 Hz", UiVariant::Info, "nyquist"});
@@ -128,7 +128,7 @@ struct CodeEditorState {
                 }
             }
             if (showHoverDataTips) {
-                const float gainVal = 1.85f + 0.05f * static_cast<float>(stepCounter % 5);
+                const keel::f32 gainVal = 1.85f + 0.05f * keel::as<keel::f32>(stepCounter % 5);
                 debugVariables.assign({
                     {"sampleRate", "48000.0", "double"},
                     {"cutoffHz", "2400.0f", "float"},

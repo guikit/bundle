@@ -40,7 +40,7 @@ void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 4> placeNames = {"Leading", "Trailing", "Top", "Bottom"};
-    keel::usize placeIdx = static_cast<keel::usize>(s_state.iconPlacement);
+    keel::usize placeIdx = keel::as<keel::usize>(s_state.iconPlacement);
     if (placeIdx > 3) placeIdx = 0;
     if (auto el = ui.Element({
         .label = "Icon Placement",

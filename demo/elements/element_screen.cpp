@@ -17,7 +17,7 @@ struct ElementStudioState {
     guikit::UiSize elemSize = guikit::UiSize::Md;
     guikit::Align align = guikit::Align::Start;
     keel::usize widthModeIdx = 0; // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
-    float widthDp = 380.0f;
+    keel::f32 widthDp = 380.0f;
     bool showDescription = true;
     bool showIconAndBadge = true;
     bool wrapInCard = true;
@@ -141,7 +141,7 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
         "Composite ui.Row",
         "Standalone (No Slot)"
     };
-    keel::usize presetIdx = static_cast<keel::usize>(s_state.slotPreset);
+    keel::usize presetIdx = keel::as<keel::usize>(s_state.slotPreset);
     if (auto el = ui.Element({.label = "Control Slot"})) {
         if (ui.Select(presetIdx, kSlotNames).changed) {
             s_state.slotPreset = static_cast<ElementSlotPreset>(presetIdx);
@@ -169,7 +169,7 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    keel::usize alignIdx = static_cast<keel::usize>(s_state.align);
+    keel::usize alignIdx = keel::as<keel::usize>(s_state.align);
     if (auto el = ui.Element({.label = "Alignment"})) {
         if (ui.Segmented(alignIdx, kLabelAlignNames).changed) {
             s_state.align = static_cast<guikit::Align>(alignIdx);

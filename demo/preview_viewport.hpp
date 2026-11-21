@@ -21,19 +21,19 @@ inline void RenderDotGridBackdrop(const guikit::Node* n, guikit::ICanvas& canvas
     canvas.DrawRect(r, bg);
 
     // Subtle studio dot-grid pattern
-    constexpr float scale = 1.0f;
-    const float step = keel::round(18.0f * scale);
-    const float dotSize = keel::max(1.5f, keel::round(1.5f * scale));
+    constexpr keel::f32 scale = 1.0f;
+    const keel::f32 step = keel::round(18.0f * scale);
+    const keel::f32 dotSize = keel::max(1.5f, keel::round(1.5f * scale));
     const guikit::Color dotColor = isLight
         ? guikit::Color(100, 116, 139, 46)
         : guikit::Color(148, 163, 184, 30);
 
-    const float startX = keel::floor(r.x + step * 0.5f);
-    const float startY = keel::floor(r.y + step * 0.5f);
-    const float endX = r.Right() - 2.0f;
-    const float endY = r.Bottom() - 2.0f;
-    for (float y = startY; y < endY; y += step) {
-        for (float x = startX; x < endX; x += step) {
+    const keel::f32 startX = keel::floor(r.x + step * 0.5f);
+    const keel::f32 startY = keel::floor(r.y + step * 0.5f);
+    const keel::f32 endX = r.Right() - 2.0f;
+    const keel::f32 endY = r.Bottom() - 2.0f;
+    for (keel::f32 y = startY; y < endY; y += step) {
+        for (keel::f32 x = startX; x < endX; x += step) {
             canvas.DrawRect(guikit::Rect(x, y, dotSize, dotSize), dotColor);
         }
     }
@@ -54,17 +54,17 @@ inline void RenderBackdropHudBadge(const guikit::Node* n, guikit::ICanvas& canva
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 160.0f || r.h <= 60.0f) return;
 
-    constexpr float s = 1.0f;
-    const float fontSize = keel::round(11.0f * s);
+    constexpr keel::f32 s = 1.0f;
+    const keel::f32 fontSize = keel::round(11.0f * s);
     const guikit::Vec2 textSz = canvas.MeasureText(n->text, fontSize);
-    const float padX = 9.0f * s;
-    const float padY = 4.0f * s;
-    const float pillW = textSz.x + padX * 2.0f;
-    const float pillH = keel::max(fontSize + padY * 2.0f, 20.0f * s);
-    const float extraRight = (n->type == guikit::NodeType::ScrollArea && n->scrollContentSize.y > r.h + 0.5f) ? (10.0f * s) : 0.0f;
-    const float extraBottom = (n->type == guikit::NodeType::ScrollArea && n->scrollContentSize.x > r.w + 0.5f) ? (10.0f * s) : 0.0f;
-    const float pillX = r.Right() - pillW - 10.0f * s - extraRight;
-    const float pillY = r.Bottom() - pillH - 8.0f * s - extraBottom;
+    const keel::f32 padX = 9.0f * s;
+    const keel::f32 padY = 4.0f * s;
+    const keel::f32 pillW = textSz.x + padX * 2.0f;
+    const keel::f32 pillH = keel::max(fontSize + padY * 2.0f, 20.0f * s);
+    const keel::f32 extraRight = (n->type == guikit::NodeType::ScrollArea && n->scrollContentSize.y > r.h + 0.5f) ? (10.0f * s) : 0.0f;
+    const keel::f32 extraBottom = (n->type == guikit::NodeType::ScrollArea && n->scrollContentSize.x > r.w + 0.5f) ? (10.0f * s) : 0.0f;
+    const keel::f32 pillX = r.Right() - pillW - 10.0f * s - extraRight;
+    const keel::f32 pillY = r.Bottom() - pillH - 8.0f * s - extraBottom;
 
     const bool isLight = (theme.mode == guikit::ThemeMode::Light);
     const guikit::Color pillBg = isLight
@@ -86,14 +86,14 @@ inline void RenderWindowResizeGrip(const guikit::Node* n, guikit::ICanvas& canva
     if (r.w <= 20.0f || r.h <= 20.0f) return;
 
     // Subtle diagonal resize grip lines in the bottom-right corner of the window frame
-    constexpr float s = 1.0f;
+    constexpr keel::f32 s = 1.0f;
     const guikit::Color gripCol = (n->scrollbarActive || n->scrollbarHovered)
         ? theme.GetVariant(guikit::UiVariant::Primary).bg
         : theme.palette.textSecondary.WithAlphaF(0.55f);
-    const float bx = r.Right() - 4.0f * s;
-    const float by = r.Bottom() - 4.0f * s;
+    const keel::f32 bx = r.Right() - 4.0f * s;
+    const keel::f32 by = r.Bottom() - 4.0f * s;
     for (keel::i32 i = 0; i < 3; ++i) {
-        const float span = (3.5f + static_cast<float>(i) * 3.5f) * s;
+        const keel::f32 span = (3.5f + keel::as<keel::f32>(i) * 3.5f) * s;
         canvas.DrawLine({bx - span, by}, {bx, by - span}, gripCol, keel::max(1.0f, 1.2f * s));
     }
 }
@@ -102,12 +102,12 @@ inline void RenderWindowTitlebarTrafficLights(const guikit::Node* n, guikit::ICa
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 20.0f || r.h <= 4.0f) return;
 
-    constexpr float s = 1.0f;
-    const float dotD = 10.0f * s;
-    const float dotR = dotD * 0.5f;
-    const float gap = 7.0f * s;
-    const float cy = r.Center().y - dotR;
-    const float x0 = r.x + 12.0f * s;
+    constexpr keel::f32 s = 1.0f;
+    const keel::f32 dotD = 10.0f * s;
+    const keel::f32 dotR = dotD * 0.5f;
+    const keel::f32 gap = 7.0f * s;
+    const keel::f32 cy = r.Center().y - dotR;
+    const keel::f32 x0 = r.x + 12.0f * s;
 
     // Traffic lights: Close (Red), Minimize (Amber), Zoom (Green)
     canvas.DrawRoundRect(guikit::Rect(x0, cy, dotD, dotD), dotR, guikit::Color(255, 95, 86, 255), guikit::Color(224, 68, 62, 180), 0.75f);
@@ -123,31 +123,31 @@ inline void RenderDeviceChassisButtons(const guikit::Node* n, guikit::ICanvas& c
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 40.0f || r.h <= 40.0f) return;
 
-    constexpr float s = 1.0f;
+    constexpr keel::f32 s = 1.0f;
     const guikit::Color btnCol(71, 85, 105, 255);
-    const float btnThickness = keel::max(1.5f, keel::round(2.5f * s));
+    const keel::f32 btnThickness = keel::max(1.5f, keel::round(2.5f * s));
 
     if (r.h >= r.w) {
         // Portrait orientation: volume rockers on left edge, power button on right edge
-        const float yBase = r.y + keel::min(r.h * 0.20f, 84.0f * s);
+        const keel::f32 yBase = r.y + keel::min(r.h * 0.20f, 84.0f * s);
         canvas.DrawRoundRect(guikit::Rect(r.x - btnThickness, yBase, btnThickness, 22.0f * s), 1.5f * s, btnCol);
         canvas.DrawRoundRect(guikit::Rect(r.x - btnThickness, yBase + 32.0f * s, btnThickness, 36.0f * s), 1.5f * s, btnCol);
         canvas.DrawRoundRect(guikit::Rect(r.x - btnThickness, yBase + 74.0f * s, btnThickness, 36.0f * s), 1.5f * s, btnCol);
         canvas.DrawRoundRect(guikit::Rect(r.Right(), yBase + 42.0f * s, btnThickness, 52.0f * s), 1.5f * s, btnCol);
     } else {
         // Landscape orientation: buttons on top edge
-        const float xBase = r.x + keel::min(r.w * 0.18f, 90.0f * s);
+        const keel::f32 xBase = r.x + keel::min(r.w * 0.18f, 90.0f * s);
         canvas.DrawRoundRect(guikit::Rect(xBase, r.y - btnThickness, 34.0f * s, btnThickness), 1.5f * s, btnCol);
         canvas.DrawRoundRect(guikit::Rect(xBase + 42.0f * s, r.y - btnThickness, 34.0f * s, btnThickness), 1.5f * s, btnCol);
     }
 
     // Tablet front-facing camera is embedded inside the outer hardware bezel (not inside the LCD screen)
     if constexpr (!IsPhone) {
-        const float bezelT = 10.0f * s;
-        const float camD = keel::max(3.5f, 5.2f * s);
-        const float coreD = keel::max(1.8f, 2.4f * s);
-        const float cx = r.Center().x;
-        const float cy = r.y + bezelT * 0.5f;
+        const keel::f32 bezelT = 10.0f * s;
+        const keel::f32 camD = keel::max(3.5f, 5.2f * s);
+        const keel::f32 coreD = keel::max(1.8f, 2.4f * s);
+        const keel::f32 cx = r.Center().x;
+        const keel::f32 cy = r.y + bezelT * 0.5f;
         canvas.DrawRoundRect(
             guikit::Rect(cx - camD * 0.5f, cy - camD * 0.5f, camD, camD),
             camD * 0.5f,
@@ -167,7 +167,7 @@ inline void RenderPhoneDynamicIsland(const guikit::Node* n, guikit::ICanvas& can
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 40.0f || r.h <= 40.0f) return;
 
-    constexpr float s = 1.0f;
+    constexpr keel::f32 s = 1.0f;
     const guikit::Color pillFill(4, 6, 11, 255);
     const guikit::Color pillStroke(30, 41, 59, 135);
     const guikit::Color lensHousing(13, 18, 28, 255);
@@ -177,47 +177,47 @@ inline void RenderPhoneDynamicIsland(const guikit::Node* n, guikit::ICanvas& can
 
     if (r.h >= r.w) {
         // Portrait: horizontal Dynamic Island at top-center of the screen
-        const float pillW = keel::min(r.w * 0.31f, 92.0f * s);
-        const float pillH = 22.0f * s;
-        const float pillX = r.Center().x - pillW * 0.5f;
-        const float pillY = r.y + 7.0f * s;
-        const float cy = pillY + pillH * 0.5f;
+        const keel::f32 pillW = keel::min(r.w * 0.31f, 92.0f * s);
+        const keel::f32 pillH = 22.0f * s;
+        const keel::f32 pillX = r.Center().x - pillW * 0.5f;
+        const keel::f32 pillY = r.y + 7.0f * s;
+        const keel::f32 cy = pillY + pillH * 0.5f;
 
         canvas.DrawRoundRect(guikit::Rect(pillX, pillY, pillW, pillH), pillH * 0.5f, pillFill, pillStroke, 0.75f);
 
         // Subtle left FaceID infrared sensor housing
-        const float senD = 6.5f * s;
+        const keel::f32 senD = 6.5f * s;
         canvas.DrawRoundRect(guikit::Rect(pillX + 7.5f * s, cy - senD * 0.5f, senD, senD), senD * 0.5f, sensorDot);
 
         // Right sapphire camera lens + inner glass + tiny specular reflection
-        const float lensD = 8.5f * s;
-        const float coreD = 4.2f * s;
-        const float glintD = keel::max(1.2f, 1.6f * s);
-        const float lx = pillX + pillW - 6.5f * s - lensD * 0.5f;
+        const keel::f32 lensD = 8.5f * s;
+        const keel::f32 coreD = 4.2f * s;
+        const keel::f32 glintD = keel::max(1.2f, 1.6f * s);
+        const keel::f32 lx = pillX + pillW - 6.5f * s - lensD * 0.5f;
         canvas.DrawRoundRect(guikit::Rect(lx - lensD * 0.5f, cy - lensD * 0.5f, lensD, lensD), lensD * 0.5f, lensHousing);
         canvas.DrawRoundRect(guikit::Rect(lx - coreD * 0.5f, cy - coreD * 0.5f, coreD, coreD), coreD * 0.5f, lensGlass);
         canvas.DrawRoundRect(guikit::Rect(lx - coreD * 0.30f, cy - coreD * 0.30f, glintD, glintD), glintD * 0.5f, lensGlint);
     } else {
         // Landscape (90 deg CCW): vertical Dynamic Island on the physical left edge of the screen
-        const float pillW = 22.0f * s;
-        const float pillH = keel::min(r.h * 0.31f, 92.0f * s);
-        const float pillX = r.x + 7.0f * s;
-        const float pillY = r.Center().y - pillH * 0.5f;
-        const float cx = pillX + pillW * 0.5f;
+        const keel::f32 pillW = 22.0f * s;
+        const keel::f32 pillH = keel::min(r.h * 0.31f, 92.0f * s);
+        const keel::f32 pillX = r.x + 7.0f * s;
+        const keel::f32 pillY = r.Center().y - pillH * 0.5f;
+        const keel::f32 cx = pillX + pillW * 0.5f;
 
         canvas.DrawRoundRect(guikit::Rect(pillX, pillY, pillW, pillH), pillW * 0.5f, pillFill, pillStroke, 0.75f);
 
         // Top sapphire camera lens (rotated 90 deg CCW from right side of portrait island)
-        const float lensD = 8.5f * s;
-        const float coreD = 4.2f * s;
-        const float glintD = keel::max(1.2f, 1.6f * s);
-        const float ly = pillY + 6.5f * s + lensD * 0.5f;
+        const keel::f32 lensD = 8.5f * s;
+        const keel::f32 coreD = 4.2f * s;
+        const keel::f32 glintD = keel::max(1.2f, 1.6f * s);
+        const keel::f32 ly = pillY + 6.5f * s + lensD * 0.5f;
         canvas.DrawRoundRect(guikit::Rect(cx - lensD * 0.5f, ly - lensD * 0.5f, lensD, lensD), lensD * 0.5f, lensHousing);
         canvas.DrawRoundRect(guikit::Rect(cx - coreD * 0.5f, ly - coreD * 0.5f, coreD, coreD), coreD * 0.5f, lensGlass);
         canvas.DrawRoundRect(guikit::Rect(cx - coreD * 0.30f, ly - coreD * 0.30f, glintD, glintD), glintD * 0.5f, lensGlint);
 
         // Subtle bottom FaceID sensor housing
-        const float senD = 6.5f * s;
+        const keel::f32 senD = 6.5f * s;
         canvas.DrawRoundRect(guikit::Rect(cx - senD * 0.5f, pillY + pillH - 7.5f * s - senD, senD, senD), senD * 0.5f, sensorDot);
     }
 }
@@ -227,31 +227,31 @@ inline void RenderDeviceStatusSafeArea(const guikit::Node* n, guikit::ICanvas& c
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 40.0f || r.h <= 6.0f) return;
 
-    constexpr float s = 1.0f;
+    constexpr keel::f32 s = 1.0f;
     const guikit::Color fg = theme.palette.textPrimary;
     const guikit::Color fgMuted = theme.palette.textSecondary;
 
     // 1. Left: System Clock ("9:41")
-    const float fontSize = keel::max(7.0f, keel::round(11.0f * s));
-    const float textY = r.y + (r.h - fontSize) * 0.5f;
-    const float edgeInset = IsPhone ? (22.0f * s) : (18.0f * s);
+    const keel::f32 fontSize = keel::max(7.0f, keel::round(11.0f * s));
+    const keel::f32 textY = r.y + (r.h - fontSize) * 0.5f;
+    const keel::f32 edgeInset = IsPhone ? (22.0f * s) : (18.0f * s);
     canvas.DrawText("9:41", {r.x + edgeInset, textY}, fontSize, fg);
 
     // 2. Right: Cellular Signal Bars + Battery Icon
-    const float battW = 18.0f * s;
-    const float battH = 9.0f * s;
-    const float battX = r.Right() - edgeInset - battW;
-    const float battY = r.Center().y - battH * 0.5f;
+    const keel::f32 battW = 18.0f * s;
+    const keel::f32 battH = 9.0f * s;
+    const keel::f32 battX = r.Right() - edgeInset - battW;
+    const keel::f32 battY = r.Center().y - battH * 0.5f;
     canvas.DrawRoundRect(guikit::Rect(battX, battY, battW, battH), 2.5f * s, guikit::Color::Transparent(), fgMuted, 1.0f);
     canvas.DrawRect(guikit::Rect(battX + battW + 1.0f * s, r.Center().y - 2.0f * s, 1.5f * s, 4.0f * s), fgMuted);
     canvas.DrawRoundRect(guikit::Rect(battX + 2.0f * s, battY + 2.0f * s, battW - 5.5f * s, battH - 4.0f * s), 1.2f * s, fg);
 
     // 4-bar cellular signal indicator
-    const float sigBaseX = battX - 18.0f * s;
+    const keel::f32 sigBaseX = battX - 18.0f * s;
     for (keel::i32 i = 0; i < 4; ++i) {
-        const float bh = (3.0f + static_cast<float>(i) * 1.8f) * s;
-        const float bx = sigBaseX + static_cast<float>(i) * 3.5f * s;
-        const float by = battY + battH - bh;
+        const keel::f32 bh = (3.0f + keel::as<keel::f32>(i) * 1.8f) * s;
+        const keel::f32 bx = sigBaseX + keel::as<keel::f32>(i) * 3.5f * s;
+        const keel::f32 by = battY + battH - bh;
         canvas.DrawRect(guikit::Rect(bx, by, 2.2f * s, bh), fg);
     }
 }
@@ -260,11 +260,11 @@ inline void RenderDeviceHomeIndicatorSafeArea(const guikit::Node* n, guikit::ICa
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 20.0f || r.h <= 4.0f) return;
 
-    constexpr float s = 1.0f;
-    const float pillW = keel::min(r.w * 0.36f, 114.0f * s);
-    const float pillH = keel::max(2.0f, keel::round(4.0f * s));
-    const float pillX = r.Center().x - pillW * 0.5f;
-    const float pillY = r.Center().y - pillH * 0.5f;
+    constexpr keel::f32 s = 1.0f;
+    const keel::f32 pillW = keel::min(r.w * 0.36f, 114.0f * s);
+    const keel::f32 pillH = keel::max(2.0f, keel::round(4.0f * s));
+    const keel::f32 pillX = r.Center().x - pillW * 0.5f;
+    const keel::f32 pillY = r.Center().y - pillH * 0.5f;
     canvas.DrawRoundRect(
         guikit::Rect(pillX, pillY, pillW, pillH),
         pillH * 0.5f,
@@ -293,7 +293,7 @@ inline void RenderPreviewViewport(
     const bool isPhone = (formFactor == PreviewFormFactor::Phone);
     const bool isResizableWindow = (formFactor == PreviewFormFactor::Window);
     const bool useCenteredScrollCanvas = isDeviceMode || (isResizableWindow && demoCtx.previewWindowCustomSize);
-    const float clientPad = isShellScreen ? 0.0f : (isFullStage ? 8.0f : 24.0f);
+    const keel::f32 clientPad = isShellScreen ? 0.0f : (isFullStage ? 8.0f : 24.0f);
 
     // 1. Recessed Studio Artboard Backdrop (2D ScrollArea in Device / Custom-Sized Window mode, Stretch Box otherwise)
     if (auto backdropBox = ui.ScrollArea({
@@ -313,28 +313,28 @@ inline void RenderPreviewViewport(
         const guikit::Rect backdropBounds = ui.GetPrevFrameBounds(backdropNode->id);
         // Sizes here are in the studio chrome's dp. The user's shell zoom is part of the frame factor (the root
         // zoom); the preview below is a container scaled relative to the *display* scale and does not follow it.
-        const float rootZoom = ui.GetRootZoom();
-        const float padPx = 36.0f;
-        const float availPxW = (backdropBounds.w > 80.0f) ? keel::max(120.0f, backdropBounds.w - padPx) : 860.0f;
-        const float availPxH = (backdropBounds.h > 80.0f) ? keel::max(120.0f, backdropBounds.h - padPx) : 560.0f;
+        const keel::f32 rootZoom = ui.GetRootZoom();
+        const keel::f32 padPx = 36.0f;
+        const keel::f32 availPxW = (backdropBounds.w > 80.0f) ? keel::max(120.0f, backdropBounds.w - padPx) : 860.0f;
+        const keel::f32 availPxH = (backdropBounds.h > 80.0f) ? keel::max(120.0f, backdropBounds.h - padPx) : 560.0f;
 
         // Hardware device specifications:
         // - Phone (6.3" iPhone 16 Pro class): 375 x 784 dp  |  71.5 x 149.6 mm
         // - Tablet (8.3" iPad mini / Touch Panel class): 540 x 782 dp  |  134.8 x 195.4 mm
-        const float rawPxPerMm    = (demoCtx.displayPxPerMm > 0.5f) ? demoCtx.displayPxPerMm : (96.0f / 25.4f);
-        const float pxPerMm       = rawPxPerMm / keel::max(0.1f, ui.GetDisplayScale());
-        const float basePortraitW = isPhone ? 375.0f : 540.0f;
-        const float basePortraitH = isPhone ? 784.0f : 782.0f;
-        const float baseMmW       = isPhone ? 71.5f  : 134.8f;
-        const float baseMmH       = isPhone ? 149.6f : 195.4f;
-        const float targetW       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitH : basePortraitW) : demoCtx.previewWindowW;
-        const float targetH       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitW : basePortraitH) : demoCtx.previewWindowH;
+        const keel::f32 rawPxPerMm    = (demoCtx.displayPxPerMm > 0.5f) ? demoCtx.displayPxPerMm : (96.0f / 25.4f);
+        const keel::f32 pxPerMm       = rawPxPerMm / keel::max(0.1f, ui.GetDisplayScale());
+        const keel::f32 basePortraitW = isPhone ? 375.0f : 540.0f;
+        const keel::f32 basePortraitH = isPhone ? 784.0f : 782.0f;
+        const keel::f32 baseMmW       = isPhone ? 71.5f  : 134.8f;
+        const keel::f32 baseMmH       = isPhone ? 149.6f : 195.4f;
+        const keel::f32 targetW       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitH : basePortraitW) : demoCtx.previewWindowW;
+        const keel::f32 targetH       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitW : basePortraitH) : demoCtx.previewWindowH;
 
         const PreviewZoomMode zoomMode = static_cast<PreviewZoomMode>(
-            keel::min<keel::usize>(demoCtx.previewZoomModeIdx, static_cast<keel::usize>(PreviewZoomMode::Custom))
+            keel::min<keel::usize>(demoCtx.previewZoomModeIdx, keel::as<keel::usize>(PreviewZoomMode::Custom))
         );
 
-        float effectiveZoom = 1.0f;
+        keel::f32 effectiveZoom = 1.0f;
         switch (zoomMode) {
             case PreviewZoomMode::Fit:
                 if (isDeviceMode) {
@@ -347,7 +347,7 @@ inline void RenderPreviewViewport(
                 break;
             case PreviewZoomMode::Real1To1:
                 if (isDeviceMode) {
-                    const float devMmW = demoCtx.previewLandscape ? baseMmH : baseMmW;
+                    const keel::f32 devMmW = demoCtx.previewLandscape ? baseMmH : baseMmW;
                     effectiveZoom = keel::clamp((devMmW * pxPerMm) / targetW, 0.35f, 2.50f);
                 } else {
                     effectiveZoom = 1.0f;
@@ -364,28 +364,28 @@ inline void RenderPreviewViewport(
                 break;
         }
 
-        const float realMmW = isDeviceMode
+        const keel::f32 realMmW = isDeviceMode
             ? (demoCtx.previewLandscape ? baseMmH : baseMmW)
             : ((targetW * effectiveZoom) / pxPerMm);
-        const float realMmH = isDeviceMode
+        const keel::f32 realMmH = isDeviceMode
             ? (demoCtx.previewLandscape ? baseMmW : baseMmH)
             : ((targetH * effectiveZoom) / pxPerMm);
 
         // Interactive Ctrl + MouseWheel zoom over the preview viewport
         if (backdropBounds.w > 0.0f && backdropBounds.Contains(ui.GetMousePos()) && ui.GetKeyModifiers().ctrl) {
-            const float wheelY = ui.GetMouseWheel().y;
+            const keel::f32 wheelY = ui.GetMouseWheel().y;
             if (keel::abs(wheelY) > 0.001f) {
-                const float snappedBase = keel::round(effectiveZoom * 20.0f) / 20.0f;
-                const float step = (wheelY > 0.0f ? 0.05f : -0.05f) * keel::max(1.0f, keel::round(keel::abs(wheelY)));
+                const keel::f32 snappedBase = keel::round(effectiveZoom * 20.0f) / 20.0f;
+                const keel::f32 step = (wheelY > 0.0f ? 0.05f : -0.05f) * keel::max(1.0f, keel::round(keel::abs(wheelY)));
                 effectiveZoom = keel::clamp(snappedBase + step, 0.35f, 2.50f);
                 demoCtx.previewCustomZoom = effectiveZoom;
-                demoCtx.previewZoomModeIdx = static_cast<keel::usize>(PreviewZoomMode::Custom);
+                demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Custom);
                 ui.ConsumeMouseWheel();
                 ui.InvalidateAll();
             }
         }
         demoCtx.previewEffectiveZoom = effectiveZoom;
-        const float relScale = ui.ScaleForZoom(effectiveZoom); // one preview dp, in chrome dp: the preview's `.scale`
+        const keel::f32 relScale = ui.ScaleForZoom(effectiveZoom); // one preview dp, in chrome dp: the preview's `.scale`
 
         const keel::i32 zoomPct = keel::round_i32(effectiveZoom * 100.0f);
         if (useCenteredScrollCanvas) {
@@ -406,14 +406,14 @@ inline void RenderPreviewViewport(
         }
 
         backdropNode->visualHash = guikit::detail::HashArgs(
-            static_cast<keel::u8>(demoCtx.shellTheme.mode),
-            static_cast<keel::u8>(formFactor),
+            keel::as<keel::u8>(demoCtx.shellTheme.mode),
+            keel::as<keel::u8>(formFactor),
             demoCtx.previewLandscape,
             demoCtx.previewZoomModeIdx,
             zoomPct,
             demoCtx.previewWindowCustomSize,
-            static_cast<keel::i32>(demoCtx.previewWindowW),
-            static_cast<keel::i32>(demoCtx.previewWindowH)
+            keel::as<keel::i32>(demoCtx.previewWindowW),
+            keel::as<keel::i32>(demoCtx.previewWindowH)
         );
 
         auto invokeStageInsideClient = [&]() {
@@ -467,9 +467,9 @@ inline void RenderPreviewViewport(
 
                     if (winBounds.w > 40.0f && winBounds.h > 40.0f) {
                         const guikit::Vec2 mouse = ui.GetMousePos();
-                        const float titleH = 28.0f * relScale;
-                        const float gripThick = 7.0f;
-                        const float cornerSpan = 16.0f;
+                        const keel::f32 titleH = 28.0f * relScale;
+                        const keel::f32 gripThick = 7.0f;
+                        const keel::f32 cornerSpan = 16.0f;
 
                         const guikit::Rect brCorner(winBounds.Right() - cornerSpan, winBounds.Bottom() - cornerSpan, cornerSpan + 5.0f, cornerSpan + 5.0f);
                         const guikit::Rect blCorner(winBounds.x - 5.0f, winBounds.Bottom() - cornerSpan, cornerSpan + 5.0f, cornerSpan + 5.0f);
@@ -478,8 +478,8 @@ inline void RenderPreviewViewport(
                         const guikit::Rect bEdge(winBounds.x + cornerSpan, winBounds.Bottom() - gripThick, keel::max(0.0f, winBounds.w - cornerSpan * 2.0f), gripThick * 2.0f);
 
                         // Green traffic-light button & titlebar double-click (Maximize / Restore toggle)
-                        const float dotD = 10.0f * relScale;
-                        const float dotGap = 7.0f * relScale;
+                        const keel::f32 dotD = 10.0f * relScale;
+                        const keel::f32 dotGap = 7.0f * relScale;
                         const guikit::Rect greenBtnRect(
                             winBounds.x + 12.0f * relScale + (dotD + dotGap) * 2.0f - 2.0f,
                             winBounds.y,
@@ -511,8 +511,8 @@ inline void RenderPreviewViewport(
                             else if (edge & 4)        ui.SetCursor(guikit::CursorType::ResizeNS);
                         };
 
-                        const float maxFitW = keel::max(320.0f, keel::floor(availPxW / relScale));
-                        const float maxFitH = keel::max(220.0f, keel::floor(availPxH / relScale));
+                        const keel::f32 maxFitW = keel::max(320.0f, keel::floor(availPxW / relScale));
+                        const keel::f32 maxFitH = keel::max(220.0f, keel::floor(availPxH / relScale));
 
                         auto toggleMaximizeRestore = [&]() {
                             if (demoCtx.previewWindowCustomSize) {
@@ -562,22 +562,22 @@ inline void RenderPreviewViewport(
                                 ui.SetActiveId(winResizeId);
                                 applyEdgeCursor(demoCtx.previewWindowResizeEdge);
                                 const keel::u8 edge = demoCtx.previewWindowResizeEdge;
-                                const float rawDx = mouse.x - demoCtx.previewWindowDragStartMouse.x;
-                                const float rawDy = mouse.y - demoCtx.previewWindowDragStartMouse.y;
+                                const keel::f32 rawDx = mouse.x - demoCtx.previewWindowDragStartMouse.x;
+                                const keel::f32 rawDy = mouse.y - demoCtx.previewWindowDragStartMouse.y;
                                 if (demoCtx.previewWindowCustomSize || keel::abs(rawDx) > 1.0f || keel::abs(rawDy) > 1.0f) {
                                     demoCtx.previewWindowCustomSize = true;
                                     // Symmetric 2x delta keeps the dragged edge locked 1:1 under the cursor while centered
                                     if (edge & 2) {
-                                        const float dx = rawDx * 2.0f / relScale;
+                                        const keel::f32 dx = rawDx * 2.0f / relScale;
                                         demoCtx.previewWindowW = keel::clamp(keel::round(demoCtx.previewWindowDragStartW + dx), 320.0f, maxFitW);
                                     } else if (edge & 1) {
-                                        const float dx = -rawDx * 2.0f / relScale;
+                                        const keel::f32 dx = -rawDx * 2.0f / relScale;
                                         demoCtx.previewWindowW = keel::clamp(keel::round(demoCtx.previewWindowDragStartW + dx), 320.0f, maxFitW);
                                     } else {
                                         demoCtx.previewWindowW = keel::clamp(demoCtx.previewWindowDragStartW, 320.0f, maxFitW);
                                     }
                                     if (edge & 4) {
-                                        const float dy = rawDy * 2.0f / relScale;
+                                        const keel::f32 dy = rawDy * 2.0f / relScale;
                                         demoCtx.previewWindowH = keel::clamp(keel::round(demoCtx.previewWindowDragStartH + dy), 220.0f, maxFitH);
                                     } else {
                                         demoCtx.previewWindowH = keel::clamp(demoCtx.previewWindowDragStartH, 220.0f, maxFitH);
@@ -668,7 +668,7 @@ inline void RenderPreviewViewport(
                 }
             } else if (isDeviceMode) {
                 // Hardware Device Chassis (Tablet or Smartphone with Safe-Area Top & Bottom Bars)
-                const float devicePad = isShellScreen ? 0.0f : (isFullStage ? 6.0f : 16.0f);
+                const keel::f32 devicePad = isShellScreen ? 0.0f : (isFullStage ? 6.0f : 16.0f);
 
                 if (auto previewZoneScope = ui.Zone(previewZone)) {
                     if (auto chassisBox = ui.Box({

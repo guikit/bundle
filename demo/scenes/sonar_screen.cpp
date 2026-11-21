@@ -11,15 +11,15 @@ struct DynamicContact {
     keel::FixedString<64> callsign{};
     SonarTargetClass classification{SonarTargetClass::Diver};
     // Cartesian position in meters relative to sensor (X = East, Y = North)
-    float x{0.0f};
-    float y{150.0f};
-    float vx{0.5f};
-    float vy{-0.8f};
-    float depthMeters{6.5f};
-    float snrDb{19.5f};
-    float echoStrength{0.92f};
-    float radialSpreadMeters{7.0f};
-    float angularSpreadDeg{3.2f};
+    keel::f32 x{0.0f};
+    keel::f32 y{150.0f};
+    keel::f32 vx{0.5f};
+    keel::f32 vy{-0.8f};
+    keel::f32 depthMeters{6.5f};
+    keel::f32 snrDb{19.5f};
+    keel::f32 echoStrength{0.92f};
+    keel::f32 radialSpreadMeters{7.0f};
+    keel::f32 angularSpreadDeg{3.2f};
     keel::Array<PolarPoint> trail{};
 };
 
@@ -31,16 +31,16 @@ struct SonarDemoState {
     keel::i32 scanModeIndex{0};           // 0 = MultibeamContinuous, 1 = RotatingSweep
     Colormap colormap{Colormap::Gold};
 
-    float maxRangeMeters{500.0f};
-    float headingDeg{0.0f};
-    float sectorApertureDeg{120.0f};
-    float gainDb{3.0f};
-    float tvgAmount{0.58f};
-    float clutterThreshold{0.14f};
-    float persistence{0.84f};
-    float sweepSpeedDegPerSec{95.0f};
-    float sweepAngleDeg{0.0f};
-    float rangeZoom{1.0f};
+    keel::f32 maxRangeMeters{500.0f};
+    keel::f32 headingDeg{0.0f};
+    keel::f32 sectorApertureDeg{120.0f};
+    keel::f32 gainDb{3.0f};
+    keel::f32 tvgAmount{0.58f};
+    keel::f32 clutterThreshold{0.14f};
+    keel::f32 persistence{0.84f};
+    keel::f32 sweepSpeedDegPerSec{95.0f};
+    keel::f32 sweepAngleDeg{0.0f};
+    keel::f32 rangeZoom{1.0f};
 
     bool showRangeRings{true};
     bool showBearingDial{true};
@@ -51,26 +51,26 @@ struct SonarDemoState {
     bool showHudOverlay{true};
     bool guardZoneEnabled{true};
 
-    float guardMinRange{90.0f};
-    float guardMaxRange{340.0f};
-    float guardStartBrg{315.0f};
-    float guardEndBrg{55.0f};
+    keel::f32 guardMinRange{90.0f};
+    keel::f32 guardMaxRange{340.0f};
+    keel::f32 guardStartBrg{315.0f};
+    keel::f32 guardEndBrg{55.0f};
 
     keel::i32 selectedTargetId{1};
-    float eblBearingDeg{22.0f};
-    float vrmRangeMeters{210.0f};
+    keel::f32 eblBearingDeg{22.0f};
+    keel::f32 vrmRangeMeters{210.0f};
     bool requestResetView{false};
     bool requestClearPersistence{false};
 
     keel::u32 numBeams{180};
     keel::u32 numRangeBins{256};
-    keel::Array<float> staticBathymetry{};
-    keel::Array<float> polarMatrix{};
+    keel::Array<keel::f32> staticBathymetry{};
+    keel::Array<keel::f32> polarMatrix{};
     keel::Array<DynamicContact> contacts{};
     keel::Array<SonarTarget> targetViews{};
 
-    double simTimeSec{0.0};
-    double lastTrailSampleSec{0.0};
+    keel::f64 simTimeSec{0.0};
+    keel::f64 lastTrailSampleSec{0.0};
     keel::u64 lastWallNs{0};
 
     SonarViewResponse lastResp{};
@@ -78,44 +78,44 @@ struct SonarDemoState {
 
 SonarDemoState s_sonar{};
 
-[[nodiscard]] inline float NormalizeDeg(float d) noexcept {
-    float r = keel::fmod(d, 360.0f);
+[[nodiscard]] inline keel::f32 NormalizeDeg(keel::f32 d) noexcept {
+    keel::f32 r = keel::fmod(d, 360.0f);
     if (r < 0.0f) r += 360.0f;
     return r;
 }
 
-[[nodiscard]] inline float AngleDiffDeg(float a, float b) noexcept {
+[[nodiscard]] inline keel::f32 AngleDiffDeg(keel::f32 a, keel::f32 b) noexcept {
     return keel::fmod(a - b + 540.0f, 360.0f) - 180.0f;
 }
 
-[[nodiscard]] inline float FastHashNoise(keel::u32 x, keel::u32 y, keel::u32 seed) noexcept {
+[[nodiscard]] inline keel::f32 FastHashNoise(keel::u32 x, keel::u32 y, keel::u32 seed) noexcept {
     keel::u32 n = x * 374761393u + y * 668265263u + seed * 1442695041u;
     n = (n ^ (n >> 13u)) * 1274126177u;
     n = n ^ (n >> 16u);
-    return static_cast<float>(n & 0xFFFFu) / 65535.0f;
+    return keel::as<keel::f32>(n & 0xFFFFu) / 65535.0f;
 }
 
 void BuildStaticBathymetry(SonarDemoState& st) {
-    const keel::usize total = static_cast<keel::usize>(st.numBeams) * st.numRangeBins;
+    const keel::usize total = keel::as<keel::usize>(st.numBeams) * st.numRangeBins;
     st.staticBathymetry.assign(total, 0.0f);
 
     for (keel::u32 b = 0; b < st.numBeams; ++b) {
-        const float brg = (static_cast<float>(b) / static_cast<float>(st.numBeams)) * 360.0f;
+        const keel::f32 brg = (keel::as<keel::f32>(b) / keel::as<keel::f32>(st.numBeams)) * 360.0f;
         for (keel::u32 r = 0; r < st.numRangeBins; ++r) {
-            const float rNorm = static_cast<float>(r) / static_cast<float>(st.numRangeBins - 1);
-            const float rng = rNorm * st.maxRangeMeters;
+            const keel::f32 rNorm = keel::as<keel::f32>(r) / keel::as<keel::f32>(st.numRangeBins - 1);
+            const keel::f32 rng = rNorm * st.maxRangeMeters;
 
             // Base seabed reverberation + gentle shoal ridges
-            const float ridge1 = 0.07f * keel::pow(keel::max(0.0f, keel::sin(rNorm * 14.0f + keel::cos(keel::deg_to_rad(brg) * 3.0f))), 2.0f);
-            const float noise = 0.06f * FastHashNoise(b, r, 42u);
-            float val = 0.04f + ridge1 + noise;
+            const keel::f32 ridge1 = 0.07f * keel::pow(keel::max(0.0f, keel::sin(rNorm * 14.0f + keel::cos(keel::deg_to_rad(brg) * 3.0f))), 2.0f);
+            const keel::f32 noise = 0.06f * FastHashNoise(b, r, 42u);
+            keel::f32 val = 0.04f + ridge1 + noise;
 
             // Harbor Breakwater wall between bearing 300..348 deg at ~260..310 m
             if (brg >= 296.0f && brg <= 350.0f) {
-                const float wallR = 255.0f + (brg - 296.0f) * 1.15f;
-                const float distToWall = keel::abs(rng - wallR);
+                const keel::f32 wallR = 255.0f + (brg - 296.0f) * 1.15f;
+                const keel::f32 distToWall = keel::abs(rng - wallR);
                 if (distToWall < 16.0f) {
-                    const float wallEcho = 0.86f * keel::exp(-(distToWall * distToWall) / (2.0f * 5.2f * 5.2f));
+                    const keel::f32 wallEcho = 0.86f * keel::exp(-(distToWall * distToWall) / (2.0f * 5.2f * 5.2f));
                     val += wallEcho * (0.85f + 0.15f * FastHashNoise(b, r, 99u));
                 } else if (rng > wallR + 14.0f) {
                     // Acoustic shadow zone behind the stone breakwater!
@@ -125,25 +125,25 @@ void BuildStaticBathymetry(SonarDemoState& st) {
 
             // South-East Pier Pilings & Seafloor Pipeline along 065..105 deg
             if (brg >= 62.0f && brg <= 108.0f) {
-                const float pierR = 175.0f + (brg - 62.0f) * 1.8f;
-                const float distToPier = keel::abs(rng - pierR);
+                const keel::f32 pierR = 175.0f + (brg - 62.0f) * 1.8f;
+                const keel::f32 distToPier = keel::abs(rng - pierR);
                 if (distToPier < 10.0f) {
-                    const float pilingMod = 0.5f + 0.5f * keel::cos(keel::deg_to_rad(brg - 62.0f) * 45.0f);
+                    const keel::f32 pilingMod = 0.5f + 0.5f * keel::cos(keel::deg_to_rad(brg - 62.0f) * 45.0f);
                     val += 0.72f * pilingMod * keel::exp(-(distToPier * distToPier) / (2.0f * 3.8f * 3.8f));
                 }
             }
 
             // Submerged wreck / reef anomaly at (145m, 012 deg)
             {
-                const float dBrg = AngleDiffDeg(brg, 12.0f);
-                const float dRng = rng - 142.0f;
-                const float d2 = (dRng * dRng) / (11.0f * 11.0f) + (dBrg * dBrg) / (3.8f * 3.8f);
+                const keel::f32 dBrg = AngleDiffDeg(brg, 12.0f);
+                const keel::f32 dRng = rng - 142.0f;
+                const keel::f32 d2 = (dRng * dRng) / (11.0f * 11.0f) + (dBrg * dBrg) / (3.8f * 3.8f);
                 if (d2 < 9.0f) {
                     val += 0.68f * keel::exp(-0.5f * d2);
                 }
             }
 
-            st.staticBathymetry[static_cast<keel::usize>(b) * st.numRangeBins + r] = keel::clamp(val, 0.0f, 1.0f);
+            st.staticBathymetry[keel::as<keel::usize>(b) * st.numRangeBins + r] = keel::clamp(val, 0.0f, 1.0f);
         }
     }
 }
@@ -290,14 +290,14 @@ void StepSonarSimulation(SonarDemoState& st) {
         ApplyScenarioPreset(st, st.scenarioIndex);
     }
 
-    double dt = static_cast<double>(nowNs - st.lastWallNs) * 1e-9;
+    keel::f64 dt = keel::as<keel::f64>(nowNs - st.lastWallNs) * 1e-9;
     st.lastWallNs = nowNs;
     dt = keel::clamp(dt, 0.0, 0.08);
 
     if (st.liveSimulation) {
         if (dt < 0.004) dt = 0.016; // deterministic fallback for headless/unit-test frames
         st.simTimeSec += dt;
-        st.sweepAngleDeg = NormalizeDeg(st.sweepAngleDeg + static_cast<float>(dt) * st.sweepSpeedDegPerSec);
+        st.sweepAngleDeg = NormalizeDeg(st.sweepAngleDeg + keel::as<keel::f32>(dt) * st.sweepSpeedDegPerSec);
 
         const bool recordTrail = (st.simTimeSec - st.lastTrailSampleSec) >= 0.45;
         if (recordTrail) {
@@ -305,21 +305,21 @@ void StepSonarSimulation(SonarDemoState& st) {
         }
 
         // Update dynamic contact kinematics (scaled 5x speed so motion is visually engaging in real time)
-        const float kinematicScale = 5.5f;
+        const keel::f32 kinematicScale = 5.5f;
         for (auto& c : st.contacts) {
-            c.x += c.vx * static_cast<float>(dt) * kinematicScale;
-            c.y += c.vy * static_cast<float>(dt) * kinematicScale;
+            c.x += c.vx * keel::as<keel::f32>(dt) * kinematicScale;
+            c.y += c.vy * keel::as<keel::f32>(dt) * kinematicScale;
 
             // Gentle sinusoidal maneuvering & boundary turnaround
-            const float dist = keel::sqrt(c.x * c.x + c.y * c.y);
+            const keel::f32 dist = keel::sqrt(c.x * c.x + c.y * c.y);
             if (dist < 45.0f || dist > st.maxRangeMeters * 0.88f) {
                 c.vx = -c.vx;
                 c.vy = -c.vy;
             }
 
             if (recordTrail) {
-                const float rMeters = keel::sqrt(c.x * c.x + c.y * c.y);
-                const float brgDeg = NormalizeDeg(keel::rad_to_deg(keel::atan2(c.x, c.y)));
+                const keel::f32 rMeters = keel::sqrt(c.x * c.x + c.y * c.y);
+                const keel::f32 brgDeg = NormalizeDeg(keel::rad_to_deg(keel::atan2(c.x, c.y)));
                 c.trail.push_back(PolarPoint{rMeters, brgDeg});
                 if (c.trail.size() > 18) {
                     c.trail.erase(0);
@@ -332,25 +332,25 @@ void StepSonarSimulation(SonarDemoState& st) {
     st.targetViews.clear();
     st.targetViews.reserve(st.contacts.size());
 
-    const keel::usize totalCells = static_cast<keel::usize>(st.numBeams) * st.numRangeBins;
+    const keel::usize totalCells = keel::as<keel::usize>(st.numBeams) * st.numRangeBins;
     if (st.staticBathymetry.size() != totalCells) {
         BuildStaticBathymetry(st);
     }
     st.polarMatrix = st.staticBathymetry.clone();
 
     // Add time-varying acoustic speckle noise
-    const keel::u32 frameSeed = static_cast<keel::u32>(st.simTimeSec * 30.0);
+    const keel::u32 frameSeed = keel::as<keel::u32>(st.simTimeSec * 30.0);
     for (keel::usize i = 0; i < totalCells; ++i) {
-        const float speckle = (FastHashNoise(static_cast<keel::u32>(i), frameSeed, 7u) - 0.5f) * 0.07f;
+        const keel::f32 speckle = (FastHashNoise(keel::as<keel::u32>(i), frameSeed, 7u) - 0.5f) * 0.07f;
         st.polarMatrix[i] = keel::clamp(st.polarMatrix[i] + speckle, 0.0f, 1.0f);
     }
 
     // Inject moving target acoustic blooms & wakes into `polarMatrix`
     for (const auto& c : st.contacts) {
-        const float rMeters = keel::sqrt(c.x * c.x + c.y * c.y);
-        const float brgDeg = NormalizeDeg(keel::rad_to_deg(keel::atan2(c.x, c.y)));
-        const float speed = keel::sqrt(c.vx * c.vx + c.vy * c.vy);
-        const float courseDeg = NormalizeDeg(keel::rad_to_deg(keel::atan2(c.vx, c.vy)));
+        const keel::f32 rMeters = keel::sqrt(c.x * c.x + c.y * c.y);
+        const keel::f32 brgDeg = NormalizeDeg(keel::rad_to_deg(keel::atan2(c.x, c.y)));
+        const keel::f32 speed = keel::sqrt(c.vx * c.vx + c.vy * c.vy);
+        const keel::f32 courseDeg = NormalizeDeg(keel::rad_to_deg(keel::atan2(c.vx, c.vy)));
 
         st.targetViews.push_back(SonarTarget{
             .id = c.id,
@@ -366,33 +366,33 @@ void StepSonarSimulation(SonarDemoState& st) {
         });
 
         // Paint 2D polar Gaussian signature into `polarMatrix`
-        const float invSigR2 = 1.0f / keel::max(4.0f, c.radialSpreadMeters * c.radialSpreadMeters);
-        const float invSigB2 = 1.0f / keel::max(1.0f, c.angularSpreadDeg * c.angularSpreadDeg);
+        const keel::f32 invSigR2 = 1.0f / keel::max(4.0f, c.radialSpreadMeters * c.radialSpreadMeters);
+        const keel::f32 invSigB2 = 1.0f / keel::max(1.0f, c.angularSpreadDeg * c.angularSpreadDeg);
         for (keel::u32 b = 0; b < st.numBeams; ++b) {
-            const float beamBrg = (static_cast<float>(b) / static_cast<float>(st.numBeams)) * 360.0f;
-            const float dBrg = AngleDiffDeg(beamBrg, brgDeg);
+            const keel::f32 beamBrg = (keel::as<keel::f32>(b) / keel::as<keel::f32>(st.numBeams)) * 360.0f;
+            const keel::f32 dBrg = AngleDiffDeg(beamBrg, brgDeg);
             if (keel::abs(dBrg) > c.angularSpreadDeg * 3.2f) continue;
 
-            float* row = st.polarMatrix.data() + static_cast<keel::usize>(b) * st.numRangeBins;
+            keel::f32* row = st.polarMatrix.data() + keel::as<keel::usize>(b) * st.numRangeBins;
             for (keel::u32 r = 0; r < st.numRangeBins; ++r) {
-                const float binRng = (static_cast<float>(r) / static_cast<float>(st.numRangeBins - 1)) * st.maxRangeMeters;
-                const float dRng = binRng - rMeters;
+                const keel::f32 binRng = (keel::as<keel::f32>(r) / keel::as<keel::f32>(st.numRangeBins - 1)) * st.maxRangeMeters;
+                const keel::f32 dRng = binRng - rMeters;
                 if (keel::abs(dRng) > c.radialSpreadMeters * 3.2f) continue;
 
-                const float g = keel::exp(-0.5f * (dRng * dRng * invSigR2 + dBrg * dBrg * invSigB2));
+                const keel::f32 g = keel::exp(-0.5f * (dRng * dRng * invSigR2 + dBrg * dBrg * invSigB2));
                 row[r] = keel::min(1.0f, row[r] + c.echoStrength * g);
             }
         }
 
         // Paint faint wake trail echoes along historical trail points
         for (keel::usize ti = 0; ti < c.trail.size(); ++ti) {
-            const float wakeWeight = 0.28f * (static_cast<float>(ti + 1) / static_cast<float>(c.trail.size() + 1));
-            const float trR = c.trail[ti].rangeMeters;
-            const float trB = c.trail[ti].bearingDeg;
-            const keel::u32 bCenter = static_cast<keel::u32>(NormalizeDeg(trB) / 360.0f * st.numBeams) % st.numBeams;
-            const keel::u32 rCenter = static_cast<keel::u32>(keel::clamp(trR / st.maxRangeMeters, 0.0f, 0.999f) * st.numRangeBins);
-            st.polarMatrix[static_cast<keel::usize>(bCenter) * st.numRangeBins + rCenter] =
-                keel::min(1.0f, st.polarMatrix[static_cast<keel::usize>(bCenter) * st.numRangeBins + rCenter] + wakeWeight);
+            const keel::f32 wakeWeight = 0.28f * (keel::as<keel::f32>(ti + 1) / keel::as<keel::f32>(c.trail.size() + 1));
+            const keel::f32 trR = c.trail[ti].rangeMeters;
+            const keel::f32 trB = c.trail[ti].bearingDeg;
+            const keel::u32 bCenter = keel::as<keel::u32>(NormalizeDeg(trB) / 360.0f * st.numBeams) % st.numBeams;
+            const keel::u32 rCenter = keel::as<keel::u32>(keel::clamp(trR / st.maxRangeMeters, 0.0f, 0.999f) * st.numRangeBins);
+            st.polarMatrix[keel::as<keel::usize>(bCenter) * st.numRangeBins + rCenter] =
+                keel::min(1.0f, st.polarMatrix[keel::as<keel::usize>(bCenter) * st.numRangeBins + rCenter] + wakeWeight);
         }
     }
 }
@@ -433,7 +433,7 @@ void RenderSonarInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         ui.Segmented(s_sonar.scanModeIndex, kScanModeItems, {.size = guikit::UiSize::Sm});
     }
 
-    keel::i32 cmapIdx = static_cast<keel::i32>(s_sonar.colormap);
+    keel::i32 cmapIdx = keel::as<keel::i32>(s_sonar.colormap);
     if (auto el = ui.Element({
         .label = "Colormap",
         .layout = guikit::ElementLayout::Top,
@@ -632,8 +632,8 @@ keel::String GenerateSonarCode(const DemoContext& /*ctx*/) {
         "}}\n",
         s_sonar.numBeams,
         s_sonar.numRangeBins,
-        kModeEnums[static_cast<keel::usize>(keel::clamp(s_sonar.displayModeIndex, 0, 2))],
-        kScanEnums[static_cast<keel::usize>(keel::clamp(s_sonar.scanModeIndex, 0, 1))],
+        kModeEnums[keel::as<keel::usize>(keel::clamp(s_sonar.displayModeIndex, 0, 2))],
+        kScanEnums[keel::as<keel::usize>(keel::clamp(s_sonar.scanModeIndex, 0, 1))],
         cmapName,
         s_sonar.maxRangeMeters,
         s_sonar.sectorApertureDeg,

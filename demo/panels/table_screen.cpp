@@ -9,9 +9,9 @@ struct SignalTargetRow {
     keel::i32 id{0};
     keel::FixedString<64> callsign{};
     keel::FixedString<32> modulation{};
-    float freqMhz{0.0f};
-    float bearingDeg{0.0f};
-    float snrDb{0.0f};
+    keel::f32 freqMhz{0.0f};
+    keel::f32 bearingDeg{0.0f};
+    keel::f32 snrDb{0.0f};
     keel::i32 status{0}; // 0=LOCKED, 1=TRACKING, 2=SCANNING, 3=ALARM
     bool tracked{true};
 };
@@ -60,13 +60,13 @@ struct TableDemoState {
             r.id = 1001 + i;
             r.callsign = keel::format_fixed<64>(
                 "{}-{}",
-                kCallsigns[static_cast<keel::usize>(i) % kCallsigns.size()],
+                kCallsigns[keel::as<keel::usize>(i) % kCallsigns.size()],
                 (i / 8) + 1
             );
-            r.modulation = kMods[static_cast<keel::usize>(i * 3) % kMods.size()];
-            r.freqMhz = 118.500f + static_cast<float>(i) * 14.375f;
-            r.bearingDeg = -165.0f + keel::fmod(static_cast<float>(i) * 29.5f, 330.0f);
-            r.snrDb = 8.0f + keel::fmod(static_cast<float>(i) * 7.3f, 31.0f);
+            r.modulation = kMods[keel::as<keel::usize>(i * 3) % kMods.size()];
+            r.freqMhz = 118.500f + keel::as<keel::f32>(i) * 14.375f;
+            r.bearingDeg = -165.0f + keel::fmod(keel::as<keel::f32>(i) * 29.5f, 330.0f);
+            r.snrDb = 8.0f + keel::fmod(keel::as<keel::f32>(i) * 7.3f, 31.0f);
             r.status = (r.snrDb > 33.0f) ? 3 : ((r.snrDb > 22.0f) ? 0 : ((r.snrDb > 14.0f) ? 1 : 2));
             r.tracked = (i % 3 != 2);
             rows.push_back(r);
@@ -182,13 +182,13 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
     if (g_tableDemo.datasetMode == 0) {
         // Animate live telemetry if enabled
         if (g_tableDemo.liveTelemetry) {
-            const float t = static_cast<float>((ui.GetCurrentTime)());
+            const keel::f32 t = keel::as<keel::f32>((ui.GetCurrentTime)());
             for (keel::usize i = 0; i < g_tableDemo.rows.size(); ++i) {
                 auto& r = g_tableDemo.rows[i];
                 if (!r.tracked) continue;
-                const float wave = keel::sin(t * 2.2f + static_cast<float>(i) * 0.7f);
-                r.snrDb = keel::clamp(20.0f + wave * 14.0f + static_cast<float>(i % 5) * 1.5f, 3.0f, 39.5f);
-                r.bearingDeg += keel::cos(t * 1.1f + static_cast<float>(i)) * 0.08f;
+                const keel::f32 wave = keel::sin(t * 2.2f + keel::as<keel::f32>(i) * 0.7f);
+                r.snrDb = keel::clamp(20.0f + wave * 14.0f + keel::as<keel::f32>(i % 5) * 1.5f, 3.0f, 39.5f);
+                r.bearingDeg += keel::cos(t * 1.1f + keel::as<keel::f32>(i)) * 0.08f;
                 r.status = (r.snrDb > 34.0f) ? 3 : ((r.snrDb > 22.0f) ? 0 : ((r.snrDb > 12.0f) ? 1 : 2));
             }
             ui.RequestRepaint(2);
@@ -220,8 +220,8 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
         }};
 
         const keel::StringRef selCallsign =
-            (g_tableDemo.selectedRow >= 0 && static_cast<keel::usize>(g_tableDemo.selectedRow) < filteredIndices.size())
-                ? g_tableDemo.rows[filteredIndices[static_cast<keel::usize>(g_tableDemo.selectedRow)]].callsign.as_ref()
+            (g_tableDemo.selectedRow >= 0 && keel::as<keel::usize>(g_tableDemo.selectedRow) < filteredIndices.size())
+                ? g_tableDemo.rows[filteredIndices[keel::as<keel::usize>(g_tableDemo.selectedRow)]].callsign.as_ref()
                 : keel::StringRef("None");
 
         char footerBuf[128];
@@ -293,7 +293,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                     static constexpr keel::StaticArray<UiVariant, 4> kStatusVars = {
                         UiVariant::Success, UiVariant::Primary, UiVariant::Warning, UiVariant::Danger
                     };
-                    const keel::usize stIdx = static_cast<keel::usize>(keel::clamp(item.status, 0, 3));
+                    const keel::usize stIdx = keel::as<keel::usize>(keel::clamp(item.status, 0, 3));
                     ui.Element({.badge = {kStatusLabels[stIdx], kStatusVars[stIdx]}, .width = SizeMode::Fit});
                 }
             }
@@ -334,7 +334,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
         })) {
             if (g_tableDemo.pendingJumpRow >= 0) {
                 g_tableDemo.virtualSelectedRow = g_tableDemo.pendingJumpRow;
-                table.ScrollToRow(static_cast<keel::usize>(g_tableDemo.pendingJumpRow));
+                table.ScrollToRow(keel::as<keel::usize>(g_tableDemo.pendingJumpRow));
                 g_tableDemo.pendingJumpRow = -1;
             }
 
@@ -349,9 +349,9 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                 if (auto row = table.Row(r)) {
                     ui.Text(ui.Format("PKT-{:06}", logicalIdx + 1), {.variant = UiVariant::Secondary});
 
-                    const keel::u32 mins = static_cast<keel::u32>((logicalIdx / 600) % 60);
-                    const keel::u32 secs = static_cast<keel::u32>((logicalIdx / 10) % 60);
-                    const keel::u32 tenths = static_cast<keel::u32>(logicalIdx % 10);
+                    const keel::u32 mins = keel::as<keel::u32>((logicalIdx / 600) % 60);
+                    const keel::u32 secs = keel::as<keel::u32>((logicalIdx / 10) % 60);
+                    const keel::u32 tenths = keel::as<keel::u32>(logicalIdx % 10);
                     ui.Text(ui.Format("12:{:02}:{:02}.{}00", mins, secs, tenths));
 
                     static constexpr keel::StaticArray<const char*, 6> kNodes = {
@@ -360,10 +360,10 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                     };
                     ui.Text(kNodes[logicalIdx % kNodes.size()]);
 
-                    const float freq = 430.000f + static_cast<float>(logicalIdx % 250) * 0.025f;
+                    const keel::f32 freq = 430.000f + keel::as<keel::f32>(logicalIdx % 250) * 0.025f;
                     ui.Text(ui.Format("{:.3f} MHz", freq));
 
-                    const float rssi = -95.0f + static_cast<float>((logicalIdx * 17) % 65);
+                    const keel::f32 rssi = -95.0f + keel::as<keel::f32>((logicalIdx * 17) % 65);
                     ui.ProgressBar(rssi, -100.0f, -30.0f, {
                         .valueFormat = "%.0f dBm",
                         .segments = 10,

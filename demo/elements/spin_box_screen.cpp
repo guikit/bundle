@@ -4,10 +4,10 @@ namespace guikit::demo {
 
 namespace {
 struct SpinBoxState {
-    float val = 142.5f;
-    float minVal = 0.0f;
-    float maxVal = 500.0f;
-    float step = 2.5f;
+    keel::f32 val = 142.5f;
+    keel::f32 minVal = 0.0f;
+    keel::f32 maxVal = 500.0f;
+    keel::f32 step = 2.5f;
     guikit::SpinBoxStepStyle stepStyle = guikit::SpinBoxStepStyle::Detached;
     keel::i32 iconStyleIdx = 0; // 0 = Minus/Plus, 1 = Chevrons, 2 = Arrows
     bool showFillBar = true;
@@ -31,7 +31,7 @@ constexpr keel::StringRef StepStyleEnumName(guikit::SpinBoxStepStyle style) noex
 
 void RenderSpinBoxInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 4> stepStyleLabels = {"None", "Inline", "Detached", "Split"};
-    keel::i32 styleIdx = static_cast<keel::i32>(s_state.stepStyle);
+    keel::i32 styleIdx = keel::as<keel::i32>(s_state.stepStyle);
     if (auto el = ui.Element({
         .label = "Stepper Style (- / +)",
         .description = "None, Inline inside box, Detached square buttons after box, or Split sides"
@@ -94,9 +94,9 @@ void RenderSpinBoxStage(guikit::Context& ui, DemoContext& ctx) {
         opts.suffix = s_state.suffix;
         opts.valueFormat = {"%.1f", kValVariants};
         opts.cursorMode = s_state.cursorMode;
-        opts.min = static_cast<double>(s_state.minVal);
-        opts.max = static_cast<double>(s_state.maxVal);
-        opts.step = static_cast<double>(s_state.step);
+        opts.min = keel::as<keel::f64>(s_state.minVal);
+        opts.max = keel::as<keel::f64>(s_state.maxVal);
+        opts.step = keel::as<keel::f64>(s_state.step);
         opts.stepStyle = s_state.stepStyle;
         opts.minusIcon = minusIc;
         opts.plusIcon = plusIc;

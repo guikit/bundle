@@ -18,7 +18,7 @@ struct SidebarState {
     bool showBadges = true;
     bool showSections = true;
     bool autoWidth = false;
-    float sidebarWidth = 210.0f;
+    keel::f32 sidebarWidth = 210.0f;
 
     // Optional Workbench shell companions
     bool gearMenuOpen = false;
@@ -249,7 +249,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                 // 2. Primary Sidebar docked flush next to ActivityBar (or on outer edge when standalone)
                 if (auto sb = ui.Sidebar(s_state.mode, {
                     .side = s_state.side,
-                    .width = s_state.autoWidth ? keel::kNullOpt : keel::Optional<float>(s_state.sidebarWidth),
+                    .width = s_state.autoWidth ? keel::kNullOpt : keel::Optional<keel::f32>(s_state.sidebarWidth),
                     .resizable = s_state.resizable,
                     .allowCompact = s_state.allowCompact,
                     .allowCollapse = s_state.allowCollapse,
@@ -266,7 +266,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                         };
                         if (s_state.showSections) {
                             menu.Section(s_state.showActivityBar
-                                ? actHeaders[static_cast<keel::usize>(keel::clamp(s_state.activityIdx, 0, 2))]
+                                ? actHeaders[keel::as<keel::usize>(keel::clamp(s_state.activityIdx, 0, 2))]
                                 : keel::StringRef("WORKSPACE"));
                         }
                         menu.Item(s_state.menuIdx, 0, {
@@ -311,7 +311,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                         "Overview", "Analytics", "Deployments", "Settings"
                     };
                     ui.Heading({
-                        .label = pageTitles[static_cast<keel::usize>(keel::clamp(s_state.menuIdx, 0, 3))],
+                        .label = pageTitles[keel::as<keel::usize>(keel::clamp(s_state.menuIdx, 0, 3))],
                         .description = "Drag the Sidebar border sash to resize or snap between Expanded, Compact, and Collapsed modes.",
                         .badge = {ModeEnumName(s_state.mode), ctx.ResolveControlColor()},
                         .level = guikit::HeadingLevel::H5
@@ -362,7 +362,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                             "[Warn] 2 boundary reflections attenuated below -65 dB threshold.",
                             "[Slice 2D] Drag the top border of this BottomPanel up/down to resize the cross-section viewport."
                         };
-                        ui.Text(tabContents[static_cast<keel::usize>(keel::clamp(s_state.bottomTabIdx, 0, 2))], {
+                        ui.Text(tabContents[keel::as<keel::usize>(keel::clamp(s_state.bottomTabIdx, 0, 2))], {
                             .role = guikit::TextRole::BodySmall,
                             .variant = guikit::UiVariant::Secondary
                         });

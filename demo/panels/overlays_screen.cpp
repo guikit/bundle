@@ -11,8 +11,8 @@ struct OverlaysDemoState {
     // Modal settings & state
     bool customModalOpen = false;
     bool confirmDeleteModalOpen = false;
-    float modalWidth = 440.0f;
-    float backdropOpacity = 0.55f;
+    keel::f32 modalWidth = 440.0f;
+    keel::f32 backdropOpacity = 0.55f;
     bool closeOnBackdrop = true;
     bool closeOnEscape = true;
     bool showCloseButton = true;
@@ -25,13 +25,13 @@ struct OverlaysDemoState {
     // Popover settings & state
     bool popoverOpen = false;
     keel::usize popoverPlacementIdx = 0; // Auto, BottomStart, BottomEnd, TopStart, TopEnd
-    float popoverWidth = 280.0f;
-    float popoverOffset = 6.0f;
+    keel::f32 popoverWidth = 280.0f;
+    keel::f32 popoverOffset = 6.0f;
     bool popoverCloseOutside = true;
     bool popoverCloseEscape = true;
     bool filterShowPeaks = true;
     bool filterAutoScale = true;
-    float filterGainDb = 12.0f;
+    keel::f32 filterGainDb = 12.0f;
     keel::FixedString<128> lastPopoverStatus = "Click \"Stream Filters\" to open Popover";
 
     // ContextMenu settings & state
@@ -39,7 +39,7 @@ struct OverlaysDemoState {
     guikit::Vec2 zoneMenuPos{};
     bool btnMenuOpen = false;
     keel::usize triggerModeIdx = 0; // 0 = RightClick, 1 = Click
-    float menuMinWidth = 200.0f;
+    keel::f32 menuMinWidth = 200.0f;
     bool itemBookmarked = true;
     bool itemLocked = false;
     bool itemGridSnap = true;
@@ -47,8 +47,8 @@ struct OverlaysDemoState {
 
     // Toast settings & state
     keel::usize toastPlacementIdx = 0; // BottomRight, TopRight, BottomLeft, TopLeft, TopCenter, BottomCenter
-    float toastDuration = 4.0f;
-    float toastWidth = 320.0f;
+    keel::f32 toastDuration = 4.0f;
+    keel::f32 toastWidth = 320.0f;
     keel::i32 toastMaxVisible = 5;
     bool toastPauseOnHover = true;
     bool toastShowProgress = true;
@@ -59,7 +59,7 @@ struct OverlaysDemoState {
     // CommandPalette settings & state
     bool commandPaletteOpen = false;
     bool paletteAutoWidth = true;
-    float paletteWidth = 660.0f;
+    keel::f32 paletteWidth = 660.0f;
     keel::i32 paletteMaxVisible = 8;
     bool paletteShowFooter = true;
     keel::FixedString<160> lastPaletteCommand = "None (press Ctrl+K or click Open)";
@@ -516,8 +516,8 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
 
     auto cpRes = ui.CommandPalette(s_ov.commandPaletteOpen, kPaletteCommands, {
         .placeholder = "Type a command or search...",
-        .width = s_ov.paletteAutoWidth ? keel::kNullOpt : keel::Optional<float>(s_ov.paletteWidth),
-        .maxVisibleItems = static_cast<keel::u32>(keel::max(1, s_ov.paletteMaxVisible)),
+        .width = s_ov.paletteAutoWidth ? keel::kNullOpt : keel::Optional<keel::f32>(s_ov.paletteWidth),
+        .maxVisibleItems = keel::as<keel::u32>(keel::max(1, s_ov.paletteMaxVisible)),
         .backdropOpacity = s_ov.backdropOpacity,
         .closeOnBackdropClick = s_ov.closeOnBackdrop,
         .closeOnEscape = s_ov.closeOnEscape,
@@ -526,8 +526,8 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
         .size = ctx.controlsSize
     });
 
-    if (cpRes.changed && cpRes.selectedIndex >= 0 && static_cast<keel::usize>(cpRes.selectedIndex) < kPaletteCommands.size()) {
-        const auto& cmd = kPaletteCommands[static_cast<keel::usize>(cpRes.selectedIndex)];
+    if (cpRes.changed && cpRes.selectedIndex >= 0 && keel::as<keel::usize>(cpRes.selectedIndex) < kPaletteCommands.size()) {
+        const auto& cmd = kPaletteCommands[keel::as<keel::usize>(cpRes.selectedIndex)];
         s_ov.lastPaletteCommand = keel::format_fixed<160>("Executed: [{}] {}", cmd.category, cmd.label);
         if (cpRes.selectedIndex == 0) s_ov.customModalOpen = true;
         else if (cpRes.selectedIndex == 4) ui.ClearToasts();
@@ -639,7 +639,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
     ui.ToastHost({
         .placement = static_cast<guikit::ToastPlacement>(s_ov.toastPlacementIdx),
         .width = s_ov.toastWidth,
-        .maxVisible = static_cast<keel::usize>(keel::max(1, s_ov.toastMaxVisible)),
+        .maxVisible = keel::as<keel::usize>(keel::max(1, s_ov.toastMaxVisible)),
         .pauseOnHover = s_ov.toastPauseOnHover,
         .confineToParent = s_ov.confineToastToStage
     });

@@ -17,33 +17,33 @@ struct AttitudeDemoState {
     keel::i32 aircraftSymbolIndex{0};     // 0 = GullWing, 1 = ClassicW, 2 = RussianSilhouette
 
     // Primary Flight Telemetry
-    float rollDeg{0.0f};
-    float pitchDeg{2.5f};
-    float headingDeg{42.0f};
-    float airspeedKnots{250.0f};
-    float machNumber{0.72f};
-    float altitudeFeet{12500.0f};
-    float verticalSpeedFpm{0.0f};
-    float slipSkid{0.0f};
-    float gLoad{1.0f};
-    float radioAltitudeFeet{1850.0f};
+    keel::f32 rollDeg{0.0f};
+    keel::f32 pitchDeg{2.5f};
+    keel::f32 headingDeg{42.0f};
+    keel::f32 airspeedKnots{250.0f};
+    keel::f32 machNumber{0.72f};
+    keel::f32 altitudeFeet{12500.0f};
+    keel::f32 verticalSpeedFpm{0.0f};
+    keel::f32 slipSkid{0.0f};
+    keel::f32 gLoad{1.0f};
+    keel::f32 radioAltitudeFeet{1850.0f};
 
     // FPV, FD & Bugs
     bool showFlightPathVector{true};
-    float aoaDeg{2.2f};
-    float sideslipDeg{0.0f};
-    float fdPitchDeg{3.0f};
-    float fdRollDeg{0.0f};
-    float targetAirspeedBug{250.0f};
-    float targetAltitudeBug{12500.0f};
-    float targetHeadingBug{45.0f};
-    float baroSettingInHg{29.92f};
+    keel::f32 aoaDeg{2.2f};
+    keel::f32 sideslipDeg{0.0f};
+    keel::f32 fdPitchDeg{3.0f};
+    keel::f32 fdRollDeg{0.0f};
+    keel::f32 targetAirspeedBug{250.0f};
+    keel::f32 targetAltitudeBug{12500.0f};
+    keel::f32 targetHeadingBug{45.0f};
+    keel::f32 baroSettingInHg{29.92f};
     bool baroStd{false};
 
     // ILS Deviation
     bool showIlsDiamonds{true};
-    float locDeviationDots{0.0f};
-    float gsDeviationDots{0.0f};
+    keel::f32 locDeviationDots{0.0f};
+    keel::f32 gsDeviationDots{0.0f};
 
     // Instrument Overlays
     bool showPitchLadder{true};
@@ -52,23 +52,23 @@ struct AttitudeDemoState {
     bool showHeadingTape{true};
     bool showFmaBar{true};
     bool showMouseStickOverlay{true};
-    float fovPitchDeg{50.0f};
+    keel::f32 fovPitchDeg{50.0f};
 
-    double simTimeSec{0.0};
+    keel::f64 simTimeSec{0.0};
     keel::u64 lastWallNs{0};
     AttitudeViewResponse lastResp{};
 };
 
 AttitudeDemoState s_att{};
 
-[[nodiscard]] inline float WrapHeadingDeg(float d) noexcept {
-    float r = keel::fmod(d, 360.0f);
+[[nodiscard]] inline keel::f32 WrapHeadingDeg(keel::f32 d) noexcept {
+    keel::f32 r = keel::fmod(d, 360.0f);
     if (r < 0.0f) r += 360.0f;
     return r;
 }
 
-[[nodiscard]] inline float WrapRollDeg(float d) noexcept {
-    float r = keel::fmod(d + 180.0f, 360.0f);
+[[nodiscard]] inline keel::f32 WrapRollDeg(keel::f32 d) noexcept {
+    keel::f32 r = keel::fmod(d + 180.0f, 360.0f);
     if (r < 0.0f) r += 360.0f;
     return r - 180.0f;
 }
@@ -80,10 +80,10 @@ void StepAttitudeSimulation(guikit::Context& ui, AttitudeDemoState& st) {
         st.initialized = true;
     }
 
-    double dt = static_cast<double>(nowNs - st.lastWallNs) * 1e-9;
+    keel::f64 dt = keel::as<keel::f64>(nowNs - st.lastWallNs) * 1e-9;
     st.lastWallNs = nowNs;
     dt = keel::clamp(dt, 0.001, 0.05);
-    const float fdt = static_cast<float>(dt);
+    const keel::f32 fdt = keel::as<keel::f32>(dt);
     st.simTimeSec += dt;
 
     if (st.controlModeIndex == 3) {
@@ -95,23 +95,23 @@ void StepAttitudeSimulation(guikit::Context& ui, AttitudeDemoState& st) {
     const Vec2 mousePos = ui.GetMousePos();
     const Rect adiR = st.lastResp.adiRect;
     const Vec2 adiCenter = (adiR.w > 20.0f) ? adiR.Center() : Vec2{640.0f, 400.0f};
-    const float adiRadius = (adiR.w > 20.0f) ? (adiR.w * 0.5f) : 220.0f;
+    const keel::f32 adiRadius = (adiR.w > 20.0f) ? (adiR.w * 0.5f) : 220.0f;
 
-    const float nx = keel::clamp((mousePos.x - adiCenter.x) / keel::max(40.0f, adiRadius), -1.0f, 1.0f);
-    const float ny = keel::clamp((mousePos.y - adiCenter.y) / keel::max(40.0f, adiRadius), -1.0f, 1.0f);
+    const keel::f32 nx = keel::clamp((mousePos.x - adiCenter.x) / keel::max(40.0f, adiRadius), -1.0f, 1.0f);
+    const keel::f32 ny = keel::clamp((mousePos.y - adiCenter.y) / keel::max(40.0f, adiRadius), -1.0f, 1.0f);
     const Rect horR = (st.lastResp.horizonRect.w > 20.0f) ? st.lastResp.horizonRect : adiR;
     const bool mouseInStage = (horR.w > 20.0f) &&
                               mousePos.x >= (horR.x - 160.0f) && mousePos.x <= (horR.Right() + 160.0f) &&
                               mousePos.y >= (horR.y - 80.0f)  && mousePos.y <= (horR.Bottom() + 80.0f);
 
-    const float prevRoll = st.rollDeg;
-    const float prevPitch = st.pitchDeg;
+    const keel::f32 prevRoll = st.rollDeg;
+    const keel::f32 prevPitch = st.pitchDeg;
 
     if (st.controlModeIndex == 0) {
         // Mode 0: Direct Mouse Follow (Mouse position maps directly to Roll & Pitch)
-        const float cmdRoll = mouseInStage ? (nx * 65.0f) : 0.0f;
-        const float cmdPitch = mouseInStage ? (-ny * 38.0f) : 2.5f;
-        const float alpha = keel::clamp(fdt * 12.0f, 0.05f, 1.0f);
+        const keel::f32 cmdRoll = mouseInStage ? (nx * 65.0f) : 0.0f;
+        const keel::f32 cmdPitch = mouseInStage ? (-ny * 38.0f) : 2.5f;
+        const keel::f32 alpha = keel::clamp(fdt * 12.0f, 0.05f, 1.0f);
         st.rollDeg += (cmdRoll - st.rollDeg) * alpha;
         st.pitchDeg += (cmdPitch - st.pitchDeg) * alpha;
         st.fdRollDeg = cmdRoll;
@@ -119,11 +119,11 @@ void StepAttitudeSimulation(guikit::Context& ui, AttitudeDemoState& st) {
     } else if (st.controlModeIndex == 1) {
         // Mode 1: Virtual Fly-By-Wire Side-Stick (Mouse offset commands Roll Rate & Pitch Rate, supports 360 barrel rolls)
         if (mouseInStage) {
-            const float deadzone = 0.05f;
-            const float sx = (keel::abs(nx) > deadzone) ? ((nx - keel::copysign(deadzone, nx)) / (1.0f - deadzone)) : 0.0f;
-            const float sy = (keel::abs(ny) > deadzone) ? ((ny - keel::copysign(deadzone, ny)) / (1.0f - deadzone)) : 0.0f;
-            const float rollRateDegPerSec = sx * 135.0f;
-            const float pitchRateDegPerSec = -sy * 65.0f;
+            const keel::f32 deadzone = 0.05f;
+            const keel::f32 sx = (keel::abs(nx) > deadzone) ? ((nx - keel::copysign(deadzone, nx)) / (1.0f - deadzone)) : 0.0f;
+            const keel::f32 sy = (keel::abs(ny) > deadzone) ? ((ny - keel::copysign(deadzone, ny)) / (1.0f - deadzone)) : 0.0f;
+            const keel::f32 rollRateDegPerSec = sx * 135.0f;
+            const keel::f32 pitchRateDegPerSec = -sy * 65.0f;
             st.rollDeg = WrapRollDeg(st.rollDeg + rollRateDegPerSec * fdt);
             st.pitchDeg = keel::clamp(st.pitchDeg + pitchRateDegPerSec * fdt, -85.0f, 85.0f);
             st.fdRollDeg = keel::clamp(sx * 45.0f, -60.0f, 60.0f);
@@ -131,49 +131,49 @@ void StepAttitudeSimulation(guikit::Context& ui, AttitudeDemoState& st) {
         }
     } else if (st.controlModeIndex == 2) {
         // Mode 2: Automated Autopilot Figure-8 Flight Pattern
-        const float t = static_cast<float>(st.simTimeSec);
-        const float targetRoll = 36.0f * keel::sin(t * 0.55f);
-        const float targetPitch = 3.0f + 9.5f * keel::sin(t * 1.10f);
+        const keel::f32 t = keel::as<keel::f32>(st.simTimeSec);
+        const keel::f32 targetRoll = 36.0f * keel::sin(t * 0.55f);
+        const keel::f32 targetPitch = 3.0f + 9.5f * keel::sin(t * 1.10f);
         st.fdRollDeg = 36.0f * keel::sin((t + 0.45f) * 0.55f);
         st.fdPitchDeg = 3.0f + 9.5f * keel::sin((t + 0.45f) * 1.10f);
-        const float alpha = keel::clamp(fdt * 6.0f, 0.02f, 1.0f);
+        const keel::f32 alpha = keel::clamp(fdt * 6.0f, 0.02f, 1.0f);
         st.rollDeg += (targetRoll - st.rollDeg) * alpha;
         st.pitchDeg += (targetPitch - st.pitchDeg) * alpha;
     }
 
     // Integrate realistic coupled air-data dynamics from Roll & Pitch
-    const float rollRate = (st.rollDeg - prevRoll) / fdt;
-    const float pitchRate = (st.pitchDeg - prevPitch) / fdt;
+    const keel::f32 rollRate = (st.rollDeg - prevRoll) / fdt;
+    const keel::f32 pitchRate = (st.pitchDeg - prevPitch) / fdt;
 
     // Vertical speed (FPM) driven by pitch angle and airspeed
-    const float targetVsi = keel::sin(keel::deg_to_rad(st.pitchDeg - 2.0f)) * st.airspeedKnots * 88.0f;
+    const keel::f32 targetVsi = keel::sin(keel::deg_to_rad(st.pitchDeg - 2.0f)) * st.airspeedKnots * 88.0f;
     st.verticalSpeedFpm += (targetVsi - st.verticalSpeedFpm) * keel::clamp(fdt * 6.0f, 0.05f, 1.0f);
     st.altitudeFeet = keel::clamp(st.altitudeFeet + (st.verticalSpeedFpm / 60.0f) * fdt, 0.0f, 50000.0f);
     st.radioAltitudeFeet = keel::clamp(st.altitudeFeet - 10650.0f, 20.0f, 2500.0f);
 
     // Airspeed responds to dive/climb + autothrottle restoring toward targetAirspeedBug
-    const float gravityAccelKtPerSec = -keel::sin(keel::deg_to_rad(st.pitchDeg - 2.0f)) * 18.0f;
-    const float autoThrottleKtPerSec = (st.targetAirspeedBug - st.airspeedKnots) * 0.45f;
+    const keel::f32 gravityAccelKtPerSec = -keel::sin(keel::deg_to_rad(st.pitchDeg - 2.0f)) * 18.0f;
+    const keel::f32 autoThrottleKtPerSec = (st.targetAirspeedBug - st.airspeedKnots) * 0.45f;
     st.airspeedKnots = keel::clamp(st.airspeedKnots + (gravityAccelKtPerSec + autoThrottleKtPerSec) * fdt, 95.0f, 380.0f);
     st.machNumber = keel::clamp(st.airspeedKnots / 348.0f, 0.15f, 0.99f);
 
     // Coordinated turn rate integrates magnetic heading
-    const float turnRateDegPerSec =
+    const keel::f32 turnRateDegPerSec =
         keel::clamp(keel::tan(keel::deg_to_rad(keel::clamp(st.rollDeg, -70.0f, 70.0f))) * 4.2f, -18.0f, 18.0f);
     st.headingDeg = WrapHeadingDeg(st.headingDeg + turnRateDegPerSec * fdt);
 
     // Normal load factor (G) and inclinometer slip/skid ball
-    const float bankCos = keel::max(0.35f, keel::cos(keel::deg_to_rad(keel::clamp(st.rollDeg, -70.0f, 70.0f))));
-    const float targetG = (1.0f / bankCos) + pitchRate * 0.035f;
+    const keel::f32 bankCos = keel::max(0.35f, keel::cos(keel::deg_to_rad(keel::clamp(st.rollDeg, -70.0f, 70.0f))));
+    const keel::f32 targetG = (1.0f / bankCos) + pitchRate * 0.035f;
     st.gLoad += (keel::clamp(targetG, -2.5f, 6.0f) - st.gLoad) * keel::clamp(fdt * 8.0f, 0.05f, 1.0f);
 
-    const float targetSlip = keel::clamp(-rollRate * 0.008f, -0.85f, 0.85f);
+    const keel::f32 targetSlip = keel::clamp(-rollRate * 0.008f, -0.85f, 0.85f);
     st.slipSkid += (targetSlip - st.slipSkid) * keel::clamp(fdt * 7.0f, 0.05f, 1.0f);
     st.aoaDeg = keel::clamp(2.0f + (st.gLoad - 1.0f) * 2.4f, -4.0f, 14.0f);
     st.sideslipDeg = st.slipSkid * 3.5f;
 
     // Smoothly animate ILS Localizer & Glideslope deviation relative to target bugs
-    st.locDeviationDots = keel::clamp(keel::sin(static_cast<float>(st.simTimeSec) * 0.35f) * 0.8f - st.rollDeg * 0.02f, -2.2f, 2.2f);
+    st.locDeviationDots = keel::clamp(keel::sin(keel::as<keel::f32>(st.simTimeSec) * 0.35f) * 0.8f - st.rollDeg * 0.02f, -2.2f, 2.2f);
     st.gsDeviationDots = keel::clamp((st.targetAltitudeBug - st.altitudeFeet) / 250.0f, -2.2f, 2.2f);
 }
 
@@ -493,11 +493,11 @@ keel::String GenerateAttitudeCode(const DemoContext& /*ctx*/) {
         "if (resp.cursorInsideAdi) {{\n"
         "    // Mouse stick telemetry: roll = {:.1f} deg, pitch = {:.1f} deg\n"
         "}}\n",
-        kModeEnums[static_cast<keel::usize>(keel::clamp(s_att.displayModeIndex, 0, 2))],
-        kViewportEnums[static_cast<keel::usize>(keel::clamp(s_att.viewportModeIndex, 0, 3))],
-        kRefEnums[static_cast<keel::usize>(keel::clamp(s_att.referenceModeIndex, 0, 1))],
-        kSchemeEnums[static_cast<keel::usize>(keel::clamp(s_att.colorSchemeIndex, 0, 2))],
-        kFdEnums[static_cast<keel::usize>(keel::clamp(s_att.fdStyleIndex, 0, 2))],
+        kModeEnums[keel::as<keel::usize>(keel::clamp(s_att.displayModeIndex, 0, 2))],
+        kViewportEnums[keel::as<keel::usize>(keel::clamp(s_att.viewportModeIndex, 0, 3))],
+        kRefEnums[keel::as<keel::usize>(keel::clamp(s_att.referenceModeIndex, 0, 1))],
+        kSchemeEnums[keel::as<keel::usize>(keel::clamp(s_att.colorSchemeIndex, 0, 2))],
+        kFdEnums[keel::as<keel::usize>(keel::clamp(s_att.fdStyleIndex, 0, 2))],
         s_att.rollDeg,
         s_att.pitchDeg,
         s_att.headingDeg,

@@ -24,10 +24,10 @@ struct ReadoutDemoState {
     };
 
     // Per-channel relative zero offsets
-    double voltageZeroV = 0.0;
-    double currentZeroA = 0.0;
-    double powerZeroW = 0.0;
-    double tempZeroC = 0.0;
+    keel::f64 voltageZeroV = 0.0;
+    keel::f64 currentZeroA = 0.0;
+    keel::f64 powerZeroW = 0.0;
+    keel::f64 tempZeroC = 0.0;
 };
 
 ReadoutDemoState s_state;
@@ -111,38 +111,38 @@ void RenderReadoutInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
-    const double t = ui.GetCurrentTime();
+    const keel::f64 t = ui.GetCurrentTime();
     if (s_state.liveSim) {
         ui.RequestRepaint(1);
     }
 
-    const double rawVoltageV = s_state.liveSim
+    const keel::f64 rawVoltageV = s_state.liveSim
         ? (12.04 + 0.35 * keel::sin(t * 0.9) + 0.02 * keel::sin(t * 6.1))
         : 12.04;
-    const double netVoltageV = rawVoltageV - s_state.voltageZeroV;
+    const keel::f64 netVoltageV = rawVoltageV - s_state.voltageZeroV;
 
-    const double rawCurrentA = s_state.liveSim
+    const keel::f64 rawCurrentA = s_state.liveSim
         ? (1.850 + 0.420 * keel::sin(t * 0.65))
         : 1.850;
-    const double netCurrentA = rawCurrentA - s_state.currentZeroA;
+    const keel::f64 netCurrentA = rawCurrentA - s_state.currentZeroA;
 
-    const double rawPowerW = rawVoltageV * rawCurrentA;
-    const double netPowerW = rawPowerW - s_state.powerZeroW;
+    const keel::f64 rawPowerW = rawVoltageV * rawCurrentA;
+    const keel::f64 netPowerW = rawPowerW - s_state.powerZeroW;
 
-    const double freqHz = s_state.liveSim
+    const keel::f64 freqHz = s_state.liveSim
         ? (48000.0 + 125.0 * keel::sin(t * 0.5))
         : 48000.0;
 
-    const double rawTempC = s_state.liveSim
+    const keel::f64 rawTempC = s_state.liveSim
         ? (24.6 + 1.4 * keel::sin(t * 0.35))
         : 24.6;
-    const double netTempC = rawTempC - s_state.tempZeroC;
+    const keel::f64 netTempC = rawTempC - s_state.tempZeroC;
 
-    const double elapsed = s_state.liveSim ? t : 83.4;
-    const keel::i32 totalSec = static_cast<keel::i32>(elapsed);
+    const keel::f64 elapsed = s_state.liveSim ? t : 83.4;
+    const keel::i32 totalSec = keel::as<keel::i32>(elapsed);
     const keel::i32 mins = (totalSec / 60) % 60;
     const keel::i32 secs = totalSec % 60;
-    const keel::i32 tenths = static_cast<keel::i32>(elapsed * 10.0) % 10;
+    const keel::i32 tenths = keel::as<keel::i32>(elapsed * 10.0) % 10;
     const keel::StringRef uptimeStr = ui.Format("{:02}:{:02}.{}", mins, secs, tenths);
 
     const bool overCurrent = (netCurrentA > 2.15);
@@ -253,7 +253,7 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
                     }
                     ui.ShowToast({
                         .title = "Relative Zero Updated",
-                        .message = channels[static_cast<keel::usize>(ch)].label,
+                        .message = channels[keel::as<keel::usize>(ch)].label,
                         .variant = guikit::UiVariant::Success
                     });
                     ui.InvalidateAll();

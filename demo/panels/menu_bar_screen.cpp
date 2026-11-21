@@ -9,7 +9,7 @@ struct MenuBarDemoState {
     guikit::MenuBarStyle style = guikit::MenuBarStyle::Header;
     bool showRightPill = true;
     bool disabled = false;
-    float maxMenuHeight = 260.0f;
+    keel::f32 maxMenuHeight = 260.0f;
 
     // Interactive workspace state driven by MenuBar & ContextMenu
     bool showGrid = true;
@@ -47,7 +47,7 @@ void RecordAction(guikit::Context& ui, keel::StringRef action, guikit::UiVariant
 } // namespace
 
 void RenderMenuBarInspector(guikit::Context& ui, DemoContext&) {
-    keel::i32 styleIdx = static_cast<keel::i32>(s_mb.style);
+    keel::i32 styleIdx = keel::as<keel::i32>(s_mb.style);
     if (auto el = ui.Element({.label = "MenuBar Style"})) {
         if (ui.Segmented(styleIdx, kStyleLabels).changed) {
             s_mb.style = static_cast<guikit::MenuBarStyle>(styleIdx);

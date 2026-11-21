@@ -62,7 +62,7 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
 
     if (s_tb.orientation == guikit::Orientation::Horizontal) {
         static constexpr keel::StaticArray<keel::StringRef, 4> kOverflowLabels = {"Compact", "Scroll", "Wrap", "Clip"};
-        keel::usize overflowIdx = static_cast<keel::usize>(s_tb.overflow);
+        keel::usize overflowIdx = keel::as<keel::usize>(s_tb.overflow);
         if (auto el = ui.Element({.label = "Overflow Policy", .layout = guikit::ElementLayout::Stacked})) {
             if (ui.Segmented(overflowIdx, kOverflowLabels).changed) {
                 s_tb.overflow = static_cast<guikit::ToolbarOverflow>(overflowIdx);
@@ -140,7 +140,7 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
             "Auto Trigger", "Normal Trigger", "Single Shot"
         };
         tb.SplitToggle(s_tb.triggerArmed, s_tb.triggerMode, kTriggerModes, {
-            .text = kTriggerModes[static_cast<keel::usize>(keel::clamp(s_tb.triggerMode, 0, 2))],
+            .text = kTriggerModes[keel::as<keel::usize>(keel::clamp(s_tb.triggerMode, 0, 2))],
             .tooltip = "Toggle Trigger & Select Mode",
             .icon = guikit::Icon::Flash(),
             .square = isSq

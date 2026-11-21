@@ -10,8 +10,8 @@ struct LevelMeterDemoState {
     keel::usize channelModeIdx = 1; // 0 = Single-Channel (Mono dBFS), 1 = Stereo Dual-Channel (L / R)
     keel::usize orientationIdx = 0; // 0 = Horizontal, 1 = Vertical
     bool compactVertical = false;
-    float levelDb = -8.5f;
-    float stereoSpreadDb = 3.5f;
+    keel::f32 levelDb = -8.5f;
+    keel::f32 stereoSpreadDb = 3.5f;
     bool simulateLive = false;
     bool segmented = true;
     keel::u32 segments = 24;
@@ -20,7 +20,7 @@ struct LevelMeterDemoState {
     bool showClipLed = true;
     bool showScale = true;
     bool showValue = true;
-    float barThickness = 12.0f;
+    keel::f32 barThickness = 12.0f;
 };
 
 LevelMeterDemoState s_state;
@@ -139,17 +139,17 @@ void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
-    float chLeft = s_state.levelDb;
-    float chRight = keel::clamp(s_state.levelDb - s_state.stereoSpreadDb, -60.0f, 0.0f);
+    keel::f32 chLeft = s_state.levelDb;
+    keel::f32 chRight = keel::clamp(s_state.levelDb - s_state.stereoSpreadDb, -60.0f, 0.0f);
 
     if (s_state.simulateLive) {
-        const double t = ui.GetCurrentTimeSec();
-        const float envL = static_cast<float>(
+        const keel::f64 t = ui.GetCurrentTimeSec();
+        const keel::f32 envL = keel::as<keel::f32>(
             keel::sin(t * 4.2) * 4.5 +
             keel::sin(t * 11.3) * 2.8 +
             keel::max(0.0, keel::sin(t * 1.9)) * 4.2
         );
-        const float envR = static_cast<float>(
+        const keel::f32 envR = keel::as<keel::f32>(
             keel::sin(t * 3.8 + 0.9) * 4.5 +
             keel::cos(t * 9.7) * 3.0 +
             keel::max(0.0, keel::sin(t * 1.9 + 0.4)) * 4.0
@@ -190,10 +190,10 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
 
     ctx.RunElementStage(ui, [&]() {
         if (s_state.channelModeIdx == 1) {
-            const keel::StaticArray<float, 2> stereoVals = {chLeft, chRight};
+            const keel::StaticArray<keel::f32, 2> stereoVals = {chLeft, chRight};
             guikit::LevelMeter::Run(ui, stereoVals, -60.0f, 0.0f, opts);
         } else {
-            guikit::LevelMeter::Run(ui, static_cast<double>(chLeft), -60.0, 0.0, opts);
+            guikit::LevelMeter::Run(ui, keel::as<keel::f64>(chLeft), -60.0, 0.0, opts);
         }
     });
 }

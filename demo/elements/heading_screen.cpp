@@ -10,7 +10,7 @@ struct HeadingStudioState {
     guikit::HeadingSeparator separator = guikit::HeadingSeparator::Bottom;
     guikit::Align align = guikit::Align::Start;
     keel::usize widthModeIdx = 0; // 0 = Auto (Stretch), 1 = Fit, 2 = Stretch, 3 = Fixed
-    float widthDp = 360.0f;
+    keel::f32 widthDp = 360.0f;
     bool showSubtitle = true;
     bool showIconAndBadge = true;
     bool wrapInCard = true;
@@ -92,7 +92,7 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    keel::usize alignIdx = static_cast<keel::usize>(s_state.align);
+    keel::usize alignIdx = keel::as<keel::usize>(s_state.align);
     if (auto el = ui.Element({.label = "Alignment"})) {
         if (ui.Segmented(alignIdx, kLabelAlignNames).changed) {
             s_state.align = static_cast<guikit::Align>(alignIdx);

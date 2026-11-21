@@ -319,8 +319,8 @@ inline constexpr keel::StaticArray<keel::StringRef, 9> kBgPresetNames = {
 constexpr guikit::StateColor BgPresetToStateColor(
     keel::usize idx,
     bool defaultEnabled,
-    float tint = 1.0f,
-    float alpha = 1.0f
+    keel::f32 tint = 1.0f,
+    keel::f32 alpha = 1.0f
 ) noexcept {
     guikit::StateColor res{};
     switch (idx) {
@@ -360,8 +360,8 @@ constexpr guikit::StateColor BgPresetToTrackColor(keel::usize idx) noexcept {
 inline keel::String BgPresetToCode(
     keel::usize idx,
     bool defaultEnabled,
-    float tint = 1.0f,
-    float alpha = 1.0f
+    keel::f32 tint = 1.0f,
+    keel::f32 alpha = 1.0f
 ) {
     keel::String code;
     switch (idx) {
@@ -396,21 +396,21 @@ struct DemoContext {
     keel::usize previewFormFactorIdx = 0; // 0 = Window, 1 = Tablet, 2 = Phone, 3 = Full
     bool previewLandscape = false;        // Orientation state for Tablet / Phone
     keel::usize previewZoomModeIdx = 3;   // 0=Fit, 1=Real 1:1, 2=75%, 3=100%, 4=125%, 5=150%, 6=175%, 7=200%, 8=Custom
-    float previewCustomZoom = 1.0f;       // Custom zoom factor set via Ctrl + MouseWheel
-    float previewEffectiveZoom = 1.0f;    // Resolved effective zoom factor for current frame
-    float displayPxPerMm = 96.0f / 25.4f; // Physical monitor density (px/mm) for Real 1:1 mode
+    keel::f32 previewCustomZoom = 1.0f;       // Custom zoom factor set via Ctrl + MouseWheel
+    keel::f32 previewEffectiveZoom = 1.0f;    // Resolved effective zoom factor for current frame
+    keel::f32 displayPxPerMm = 96.0f / 25.4f; // Physical monitor density (px/mm) for Real 1:1 mode
     bool previewWindowCustomSize = false; // false = Maximized (Stretch), true = user-resized WxH (dp)
-    float previewWindowW = 760.0f;        // User-resized window width in logical dp
-    float previewWindowH = 500.0f;        // User-resized window height in logical dp
+    keel::f32 previewWindowW = 760.0f;        // User-resized window width in logical dp
+    keel::f32 previewWindowH = 500.0f;        // User-resized window height in logical dp
     keel::u8 previewWindowResizeEdge = 0; // Active resize edge bitmask (1=Left, 2=Right, 4=Bottom)
     keel::u8 previewWindowHoverEdge = 0;  // Hovered resize edge bitmask (1=Left, 2=Right, 4=Bottom)
     guikit::Vec2 previewWindowDragStartMouse{0.0f, 0.0f};
-    float previewWindowDragStartW = 0.0f;
-    float previewWindowDragStartH = 0.0f;
+    keel::f32 previewWindowDragStartW = 0.0f;
+    keel::f32 previewWindowDragStartH = 0.0f;
 
     guikit::UiTheme shellTheme = guikit::UiTheme::Dark();
     guikit::UiTheme previewTheme = guikit::UiTheme::Dark();
-    float previewDensity = 1.0f;
+    keel::f32 previewDensity = 1.0f;
 
     // Semantic Element form-field wrapper state (shared across ELEMENTS screens, excluding ElemHeading)
     guikit::UiSize elemSize = guikit::UiSize::Md;
@@ -425,7 +425,7 @@ struct DemoContext {
     keel::usize elemLayoutIdx = 0;      // 0 = Auto (kNullOpt), 1 = Stacked, 2 = Top, 3 = Bottom, 4 = Leading, 5 = Trailing
     guikit::Align elemAlign = guikit::Align::Start;
     keel::usize elemWidthModeIdx = 0;   // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
-    float elemWidthDp = 280.0f;         // 120..520 dp
+    keel::f32 elemWidthDp = 280.0f;         // 120..520 dp
     bool elemDisabled = false;
 
     // Shared Control state
@@ -433,29 +433,29 @@ struct DemoContext {
     guikit::UiSize controlsSize = guikit::UiSize::Md;
     guikit::UiVariant btnVariant = guikit::UiVariant::Primary;
     keel::usize ctrlWidthModeIdx = 0;   // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
-    float ctrlWidthDp = 220.0f;         // 80..480 dp
+    keel::f32 ctrlWidthDp = 220.0f;         // 80..480 dp
     keel::usize ctrlHeightModeIdx = 0;  // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
-    float ctrlHeightDp = 44.0f;         // 24..320 dp
+    keel::f32 ctrlHeightDp = 44.0f;         // 24..320 dp
     bool knobCustomDiameter = false;    // Optional explicit diameter override for Knob
-    float knobDiameterDp = 64.0f;       // 28..140 dp
+    keel::f32 knobDiameterDp = 64.0f;       // 28..140 dp
     guikit::Align ctrlAlign = guikit::Align::Center;      // Capsule content alignment for Button
     guikit::Align ctrlSelectAlign = guikit::Align::Start; // Content alignment for Select
     keel::StaticArray<keel::usize, 17> ctrlBgIdxByCat = {0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
-    float ctrlBgTint = 1.0f;
-    float ctrlBgAlpha = 1.0f;
-    float ctrlBorderWidth = 0.0f;
+    keel::f32 ctrlBgTint = 1.0f;
+    keel::f32 ctrlBgAlpha = 1.0f;
+    keel::f32 ctrlBorderWidth = 0.0f;
     guikit::UiVariant ctrlBorderVariant = guikit::UiVariant::Default;
-    float ctrlBorderRadius = 6.0f;
+    keel::f32 ctrlBorderRadius = 6.0f;
 
     // Shared assembly & container layout tokens
-    float cardRadius = 8.0f;
-    float cardPadding = 16.0f;
-    float cardGap = 8.0f;
-    float cardBorderWidth = 1.0f;
-    float gridColGap = 12.0f;
-    float gridRowGap = 10.0f;
-    float colGap = 12.0f;
-    float rowGap = 8.0f;
+    keel::f32 cardRadius = 8.0f;
+    keel::f32 cardPadding = 16.0f;
+    keel::f32 cardGap = 8.0f;
+    keel::f32 cardBorderWidth = 1.0f;
+    keel::f32 gridColGap = 12.0f;
+    keel::f32 gridRowGap = 10.0f;
+    keel::f32 colGap = 12.0f;
+    keel::f32 rowGap = 8.0f;
 
     static constexpr guikit::SizeMode DefaultCtrlWidthMode(NavCategory cat) noexcept {
         switch (cat) {
@@ -562,7 +562,7 @@ struct DemoContext {
         }
     }
 
-    static constexpr guikit::AxisSize ResolveAxisSize(keel::usize modeIdx, float dp) noexcept {
+    static constexpr guikit::AxisSize ResolveAxisSize(keel::usize modeIdx, keel::f32 dp) noexcept {
         switch (modeIdx) {
             case 1:  return guikit::AxisSize::Fit();
             case 2:  return guikit::AxisSize::Stretch();
@@ -599,8 +599,8 @@ struct DemoContext {
         return ResolveAxisSize(ctrlHeightModeIdx, ctrlHeightDp);
     }
 
-    constexpr keel::Optional<float> ResolveKnobDiameter() const noexcept {
-        return knobCustomDiameter ? keel::Optional<float>(knobDiameterDp) : keel::kNullOpt;
+    constexpr keel::Optional<keel::f32> ResolveKnobDiameter() const noexcept {
+        return knobCustomDiameter ? keel::Optional<keel::f32>(knobDiameterDp) : keel::kNullOpt;
     }
 
     keel::FixedString<48> FormatKnobDiameterCode() const noexcept {
@@ -611,13 +611,13 @@ struct DemoContext {
     }
 
     guikit::StateColor GetControlBackground(NavCategory cat) const noexcept {
-        const keel::usize idx = static_cast<keel::usize>(cat);
+        const keel::usize idx = keel::as<keel::usize>(cat);
         const keel::usize bgIdx = (idx < ctrlBgIdxByCat.size()) ? ctrlBgIdxByCat[idx] : 0;
         return BgPresetToStateColor(bgIdx, IsCtrlBgDefaultEnabled(cat), ctrlBgTint, ctrlBgAlpha);
     }
 
     keel::String FormatControlBackgroundCode(NavCategory cat) const {
-        const keel::usize idx = static_cast<keel::usize>(cat);
+        const keel::usize idx = keel::as<keel::usize>(cat);
         const keel::usize bgIdx = (idx < ctrlBgIdxByCat.size()) ? ctrlBgIdxByCat[idx] : 0;
         return BgPresetToCode(bgIdx, IsCtrlBgDefaultEnabled(cat), ctrlBgTint, ctrlBgAlpha);
     }
@@ -907,7 +907,7 @@ struct DemoContext {
             }
         }
 
-        keel::usize elemAlignIdx = static_cast<keel::usize>(elemAlign);
+        keel::usize elemAlignIdx = keel::as<keel::usize>(elemAlign);
         if (auto el = ui.Element({.label = "Alignment"})) {
             if (ui.Segmented(elemAlignIdx, kLabelAlignNames).changed) {
                 elemAlign = static_cast<guikit::Align>(elemAlignIdx);
@@ -1060,7 +1060,7 @@ struct DemoContext {
         }
 
         if (IsCtrlBoxedCategory(cat)) {
-            keel::usize& ctrlBgIdx = ctrlBgIdxByCat[static_cast<keel::usize>(cat)];
+            keel::usize& ctrlBgIdx = ctrlBgIdxByCat[keel::as<keel::usize>(cat)];
             if (auto el = ui.Element({.label = "Background"})) {
                 if (ui.Select(ctrlBgIdx, kBgPresetNames).changed) {
                     ui.InvalidateAll();

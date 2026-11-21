@@ -22,10 +22,10 @@ void RenderRadioInspector(guikit::Context& ui, DemoContext&) {
     }
     if (s_state.groupDemo) {
         static constexpr keel::StaticArray<keel::StringRef, 3> optNames = {"Option A", "Option B", "Option C"};
-        keel::usize idx = static_cast<keel::usize>(keel::clamp(s_state.selectedIdx, 0, 2));
+        keel::usize idx = keel::as<keel::usize>(keel::clamp(s_state.selectedIdx, 0, 2));
         if (auto el = ui.Element({.label = "Active Selection"})) {
             if (ui.Segmented(idx, optNames).changed) {
-                s_state.selectedIdx = static_cast<keel::i32>(idx);
+                s_state.selectedIdx = keel::as<keel::i32>(idx);
                 ui.InvalidateAll();
             }
         }

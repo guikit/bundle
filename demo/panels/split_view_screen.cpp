@@ -8,12 +8,12 @@ namespace {
 struct SplitViewDemoState {
     keel::usize layoutModeIdx = 1;      // 0 = 3-Pane Nested, 1 = 2-Pane Single (default to clean 2-Pane)
     keel::usize orientationIdx = 0;     // 0 = Horizontal, 1 = Vertical
-    float primaryRatio = 0.35f;
-    float secondaryRatio = 0.55f;
-    float sashSize = 6.0f;
-    float minRatio = 0.12f;
-    float maxRatio = 0.88f;
-    float minPaneSize = 48.0f;
+    keel::f32 primaryRatio = 0.35f;
+    keel::f32 secondaryRatio = 0.55f;
+    keel::f32 sashSize = 6.0f;
+    keel::f32 minRatio = 0.12f;
+    keel::f32 maxRatio = 0.88f;
+    keel::f32 minPaneSize = 48.0f;
     bool showGrip = true;
     bool collapsible = true;
     bool showOuterBorder = true;
@@ -32,7 +32,7 @@ constexpr keel::StaticArray<keel::StringRef, 2> kOrientations = {
 void RenderPanePlaceholder(
     guikit::Context& ui,
     keel::StringRef title,
-    float ratioPct,
+    keel::f32 ratioPct,
     guikit::UiVariant badgeVariant
 ) {
     if (auto col = ui.Column({

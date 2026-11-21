@@ -17,40 +17,40 @@ struct CarDashboardDemoState {
     keel::i32 gearSelectorIndex{3};       // 0=P, 1=R, 2=N, 3=D, 4=S, 5=M
 
     // Primary Vehicle Telemetry
-    float speedKmh{98.0f};
-    float maxSpeedKmh{300.0f};
-    float cruiseTargetKmh{120.0f};
+    keel::f32 speedKmh{98.0f};
+    keel::f32 maxSpeedKmh{300.0f};
+    keel::f32 cruiseTargetKmh{120.0f};
     bool cruiseSet{true};
-    float rpm{2650.0f};
-    float redlineRpm{7000.0f};
-    float maxRpm{8500.0f};
+    keel::f32 rpm{2650.0f};
+    keel::f32 redlineRpm{7000.0f};
+    keel::f32 maxRpm{8500.0f};
     keel::i32 currentGear{5};
-    float evPowerKw{42.0f};
-    float throttlePct{20.0f};
-    float brakePct{0.0f};
-    float steeringAngleDeg{0.0f};
-    float boostBar{0.25f};
+    keel::f32 evPowerKw{42.0f};
+    keel::f32 throttlePct{20.0f};
+    keel::f32 brakePct{0.0f};
+    keel::f32 steeringAngleDeg{0.0f};
+    keel::f32 boostBar{0.25f};
 
     // Energy, Thermal & Trip
-    float fuelOrSocPct{78.0f};
-    float estimatedRangeKm{450.0f};
-    float coolantOrBattTempC{90.0f};
-    float oilTempC{98.0f};
-    float outsideTempC{19.0f};
-    double odometerKm{18426.2};
-    float tripDistanceKm{74.8f};
-    float avgConsumption{9.2f};
+    keel::f32 fuelOrSocPct{78.0f};
+    keel::f32 estimatedRangeKm{450.0f};
+    keel::f32 coolantOrBattTempC{90.0f};
+    keel::f32 oilTempC{98.0f};
+    keel::f32 outsideTempC{19.0f};
+    keel::f64 odometerKm{18426.2};
+    keel::f32 tripDistanceKm{74.8f};
+    keel::f32 avgConsumption{9.2f};
 
     // Dynamics, ADAS & TPMS
-    float latG{0.0f};
-    float lonG{0.0f};
-    float peakG{0.42f};
-    float frontTorquePct{32.0f};
-    float adasLeadDistanceM{42.0f};
-    float adasLeadSpeedKmh{102.0f};
+    keel::f32 latG{0.0f};
+    keel::f32 lonG{0.0f};
+    keel::f32 peakG{0.42f};
+    keel::f32 frontTorquePct{32.0f};
+    keel::f32 adasLeadDistanceM{42.0f};
+    keel::f32 adasLeadSpeedKmh{102.0f};
     bool adasLeadDetected{true};
-    keel::StaticArray<float, 4> tirePressureBar{2.4f, 2.4f, 2.6f, 2.6f};
-    keel::StaticArray<float, 4> tireTempC{44.0f, 45.0f, 48.0f, 48.0f};
+    keel::StaticArray<keel::f32, 4> tirePressureBar{2.4f, 2.4f, 2.6f, 2.6f};
+    keel::StaticArray<keel::f32, 4> tireTempC{44.0f, 45.0f, 48.0f, 48.0f};
 
     // Visibility & Telltale Flags
     bool showShiftLights{true};
@@ -70,7 +70,7 @@ struct CarDashboardDemoState {
     bool ttAdasCruise{true};
     bool ttLaneKeep{true};
 
-    double simTimeSec{0.0};
+    keel::f64 simTimeSec{0.0};
     keel::u64 lastWallNs{0};
     guikit::CarClusterViewResponse lastResp{};
 };
@@ -78,7 +78,7 @@ struct CarDashboardDemoState {
 CarDashboardDemoState s_car{};
 
 // 8-speed DCT gear speed ratios (approximate km/h per 1000 RPM)
-constexpr keel::StaticArray<float, 8> kGearKmhPer1000Rpm = {
+constexpr keel::StaticArray<keel::f32, 8> kGearKmhPer1000Rpm = {
     8.2f, 13.5f, 19.2f, 25.4f, 32.0f, 39.5f, 47.5f, 56.0f
 };
 
@@ -86,36 +86,36 @@ void ComputeAutomaticGearAndRpm(CarDashboardDemoState& st, bool sportShift) noex
     if (st.gearSelectorIndex == 0 || st.gearSelectorIndex == 2) {
         // Park or Neutral
         st.currentGear = 1;
-        const float targetRpm = 820.0f + st.throttlePct * 58.0f;
+        const keel::f32 targetRpm = 820.0f + st.throttlePct * 58.0f;
         st.rpm += (targetRpm - st.rpm) * 0.18f;
         return;
     }
 
-    const float upshiftRpm = sportShift ? (st.redlineRpm - 180.0f) : (2600.0f + st.throttlePct * 42.0f);
-    const float downshiftRpm = sportShift ? 2800.0f : 1450.0f;
+    const keel::f32 upshiftRpm = sportShift ? (st.redlineRpm - 180.0f) : (2600.0f + st.throttlePct * 42.0f);
+    const keel::f32 downshiftRpm = sportShift ? 2800.0f : 1450.0f;
 
     if (st.gearSelectorIndex != 5) { // Not Manual mode -> automatic shift logic
         keel::i32 g = keel::clamp(st.currentGear, 1, 8);
-        float ratio = kGearKmhPer1000Rpm[static_cast<keel::usize>(g - 1)];
-        float calcRpm = keel::max(820.0f, (st.speedKmh / ratio) * 1000.0f);
+        keel::f32 ratio = kGearKmhPer1000Rpm[keel::as<keel::usize>(g - 1)];
+        keel::f32 calcRpm = keel::max(820.0f, (st.speedKmh / ratio) * 1000.0f);
 
         while (g < 8 && calcRpm > upshiftRpm) {
             ++g;
-            ratio = kGearKmhPer1000Rpm[static_cast<keel::usize>(g - 1)];
+            ratio = kGearKmhPer1000Rpm[keel::as<keel::usize>(g - 1)];
             calcRpm = keel::max(820.0f, (st.speedKmh / ratio) * 1000.0f);
         }
         while (g > 1 && calcRpm < downshiftRpm && st.speedKmh > 6.0f) {
             --g;
-            ratio = kGearKmhPer1000Rpm[static_cast<keel::usize>(g - 1)];
+            ratio = kGearKmhPer1000Rpm[keel::as<keel::usize>(g - 1)];
             calcRpm = keel::max(820.0f, (st.speedKmh / ratio) * 1000.0f);
         }
         st.currentGear = g;
     }
 
     const keel::i32 effGear = keel::clamp(st.currentGear, 1, 8);
-    const float ratio = kGearKmhPer1000Rpm[static_cast<keel::usize>(effGear - 1)];
-    const float wheelRpm = (st.speedKmh / ratio) * 1000.0f;
-    const float targetRpm = keel::clamp(keel::max(820.0f + st.throttlePct * 6.0f, wheelRpm), 800.0f, st.maxRpm);
+    const keel::f32 ratio = kGearKmhPer1000Rpm[keel::as<keel::usize>(effGear - 1)];
+    const keel::f32 wheelRpm = (st.speedKmh / ratio) * 1000.0f;
+    const keel::f32 targetRpm = keel::clamp(keel::max(820.0f + st.throttlePct * 6.0f, wheelRpm), 800.0f, st.maxRpm);
     st.rpm += (targetRpm - st.rpm) * 0.25f;
 }
 
@@ -126,10 +126,10 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
         st.initialized = true;
     }
 
-    double dt = static_cast<double>(nowNs - st.lastWallNs) * 1e-9;
+    keel::f64 dt = keel::as<keel::f64>(nowNs - st.lastWallNs) * 1e-9;
     st.lastWallNs = nowNs;
     dt = keel::clamp(dt, 0.001, 0.05);
-    const float fdt = static_cast<float>(dt);
+    const keel::f32 fdt = keel::as<keel::f32>(dt);
     st.simTimeSec += dt;
 
     if (st.controlModeIndex == 3) {
@@ -139,14 +139,14 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
         return;
     }
 
-    const float prevSpeedMps = st.speedKmh / 3.6f;
+    const keel::f32 prevSpeedMps = st.speedKmh / 3.6f;
 
     if (st.controlModeIndex == 0) {
         // Mode 0: Interactive Mouse Drive (Hover cluster: Up = Throttle, Down = Brake/Regen, Left/Right = Steer)
         if (st.lastResp.cursorInside) {
-            const float targetSteer = st.lastResp.cursorSteerDeg;
-            const float targetThr = st.lastResp.cursorThrottlePct;
-            const float targetBrk = st.lastResp.cursorBrakePct;
+            const keel::f32 targetSteer = st.lastResp.cursorSteerDeg;
+            const keel::f32 targetThr = st.lastResp.cursorThrottlePct;
+            const keel::f32 targetBrk = st.lastResp.cursorBrakePct;
 
             st.steeringAngleDeg += (targetSteer - st.steeringAngleDeg) * keel::clamp(fdt * 12.0f, 0.05f, 1.0f);
             st.throttlePct += (targetThr - st.throttlePct) * keel::clamp(fdt * 10.0f, 0.05f, 1.0f);
@@ -154,32 +154,32 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
         } else {
             // Smoothly relax to highway cruise when mouse leaves the cluster
             st.steeringAngleDeg += (0.0f - st.steeringAngleDeg) * keel::clamp(fdt * 5.0f, 0.02f, 1.0f);
-            const float cruiseErr = st.cruiseTargetKmh - st.speedKmh;
-            const float autoThr = keel::clamp(18.0f + cruiseErr * 1.2f, 0.0f, 45.0f);
+            const keel::f32 cruiseErr = st.cruiseTargetKmh - st.speedKmh;
+            const keel::f32 autoThr = keel::clamp(18.0f + cruiseErr * 1.2f, 0.0f, 45.0f);
             st.throttlePct += (autoThr - st.throttlePct) * keel::clamp(fdt * 4.0f, 0.02f, 1.0f);
             st.brakePct += (0.0f - st.brakePct) * keel::clamp(fdt * 6.0f, 0.02f, 1.0f);
         }
 
         // Integrate longitudinal vehicle dynamics
-        const float propAccelMps2 = (st.throttlePct * 0.01f) * 8.2f * (1.0f - 0.35f * (st.speedKmh / st.maxSpeedKmh));
-        const float brakeDecelMps2 = (st.brakePct * 0.01f) * 11.5f;
-        const float aeroDragMps2 = 0.18f + 0.00022f * st.speedKmh * st.speedKmh;
-        const float netAccelMps2 = propAccelMps2 - brakeDecelMps2 - aeroDragMps2;
+        const keel::f32 propAccelMps2 = (st.throttlePct * 0.01f) * 8.2f * (1.0f - 0.35f * (st.speedKmh / st.maxSpeedKmh));
+        const keel::f32 brakeDecelMps2 = (st.brakePct * 0.01f) * 11.5f;
+        const keel::f32 aeroDragMps2 = 0.18f + 0.00022f * st.speedKmh * st.speedKmh;
+        const keel::f32 netAccelMps2 = propAccelMps2 - brakeDecelMps2 - aeroDragMps2;
 
         st.speedKmh = keel::clamp(st.speedKmh + netAccelMps2 * 3.6f * fdt, 0.0f, st.maxSpeedKmh - 4.0f);
         ComputeAutomaticGearAndRpm(st, st.gearSelectorIndex == 4 || st.driveThemeIndex == 1 || st.driveThemeIndex == 3);
 
         // ADAS radar lead car distance modulation
-        st.adasLeadSpeedKmh = 105.0f + 12.0f * keel::sin(static_cast<float>(st.simTimeSec) * 0.45f);
-        const float relMps = (st.adasLeadSpeedKmh - st.speedKmh) / 3.6f;
+        st.adasLeadSpeedKmh = 105.0f + 12.0f * keel::sin(keel::as<keel::f32>(st.simTimeSec) * 0.45f);
+        const keel::f32 relMps = (st.adasLeadSpeedKmh - st.speedKmh) / 3.6f;
         st.adasLeadDistanceM = keel::clamp(st.adasLeadDistanceM + relMps * fdt, 12.0f, 95.0f);
         if (st.adasLeadDistanceM >= 94.0f || st.adasLeadDistanceM <= 13.0f) {
             st.adasLeadDistanceM = 45.0f;
         }
     } else if (st.controlModeIndex == 1) {
         // Mode 1: Highway ADAS Cruise (Smooth adaptive cruise & gentle lane weaves)
-        const float t = static_cast<float>(st.simTimeSec);
-        const float targetSpd = st.cruiseTargetKmh + 14.0f * keel::sin(t * 0.55f);
+        const keel::f32 t = keel::as<keel::f32>(st.simTimeSec);
+        const keel::f32 targetSpd = st.cruiseTargetKmh + 14.0f * keel::sin(t * 0.55f);
         st.speedKmh += (targetSpd - st.speedKmh) * keel::clamp(fdt * 2.5f, 0.02f, 1.0f);
         st.steeringAngleDeg = 9.5f * keel::sin(t * 0.85f);
         st.throttlePct = keel::clamp(22.0f + 18.0f * keel::cos(t * 0.55f), 5.0f, 65.0f);
@@ -189,9 +189,9 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
         ComputeAutomaticGearAndRpm(st, false);
     } else if (st.controlModeIndex == 2) {
         // Mode 2: Track Hot Lap (Full-throttle pulls to redline, apex braking & high cornering G)
-        const float t = static_cast<float>(st.simTimeSec);
-        const float lapPhase = keel::fmod(t, 14.0f);
-        float targetSpd = 140.0f;
+        const keel::f32 t = keel::as<keel::f32>(st.simTimeSec);
+        const keel::f32 lapPhase = keel::fmod(t, 14.0f);
+        keel::f32 targetSpd = 140.0f;
         if (lapPhase < 9.5f) {
             // Full-throttle straight pull
             targetSpd = 75.0f + (lapPhase / 9.5f) * 205.0f;
@@ -200,14 +200,14 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
             st.steeringAngleDeg = 6.0f * keel::sin(lapPhase * 1.4f);
         } else if (lapPhase < 11.8f) {
             // Heavy braking zone into chicane
-            const float brkPhase = (lapPhase - 9.5f) / 2.3f;
+            const keel::f32 brkPhase = (lapPhase - 9.5f) / 2.3f;
             targetSpd = 280.0f - brkPhase * 185.0f;
             st.throttlePct = 0.0f;
             st.brakePct = 88.0f;
             st.steeringAngleDeg = -28.0f * keel::sin(brkPhase * keel::kPiF);
         } else {
             // Corner exit acceleration
-            const float exitPhase = (lapPhase - 11.8f) / 2.2f;
+            const keel::f32 exitPhase = (lapPhase - 11.8f) / 2.2f;
             targetSpd = 95.0f + exitPhase * 55.0f;
             st.throttlePct = 78.0f;
             st.brakePct = 0.0f;
@@ -220,20 +220,20 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
     }
 
     // Derived Powertrain, G-Force, AWD Split & Trip Integration
-    const float curSpeedMps = st.speedKmh / 3.6f;
-    const float rawLonG = ((curSpeedMps - prevSpeedMps) / keel::max(0.005f, fdt)) / 9.81f;
+    const keel::f32 curSpeedMps = st.speedKmh / 3.6f;
+    const keel::f32 rawLonG = ((curSpeedMps - prevSpeedMps) / keel::max(0.005f, fdt)) / 9.81f;
     st.lonG += (keel::clamp(rawLonG, -1.45f, 1.35f) - st.lonG) * keel::clamp(fdt * 10.0f, 0.05f, 1.0f);
 
-    const float speedFactor = keel::clamp(st.speedKmh / 140.0f, 0.1f, 1.4f);
-    const float targetLatG = keel::clamp((st.steeringAngleDeg / 32.0f) * speedFactor * 1.05f, -1.45f, 1.45f);
+    const keel::f32 speedFactor = keel::clamp(st.speedKmh / 140.0f, 0.1f, 1.4f);
+    const keel::f32 targetLatG = keel::clamp((st.steeringAngleDeg / 32.0f) * speedFactor * 1.05f, -1.45f, 1.45f);
     st.latG += (targetLatG - st.latG) * keel::clamp(fdt * 10.0f, 0.05f, 1.0f);
     st.peakG = keel::max(st.peakG, keel::hypot(st.latG, st.lonG));
 
     // Boost pressure & EV power
-    const float targetBoost = -0.45f + (st.throttlePct * 0.01f) * 2.15f * keel::clamp(st.rpm / 5500.0f, 0.25f, 1.0f);
+    const keel::f32 targetBoost = -0.45f + (st.throttlePct * 0.01f) * 2.15f * keel::clamp(st.rpm / 5500.0f, 0.25f, 1.0f);
     st.boostBar += (targetBoost - st.boostBar) * keel::clamp(fdt * 8.0f, 0.05f, 1.0f);
 
-    const float targetEvKw = (st.brakePct > 2.0f)
+    const keel::f32 targetEvKw = (st.brakePct > 2.0f)
         ? (-st.brakePct * 1.45f)
         : (st.throttlePct * 4.35f - (1.0f - st.throttlePct * 0.01f) * 18.0f);
     st.evPowerKw += (targetEvKw - st.evPowerKw) * keel::clamp(fdt * 10.0f, 0.05f, 1.0f);
@@ -243,9 +243,9 @@ void StepCarSimulation(guikit::Context& ui, CarDashboardDemoState& st) {
     st.ttEscActive = (keel::hypot(st.latG, st.lonG) > 1.08f);
 
     // Distance integration
-    const double dKm = static_cast<double>(curSpeedMps * fdt) * 0.001;
+    const keel::f64 dKm = keel::as<keel::f64>(curSpeedMps * fdt) * 0.001;
     st.odometerKm += dKm;
-    st.tripDistanceKm += static_cast<float>(dKm);
+    st.tripDistanceKm += keel::as<keel::f32>(dKm);
 
     ui.RequestRepaint(2);
 }
@@ -287,10 +287,10 @@ void RenderCarDashboardInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         "P (Park)", "R (Reverse)", "N (Neutral)", "D (Drive)", "S (Sport)", "M (Manual)"
     };
 
-    keel::usize ctrlIdx = static_cast<keel::usize>(keel::clamp(s_car.controlModeIndex, 0, 3));
+    keel::usize ctrlIdx = keel::as<keel::usize>(keel::clamp(s_car.controlModeIndex, 0, 3));
     if (auto el = ui.Element({.label = "Control / Simulation Mode"})) {
         if (ui.Select(ctrlIdx, kControlModes).changed) {
-            s_car.controlModeIndex = static_cast<keel::i32>(ctrlIdx);
+            s_car.controlModeIndex = keel::as<keel::i32>(ctrlIdx);
             if (s_car.controlModeIndex == 2) {
                 s_car.driveThemeIndex = 1; // SportCrimson
                 s_car.gearSelectorIndex = 4; // Sport
@@ -298,47 +298,47 @@ void RenderCarDashboardInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         }
     }
 
-    keel::usize layIdx = static_cast<keel::usize>(keel::clamp(s_car.layoutModeIndex, 0, 2));
+    keel::usize layIdx = keel::as<keel::usize>(keel::clamp(s_car.layoutModeIndex, 0, 2));
     if (auto el = ui.Element({.label = "Cluster Architecture"})) {
         if (ui.Select(layIdx, kLayoutModes).changed) {
-            s_car.layoutModeIndex = static_cast<keel::i32>(layIdx);
+            s_car.layoutModeIndex = keel::as<keel::i32>(layIdx);
         }
     }
 
-    keel::usize ptIdx = static_cast<keel::usize>(keel::clamp(s_car.powertrainIndex, 0, 1));
+    keel::usize ptIdx = keel::as<keel::usize>(keel::clamp(s_car.powertrainIndex, 0, 1));
     if (auto el = ui.Element({.label = "Powertrain Mode"})) {
         if (ui.Segmented(ptIdx, kPowertrains).changed) {
-            s_car.powertrainIndex = static_cast<keel::i32>(ptIdx);
+            s_car.powertrainIndex = keel::as<keel::i32>(ptIdx);
             s_car.avgConsumption = (s_car.powertrainIndex == 1) ? 18.4f : 9.2f;
             s_car.coolantOrBattTempC = (s_car.powertrainIndex == 1) ? 31.0f : 90.0f;
         }
     }
 
-    keel::usize thmIdx = static_cast<keel::usize>(keel::clamp(s_car.driveThemeIndex, 0, 3));
+    keel::usize thmIdx = keel::as<keel::usize>(keel::clamp(s_car.driveThemeIndex, 0, 3));
     if (auto el = ui.Element({.label = "Drive Mode Theme"})) {
         if (ui.Select(thmIdx, kDriveThemes).changed) {
-            s_car.driveThemeIndex = static_cast<keel::i32>(thmIdx);
+            s_car.driveThemeIndex = keel::as<keel::i32>(thmIdx);
         }
     }
 
-    keel::usize mfdIdx = static_cast<keel::usize>(s_car.centerMfd);
+    keel::usize mfdIdx = keel::as<keel::usize>(s_car.centerMfd);
     if (auto el = ui.Element({.label = "Center MFD Screen"})) {
         if (ui.Select(mfdIdx, kMfdPages).changed) {
             s_car.centerMfd = static_cast<guikit::ClusterCenterMfd>(mfdIdx);
         }
     }
 
-    keel::usize unitIdx = static_cast<keel::usize>(keel::clamp(s_car.speedUnitIndex, 0, 1));
+    keel::usize unitIdx = keel::as<keel::usize>(keel::clamp(s_car.speedUnitIndex, 0, 1));
     if (auto el = ui.Element({.label = "Measurement Units"})) {
         if (ui.Segmented(unitIdx, kSpeedUnits).changed) {
-            s_car.speedUnitIndex = static_cast<keel::i32>(unitIdx);
+            s_car.speedUnitIndex = keel::as<keel::i32>(unitIdx);
         }
     }
 
-    keel::usize gearSelIdx = static_cast<keel::usize>(keel::clamp(s_car.gearSelectorIndex, 0, 5));
+    keel::usize gearSelIdx = keel::as<keel::usize>(keel::clamp(s_car.gearSelectorIndex, 0, 5));
     if (auto el = ui.Element({.label = "Transmission Selector"})) {
         if (ui.Select(gearSelIdx, kGearSelectors).changed) {
-            s_car.gearSelectorIndex = static_cast<keel::i32>(gearSelIdx);
+            s_car.gearSelectorIndex = keel::as<keel::i32>(gearSelIdx);
         }
     }
 
@@ -530,10 +530,10 @@ keel::String GenerateCarDashboardCode(const DemoContext& /*ctx*/) {
         "    .centerMfdPtr     = &centerMfd,\n"
         "    .height           = guikit::SizeMode::Stretch\n"
         "}});\n",
-        kLayoutEnums[static_cast<keel::usize>(keel::clamp(s_car.layoutModeIndex, 0, 2))],
-        kPtEnums[static_cast<keel::usize>(keel::clamp(s_car.powertrainIndex, 0, 1))],
-        kThemeEnums[static_cast<keel::usize>(keel::clamp(s_car.driveThemeIndex, 0, 3))],
-        kMfdEnums[static_cast<keel::usize>(keel::clamp(static_cast<keel::i32>(s_car.centerMfd), 0, 2))],
+        kLayoutEnums[keel::as<keel::usize>(keel::clamp(s_car.layoutModeIndex, 0, 2))],
+        kPtEnums[keel::as<keel::usize>(keel::clamp(s_car.powertrainIndex, 0, 1))],
+        kThemeEnums[keel::as<keel::usize>(keel::clamp(s_car.driveThemeIndex, 0, 3))],
+        kMfdEnums[keel::as<keel::usize>(keel::clamp(keel::as<keel::i32>(s_car.centerMfd), 0, 2))],
         s_car.speedKmh,
         s_car.rpm,
         s_car.currentGear,

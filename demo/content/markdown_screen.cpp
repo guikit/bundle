@@ -5,27 +5,27 @@ namespace guikit::demo {
 namespace {
 struct MarkdownDemoState {
     // Zoom & Interactive
-    float zoom = 1.0f;
+    keel::f32 zoom = 1.0f;
     bool enableSelection = true;
     bool interactiveTasks = true;
     keel::SmallString<128> searchQuery{};
 
     // Typography
-    float bodyFontSize = 13.5f;
-    float headingScale = 1.0f;
-    float inlineCodeFontSize = 12.5f;
-    float codeFontSize = 12.5f;
-    float lineHeightScale = 1.15f;
+    keel::f32 bodyFontSize = 13.5f;
+    keel::f32 headingScale = 1.0f;
+    keel::f32 inlineCodeFontSize = 12.5f;
+    keel::f32 codeFontSize = 12.5f;
+    keel::f32 lineHeightScale = 1.15f;
 
     // Page Layout & Spacing
-    float documentPadding = 8.0f;
+    keel::f32 documentPadding = 8.0f;
     bool constrainContentWidth = false;
-    float maxContentWidth = 680.0f;
-    float blockGap = 12.0f;
-    float paragraphIndent = 0.0f;
-    float listIndent = 18.0f;
-    float blockPadding = 12.0f;
-    float blockRadius = 6.0f;
+    keel::f32 maxContentWidth = 680.0f;
+    keel::f32 blockGap = 12.0f;
+    keel::f32 paragraphIndent = 0.0f;
+    keel::f32 listIndent = 18.0f;
+    keel::f32 blockPadding = 12.0f;
+    keel::f32 blockRadius = 6.0f;
     bool headingDividers = true;
 
     // Code Block Styling (shared with CodeEditor)
@@ -48,8 +48,8 @@ struct MarkdownDemoState {
 
     // Embedded Images
     bool imageCheckerboard = true;
-    float imageMaxHeight = 200.0f;
-    float imageRadius = 8.0f;
+    keel::f32 imageMaxHeight = 200.0f;
+    keel::f32 imageRadius = 8.0f;
 
     // Status feedback
     keel::String lastClickedLink{};
@@ -261,7 +261,7 @@ void RenderMarkdownStage(guikit::Context& ui, DemoContext& ctx) {
             .codeFontSize = s_state.codeFontSize,
             .lineHeightScale = s_state.lineHeightScale,
             .documentPadding = s_state.documentPadding,
-            .maxContentWidth = s_state.constrainContentWidth ? keel::Optional<float>(s_state.maxContentWidth) : keel::kNullOpt,
+            .maxContentWidth = s_state.constrainContentWidth ? keel::Optional<keel::f32>(s_state.maxContentWidth) : keel::kNullOpt,
             .blockGap = s_state.blockGap,
             .paragraphIndent = s_state.paragraphIndent,
             .listIndent = s_state.listIndent,

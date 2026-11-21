@@ -14,9 +14,9 @@ struct SchematicPalette {
     Color inkBold{12, 16, 22, 255};         ///< Heavy symbol features (transistor base bar, cap plate, pins)
     Color inkMuted{71, 85, 105, 230};       ///< Dashed PCB boundaries, table dividers, secondary notes
     Color accent{180, 83, 9, 255};          ///< Voltage test points & reference highlights
-    float wireWidth{1.15f};
-    float symbolWidth{1.35f};
-    float heavyWidth{2.6f};
+    keel::f32 wireWidth{1.15f};
+    keel::f32 symbolWidth{1.35f};
+    keel::f32 heavyWidth{2.6f};
 
     /// Classic British drafting vellum (Light / Vintage Paper) palette.
     static SchematicPalette VintagePaper() noexcept {
@@ -66,12 +66,12 @@ public:
         m_wires.push_back({a, b});
     }
 
-    void WireH(float x1, float x2, float y) {
+    void WireH(keel::f32 x1, keel::f32 x2, keel::f32 y) {
         if (x1 > x2) keel::swap(x1, x2);
         m_wires.push_back({{x1, y}, {x2, y}});
     }
 
-    void WireV(float x, float y1, float y2) {
+    void WireV(keel::f32 x, keel::f32 y1, keel::f32 y2) {
         if (y1 > y2) keel::swap(y1, y2);
         m_wires.push_back({{x, y1}, {x, y2}});
     }
@@ -88,16 +88,16 @@ public:
         keel::Array<WireInterval> intervals;
         keel::Array<WireInterval> nextIntervals;
         for (const auto& [a, b] : m_wires) {
-            const float dx = b.x - a.x;
-            const float dy = b.y - a.y;
-            const float len = keel::hypot(dx, dy);
+            const keel::f32 dx = b.x - a.x;
+            const keel::f32 dy = b.y - a.y;
+            const keel::f32 len = keel::hypot(dx, dy);
             if (len < 0.25f) continue;
 
             intervals.clear();
             intervals.push_back({0.0f, 1.0f});
 
             for (const Rect& r : m_cutouts) {
-                float tx0 = 0.0f, tx1 = 1.0f;
+                keel::f32 tx0 = 0.0f, tx1 = 1.0f;
                 if (keel::abs(dx) < 1e-4f) {
                     if (a.x <= r.x + 0.05f || a.x >= r.Right() - 0.05f) continue;
                 } else {
@@ -106,7 +106,7 @@ public:
                     if (tx0 > tx1) keel::swap(tx0, tx1);
                 }
 
-                float ty0 = 0.0f, ty1 = 1.0f;
+                keel::f32 ty0 = 0.0f, ty1 = 1.0f;
                 if (keel::abs(dy) < 1e-4f) {
                     if (a.y <= r.y + 0.05f || a.y >= r.Bottom() - 0.05f) continue;
                 } else {
@@ -115,8 +115,8 @@ public:
                     if (ty0 > ty1) keel::swap(ty0, ty1);
                 }
 
-                const float tEnter = keel::max(0.0f, keel::max(tx0, ty0));
-                const float tExit  = keel::min(1.0f, keel::min(tx1, ty1));
+                const keel::f32 tEnter = keel::max(0.0f, keel::max(tx0, ty0));
+                const keel::f32 tExit  = keel::min(1.0f, keel::min(tx1, ty1));
                 if (tEnter >= tExit - 1e-4f) continue;
 
                 nextIntervals.clear();
@@ -151,23 +151,23 @@ public:
     }
 
     /// Draws a semicircular wire bridge crossover along a vertical wire crossing a horizontal wire at `yCross`.
-    void WireHopV(float x, float yCross, float r = 4.5f) {
+    void WireHopV(keel::f32 x, keel::f32 yCross, keel::f32 r = 4.5f) {
         AddCutout(Rect(x - 2.0f, yCross - r, 4.0f, r * 2.0f));
         WireH(x - r, x + r, yCross);
         m_scene.DrawArc({x, yCross}, r, -90.0f, 180.0f, m_pal.ink, m_pal.wireWidth, 10);
     }
 
-    void DashedLine(Vec2 a, Vec2 b, float dashLen = 8.0f, float gapLen = 5.0f, float width = 1.25f) {
-        const float dx = b.x - a.x;
-        const float dy = b.y - a.y;
-        const float len = keel::hypot(dx, dy);
+    void DashedLine(Vec2 a, Vec2 b, keel::f32 dashLen = 8.0f, keel::f32 gapLen = 5.0f, keel::f32 width = 1.25f) {
+        const keel::f32 dx = b.x - a.x;
+        const keel::f32 dy = b.y - a.y;
+        const keel::f32 len = keel::hypot(dx, dy);
         if (len < 0.5f) return;
-        const float ux = dx / len;
-        const float uy = dy / len;
-        const float step = keel::max(2.0f, dashLen + gapLen);
+        const keel::f32 ux = dx / len;
+        const keel::f32 uy = dy / len;
+        const keel::f32 step = keel::max(2.0f, dashLen + gapLen);
 
-        for (float t = 0.0f; t < len; t += step) {
-            const float tEnd = keel::min(len, t + dashLen);
+        for (keel::f32 t = 0.0f; t < len; t += step) {
+            const keel::f32 tEnd = keel::min(len, t + dashLen);
             m_scene.DrawLine(
                 {a.x + ux * t, a.y + uy * t},
                 {a.x + ux * tEnd, a.y + uy * tEnd},
@@ -177,7 +177,7 @@ public:
         }
     }
 
-    void DashedRect(Rect r, float dashLen = 9.0f, float gapLen = 5.0f, float width = 1.35f) {
+    void DashedRect(Rect r, keel::f32 dashLen = 9.0f, keel::f32 gapLen = 5.0f, keel::f32 width = 1.35f) {
         DashedLine({r.x, r.y}, {r.Right(), r.y}, dashLen, gapLen, width);
         DashedLine({r.Right(), r.y}, {r.Right(), r.Bottom()}, dashLen, gapLen, width);
         DashedLine({r.Right(), r.Bottom()}, {r.x, r.Bottom()}, dashLen, gapLen, width);
@@ -185,7 +185,7 @@ public:
     }
 
     /// Draws a solid solder junction dot at a wire intersection.
-    void Junction(Vec2 pt, float radius = 2.4f) {
+    void Junction(Vec2 pt, keel::f32 radius = 2.4f) {
         m_scene.DrawCircle(pt, radius, m_pal.inkBold);
     }
 
@@ -196,7 +196,7 @@ public:
             .title = "PCB Edge Terminal",
             .category = "Board Pin"
         });
-        constexpr float r = 6.2f;
+        constexpr keel::f32 r = 6.2f;
         AddCutout(Rect(pt.x - r, pt.y - r, r * 2.0f, r * 2.0f));
         m_scene.DrawCircle(pt, r, Color::Transparent(), m_pal.inkBold, m_pal.symbolWidth);
         m_scene.DrawTextBox(
@@ -211,14 +211,14 @@ public:
     }
 
     /// Draws a small hollow solder pad circle (used on PCB layout and switches).
-    void SolderPad(Vec2 pt, float r = 3.0f) {
+    void SolderPad(Vec2 pt, keel::f32 r = 3.0f) {
         m_scene.DrawCircle(pt, r, Color::Transparent(), m_pal.inkBold, 1.2f);
     }
 
     /// Draws a British Standard raked chassis earth symbol.
     void ChassisEarth(Vec2 pt) {
         WireV(pt.x, pt.y, pt.y + 7.0f);
-        const float by = pt.y + 7.0f;
+        const keel::f32 by = pt.y + 7.0f;
         m_scene.DrawLine({pt.x - 7.5f, by}, {pt.x + 7.5f, by}, m_pal.inkBold, m_pal.symbolWidth);
         m_scene.DrawLine({pt.x - 5.5f, by}, {pt.x - 9.0f, by + 5.5f}, m_pal.ink, 1.15f);
         m_scene.DrawLine({pt.x,        by}, {pt.x - 3.5f, by + 5.5f}, m_pal.ink, 1.15f);
@@ -264,9 +264,9 @@ public:
 
     /// Helper to draw an aligned two-line or single-line component label on the left (`side < 0`) or right (`side > 0`).
     void SideLabel(Vec2 anchor, keel::i32 side, keel::StringRef line1, keel::StringRef line2 = "") {
-        const float boxW = 48.0f;
-        const float alignX = (side >= 0) ? 0.0f : 1.0f;
-        const float rx = (side >= 0) ? anchor.x : (anchor.x - boxW);
+        const keel::f32 boxW = 48.0f;
+        const keel::f32 alignX = (side >= 0) ? 0.0f : 1.0f;
+        const keel::f32 rx = (side >= 0) ? anchor.x : (anchor.x - boxW);
         if (line2.empty()) {
             m_scene.DrawTextBox(line1, Rect(rx, anchor.y - 5.0f, boxW, 10.0f), 6.0f, m_pal.inkBold, alignX, 0.5f, FontStyle::Bold);
         } else {
@@ -295,8 +295,8 @@ public:
             .title = value,
             .category = dashed ? "Load Impedance" : "Resistor"
         });
-        const float w = vertical ? 11.5f : 32.0f;
-        const float h = vertical ? 32.0f : 11.5f;
+        const keel::f32 w = vertical ? 11.5f : 32.0f;
+        const keel::f32 h = vertical ? 32.0f : 11.5f;
         const Rect box(center.x - w * 0.5f, center.y - h * 0.5f, w, h);
         AddCutout(box);
 
@@ -322,10 +322,10 @@ public:
 
         if (!refDes.empty()) {
             if (vertical) {
-                const float ax = (labelSide >= 0) ? (box.Right() + 3.0f) : (box.x - 3.0f);
+                const keel::f32 ax = (labelSide >= 0) ? (box.Right() + 3.0f) : (box.x - 3.0f);
                 SideLabel({ax, center.y}, labelSide, refDes);
             } else {
-                const float ly = (labelSide >= 0) ? (box.Bottom() + 2.0f) : (box.y - 10.5f);
+                const keel::f32 ly = (labelSide >= 0) ? (box.Bottom() + 2.0f) : (box.y - 10.5f);
                 m_scene.DrawTextBox(
                     refDes,
                     Rect(center.x - 24.0f, ly, 48.0f, 9.0f),
@@ -353,8 +353,8 @@ public:
             .title = value,
             .category = "Preset Trimmer"
         });
-        const float w = vertical ? 11.0f : 32.0f;
-        const float h = vertical ? 32.0f : 11.0f;
+        const keel::f32 w = vertical ? 11.0f : 32.0f;
+        const keel::f32 h = vertical ? 32.0f : 11.0f;
         const Rect box(center.x - w * 0.5f, center.y - h * 0.5f, w, h);
         AddCutout(box);
         m_scene.DrawRect(box, Color::Transparent(), 0.0f, m_pal.inkBold, m_pal.symbolWidth);
@@ -372,7 +372,7 @@ public:
                     m_scene.DrawTextBox(value, Rect(center.x - 24.0f, box.Bottom() + 22.5f, 48.0f, 8.5f), 5.6f, m_pal.ink, 0.5f, 0.5f, FontStyle::Bold);
                 }
             } else {
-                const float ax = (labelSide >= 0) ? (center.x + 11.0f) : (center.x - 11.0f);
+                const keel::f32 ax = (labelSide >= 0) ? (center.x + 11.0f) : (center.x - 11.0f);
                 SideLabel({ax, center.y}, labelSide, refDes, value);
             }
         }
@@ -385,14 +385,14 @@ public:
             .title = "Mains Fuse",
             .category = "Fuse"
         });
-        const float w = vertical ? 10.5f : 28.0f;
-        const float h = vertical ? 28.0f : 10.5f;
+        const keel::f32 w = vertical ? 10.5f : 28.0f;
+        const keel::f32 h = vertical ? 28.0f : 10.5f;
         const Rect box(center.x - w * 0.5f, center.y - h * 0.5f, w, h);
         m_scene.DrawRect(box, Color::Transparent(), 0.0f, m_pal.inkBold, m_pal.symbolWidth);
         if (vertical) {
             m_scene.DrawLine({center.x, box.y}, {center.x, box.Bottom()}, m_pal.ink, m_pal.wireWidth);
             if (!refDes.empty()) {
-                const float ax = (labelSide >= 0) ? (box.Right() + 3.0f) : (box.x - 3.0f);
+                const keel::f32 ax = (labelSide >= 0) ? (box.Right() + 3.0f) : (box.x - 3.0f);
                 SideLabel({ax, center.y}, labelSide, refDes);
             }
         } else {
@@ -418,15 +418,15 @@ public:
             .category = electrolytic ? "Electrolytic Cap" : "Capacitor"
         });
         if (vertical) {
-            const float cutTop = electrolytic ? (center.y - 4.2f) : (center.y - 3.4f);
-            const float cutBot = electrolytic ? (center.y + 4.0f) : (center.y + 3.4f);
+            const keel::f32 cutTop = electrolytic ? (center.y - 4.2f) : (center.y - 3.4f);
+            const keel::f32 cutBot = electrolytic ? (center.y + 4.0f) : (center.y + 3.4f);
             AddCutout(Rect(center.x - 7.5f, cutTop, 15.0f, cutBot - cutTop));
             if (!electrolytic) {
                 m_scene.DrawRect(Rect(center.x - 7.5f, center.y - 3.4f, 15.0f, 2.2f), m_pal.inkBold);
                 m_scene.DrawRect(Rect(center.x - 7.5f, center.y + 1.2f, 15.0f, 2.2f), m_pal.inkBold);
             } else {
-                const float topY = center.y - 4.2f;
-                const float botY = center.y + 1.2f;
+                const keel::f32 topY = center.y - 4.2f;
+                const keel::f32 botY = center.y + 1.2f;
                 if (posSide <= 0) {
                     m_scene.DrawRect(Rect(center.x - 7.5f, topY, 15.0f, 3.0f), Color::Transparent(), 0.0f, m_pal.inkBold, 1.2f);
                     m_scene.DrawRect(Rect(center.x - 7.5f, botY, 15.0f, 2.8f), m_pal.inkBold);
@@ -438,19 +438,19 @@ public:
             if (labelSide == 2) {
                 SideLabel({center.x - 4.0f, center.y + 34.0f}, -1, refDes, value);
             } else {
-                const float ax = (labelSide >= 0) ? (center.x + 9.5f) : (center.x - 9.5f);
+                const keel::f32 ax = (labelSide >= 0) ? (center.x + 9.5f) : (center.x - 9.5f);
                 SideLabel({ax, center.y}, labelSide, refDes, value);
             }
         } else {
-            const float cutLeft = electrolytic ? (center.x - 4.2f) : (center.x - 3.4f);
-            const float cutRight = electrolytic ? (center.x + 4.0f) : (center.x + 3.4f);
+            const keel::f32 cutLeft = electrolytic ? (center.x - 4.2f) : (center.x - 3.4f);
+            const keel::f32 cutRight = electrolytic ? (center.x + 4.0f) : (center.x + 3.4f);
             AddCutout(Rect(cutLeft, center.y - 7.5f, cutRight - cutLeft, 15.0f));
             if (!electrolytic) {
                 m_scene.DrawRect(Rect(center.x - 3.4f, center.y - 7.5f, 2.2f, 15.0f), m_pal.inkBold);
                 m_scene.DrawRect(Rect(center.x + 1.2f, center.y - 7.5f, 2.2f, 15.0f), m_pal.inkBold);
             } else {
-                const float leftX = center.x - 4.2f;
-                const float rightX = center.x + 1.2f;
+                const keel::f32 leftX = center.x - 4.2f;
+                const keel::f32 rightX = center.x + 1.2f;
                 if (posSide <= 0) {
                     m_scene.DrawRect(Rect(leftX, center.y - 7.5f, 3.0f, 15.0f), Color::Transparent(), 0.0f, m_pal.inkBold, 1.2f);
                     m_scene.DrawRect(Rect(rightX, center.y - 7.5f, 2.8f, 15.0f), m_pal.inkBold);
@@ -463,7 +463,7 @@ public:
                 m_scene.DrawTextBox(refDes, Rect(center.x - 24.0f, center.y - 17.5f, 48.0f, 8.5f), 6.0f, m_pal.inkBold, 0.5f, 0.5f, FontStyle::Bold);
                 m_scene.DrawTextBox(value,  Rect(center.x - 24.0f, center.y + 9.0f,  48.0f, 8.5f), 5.6f, m_pal.ink,     0.5f, 0.5f, FontStyle::Bold);
             } else {
-                const float ly = (labelSide >= 0) ? (center.y + 9.0f) : (center.y - 18.0f);
+                const keel::f32 ly = (labelSide >= 0) ? (center.y + 9.0f) : (center.y - 18.0f);
                 if (!refDes.empty()) m_scene.DrawTextBox(refDes, Rect(center.x - 24.0f, ly, 48.0f, 8.5f), 6.0f, m_pal.inkBold, 0.5f, 0.5f, FontStyle::Bold);
                 if (!value.empty())  m_scene.DrawTextBox(value,  Rect(center.x - 24.0f, ly + 8.0f, 48.0f, 8.5f), 5.6f, m_pal.ink, 0.5f, 0.5f, FontStyle::Bold);
             }
@@ -471,17 +471,17 @@ public:
     }
 
     /// Draws a 4-loop horizontal inductor coil (`L100`).
-    void InductorH(Vec2 center, keel::StringRef refDes, float totalWidth = 38.0f) {
+    void InductorH(Vec2 center, keel::StringRef refDes, keel::f32 totalWidth = 38.0f) {
         auto item = m_scene.Item({
             .id = refDes,
             .title = "Output Choke",
             .category = "Inductor"
         });
         const keel::i32 loops = 4;
-        const float r = totalWidth / (static_cast<float>(loops) * 2.0f);
+        const keel::f32 r = totalWidth / (keel::as<keel::f32>(loops) * 2.0f);
         AddCutout(Rect(center.x - totalWidth * 0.5f, center.y - 2.0f, totalWidth, 4.0f));
         for (keel::i32 i = 0; i < loops; ++i) {
-            const float cx = (center.x - totalWidth * 0.5f) + r * (2.0f * static_cast<float>(i) + 1.0f);
+            const keel::f32 cx = (center.x - totalWidth * 0.5f) + r * (2.0f * keel::as<keel::f32>(i) + 1.0f);
             m_scene.DrawArc({cx, center.y}, r, 180.0f, 180.0f, m_pal.inkBold, m_pal.symbolWidth, 10);
         }
         if (!refDes.empty()) {
@@ -496,7 +496,7 @@ public:
     /// Draws a semiconductor diode or Zener diode along any orientation (`0` = Right, `90` = Down, `180` = Left, `270` = Up).
     void Diode(
         Vec2 center,
-        float dirDeg,
+        keel::f32 dirDeg,
         keel::StringRef refDes,
         keel::StringRef partNum = "",
         bool isZener = false,
@@ -510,12 +510,12 @@ public:
                 .category = isZener ? "Zener Reference" : "Diode"
             }));
         }
-        const float rad = keel::deg_to_rad(dirDeg);
+        const keel::f32 rad = keel::deg_to_rad(dirDeg);
         const Vec2 dir{keel::cos(rad), keel::sin(rad)};
         const Vec2 nrm{-dir.y, dir.x};
 
-        const float halfL = 5.2f;
-        const float halfW = 5.0f;
+        const keel::f32 halfL = 5.2f;
+        const keel::f32 halfW = 5.0f;
 
         const Vec2 tip  = {center.x + dir.x * halfL, center.y + dir.y * halfL};
         const Vec2 base = {center.x - dir.x * halfL, center.y - dir.y * halfL};
@@ -536,7 +536,7 @@ public:
 
         if (!refDes.empty()) {
             if (keel::abs(dir.x) < 0.25f) {
-                const float ax = (labelSide >= 0) ? (center.x + 8.0f) : (center.x - 8.0f);
+                const keel::f32 ax = (labelSide >= 0) ? (center.x + 8.0f) : (center.x - 8.0f);
                 SideLabel({ax, center.y}, labelSide, refDes, partNum);
             } else if (keel::abs(dir.y) < 0.25f) {
                 if (labelSide == 0) {
@@ -544,14 +544,14 @@ public:
                     m_scene.DrawTextBox(refDes,  Rect(center.x - 28.0f, center.y - 15.0f, 56.0f, 8.0f), 5.8f, m_pal.inkBold, 0.5f, 0.5f, FontStyle::Bold);
                     m_scene.DrawTextBox(partNum, Rect(center.x - 28.0f, center.y + 7.0f,  56.0f, 8.0f), 5.5f, m_pal.ink,     0.5f, 0.5f, FontStyle::Bold);
                 } else {
-                    const float ly = (labelSide >= 0) ? (center.y + 7.0f) : (center.y - 16.5f);
+                    const keel::f32 ly = (labelSide >= 0) ? (center.y + 7.0f) : (center.y - 16.5f);
                     m_scene.DrawTextBox(refDes, Rect(center.x - 28.0f, ly, 56.0f, 8.0f), 5.8f, m_pal.inkBold, 0.5f, 0.5f, FontStyle::Bold);
                     if (!partNum.empty()) {
                         m_scene.DrawTextBox(partNum, Rect(center.x - 28.0f, ly + 7.5f, 56.0f, 8.0f), 5.5f, m_pal.ink, 0.5f, 0.5f, FontStyle::Bold);
                     }
                 }
             } else {
-                const float ax = (labelSide >= 0) ? (center.x + 11.0f) : (center.x - 11.0f);
+                const keel::f32 ax = (labelSide >= 0) ? (center.x + 11.0f) : (center.x - 11.0f);
                 SideLabel({ax, center.y - 4.0f}, labelSide, refDes, partNum);
             }
         }
@@ -576,11 +576,11 @@ public:
             .title = partNum,
             .category = isPNP ? "PNP Transistor" : "NPN Transistor"
         });
-        constexpr float r = 15.0f;
+        constexpr keel::f32 r = 15.0f;
         m_scene.DrawCircle(center, r, Color::Transparent(), m_pal.inkBold, m_pal.symbolWidth * 1.15f);
 
-        const float sgn = baseLeft ? -1.0f : 1.0f;
-        const float barX = center.x + sgn * 4.5f;
+        const keel::f32 sgn = baseLeft ? -1.0f : 1.0f;
+        const keel::f32 barX = center.x + sgn * 4.5f;
 
         // Base lead from circle boundary to internal base bar
         m_scene.DrawLine({center.x + sgn * r, center.y}, {barX, center.y}, m_pal.inkBold, m_pal.symbolWidth);
@@ -603,15 +603,15 @@ public:
         // Emitter arrow on either the top or bottom diagonal leg
         const Vec2 legStart = emitterAtTop ? baseTop : baseBot;
         const Vec2 legEnd   = emitterAtTop ? termTop : termBot;
-        const float dx = legEnd.x - legStart.x;
-        const float dy = legEnd.y - legStart.y;
-        const float len = keel::hypot(dx, dy);
+        const keel::f32 dx = legEnd.x - legStart.x;
+        const keel::f32 dy = legEnd.y - legStart.y;
+        const keel::f32 len = keel::hypot(dx, dy);
         if (len > 0.1f) {
-            const float dirSign = isPNP ? -1.0f : 1.0f;
-            const float ux = (dx / len) * dirSign;
-            const float uy = (dy / len) * dirSign;
-            const float nx = -uy;
-            const float ny = ux;
+            const keel::f32 dirSign = isPNP ? -1.0f : 1.0f;
+            const keel::f32 ux = (dx / len) * dirSign;
+            const keel::f32 uy = (dy / len) * dirSign;
+            const keel::f32 nx = -uy;
+            const keel::f32 ny = ux;
 
             const Vec2 mid{
                 (legStart.x + legEnd.x) * 0.5f + ux * 2.2f,
@@ -628,13 +628,13 @@ public:
             return;
         }
         const keel::i32 side = (labelSide != 0) ? labelSide : (baseLeft ? 1 : -1);
-        const float ax = (side > 0) ? (center.x + r + 3.5f) : (center.x - r - 3.5f);
+        const keel::f32 ax = (side > 0) ? (center.x + r + 3.5f) : (center.x - r - 3.5f);
         const bool onBaseSide = (baseLeft && side < 0) || (!baseLeft && side > 0);
         if (onBaseSide) {
             // Split refDes above the horizontal base wire and partNum below the base wire so the wire never crosses text!
-            const float boxW = 48.0f;
-            const float alignX = (side >= 0) ? 0.0f : 1.0f;
-            const float rx = (side >= 0) ? ax : (ax - boxW);
+            const keel::f32 boxW = 48.0f;
+            const keel::f32 alignX = (side >= 0) ? 0.0f : 1.0f;
+            const keel::f32 rx = (side >= 0) ? ax : (ax - boxW);
             if (!refDes.empty()) {
                 m_scene.DrawTextBox(refDes, Rect(rx, center.y - 13.0f, boxW, 8.5f), 6.0f, m_pal.inkBold, alignX, 0.5f, FontStyle::Bold);
             }
@@ -648,7 +648,7 @@ public:
 
     /// Draws the diamond full-wave bridge rectifier (`MR1`–`MR4`, `1S421 / PM7A2L`).
     /// Corners: Top `(cx, cy-r)`, Right `(cx+r, cy)`, Bottom `(cx, cy+r)`, Left `(cx-r, cy)`.
-    void DiodeBridge(Vec2 center, float r = 44.0f) {
+    void DiodeBridge(Vec2 center, keel::f32 r = 44.0f) {
         auto item = m_scene.Item({
             .id = "MR1..MR4",
             .title = "1S421 / PM7A2L",
@@ -706,9 +706,9 @@ public:
     // =========================================================================
 
     /// Draws the 4-pin DIN input socket `SK1` and its off-sheet dual routing at the far left.
-    void DinSocketSK1(Vec2 center, float yIn, float yChs, float xDriverLeft) {
+    void DinSocketSK1(Vec2 center, keel::f32 yIn, keel::f32 yChs, keel::f32 xDriverLeft) {
         const Rect shield(center.x - 20.0f, center.y - 26.0f, 40.0f, 56.0f);
-        constexpr float r = 16.5f;
+        constexpr keel::f32 r = 16.5f;
 
         // 4 internal pins: 1 (top-left), 3 (top-right), 2 (bottom-left), 4 (bottom-right)
         const Vec2 p1{center.x - 5.5f, center.y - 6.0f};
@@ -721,8 +721,8 @@ public:
         WireH(p1.x, xDriverLeft, yIn);
 
         // Pin 3 -> up above shield -> left around SK1 -> down to Righthand Amplifier arrow 1
-        const float yTopLoop = yIn + 14.0f;
-        const float xLeftOuter = 24.0f;
+        const keel::f32 yTopLoop = yIn + 14.0f;
+        const keel::f32 xLeftOuter = 24.0f;
         WireV(p3.x, yTopLoop, p3.y - 2.2f);
         WireH(xLeftOuter, p3.x, yTopLoop);
         WireV(xLeftOuter, yTopLoop, yChs);
@@ -770,15 +770,15 @@ public:
     }
 
     /// Draws the Mains Transformer `T1`, voltage tap selector, neon lamp `V1`, fuse `FS1`, and mains plug `PL1`.
-    void MainsTransformerSection(Vec2 topLeft, float ySecTop, float ySecBot) {
-        const float tx = topLeft.x;
-        const float ty = topLeft.y;
-        const float coreTop = ty + 4.0f;
-        const float coreBot = ty + 292.0f;
-        const float priX = tx + 12.0f;
-        const float priR = 6.2f;
+    void MainsTransformerSection(Vec2 topLeft, keel::f32 ySecTop, keel::f32 ySecBot) {
+        const keel::f32 tx = topLeft.x;
+        const keel::f32 ty = topLeft.y;
+        const keel::f32 coreTop = ty + 4.0f;
+        const keel::f32 coreBot = ty + 292.0f;
+        const keel::f32 priX = tx + 12.0f;
+        const keel::f32 priR = 6.2f;
         const keel::i32 secLoops = 8;
-        const float secR = (ySecBot - ySecTop) / (static_cast<float>(secLoops) * 2.0f);
+        const keel::f32 secR = (ySecBot - ySecTop) / (keel::as<keel::f32>(secLoops) * 2.0f);
 
         {
             auto t1Item = m_scene.Item({
@@ -791,7 +791,7 @@ public:
             // Secondary winding (left of core, loops bulging LEFT: 90 deg sweep 180 deg)
             // Includes 8 active loops (ySecTop..ySecBot) + 3 lower loops with open tap tail
             for (keel::i32 i = 0; i < secLoops + 3; ++i) {
-                const float cy = ySecTop + secR * (2.0f * static_cast<float>(i) + 1.0f);
+                const keel::f32 cy = ySecTop + secR * (2.0f * keel::as<keel::f32>(i) + 1.0f);
                 m_scene.DrawArc({tx, cy}, secR, 90.0f, 180.0f, m_pal.inkBold, m_pal.symbolWidth, 9);
             }
             m_scene.DrawLine({tx - 12.0f, ySecBot + secR * 6.0f}, {tx, ySecBot + secR * 6.0f}, m_pal.ink, m_pal.wireWidth);
@@ -822,7 +822,7 @@ public:
             });
             m_scene.DrawCircle(selCenter, 20.0f, Color::Transparent(), m_pal.inkBold, m_pal.symbolWidth);
             for (keel::i32 p = 0; p < 6; ++p) {
-                const float ang = keel::deg_to_rad(static_cast<float>(p) * 60.0f - 90.0f);
+                const keel::f32 ang = keel::deg_to_rad(keel::as<keel::f32>(p) * 60.0f - 90.0f);
                 pads[p] = {selCenter.x + keel::cos(ang) * 13.0f, selCenter.y + keel::sin(ang) * 13.0f};
                 SolderPad(pads[p], 2.3f);
             }
@@ -832,15 +832,15 @@ public:
         }
 
         // Primary tap connections matching M12160
-        const float yPri1Top = ty + 10.0f;
-        const float yPri1Tap = ty + 72.0f;
-        const float yPri1Bot = ty + 121.6f;
-        const float yPri2Top = ty + 148.0f;
-        const float yPri2Tap = ty + 185.0f;
-        const float yPri2Bot = ty + 284.4f;
+        const keel::f32 yPri1Top = ty + 10.0f;
+        const keel::f32 yPri1Tap = ty + 72.0f;
+        const keel::f32 yPri1Bot = ty + 121.6f;
+        const keel::f32 yPri2Top = ty + 148.0f;
+        const keel::f32 yPri2Tap = ty + 185.0f;
+        const keel::f32 yPri2Bot = ty + 284.4f;
 
         // Top of upper primary -> goes right to x=tx+114 -> down to Fuse FS1
-        const float xRightMains = tx + 114.0f;
+        const keel::f32 xRightMains = tx + 114.0f;
         WireH(priX, xRightMains, yPri1Top);
         WireV(xRightMains, yPri1Top, ty + 258.0f);
 
@@ -852,7 +852,7 @@ public:
         WireH(priX, pads[5].x - 2.3f, yPri1Bot);
 
         // Top of lower primary -> selector lower-left pad + neon indicator column
-        const float neonX = tx + 42.0f;
+        const keel::f32 neonX = tx + 42.0f;
         WireH(priX, pads[4].x, yPri2Top);
         WireV(pads[4].x, pads[4].y + 2.3f, yPri2Top);
         Junction({neonX, yPri2Top});
@@ -868,7 +868,7 @@ public:
         Junction({xRightMains, ty + 162.0f});
 
         // Selector bottom pad -> goes straight down as Left Mains line to PL1
-        const float xLeftMains = selCenter.x;
+        const keel::f32 xLeftMains = selCenter.x;
         WireV(xLeftMains, pads[3].y + 2.3f, ty + 356.0f);
 
         // Bottom of lower primary -> goes right to xLeftMains
@@ -895,7 +895,7 @@ public:
         }
 
         // Fuse FS1 on Right Mains line (steps inward to xFuse = tx + 92)
-        const float xFuse = tx + 92.0f;
+        const keel::f32 xFuse = tx + 92.0f;
         WireH(xFuse, xRightMains, ty + 258.0f);
         WireV(xFuse, ty + 258.0f, ty + 356.0f);
         Fuse({xFuse, ty + 292.0f}, true, "FS1", 1);
@@ -926,15 +926,15 @@ public:
     /// Draws the authentic right-hand mechanical PCB outlines (`M12098 ISS. 10` and `M12088 ISS. 5`).
     void PcbCopperOutlines(Rect topBoard, Rect botBoard) {
         // 1. Top Board: Driver Board M12098 ISS. 10 with stepped left corners and right edge notch
-        const float x0 = topBoard.x;
-        const float y0 = topBoard.y;
-        const float x1 = topBoard.Right();
-        const float y1 = topBoard.Bottom();
-        const float stepX = 10.0f;
-        const float stepY = 46.0f;
-        const float notchX = 12.0f;
-        const float notchY1 = y0 + 52.0f;
-        const float notchY2 = y1 - 52.0f;
+        const keel::f32 x0 = topBoard.x;
+        const keel::f32 y0 = topBoard.y;
+        const keel::f32 x1 = topBoard.Right();
+        const keel::f32 y1 = topBoard.Bottom();
+        const keel::f32 stepX = 10.0f;
+        const keel::f32 stepY = 46.0f;
+        const keel::f32 notchX = 12.0f;
+        const keel::f32 notchY1 = y0 + 52.0f;
+        const keel::f32 notchY2 = y1 - 52.0f;
 
         // Stepped polygon outline of M12098 board
         WireH(x0, x1, y0);
@@ -965,9 +965,9 @@ public:
 
         // Right edge solder pads 1..9
         const char* padNums9[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-        const float padYs9[] = {36.0f, 62.0f, 80.0f, 98.0f, 116.0f, 134.0f, 152.0f, 178.0f, 196.0f};
+        const keel::f32 padYs9[] = {36.0f, 62.0f, 80.0f, 98.0f, 116.0f, 134.0f, 152.0f, 178.0f, 196.0f};
         for (keel::i32 i = 0; i < 9; ++i) {
-            const float py = y0 + padYs9[i];
+            const keel::f32 py = y0 + padYs9[i];
             SolderPad({x1 - 24.0f, py}, 2.6f);
             m_scene.DrawTextBox(padNums9[i], Rect(x1 - 44.0f, py - 4.5f, 15.0f, 9.0f), 6.0f, m_pal.inkBold, 1.0f, 0.5f, FontStyle::Bold);
         }
@@ -989,7 +989,7 @@ public:
 
         const char* padNums4[] = {"12", "13", "14", "15"};
         for (keel::i32 i = 0; i < 4; ++i) {
-            const float py = botBoard.y + 38.0f + static_cast<float>(i) * 16.0f;
+            const keel::f32 py = botBoard.y + 38.0f + keel::as<keel::f32>(i) * 16.0f;
             SolderPad({botBoard.Right() - 28.0f, py}, 2.6f);
             m_scene.DrawTextBox(padNums4[i], Rect(botBoard.Right() - 22.0f, py - 4.5f, 18.0f, 9.0f), 6.0f, m_pal.inkBold, 0.0f, 0.5f, FontStyle::Bold);
         }
@@ -1005,7 +1005,7 @@ public:
         );
 
         // Caption underneath both boards
-        const float capY = botBoard.Bottom() + 34.0f;
+        const keel::f32 capY = botBoard.Bottom() + 34.0f;
         m_scene.DrawTextBox(
             "BOARDS  VIEWED  FROM  COPPER  SIDE",
             Rect(botBoard.x, capY, botBoard.w, 10.0f),
@@ -1023,10 +1023,10 @@ public:
     void QuadTitleBlock(Rect box) {
         m_scene.DrawRect(box, Color::Transparent(), 0.0f, m_pal.inkBold, m_pal.symbolWidth * 1.2f);
 
-        const float midX = box.x + box.w * 0.55f;
-        const float revCol1 = box.x + 38.0f;
-        const float revCol2 = box.x + 84.0f;
-        const float signCol = midX - 118.0f;
+        const keel::f32 midX = box.x + box.w * 0.55f;
+        const keel::f32 revCol1 = box.x + 38.0f;
+        const keel::f32 revCol2 = box.x + 84.0f;
+        const keel::f32 signCol = midX - 118.0f;
 
         // Vertical dividers
         m_scene.DrawLine({revCol1, box.y}, {revCol1, box.Bottom()}, m_pal.ink, 1.0f);
@@ -1035,9 +1035,9 @@ public:
         m_scene.DrawLine({midX,    box.y}, {midX,    box.Bottom()}, m_pal.inkBold, 1.4f);
 
         // Left Revision Table horizontal rows
-        const float rh = box.h / 6.0f;
+        const keel::f32 rh = box.h / 6.0f;
         for (keel::i32 r = 1; r <= 5; ++r) {
-            const float ry = box.y + static_cast<float>(r) * rh;
+            const keel::f32 ry = box.y + keel::as<keel::f32>(r) * rh;
             m_scene.DrawLine({box.x, ry}, {midX, ry}, m_pal.ink, 0.9f);
         }
 
@@ -1053,8 +1053,8 @@ public:
         m_scene.DrawText("12-11-73",     {revCol1 + 5.0f,  box.y + rh * 2.0f + 4.0f}, 5.8f, m_pal.ink);
 
         // Drawn / Traced / Checked / Approved sub-table with initials & dates
-        const float sigSplit1 = signCol + 48.0f;
-        const float sigSplit2 = signCol + 78.0f;
+        const keel::f32 sigSplit1 = signCol + 48.0f;
+        const keel::f32 sigSplit2 = signCol + 78.0f;
         m_scene.DrawLine({sigSplit1, box.y + rh * 2.0f}, {sigSplit1, box.Bottom()}, m_pal.ink, 0.9f);
         m_scene.DrawLine({sigSplit2, box.y + rh * 2.0f}, {sigSplit2, box.Bottom()}, m_pal.ink, 0.9f);
 
@@ -1072,8 +1072,8 @@ public:
         m_scene.DrawText("11-3-70", {sigSplit2 + 4.0f, box.y + rh * 4.0f + 4.0f}, 5.2f, m_pal.ink);
 
         // Right Title Area
-        const float titleSplitY = box.y + box.h * 0.42f;
-        const float dwgNoX = box.Right() - 96.0f;
+        const keel::f32 titleSplitY = box.y + box.h * 0.42f;
+        const keel::f32 dwgNoX = box.Right() - 96.0f;
         m_scene.DrawLine({midX, titleSplitY}, {box.Right(), titleSplitY}, m_pal.inkBold, 1.2f);
         m_scene.DrawLine({dwgNoX, titleSplitY}, {dwgNoX, box.Bottom()}, m_pal.inkBold, 1.2f);
 
@@ -1108,8 +1108,8 @@ private:
     };
 
     struct WireInterval {
-        float u0{0.0f};
-        float u1{1.0f};
+        keel::f32 u0{0.0f};
+        keel::f32 u1{1.0f};
     };
 
     SceneScope& m_scene;
@@ -1129,9 +1129,9 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     // =========================================================================
     // GLOBAL HORIZONTAL RAILS & BOARD BOUNDARIES
     // =========================================================================
-    const float yRail67V = 52.0f;    // Top +67V Regulated Supply Rail (Pin 1 / Pin 12)
-    const float yRailGnd = 690.0f;   // Main Amplifier 0V / Negative Return Rail (Pin 8)
-    const float yRailChs = 716.0f;   // Chassis / Signal Return Rail (Pin 9 / Pin 11)
+    const keel::f32 yRail67V = 52.0f;    // Top +67V Regulated Supply Rail (Pin 1 / Pin 12)
+    const keel::f32 yRailGnd = 690.0f;   // Main Amplifier 0V / Negative Return Rail (Pin 8)
+    const keel::f32 yRailChs = 716.0f;   // Chassis / Signal Return Rail (Pin 9 / Pin 11)
 
     // 1. LEFTHAND AMPLIFIER — DRIVER BOARD M12098 Dashed Enclosure
     const Rect driverBox(118.0f, 24.0f, 742.0f, 704.0f);
@@ -1160,7 +1160,7 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     // =========================================================================
     // INPUT STAGE (SK1, C100, R100, R101, TR100, TR101, C101..C105, RV100)
     // =========================================================================
-    const float yIn = 492.0f;
+    const keel::f32 yIn = 492.0f;
     sp.DinSocketSK1({68.0f, 540.0f}, yIn, yRailChs, driverBox.x);
 
     // Input signal line from Pin 10 (x=118, y=492) to TR100 base (x=291)
@@ -1419,7 +1419,7 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     sp.Resistor({730.0f, 650.0f}, true, "R127", "10", -1);
 
     // R129 (68) & C109 (.1µ) Zobel stability network at x=774 (from yOut=404 down to yRailGnd)
-    const float yOut = 404.0f;
+    const keel::f32 yOut = 404.0f;
     sp.WireV(774.0f, yOut, yRailGnd);
     sp.Junction({774.0f, yOut});
     sp.Junction({774.0f, yRailGnd});
@@ -1433,7 +1433,7 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     // =========================================================================
     // DRIVER BOARD RIGHT EDGE PINS (1..9 at x=860) & CHASSIS POWER TRANSISTORS
     // =========================================================================
-    const float xPinEdge = driverBox.Right(); // 860.0f
+    const keel::f32 xPinEdge = driverBox.Right(); // 860.0f
 
     // Pin 2 (y=156): drops from +67V rail at x=812 inside driver board -> Pin 2 -> TR1 collector
     sp.WireV(812.0f, yRail67V, 156.0f);
@@ -1498,8 +1498,8 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     sp.Capacitor({906.0f, yOut}, false, "C5", "2000u", true, -1, -1);
 
     // Speaker Load RL (dashed resistor) & curved socket contacts SK2 / SK3
-    const float xLoad = 950.0f;
-    const float ySk3  = 468.0f;
+    const keel::f32 xLoad = 950.0f;
+    const keel::f32 ySk3  = 468.0f;
     sp.WireV(xLoad, yOut, yRailChs);
     sp.Junction({xLoad, yOut});
     sp.Junction({xLoad, ySk3});
@@ -1527,9 +1527,9 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     scene.DrawText("M 12088", {1088.0f, 574.0f}, 6.4f, pal.inkBold, FontStyle::Bold);
     scene.DrawLine({1088.0f, 584.5f}, {1130.0f, 584.5f}, pal.ink, 0.9f);
 
-    const float yPsuTop = 166.0f; // Pin 12 (+67V regulated bus)
-    const float yPsuMid = 468.0f; // Pin 13 (0V regulated return bus to Pin 8)
-    const float yPsuBot = 636.0f; // Pin 15 (Unregulated -DC rail from bridge)
+    const keel::f32 yPsuTop = 166.0f; // Pin 12 (+67V regulated bus)
+    const keel::f32 yPsuMid = 468.0f; // Pin 13 (0V regulated return bus to Pin 8)
+    const keel::f32 yPsuBot = 636.0f; // Pin 15 (Unregulated -DC rail from bridge)
 
     sp.WireH(1042.0f, 1368.0f, yPsuTop);
     sp.WireH(1100.0f, 1438.0f, yPsuMid);
@@ -1628,9 +1628,9 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     // RECTIFIER BRIDGE (MR1..MR4), RESERVOIR CAPS (C2, C3, C4) & MAINS T1
     // =========================================================================
     // Reservoir Electrolytic Capacitors C2 (2000µ) & C3 (2000µ) in compact parallel loop
-    const float xResCenter = 1502.0f;
-    const float yResTop = 242.0f;
-    const float yResBot = 316.0f;
+    const keel::f32 xResCenter = 1502.0f;
+    const keel::f32 yResTop = 242.0f;
+    const keel::f32 yResBot = 316.0f;
     sp.WireV(xResCenter, yRail67V, yResTop);
     sp.WireV(xResCenter, yResBot, yPsuBot);
     sp.Junction({xResCenter, yRail67V});
@@ -1646,7 +1646,7 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
 
     // Full-wave Diode Bridge at (1605, 344)
     const Vec2 bridgeCenter{1605.0f, 344.0f};
-    const float bridgeR = 44.0f;
+    const keel::f32 bridgeR = 44.0f;
     sp.DiodeBridge(bridgeCenter, bridgeR);
 
     // Connect Bridge Top (+DC) to yRail67V and Bottom (-DC) to yPsuBot
@@ -1654,9 +1654,9 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     sp.WireV(bridgeCenter.x, bridgeCenter.y + bridgeR, yPsuBot);
 
     // AC input to bridge from Transformer T1 secondary (top at y=344, bottom at y=444)
-    const float xT1Sec = 1712.0f;
-    const float ySecTop = 344.0f;
-    const float ySecBot = 444.0f;
+    const keel::f32 xT1Sec = 1712.0f;
+    const keel::f32 ySecTop = 344.0f;
+    const keel::f32 ySecBot = 444.0f;
     // Right AC corner of bridge -> straight right to top of T1 secondary
     sp.WireH(bridgeCenter.x + bridgeR, xT1Sec, ySecTop);
     // Left AC corner of bridge -> left to x=1544, down to y=444, right under bridge to bottom of T1 secondary
@@ -1682,8 +1682,8 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     );
 
     // Bottom Left Note: ALTERNATIVE TRANSISTOR TYPES
-    const float noteX1 = 280.0f;
-    const float noteY1 = 742.0f;
+    const keel::f32 noteX1 = 280.0f;
+    const keel::f32 noteY1 = 742.0f;
     scene.DrawText("ALTERNATIVE  TRANSISTOR  TYPES.", {noteX1, noteY1}, 6.6f, pal.inkBold, FontStyle::Bold);
     scene.DrawLine({noteX1, noteY1 + 10.5f}, {noteX1 + 188.0f, noteY1 + 10.5f}, pal.ink, 0.9f);
     scene.DrawText("BC 154   =  BCY 70.",            {noteX1 + 26.0f, noteY1 + 17.0f}, 6.2f, pal.inkBold, FontStyle::Bold);
@@ -1693,14 +1693,14 @@ inline void RenderQuad303Schematic(SceneScope& scene, const SchematicPalette& pa
     scene.DrawText("            2S 498.",            {noteX1 + 26.0f, noteY1 + 63.0f}, 6.2f, pal.inkBold, FontStyle::Bold);
 
     // Bottom Center Notes
-    const float noteX2 = 1042.0f;
-    const float noteY2 = 738.0f;
+    const keel::f32 noteX2 = 1042.0f;
+    const keel::f32 noteY2 = 738.0f;
     scene.DrawText("THE  RIGHTHAND  AMPLIFIER", {noteX2, noteY2},        6.2f, pal.inkBold, FontStyle::Bold);
     scene.DrawText("IS  IDENTICAL  TO",         {noteX2 + 12.0f, noteY2 + 11.0f}, 6.2f, pal.inkBold, FontStyle::Bold);
     scene.DrawText("THE  LEFTHAND  AMPLIFIER",  {noteX2, noteY2 + 22.0f}, 6.2f, pal.inkBold, FontStyle::Bold);
 
-    const float noteX3 = 1492.0f;
-    const float noteY3 = 702.0f;
+    const keel::f32 noteX3 = 1492.0f;
+    const keel::f32 noteY3 = 702.0f;
     scene.DrawText("THE  FRONT  BOARD  AND  THE",  {noteX3, noteY3},        6.0f, pal.inkBold, FontStyle::Bold);
     scene.DrawText("BOTTOM  TWO  TRANSISTORS",     {noteX3, noteY3 + 11.0f}, 6.0f, pal.inkBold, FontStyle::Bold);
     scene.DrawText("ON  THE  HEAT  SINK  ARE  THE",{noteX3, noteY3 + 22.0f}, 6.0f, pal.inkBold, FontStyle::Bold);

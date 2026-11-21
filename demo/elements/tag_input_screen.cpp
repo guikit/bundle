@@ -110,7 +110,7 @@ void RenderTagInputInspector(guikit::Context& ui, DemoContext&) {
         }).clicked) {
             const keel::StringRef candidate = kSampleTags[s_state.sampleCounter % kSampleTags.size()];
             ++s_state.sampleCounter;
-            if (s_state.maxTags == 0 || s_state.tags.size() < static_cast<keel::usize>(s_state.maxTags)) {
+            if (s_state.maxTags == 0 || s_state.tags.size() < keel::as<keel::usize>(s_state.maxTags)) {
                 s_state.tags.emplace_back(candidate);
                 ui.InvalidateAll();
             }
@@ -133,7 +133,7 @@ void RenderTagInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.placeholder = s_state.placeholder;
         opts.prefix = s_state.prefix;
         opts.tagVariant = s_state.tagVariant;
-        opts.maxTags = static_cast<keel::u32>(s_state.maxTags);
+        opts.maxTags = keel::as<keel::u32>(s_state.maxTags);
         opts.allowDuplicates = s_state.allowDuplicates;
         opts.splitOnComma = s_state.splitOnComma;
         opts.splitOnSpace = s_state.splitOnSpace;

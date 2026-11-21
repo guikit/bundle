@@ -12,8 +12,8 @@ struct SchematicState {
     bool selectableItems = true;
     bool showControls = true;
     bool showScrollbars = true;
-    float radius = 8.0f;
-    float gridStep = 32.0f;
+    keel::f32 radius = 8.0f;
+    keel::f32 gridStep = 32.0f;
 };
 SchematicState s_state;
 } // namespace
@@ -75,7 +75,7 @@ keel::String GenerateSchematicCode(const DemoContext& ctx) {
         "    const auto pal = guikit::demo::SchematicPalette::{}();\n"
         "    guikit::demo::RenderQuad303Schematic(scene, pal);\n"
         "}}",
-        SchematicState::bgNames[static_cast<keel::usize>(s_state.bg)],
+        SchematicState::bgNames[keel::as<keel::usize>(s_state.bg)],
         s_state.gridStep,
         s_state.selectableItems ? "true" : "false",
         s_state.showScrollbars ? "true" : "false",

@@ -6,14 +6,14 @@ namespace {
 struct TabBarState {
     keel::i32 idx = 0;
     guikit::TabBarStyle style = guikit::TabBarStyle::Underline;
-    float gap = 4.0f;
+    keel::f32 gap = 4.0f;
     bool showSep = true;
     bool fullWidth = true;
     bool scrollable = false;
     bool hasBg = true;
-    float radius = 8.0f;
-    float padding = 3.0f;
-    float borderWidth = 1.0f;
+    keel::f32 radius = 8.0f;
+    keel::f32 padding = 3.0f;
+    keel::f32 borderWidth = 1.0f;
 };
 TabBarState s_state;
 } // namespace
@@ -82,7 +82,7 @@ void RenderTabBarStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateTabBarCode(const DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, 4> kStyleCodeNames = {"Underline", "Pill", "Card", "Folder"};
-    const keel::usize styleIdx = keel::min<keel::usize>(static_cast<keel::usize>(s_state.style), 3);
+    const keel::usize styleIdx = keel::min<keel::usize>(keel::as<keel::usize>(s_state.style), 3);
     return keel::format(
         "ui.TabBar(activeTab, tabItems, {{\n"
         "    .style = guikit::TabBarStyle::{},\n"

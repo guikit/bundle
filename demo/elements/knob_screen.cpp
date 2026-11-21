@@ -4,8 +4,8 @@ namespace guikit::demo {
 
 namespace {
 struct KnobDemoState {
-    float val = 65.0f;
-    float bipolarVal = 18.0f;
+    keel::f32 val = 65.0f;
+    keel::f32 bipolarVal = 18.0f;
     bool bipolar = false;
     bool quantizeStep = false;
     bool showArc = true;
@@ -16,10 +16,10 @@ struct KnobDemoState {
     bool rackDemo = false;
 
     // 4-Knob Rack Strip state
-    float rackGainDb = 3.5f;
-    float rackFreqHz = 1250.0f;
-    float rackResQ = 2.4f;
-    float rackPan = -15.0f;
+    keel::f32 rackGainDb = 3.5f;
+    keel::f32 rackFreqHz = 1250.0f;
+    keel::f32 rackResQ = 2.4f;
+    keel::f32 rackPan = -15.0f;
 };
 KnobDemoState s_state;
 } // namespace
@@ -66,7 +66,7 @@ void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 5> valPlaceNames = {
         "Leading", "Trailing", "Top", "Bottom", "Thumb"
     };
-    keel::usize valPlaceIdx = static_cast<keel::usize>(s_state.valuePlacement);
+    keel::usize valPlaceIdx = keel::as<keel::usize>(s_state.valuePlacement);
     if (auto el = ui.Element({.label = "Value Placement", .disabled = !s_state.showValue})) {
         if (ui.Select(valPlaceIdx, valPlaceNames, {
             .disabled = !s_state.showValue
@@ -78,7 +78,7 @@ void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
-    const keel::Optional<double> stepOpt = s_state.quantizeStep ? keel::Optional<double>(5.0) : keel::kNullOpt;
+    const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
 
     if (s_state.rackDemo) {
         if (auto card = ui.Card({

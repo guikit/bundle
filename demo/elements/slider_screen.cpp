@@ -5,19 +5,19 @@ namespace guikit::demo {
 namespace {
 struct SliderDemoState {
     keel::usize modeIdx = 0; // 0 = Slider, 1 = StepSlider, 2 = RangeSlider, 3 = ProgressBar
-    float val = 65.0f;
+    keel::f32 val = 65.0f;
     keel::usize stepIdx = 2;
-    float rangeLow = 22.0f;
-    float rangeHigh = 78.0f;
-    float rangeMinSpan = 10.0f;
+    keel::f32 rangeLow = 22.0f;
+    keel::f32 rangeHigh = 78.0f;
+    keel::f32 rangeMinSpan = 10.0f;
     bool quantizeStep = false;
 
     keel::u32 progressSegments = 20;
     bool progressSegmented = false;
     bool progressMultiZone = true;
     bool progressShowPeak = true;
-    float progressPeakVal = 86.0f;
-    float progressBarHeight = 10.0f;
+    keel::f32 progressPeakVal = 86.0f;
+    keel::f32 progressBarHeight = 10.0f;
 
     bool showTicks = true;
     bool showLabels = true;
@@ -74,7 +74,7 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 5> valPlaceNames = {
         "Leading", "Trailing", "Top", "Bottom", "Thumb"
     };
-    keel::usize valPlaceIdx = static_cast<keel::usize>(s_state.valuePlacement);
+    keel::usize valPlaceIdx = keel::as<keel::usize>(s_state.valuePlacement);
     if (auto el = ui.Element({.label = "Value Placement", .disabled = !s_state.showValue})) {
         if (ui.Select(valPlaceIdx, valPlaceNames, {
             .disabled = !s_state.showValue
@@ -165,7 +165,7 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
-    const keel::Optional<double> stepOpt = s_state.quantizeStep ? keel::Optional<double>(5.0) : keel::kNullOpt;
+    const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
     const guikit::AxisSize wSize = ctx.ResolveCtrlWidth();
     const guikit::AxisSize hSize =
         (s_state.orientation == guikit::Orientation::Vertical && s_state.compactVertical && ctx.ResolveCtrlHeight().IsAuto())
@@ -211,7 +211,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.textRight = s_state.textRight;
             opts.valueFormat = "%.0f %%";
             opts.step = stepOpt;
-            opts.minSpan = static_cast<double>(s_state.rangeMinSpan);
+            opts.minSpan = keel::as<keel::f64>(s_state.rangeMinSpan);
             opts.showValue = s_state.showValue;
             opts.valuePlacement = s_state.valuePlacement;
             opts.disabled = ctx.elemDisabled;
@@ -227,7 +227,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.textRight = s_state.textRight;
             opts.valueFormat = "%.1f %%";
             opts.peakHoldValue = s_state.progressShowPeak
-                ? keel::Optional<double>(s_state.progressPeakVal)
+                ? keel::Optional<keel::f64>(s_state.progressPeakVal)
                 : keel::kNullOpt;
             opts.segments = s_state.progressSegmented ? s_state.progressSegments : 0u;
             opts.trackHeight = s_state.progressBarHeight;

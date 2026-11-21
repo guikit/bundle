@@ -14,9 +14,9 @@ void ReleaseInactiveSceneBuffers(
     const keel::Array<DemoExtensionScreen>& extensions
 ) noexcept {
     bool releasedHeavyBuffers = false;
-    if (leavingExt >= 0 && static_cast<keel::usize>(leavingExt) < extensions.size()) {
-        if (extensions[static_cast<keel::usize>(leavingExt)].releaseBuffers != nullptr) {
-            extensions[static_cast<keel::usize>(leavingExt)].releaseBuffers();
+    if (leavingExt >= 0 && keel::as<keel::usize>(leavingExt) < extensions.size()) {
+        if (extensions[keel::as<keel::usize>(leavingExt)].releaseBuffers != nullptr) {
+            extensions[keel::as<keel::usize>(leavingExt)].releaseBuffers();
             releasedHeavyBuffers = true;
         }
     } else if (leavingCat == NavCategory::SceneImageView) {
@@ -113,64 +113,64 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
         const NavCategory prevCat = m_selectedCategory;
         const keel::i32 prevExt = m_selectedExtension;
         if (auto menu = ui.SidebarMenu({.size = guikit::UiSize::Sm})) {
-            constexpr keel::i32 kBaseCount = static_cast<keel::i32>(NavCategory::SceneImageView) + 1;
+            constexpr keel::i32 kBaseCount = keel::as<keel::i32>(NavCategory::SceneImageView) + 1;
             keel::i32 activeIdx = (m_selectedExtension >= 0)
                 ? (kBaseCount + m_selectedExtension)
-                : static_cast<keel::i32>(m_selectedCategory);
+                : keel::as<keel::i32>(m_selectedCategory);
 
             menu.Section("STRUCTURE");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemHeading),       {.text = "Heading",      .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemElement),       {.text = "Element",      .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemHeading),       {.text = "Heading",      .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemElement),       {.text = "Element",      .icon = guikit::Icon::Settings()});
 
             menu.Section("CONTROLS");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSlider),        {.text = "Slider",       .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemLevelMeter),    {.text = "LevelMeter",   .icon = guikit::Icon::Play()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemReadout),       {.text = "Readout",      .icon = guikit::Icon::Target()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemKnob),          {.text = "Knob",         .icon = guikit::Icon::Refresh()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemInputField),    {.text = "Input",        .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemTag),           {.text = "Tag",          .icon = guikit::Icon::Check()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSegmented),     {.text = "Segmented",    .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemColorPicker),   {.text = "ColorPicker",  .icon = guikit::Icon::Eye()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemDatePicker),    {.text = "DatePicker",   .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemSwitch),        {.text = "Switch",       .icon = guikit::Icon::Refresh()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemCheckbox),      {.text = "Checkbox",     .icon = guikit::Icon::Check()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemRadio),         {.text = "Radio",        .icon = guikit::Icon::Check()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ElemImage),         {.text = "Image",        .icon = guikit::Icon::Eye()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSlider),        {.text = "Slider",       .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemLevelMeter),    {.text = "LevelMeter",   .icon = guikit::Icon::Play()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemReadout),       {.text = "Readout",      .icon = guikit::Icon::Target()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemKnob),          {.text = "Knob",         .icon = guikit::Icon::Refresh()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemInputField),    {.text = "Input",        .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemTag),           {.text = "Tag",          .icon = guikit::Icon::Check()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSegmented),     {.text = "Segmented",    .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemColorPicker),   {.text = "ColorPicker",  .icon = guikit::Icon::Eye()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemDatePicker),    {.text = "DatePicker",   .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSwitch),        {.text = "Switch",       .icon = guikit::Icon::Refresh()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemCheckbox),      {.text = "Checkbox",     .icon = guikit::Icon::Check()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemRadio),         {.text = "Radio",        .icon = guikit::Icon::Check()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemImage),         {.text = "Image",        .icon = guikit::Icon::Eye()});
 
             menu.Section("CONTAINERS & SHELL");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelCard),         {.text = "Card",         .icon = guikit::Icon::Copy()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelSplitView),    {.text = "SplitView",    .icon = guikit::Icon::Copy()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelSidebar),      {.text = "Sidebar",      .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelOverlays),     {.text = "Overlays",     .icon = guikit::Icon::Flash()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelCard),         {.text = "Card",         .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelSplitView),    {.text = "SplitView",    .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelSidebar),      {.text = "Sidebar",      .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelOverlays),     {.text = "Overlays",     .icon = guikit::Icon::Flash()});
 
             menu.Section("NAVIGATION");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelTabBar),       {.text = "TabBar",       .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelBreadcrumb),   {.text = "Breadcrumb",   .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelPagination),   {.text = "Pagination",   .icon = guikit::Icon::ArrowRight()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelMenuBar),      {.text = "MenuBar",      .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelToolbar),      {.text = "Toolbar",      .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelTabBar),       {.text = "TabBar",       .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelBreadcrumb),   {.text = "Breadcrumb",   .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelPagination),   {.text = "Pagination",   .icon = guikit::Icon::ArrowRight()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelMenuBar),      {.text = "MenuBar",      .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelToolbar),      {.text = "Toolbar",      .icon = guikit::Icon::Settings()});
 
             menu.Section("DATA");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelTreeView),     {.text = "TreeView",     .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::PanelTable),        {.text = "Table / Grid", .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelTreeView),     {.text = "TreeView",     .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelTable),        {.text = "Table / Grid", .icon = guikit::Icon::Copy()});
 
             menu.Section("CONTENT");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ContentMarkdown),   {.text = "Markdown",     .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::ContentCodeEditor), {.text = "Code Editor",  .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ContentMarkdown),   {.text = "Markdown",     .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ContentCodeEditor), {.text = "Code Editor",  .icon = guikit::Icon::Edit()});
 
             menu.Section("2D SCENES");
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::SceneSchematic2D),  {.text = "Schematic 2D", .icon = guikit::Icon::Search()});
-            menu.Item(activeIdx, static_cast<keel::i32>(NavCategory::SceneImageView),    {.text = "Image View",   .icon = guikit::Icon::Eye()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SceneSchematic2D),  {.text = "Schematic 2D", .icon = guikit::Icon::Search()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SceneImageView),    {.text = "Image View",   .icon = guikit::Icon::Eye()});
 
             if (!m_extensions.empty()) {
                 menu.Section("MODULES");
                 for (keel::usize ei = 0; ei < m_extensions.size(); ++ei) {
                     const auto& ext = m_extensions[ei];
-                    menu.Item(activeIdx, kBaseCount + static_cast<keel::i32>(ei), {
+                    menu.Item(activeIdx, kBaseCount + keel::as<keel::i32>(ei), {
                         .text = ext.navLabel,
                         .icon = ext.icon
                     });
@@ -206,8 +206,8 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
             .separator = guikit::HeadingSeparator::Bottom
         });
 
-        if (m_selectedExtension >= 0 && static_cast<keel::usize>(m_selectedExtension) < m_extensions.size()) {
-            if (auto fn = m_extensions[static_cast<keel::usize>(m_selectedExtension)].renderInspector) {
+        if (m_selectedExtension >= 0 && keel::as<keel::usize>(m_selectedExtension) < m_extensions.size()) {
+            if (auto fn = m_extensions[keel::as<keel::usize>(m_selectedExtension)].renderInspector) {
                 fn(ui, m_demoCtx);
             }
         } else if (IsControlCategory(m_selectedCategory)) {
@@ -275,13 +275,13 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         if (ui.Select(m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {.size = guikit::UiSize::Sm, .width = 96.0f}).changed) {
             if (m_demoCtx.previewFormFactorIdx == 1) {
                 m_demoCtx.previewLandscape = true;  // Tablet defaults to Landscape
-                if (m_demoCtx.previewZoomModeIdx == static_cast<keel::usize>(PreviewZoomMode::Zoom100)) {
-                    m_demoCtx.previewZoomModeIdx = static_cast<keel::usize>(PreviewZoomMode::Fit);
+                if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
+                    m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
                 }
             } else if (m_demoCtx.previewFormFactorIdx == 2) {
                 m_demoCtx.previewLandscape = false; // Phone defaults to Portrait
-                if (m_demoCtx.previewZoomModeIdx == static_cast<keel::usize>(PreviewZoomMode::Zoom100)) {
-                    m_demoCtx.previewZoomModeIdx = static_cast<keel::usize>(PreviewZoomMode::Fit);
+                if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
+                    m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
                 }
             }
             ui.InvalidateAll();
@@ -307,8 +307,8 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             .size = guikit::UiSize::Sm,
             .width = 116.0f
         };
-        if (m_demoCtx.previewZoomModeIdx == static_cast<keel::usize>(PreviewZoomMode::Fit) ||
-            m_demoCtx.previewZoomModeIdx == static_cast<keel::usize>(PreviewZoomMode::Real1To1)) {
+        if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Fit) ||
+            m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Real1To1)) {
             zoomSelectOpts.suffix.text = {ui.Format("{}%", effZoomPct), guikit::StateColor::Muted()};
         }
 
@@ -399,8 +399,8 @@ void DemoWindow::RenderCodePanel(guikit::Context& ui) {
 
         if (!IsLiveResizeFrame() || m_cachedCodeSnippet.empty() ||
             m_cachedCodeCategory != m_selectedCategory || m_cachedCodeExtension != m_selectedExtension) {
-            if (m_selectedExtension >= 0 && static_cast<keel::usize>(m_selectedExtension) < m_extensions.size()) {
-                auto fn = m_extensions[static_cast<keel::usize>(m_selectedExtension)].generateCode;
+            if (m_selectedExtension >= 0 && keel::as<keel::usize>(m_selectedExtension) < m_extensions.size()) {
+                auto fn = m_extensions[keel::as<keel::usize>(m_selectedExtension)].generateCode;
                 m_cachedCodeSnippet = fn ? fn(m_demoCtx) : keel::String{};
             } else {
                 m_cachedCodeSnippet = DispatchCodeGenerator(m_selectedCategory, m_demoCtx);
@@ -434,16 +434,16 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
         })) {
             RenderPreviewToolbar(ui);
 
-            const bool extActive = (m_selectedExtension >= 0 && static_cast<keel::usize>(m_selectedExtension) < m_extensions.size());
+            const bool extActive = (m_selectedExtension >= 0 && keel::as<keel::usize>(m_selectedExtension) < m_extensions.size());
             if (extActive || IsSandboxCategory(m_selectedCategory)) {
                 const bool isFullStage = extActive ? true : IsFullStageCategory(m_selectedCategory);
                 const bool isShellScreen = !extActive && (m_selectedCategory == NavCategory::PanelSidebar);
                 const keel::StringRef title = extActive
-                    ? m_extensions[static_cast<keel::usize>(m_selectedExtension)].title
+                    ? m_extensions[keel::as<keel::usize>(m_selectedExtension)].title
                     : CategoryDisplayTitle(m_selectedCategory);
                 RenderPreviewViewport(ui, m_demoCtx, isFullStage, isShellScreen, title, [&]() {
                     if (extActive) {
-                        if (auto fn = m_extensions[static_cast<keel::usize>(m_selectedExtension)].renderStage) {
+                        if (auto fn = m_extensions[keel::as<keel::usize>(m_selectedExtension)].renderStage) {
                             fn(ui, m_demoCtx);
                         }
                     } else {
@@ -459,8 +459,8 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
 void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
     if (auto sb = ui.StatusBar()) {
         const bool isGpuScene = (m_selectedExtension >= 0 &&
-                                 static_cast<keel::usize>(m_selectedExtension) < m_extensions.size() &&
-                                 m_extensions[static_cast<keel::usize>(m_selectedExtension)].isGpuScene);
+                                 keel::as<keel::usize>(m_selectedExtension) < m_extensions.size() &&
+                                 m_extensions[keel::as<keel::usize>(m_selectedExtension)].isGpuScene);
         RenderTelemetryStatus(sb, isGpuScene);
 
         sb.Spacer();
@@ -576,9 +576,9 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderSchematicInspector,
         &RenderImageViewInspector,
     };
-    static_assert(kInspectors.size() == static_cast<keel::usize>(NavCategory::SceneImageView) + 1);
+    static_assert(kInspectors.size() == keel::as<keel::usize>(NavCategory::SceneImageView) + 1);
 
-    const keel::usize idx = static_cast<keel::usize>(cat);
+    const keel::usize idx = keel::as<keel::usize>(cat);
     if (idx < kInspectors.size()) {
         kInspectors[idx](ui, ctx);
     }
@@ -629,9 +629,9 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderSchematicStage,
         &RenderImageViewStage,
     };
-    static_assert(kStages.size() == static_cast<keel::usize>(NavCategory::SceneImageView) + 1);
+    static_assert(kStages.size() == keel::as<keel::usize>(NavCategory::SceneImageView) + 1);
 
-    const keel::usize idx = static_cast<keel::usize>(cat);
+    const keel::usize idx = keel::as<keel::usize>(cat);
     if (idx < kStages.size()) {
         kStages[idx](ui, ctx);
     }
@@ -682,9 +682,9 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateSchematicCode,
         &GenerateImageViewCode,
     };
-    static_assert(kGenerators.size() == static_cast<keel::usize>(NavCategory::SceneImageView) + 1);
+    static_assert(kGenerators.size() == keel::as<keel::usize>(NavCategory::SceneImageView) + 1);
 
-    const keel::usize idx = static_cast<keel::usize>(cat);
+    const keel::usize idx = keel::as<keel::usize>(cat);
     if (idx < kGenerators.size()) {
         return kGenerators[idx](ctx);
     }

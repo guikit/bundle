@@ -21,7 +21,7 @@ struct ImageState {
     };
     guikit::Align alignX = guikit::Align::Center;
     guikit::Align alignY = guikit::Align::Center;
-    float opacityPct = 100.0f;
+    keel::f32 opacityPct = 100.0f;
     bool checkerboard = true;
 };
 
@@ -51,7 +51,7 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    keel::usize axIdx = static_cast<keel::usize>(s_state.alignX);
+    keel::usize axIdx = keel::as<keel::usize>(s_state.alignX);
     if (auto el = ui.Element({.label = "Horizontal Fit Align"})) {
         if (ui.Segmented(axIdx, kLabelAlignNames).changed) {
             s_state.alignX = static_cast<guikit::Align>(axIdx);
@@ -59,7 +59,7 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    keel::usize ayIdx = static_cast<keel::usize>(s_state.alignY);
+    keel::usize ayIdx = keel::as<keel::usize>(s_state.alignY);
     if (auto el = ui.Element({.label = "Vertical Fit Align"})) {
         if (ui.Segmented(ayIdx, kLabelAlignNames).changed) {
             s_state.alignY = static_cast<guikit::Align>(ayIdx);
@@ -84,7 +84,7 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderImageStage(guikit::Context& ui, DemoContext& ctx) {
-    const keel::u8 alpha = static_cast<keel::u8>(keel::clamp(keel::round_i32(s_state.opacityPct * 2.55f), 0, 255));
+    const keel::u8 alpha = keel::as<keel::u8>(keel::clamp(keel::round_i32(s_state.opacityPct * 2.55f), 0, 255));
     ctx.RunElementStage(ui, [&]() {
         guikit::ImageOptions opts{};
         opts.alt = s_state.altText;
@@ -126,7 +126,7 @@ keel::String GenerateImageCode(const DemoContext& ctx) {
         "}});",
         ImageState::sources[s_state.sourceIdx % ImageState::sources.size()],
         s_state.altText,
-        ImageState::fitModeNames[static_cast<keel::usize>(s_state.fit)],
+        ImageState::fitModeNames[keel::as<keel::usize>(s_state.fit)],
         AlignName(s_state.alignX),
         AlignName(s_state.alignY),
         s_state.checkerboard ? "true" : "false",

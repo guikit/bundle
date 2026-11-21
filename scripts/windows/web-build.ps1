@@ -17,6 +17,7 @@
 param(
     [ValidateSet("Release", "Debug")]
     [string]$BuildType = "Release",
+    [switch]$Sdl,
     [switch]$InstallEmsdk,
     [switch]$Clean,
     [switch]$Serve,
@@ -25,9 +26,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$BuildDir = Join-Path $RepoRoot "build_wasm"
-$OutDir   = Join-Path $RepoRoot "dist\web"
+$RepoRoot   = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$TargetName = if ($Sdl) { "guikit_demo" } else { "guikit_demo_native" }
+$BuildSdl   = if ($Sdl) { "ON" } else { "OFF" }
+$BuildDir   = Join-Path $RepoRoot (if ($Sdl) { "build_wasm" } else { "build_wasm_native" })
+$OutDir     = Join-Path $RepoRoot (if ($Sdl) { "dist\web-sdl" } else { "dist\web" })
 
 function Find-Or-Activate-Emsdk {
     if (Get-Command "emcmake" -ErrorAction SilentlyContinue) {
@@ -100,7 +103,7 @@ Ensure-Ninja
 Find-Or-Activate-Emsdk
 
 $IndexHtml = Join-Path $OutDir "index.html"
-$WasmFile  = Join-Path $OutDir "guikit_demo.wasm"
+$WasmFile  = Join-Path $OutDir "$TargetName.wasm"
 $NeedBuild = (-not $SkipBuildIfPresent) -or (-not (Test-Path $IndexHtml)) -or (-not (Test-Path $WasmFile))
 
 if ($NeedBuild) {
@@ -110,26 +113,27 @@ if ($NeedBuild) {
     }
 
     if (-not (Test-Path $CacheFile)) {
-        Write-Host "[WASM] Configuring CMake ($BuildType) ..." -ForegroundColor Cyan
+        Write-Host "[WASM] Configuring CMake ($BuildType, target=$TargetName) ..." -ForegroundColor Cyan
         & emcmake cmake -G Ninja -S $RepoRoot -B $BuildDir `
             "-DCMAKE_BUILD_TYPE=$BuildType" `
             "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF" `
+            "-DGUIKIT_BUNDLE_BUILD_SDL=$BuildSdl" `
             "-DGUIKIT_BUNDLE_BUILD_DEMO=ON" `
             "-DGUIKIT_BUNDLE_BUILD_TESTS=OFF"
         if ($LASTEXITCODE -ne 0) { throw "CMake configuration failed." }
     }
 
-    Write-Host "[WASM] Building guikit_demo ..." -ForegroundColor Cyan
-    & cmake --build $BuildDir --target guikit_demo --parallel
+    Write-Host "[WASM] Building $TargetName ..." -ForegroundColor Cyan
+    & cmake --build $BuildDir --target $TargetName --parallel
     if ($LASTEXITCODE -ne 0) { throw "WebAssembly build failed." }
 
     New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
-    Copy-Item (Join-Path $BuildDir "guikit_demo.html") (Join-Path $OutDir "index.html") -Force
-    Copy-Item (Join-Path $BuildDir "guikit_demo.js")   (Join-Path $OutDir "guikit_demo.js") -Force
-    Copy-Item (Join-Path $BuildDir "guikit_demo.wasm") (Join-Path $OutDir "guikit_demo.wasm") -Force
-    if (Test-Path (Join-Path $BuildDir "guikit_demo.data")) {
-        Copy-Item (Join-Path $BuildDir "guikit_demo.data") (Join-Path $OutDir "guikit_demo.data") -Force
+    Copy-Item (Join-Path $BuildDir "$TargetName.html") (Join-Path $OutDir "index.html") -Force
+    Copy-Item (Join-Path $BuildDir "$TargetName.js")   (Join-Path $OutDir "$TargetName.js") -Force
+    Copy-Item (Join-Path $BuildDir "$TargetName.wasm") (Join-Path $OutDir "$TargetName.wasm") -Force
+    if (Test-Path (Join-Path $BuildDir "$TargetName.data")) {
+        Copy-Item (Join-Path $BuildDir "$TargetName.data") (Join-Path $OutDir "$TargetName.data") -Force
     }
 
     # Create .nojekyll so GitHub Pages serves .wasm and .data files without Jekyll processing

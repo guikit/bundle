@@ -1,6 +1,6 @@
 build/
 build-*/
-build_wasm/
+build_wasm*/
 dist/
 .emsdk/
 .cache/

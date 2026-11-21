@@ -17,28 +17,41 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-BUILD_DIR="${REPO_ROOT}/build_wasm"
-OUT_DIR="${REPO_ROOT}/dist/web"
 BUILD_TYPE="Release"
 INSTALL_EMSDK=1
 CLEAN=0
 SERVE=0
 OPEN_BROWSER=0
+USE_NATIVE=1
 
 for arg in "$@"; do
     case "$arg" in
         --debug)          BUILD_TYPE="Debug" ;;
+        --native)         USE_NATIVE=1 ;;
+        --sdl)            USE_NATIVE=0 ;;
         --install-emsdk)  INSTALL_EMSDK=1 ;;
         --no-install)     INSTALL_EMSDK=0 ;;
         --clean)          CLEAN=1 ;;
         --serve)          SERVE=1 ;;
         --open-browser)   OPEN_BROWSER=1 ;;
         *)
-            echo "Usage: $0 [--debug] [--clean] [--serve] [--open-browser] [--no-install]"
+            echo "Usage: $0 [--native|--sdl] [--debug] [--clean] [--serve] [--open-browser] [--no-install]"
             exit 1
             ;;
     esac
 done
+
+if [[ "$USE_NATIVE" -eq 1 ]]; then
+    BUILD_DIR="${REPO_ROOT}/build_wasm_native"
+    OUT_DIR="${REPO_ROOT}/dist/web"
+    TARGET_NAME="guikit_demo_native"
+    SDL_OPT="OFF"
+else
+    BUILD_DIR="${REPO_ROOT}/build_wasm"
+    OUT_DIR="${REPO_ROOT}/dist/web-sdl"
+    TARGET_NAME="guikit_demo"
+    SDL_OPT="ON"
+fi
 
 if [[ "$CLEAN" -eq 1 ]]; then
     rm -rf "$BUILD_DIR" "$OUT_DIR"
@@ -71,22 +84,23 @@ if ! command -v emcmake >/dev/null 2>&1; then
 fi
 
 if [[ ! -f "${BUILD_DIR}/Makefile" && ! -f "${BUILD_DIR}/build.ninja" ]]; then
-    echo "[WASM] Configuring CMake (${BUILD_TYPE}) ..."
+    echo "[WASM] Configuring CMake (${BUILD_TYPE}, target=${TARGET_NAME}) ..."
     emcmake cmake -S "$REPO_ROOT" -B "$BUILD_DIR" \
         -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+        -DGUIKIT_BUNDLE_BUILD_SDL="$SDL_OPT" \
         -DGUIKIT_BUNDLE_BUILD_DEMO=ON \
         -DGUIKIT_BUNDLE_BUILD_TESTS=OFF
 fi
 
-echo "[WASM] Building guikit_demo ..."
-cmake --build "$BUILD_DIR" --target guikit_demo --parallel
+echo "[WASM] Building ${TARGET_NAME} ..."
+cmake --build "$BUILD_DIR" --target "$TARGET_NAME" --parallel
 
 mkdir -p "$OUT_DIR"
-cp "${BUILD_DIR}/guikit_demo.html" "${OUT_DIR}/index.html"
-cp "${BUILD_DIR}/guikit_demo.js"   "${OUT_DIR}/guikit_demo.js"
-cp "${BUILD_DIR}/guikit_demo.wasm" "${OUT_DIR}/guikit_demo.wasm"
-if [[ -f "${BUILD_DIR}/guikit_demo.data" ]]; then
-    cp "${BUILD_DIR}/guikit_demo.data" "${OUT_DIR}/guikit_demo.data"
+cp "${BUILD_DIR}/${TARGET_NAME}.html" "${OUT_DIR}/index.html"
+cp "${BUILD_DIR}/${TARGET_NAME}.js"   "${OUT_DIR}/${TARGET_NAME}.js"
+cp "${BUILD_DIR}/${TARGET_NAME}.wasm" "${OUT_DIR}/${TARGET_NAME}.wasm"
+if [[ -f "${BUILD_DIR}/${TARGET_NAME}.data" ]]; then
+    cp "${BUILD_DIR}/${TARGET_NAME}.data" "${OUT_DIR}/${TARGET_NAME}.data"
 fi
 touch "${OUT_DIR}/.nojekyll"
 

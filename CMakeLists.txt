@@ -163,7 +163,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         endif()
     endif()
 
-    if (TARGET guikit::native AND NOT EMSCRIPTEN)
+    if (TARGET guikit::native)
         add_executable(guikit_demo_native ${GUIKIT_DEMO_SOURCES})
         target_include_directories(guikit_demo_native PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}/demo"
@@ -183,5 +183,20 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
             target_link_libraries(guikit_demo_native PRIVATE guikit::text)
         endif()
         guikit_enforce_guidelines(guikit_demo_native)
+        if (EMSCRIPTEN)
+            set_target_properties(guikit_demo_native PROPERTIES SUFFIX ".html")
+            target_link_options(guikit_demo_native PRIVATE
+                "-Oz"
+                "-flto"
+                "-sSTACK_SIZE=1048576"
+                "-Wl,--stack-first"
+                "-sALLOW_MEMORY_GROWTH=1"
+                "-sINITIAL_MEMORY=33554432"
+                "-sMAX_WEBGL_VERSION=2"
+                "-sMIN_WEBGL_VERSION=2"
+                "-sEXIT_RUNTIME=0"
+                "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/demo/shell.html"
+            )
+        endif()
     endif()
 endif()

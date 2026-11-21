@@ -35,7 +35,9 @@ void ReleaseInactiveSceneBuffers(
 DemoWindow::DemoWindow()
     : guikit::MainWindow({
 #if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
-#if defined(_WIN32)
+#if defined(__EMSCRIPTEN__)
+          .title = "GuiKit Demo (C++20 Immediate Mode + Native WebGL2)",
+#elif defined(_WIN32)
           .title = "GuiKit Demo (C++20 Immediate Mode + Native Win32 OpenGL 3.3)",
 #else
           .title = "GuiKit Demo (C++20 Immediate Mode + Native OpenGL ES3)",

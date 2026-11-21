@@ -18,17 +18,21 @@
 #>
 param(
     [string]$RemoteUrl = "git@github.com:guikit/demo.git",
+    [switch]$Sdl = $false,
     [switch]$SkipBuild = $false
 )
 
 $ErrorActionPreference = "Stop"
 
-$RepoRoot  = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$BuildDir  = Join-Path $RepoRoot "build_wasm"
-$StageDir  = Join-Path $RepoRoot "dist\gh-pages"
-$EmsdkDir  = Join-Path $RepoRoot ".emsdk"
+$RepoRoot   = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$TargetName = if ($Sdl) { "guikit_demo" } else { "guikit_demo_native" }
+$BuildSdl   = if ($Sdl) { "ON" } else { "OFF" }
+$StackDesc  = if ($Sdl) { "Emscripten + SDL3 + ThorVG + WebGL2" } else { "Emscripten + Native WebGL2 + FreeType (zero SDL3, zero ThorVG)" }
+$BuildDir   = Join-Path $RepoRoot (if ($Sdl) { "build_wasm" } else { "build_wasm_native" })
+$StageDir   = Join-Path $RepoRoot "dist\gh-pages"
+$EmsdkDir   = Join-Path $RepoRoot ".emsdk"
 
-Write-Host "==> [1/4] Preparing WebAssembly build..." -ForegroundColor Cyan
+Write-Host "==> [1/4] Preparing WebAssembly build ($TargetName)..." -ForegroundColor Cyan
 
 if (-not $SkipBuild) {
     # Activate local .emsdk environment if emcmake is not yet in PATH
@@ -40,31 +44,31 @@ if (-not $SkipBuild) {
         }
     }
 
-    # Configure build_wasm if Ninja build file does not exist
+    # Configure build dir if Ninja build file does not exist
     $NinjaFile = Join-Path $BuildDir "build.ninja"
     if (-not (Test-Path $NinjaFile)) {
         Write-Host "    Configuring CMake in $BuildDir..." -ForegroundColor Gray
         $EmcmakeBat = Join-Path $EmsdkDir "upstream\emscripten\emcmake.bat"
         if (Test-Path $EmcmakeBat) {
-            & $EmcmakeBat cmake -S $RepoRoot -B $BuildDir -G Ninja -DCMAKE_BUILD_TYPE=Release -DGUIKIT_BUNDLE_BUILD_TESTS=OFF
+            & $EmcmakeBat cmake -S $RepoRoot -B $BuildDir -G Ninja -DCMAKE_BUILD_TYPE=Release "-DGUIKIT_BUNDLE_BUILD_SDL=$BuildSdl" -DGUIKIT_BUNDLE_BUILD_TESTS=OFF
         } else {
-            emcmake cmake -S $RepoRoot -B $BuildDir -G Ninja -DCMAKE_BUILD_TYPE=Release -DGUIKIT_BUNDLE_BUILD_TESTS=OFF
+            emcmake cmake -S $RepoRoot -B $BuildDir -G Ninja -DCMAKE_BUILD_TYPE=Release "-DGUIKIT_BUNDLE_BUILD_SDL=$BuildSdl" -DGUIKIT_BUNDLE_BUILD_TESTS=OFF
         }
         if ($LASTEXITCODE -ne 0) { throw "CMake configuration failed with exit code $LASTEXITCODE" }
     }
 
-    Write-Host "    Building target guikit_demo (Release)..." -ForegroundColor Gray
-    cmake --build $BuildDir --config Release --target guikit_demo
+    Write-Host "    Building target $TargetName (Release)..." -ForegroundColor Gray
+    cmake --build $BuildDir --config Release --target $TargetName
     if ($LASTEXITCODE -ne 0) { throw "WASM build failed with exit code $LASTEXITCODE" }
 } else {
     Write-Host "    Skipping build (-SkipBuild specified)." -ForegroundColor Yellow
 }
 
 # Verify required artifacts exist
-$HtmlFile = Join-Path $BuildDir "guikit_demo.html"
-$JsFile   = Join-Path $BuildDir "guikit_demo.js"
-$WasmFile = Join-Path $BuildDir "guikit_demo.wasm"
-$DataFile = Join-Path $BuildDir "guikit_demo.data"
+$HtmlFile = Join-Path $BuildDir "$TargetName.html"
+$JsFile   = Join-Path $BuildDir "$TargetName.js"
+$WasmFile = Join-Path $BuildDir "$TargetName.wasm"
+$DataFile = Join-Path $BuildDir "$TargetName.data"
 
 foreach ($f in @($HtmlFile, $JsFile, $WasmFile)) {
     if (-not (Test-Path $f)) {
@@ -79,13 +83,13 @@ if (Test-Path $StageDir) {
 }
 New-Item -ItemType Directory -Path $StageDir -Force | Out-Null
 
-# Copy index.html (for root URL) and guikit_demo.*
+# Copy index.html (for root URL) and target artifacts
 Copy-Item $HtmlFile (Join-Path $StageDir "index.html") -Force
-Copy-Item $HtmlFile (Join-Path $StageDir "guikit_demo.html") -Force
-Copy-Item $JsFile   (Join-Path $StageDir "guikit_demo.js") -Force
-Copy-Item $WasmFile (Join-Path $StageDir "guikit_demo.wasm") -Force
+Copy-Item $HtmlFile (Join-Path $StageDir "$TargetName.html") -Force
+Copy-Item $JsFile   (Join-Path $StageDir "$TargetName.js") -Force
+Copy-Item $WasmFile (Join-Path $StageDir "$TargetName.wasm") -Force
 if (Test-Path $DataFile) {
-    Copy-Item $DataFile (Join-Path $StageDir "guikit_demo.data") -Force
+    Copy-Item $DataFile (Join-Path $StageDir "$TargetName.data") -Force
 }
 
 # Create .nojekyll so GitHub Pages serves .wasm and .js without Jekyll filtering
@@ -103,11 +107,11 @@ $UtcNow     = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'")
 $ReadmeContent = @"
 # GuiKit — WebAssembly Interactive Demo
 
-Live WebAssembly build of **GuiKit** (`guikit_demo`), compiled with Emscripten + SDL3 + ThorVG + WebGL2.
+Live WebAssembly build of **GuiKit** (`$TargetName`), compiled with $StackDesc.
 
 - **Live Demo (GitHub Pages)**: [https://guikit.github.io/demo/](https://guikit.github.io/demo/)
 - **Source Repository**: `guikit/bundle` (`@$SourceCommit`)
-- **Bundle Size**: `guikit_demo.wasm` ($WasmSizeMb MB uncompressed, embedded fonts + images + S-57/ENC GeoJSON chart)
+- **Bundle Size**: `$TargetName.wasm` ($WasmSizeMb MB uncompressed, embedded fonts + images + S-57/ENC GeoJSON chart)
 - **Last Published**: $UtcNow
 "@
 Set-Content -Path (Join-Path $StageDir "README.md") -Value $ReadmeContent -Encoding UTF8
@@ -118,7 +122,7 @@ Push-Location $StageDir
 try {
     git init -b main | Out-Null
     git add -A
-    git commit -m "deploy(wasm): publish guikit_demo @$SourceCommit ($UtcNow)" | Out-Null
+    git commit -m "deploy(wasm): publish $TargetName @$SourceCommit ($UtcNow)" | Out-Null
 
     Write-Host "==> [4/4] Pushing to $RemoteUrl (branches: main, gh-pages)..." -ForegroundColor Cyan
     git remote add origin $RemoteUrl

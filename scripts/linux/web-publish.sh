@@ -17,30 +17,44 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-BUILD_DIR="${REPO_ROOT}/build_wasm"
 STAGE_DIR="${REPO_ROOT}/dist/gh-pages"
 REMOTE_URL="git@github.com:guikit/demo.git"
 SKIP_BUILD=0
+USE_NATIVE=1
 
 for arg in "$@"; do
     case "$arg" in
         --skip-build) SKIP_BUILD=1 ;;
+        --native)     USE_NATIVE=1 ;;
+        --sdl)        USE_NATIVE=0 ;;
         --remote=*)   REMOTE_URL="${arg#*=}" ;;
         *)
-            echo "Usage: $0 [--skip-build] [--remote=<git-url>]"
+            echo "Usage: $0 [--native|--sdl] [--skip-build] [--remote=<git-url>]"
             exit 1
             ;;
     esac
 done
 
-echo "==> [1/4] Preparing WebAssembly build..."
+if [[ "$USE_NATIVE" -eq 1 ]]; then
+    BUILD_DIR="${REPO_ROOT}/build_wasm_native"
+    TARGET_NAME="guikit_demo_native"
+    BUILD_FLAG="--native"
+    STACK_DESC="Emscripten + Native WebGL2 + FreeType (zero SDL3, zero ThorVG)"
+else
+    BUILD_DIR="${REPO_ROOT}/build_wasm"
+    TARGET_NAME="guikit_demo"
+    BUILD_FLAG="--sdl"
+    STACK_DESC="Emscripten + SDL3 + ThorVG + WebGL2"
+fi
+
+echo "==> [1/4] Preparing WebAssembly build (${TARGET_NAME})..."
 if [[ "$SKIP_BUILD" -eq 0 ]]; then
-    "${SCRIPT_DIR}/web-build.sh"
+    "${SCRIPT_DIR}/web-build.sh" "$BUILD_FLAG"
 else
     echo "    Skipping build (--skip-build specified)."
 fi
 
-for f in "${BUILD_DIR}/guikit_demo.html" "${BUILD_DIR}/guikit_demo.js" "${BUILD_DIR}/guikit_demo.wasm"; do
+for f in "${BUILD_DIR}/${TARGET_NAME}.html" "${BUILD_DIR}/${TARGET_NAME}.js" "${BUILD_DIR}/${TARGET_NAME}.wasm"; do
     if [[ ! -f "$f" ]]; then
         echo "Error: Required WebAssembly artifact not found: $f" >&2
         exit 1
@@ -51,12 +65,12 @@ echo "==> [2/4] Staging static bundle in ${STAGE_DIR}..."
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR"
 
-cp "${BUILD_DIR}/guikit_demo.html" "${STAGE_DIR}/index.html"
-cp "${BUILD_DIR}/guikit_demo.html" "${STAGE_DIR}/guikit_demo.html"
-cp "${BUILD_DIR}/guikit_demo.js"   "${STAGE_DIR}/guikit_demo.js"
-cp "${BUILD_DIR}/guikit_demo.wasm" "${STAGE_DIR}/guikit_demo.wasm"
-if [[ -f "${BUILD_DIR}/guikit_demo.data" ]]; then
-    cp "${BUILD_DIR}/guikit_demo.data" "${STAGE_DIR}/guikit_demo.data"
+cp "${BUILD_DIR}/${TARGET_NAME}.html" "${STAGE_DIR}/index.html"
+cp "${BUILD_DIR}/${TARGET_NAME}.html" "${STAGE_DIR}/${TARGET_NAME}.html"
+cp "${BUILD_DIR}/${TARGET_NAME}.js"   "${STAGE_DIR}/${TARGET_NAME}.js"
+cp "${BUILD_DIR}/${TARGET_NAME}.wasm" "${STAGE_DIR}/${TARGET_NAME}.wasm"
+if [[ -f "${BUILD_DIR}/${TARGET_NAME}.data" ]]; then
+    cp "${BUILD_DIR}/${TARGET_NAME}.data" "${STAGE_DIR}/${TARGET_NAME}.data"
 fi
 touch "${STAGE_DIR}/.nojekyll"
 
@@ -66,7 +80,7 @@ UTC_NOW="$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
 cat > "${STAGE_DIR}/README.md" <<EOF
 # GuiKit — WebAssembly Interactive Demo
 
-Live WebAssembly build of **GuiKit** (\`guikit_demo\`), compiled with Emscripten + SDL3 + ThorVG + WebGL2.
+Live WebAssembly build of **GuiKit** (\`${TARGET_NAME}\`), compiled with ${STACK_DESC}.
 
 - **Live Demo (GitHub Pages)**: [https://guikit.github.io/demo/](https://guikit.github.io/demo/)
 - **Source Repository**: \`guikit/bundle\` (\`@${SOURCE_COMMIT}\`)
@@ -77,7 +91,7 @@ echo "==> [3/4] Creating deployment commit (source @${SOURCE_COMMIT})..."
 pushd "$STAGE_DIR" >/dev/null
 git init -b main >/dev/null
 git add -A
-git commit -m "deploy(wasm): publish guikit_demo @${SOURCE_COMMIT} (${UTC_NOW})" >/dev/null
+git commit -m "deploy(wasm): publish ${TARGET_NAME} @${SOURCE_COMMIT} (${UTC_NOW})" >/dev/null
 
 echo "==> [4/4] Pushing to ${REMOTE_URL} (branches: main, gh-pages)..."
 git remote add origin "$REMOTE_URL"

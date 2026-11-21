@@ -1,6 +1,8 @@
 #include "bundle_screens.hpp"
 #include "demo_window.hpp"
-#if defined(GUIKIT_HAS_BACKEND_SDL3) && GUIKIT_HAS_BACKEND_SDL3
+#if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
+#include "guikit/native.hpp"
+#elif defined(GUIKIT_HAS_BACKEND_SDL3) && GUIKIT_HAS_BACKEND_SDL3
 #include "guikit/sdl.hpp"
 #endif
 
@@ -9,6 +11,9 @@ void RegisterDemoEmbeddedAssets() noexcept;
 } // namespace guikit::demo
 
 int main(int /*argc*/, char* /*argv*/[]) {
+#if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
+    guikit::native::RegisterNativeWindowBackend();
+#endif
     guikit::demo::RegisterDemoEmbeddedAssets();
     guikit::demo::DemoWindow demo;
 

@@ -70,7 +70,7 @@ if (TARGET guikit::native)
     target_link_libraries(guikit_all INTERFACE guikit::native)
 endif()
 
-if (GUIKIT_BUNDLE_BUILD_DEMO AND TARGET guikit::backend_sdl3)
+if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::native))
     set(GUIKIT_DEMO_GENERATED_ASSETS_CPP "${CMAKE_CURRENT_BINARY_DIR}/generated/demo_embedded_assets.cpp")
     file(GLOB_RECURSE GUIKIT_DEMO_ASSET_FILES CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/demo/assets/*"
@@ -88,7 +88,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND TARGET guikit::backend_sdl3)
         VERBATIM
     )
 
-    add_executable(guikit_demo
+    set(GUIKIT_DEMO_SOURCES
         demo/main.cpp
         demo/demo_window.cpp
         demo/elements/heading_screen.cpp
@@ -134,28 +134,54 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND TARGET guikit::backend_sdl3)
         demo/scenes/bpmn_screen.cpp
         "${GUIKIT_DEMO_GENERATED_ASSETS_CPP}"
     )
-    target_include_directories(guikit_demo PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/demo"
-    )
-    target_link_libraries(guikit_demo PRIVATE
-        guikit::all
-    )
-    guikit_enforce_guidelines(guikit_demo
-        HEADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/demo"
-    )
-    if (EMSCRIPTEN)
-        set_target_properties(guikit_demo PROPERTIES SUFFIX ".html")
-        target_link_options(guikit_demo PRIVATE
-            "-Oz"
-            "-flto"
-            "-sSTACK_SIZE=1048576"
-            "-Wl,--stack-first"
-            "-sALLOW_MEMORY_GROWTH=1"
-            "-sINITIAL_MEMORY=67108864"
-            "-sMAX_WEBGL_VERSION=2"
-            "-sMIN_WEBGL_VERSION=1"
-            "-sEXIT_RUNTIME=0"
-            "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/demo/shell.html"
+
+    if (TARGET guikit::backend_sdl3)
+        add_executable(guikit_demo ${GUIKIT_DEMO_SOURCES})
+        target_include_directories(guikit_demo PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/demo"
         )
+        target_link_libraries(guikit_demo PRIVATE
+            guikit::all
+        )
+        guikit_enforce_guidelines(guikit_demo
+            HEADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/demo"
+        )
+        if (EMSCRIPTEN)
+            set_target_properties(guikit_demo PROPERTIES SUFFIX ".html")
+            target_link_options(guikit_demo PRIVATE
+                "-Oz"
+                "-flto"
+                "-sSTACK_SIZE=1048576"
+                "-Wl,--stack-first"
+                "-sALLOW_MEMORY_GROWTH=1"
+                "-sINITIAL_MEMORY=67108864"
+                "-sMAX_WEBGL_VERSION=2"
+                "-sMIN_WEBGL_VERSION=1"
+                "-sEXIT_RUNTIME=0"
+                "--shell-file" "${CMAKE_CURRENT_SOURCE_DIR}/demo/shell.html"
+            )
+        endif()
+    endif()
+
+    if (TARGET guikit::native AND NOT EMSCRIPTEN)
+        add_executable(guikit_demo_native ${GUIKIT_DEMO_SOURCES})
+        target_include_directories(guikit_demo_native PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/demo"
+        )
+        target_compile_definitions(guikit_demo_native PRIVATE
+            GUIKIT_DEMO_USE_NATIVE=1
+        )
+        target_link_libraries(guikit_demo_native PRIVATE
+            guikit::guikit
+            guikit::native
+            guikit::geo
+            guikit::signal
+            guikit::cockpit
+            guikit::diagram
+        )
+        if (TARGET guikit::text)
+            target_link_libraries(guikit_demo_native PRIVATE guikit::text)
+        endif()
+        guikit_enforce_guidelines(guikit_demo_native)
     endif()
 endif()

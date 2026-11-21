@@ -34,7 +34,11 @@ void ReleaseInactiveSceneBuffers(
 
 DemoWindow::DemoWindow()
     : guikit::MainWindow({
+#if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
+          .title = "GuiKit Demo (C++20 Immediate Mode + Native OpenGL ES3)",
+#else
           .title = "GuiKit Vector GUI Demo (C++20 Immediate Mode + ThorVG)",
+#endif
           .width = 1380,
           .height = 800,
           .minWidth = 320,

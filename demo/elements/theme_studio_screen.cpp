@@ -208,6 +208,7 @@ void RandomizeHarmonicTheme() noexcept {
         case guikit::ThemePreset::IndustrialLight:   return "IndustrialLight";
         case guikit::ThemePreset::HighContrastDark:  return "HighContrastDark";
         case guikit::ThemePreset::HighContrastLight: return "HighContrastLight";
+        case guikit::ThemePreset::Windows98:         return "Windows98";
     }
     return "Dark";
 }
@@ -218,6 +219,7 @@ void RandomizeHarmonicTheme() noexcept {
         case guikit::SurfaceStyle::Soft:      return "Soft";
         case guikit::SurfaceStyle::Outline:   return "Outline";
         case guikit::SurfaceStyle::Brutalist: return "Brutalist";
+        case guikit::SurfaceStyle::Bevel:     return "Bevel";
     }
     return "Solid";
 }
@@ -308,14 +310,16 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         guikit::ThemePresetName(guikit::ThemePreset::Industrial),
         guikit::ThemePresetName(guikit::ThemePreset::IndustrialLight),
         guikit::ThemePresetName(guikit::ThemePreset::HighContrastDark),
-        guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight)
+        guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight),
+        guikit::ThemePresetName(guikit::ThemePreset::Windows98)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kSurfaceStyleCount> kSurfaceNames = {{
         guikit::SurfaceStyleName(guikit::SurfaceStyle::Solid),
         guikit::SurfaceStyleName(guikit::SurfaceStyle::Soft),
         guikit::SurfaceStyleName(guikit::SurfaceStyle::Outline),
-        guikit::SurfaceStyleName(guikit::SurfaceStyle::Brutalist)
+        guikit::SurfaceStyleName(guikit::SurfaceStyle::Brutalist),
+        guikit::SurfaceStyleName(guikit::SurfaceStyle::Bevel)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kSyntaxPresetCount> kSyntaxNames = {{
@@ -370,6 +374,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         if (auto el = ui.Element({.label = "Base Preset"})) {
             if (ui.Select(presetIdx, kPresetNames, {.size = guikit::UiSize::Sm}).changed) {
                 s_studio.preset = keel::from_underlying<guikit::ThemePreset>(presetIdx);
+                s_studio.surfaceStyle = guikit::UiTheme::FromPreset(s_studio.preset).surfaceStyle;
                 ui.InvalidateAll();
             }
         }
@@ -443,6 +448,14 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                     r.radiusScale = 0.30f;
                     r.borderScale = 1.25f;
                     r.shadowIntensity = 0.50f;
+                    ApplySpecToStudioState(r);
+                    ui.InvalidateAll();
+                }
+                if (ui.Button({.text = "Win98", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
+                    guikit::ThemeSpec r{};
+                    r.base = guikit::ThemePreset::Windows98;
+                    r.surfaceStyle = guikit::SurfaceStyle::Bevel;
+                    r.shadowIntensity = 0.0f;
                     ApplySpecToStudioState(r);
                     ui.InvalidateAll();
                 }
@@ -630,10 +643,159 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
 
     if (auto zone = ui.Zone({.theme = built})) {
         if (auto bg = ui.Box({
+            .gap = 0.0f,
             .width = guikit::SizeMode::Stretch,
             .height = guikit::SizeMode::Stretch,
             .background = guikit::StateColor{built.palette.background}
         })) {
+            // Live Application Chrome Preview (MenuBar + Toolbar under the active theme)
+            guikit::ContextMenuOptions dropOpts{};
+            dropOpts.size = guikit::UiSize::Sm;
+            if (auto mb = ui.MenuBar({.size = guikit::UiSize::Sm})) {
+                if (auto file = mb.Menu("File", dropOpts)) {
+                    if (file.Item("Snapshot JSON", {.icon = guikit::Icon::Save()})) {
+                        s_studio.jsonDraft = BuildCurrentSpec().ToJson();
+                        s_studio.jsonImportStatus = 0;
+                        ui.InvalidateAll();
+                    }
+                    if (file.Item("Copy Theme JSON", {.icon = guikit::Icon::Copy()})) {
+                        const keel::String json = BuildCurrentSpec().ToJson();
+                        ui.SetClipboardText(json.as_ref());
+                        ui.ShowToast({
+                            .message = "Copied ThemeSpec JSON to clipboard",
+                            .variant = guikit::UiVariant::Success
+                        });
+                    }
+                    file.Separator();
+                    if (file.Item("Reset to Defaults", {.icon = guikit::Icon::Refresh(), .variant = guikit::UiVariant::Danger})) {
+                        ResetToDefaults();
+                        ui.InvalidateAll();
+                    }
+                }
+
+                if (auto themeMenu = mb.Menu("Theme", dropOpts)) {
+                    if (auto presetsSub = themeMenu.SubMenu("Base Preset", {.icon = guikit::Icon::Eye()})) {
+                        keel::i32 presetIdx = keel::as<keel::i32>(s_studio.preset);
+                        for (keel::usize pi = 0; pi < guikit::kThemePresetCount; ++pi) {
+                            const auto p = keel::from_underlying<guikit::ThemePreset>(pi);
+                            if (presetsSub.Radio(guikit::ThemePresetName(p), presetIdx, keel::as<keel::i32>(pi))) {
+                                s_studio.preset = p;
+                                s_studio.surfaceStyle = guikit::UiTheme::FromPreset(p).surfaceStyle;
+                                ui.InvalidateAll();
+                            }
+                        }
+                    }
+                    themeMenu.Separator();
+                    if (themeMenu.Item("Harmonic Randomize", {.icon = guikit::Icon::Flash()})) {
+                        RandomizeHarmonicTheme();
+                        ui.InvalidateAll();
+                    }
+                    if (themeMenu.Checkbox("Theme Morph (Lerp)", s_studio.enableLerp, {.keepOpen = true})) {
+                        ui.InvalidateAll();
+                    }
+                }
+
+                if (auto surfMenu = mb.Menu("Surface", dropOpts)) {
+                    surfMenu.Section("SURFACE STYLE");
+                    keel::i32 surfIdx = keel::as<keel::i32>(s_studio.surfaceStyle);
+                    for (keel::i32 si = 0; si < keel::as<keel::i32>(guikit::kSurfaceStyleCount); ++si) {
+                        const auto ss = keel::from_underlying<guikit::SurfaceStyle>(si);
+                        if (surfMenu.Radio(guikit::SurfaceStyleName(ss), surfIdx, si)) {
+                            s_studio.surfaceStyle = ss;
+                            ui.InvalidateAll();
+                        }
+                    }
+                    surfMenu.Separator();
+                    surfMenu.Section("SHELL STYLE");
+                    keel::i32 shellIdx = (s_studio.shellStyle == guikit::ShellStyle::Floating) ? 1 : 0;
+                    if (surfMenu.Radio("Docked", shellIdx, 0)) {
+                        s_studio.shellStyle = guikit::ShellStyle::Docked;
+                        ui.InvalidateAll();
+                    }
+                    if (surfMenu.Radio("Floating", shellIdx, 1)) {
+                        s_studio.shellStyle = guikit::ShellStyle::Floating;
+                        ui.InvalidateAll();
+                    }
+                }
+
+                if (auto viewMenu = mb.Menu("View", dropOpts)) {
+                    viewMenu.Section("STAGE SECTION");
+                    keel::i32 tabIdx = keel::as<keel::i32>(s_studio.activeStageTab);
+                    if (viewMenu.Radio("Full Showcase", tabIdx, 0))     { s_studio.activeStageTab = 0u; ui.InvalidateAll(); }
+                    if (viewMenu.Radio("Token Swatches", tabIdx, 1))    { s_studio.activeStageTab = 1u; ui.InvalidateAll(); }
+                    if (viewMenu.Radio("Controls & States", tabIdx, 2)) { s_studio.activeStageTab = 2u; ui.InvalidateAll(); }
+                    if (viewMenu.Radio("Zones & Syntax", tabIdx, 3))    { s_studio.activeStageTab = 3u; ui.InvalidateAll(); }
+                }
+
+                mb.Spacer();
+                ui.Tag(guikit::ThemePresetName(built.preset), {
+                    .variant = guikit::UiVariant::Primary,
+                    .size = guikit::UiSize::Xs
+                });
+            }
+
+            if (auto tb = ui.Toolbar({.size = guikit::UiSize::Sm})) {
+                if (tb.Action({
+                    .text = "Randomize",
+                    .tooltip = "Generate a harmonic color scheme",
+                    .icon = guikit::Icon::Refresh(),
+                    .color = guikit::StateColor::Primary()
+                }).clicked) {
+                    RandomizeHarmonicTheme();
+                    ui.InvalidateAll();
+                }
+                if (tb.Action({
+                    .text = "Reset",
+                    .tooltip = "Reset all theme studio overrides",
+                    .icon = guikit::Icon::Close(),
+                    .color = guikit::StateColor::Secondary()
+                }).clicked) {
+                    ResetToDefaults();
+                    ui.InvalidateAll();
+                }
+
+                tb.Separator();
+
+                keel::i32 surfTool = keel::as<keel::i32>(s_studio.surfaceStyle);
+                bool surfChanged = false;
+                surfChanged |= tb.Item(surfTool, 0, {.text = "Solid"}).changed;
+                surfChanged |= tb.Item(surfTool, 1, {.text = "Soft"}).changed;
+                surfChanged |= tb.Item(surfTool, 2, {.text = "Outline"}).changed;
+                surfChanged |= tb.Item(surfTool, 3, {.text = "Brutalist"}).changed;
+                surfChanged |= tb.Item(surfTool, 4, {.text = "Classic 3D"}).changed;
+                if (surfChanged) {
+                    s_studio.surfaceStyle = keel::from_underlying<guikit::SurfaceStyle>(surfTool);
+                    ui.InvalidateAll();
+                }
+
+                tb.Separator();
+
+                bool isFloating = (s_studio.shellStyle == guikit::ShellStyle::Floating);
+                if (tb.Toggle(isFloating, {
+                    .text = "Floating",
+                    .tooltip = "Toggle Docked vs Floating shell panels",
+                    .color = guikit::StateColor::Info()
+                }).changed) {
+                    s_studio.shellStyle = isFloating ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked;
+                    ui.InvalidateAll();
+                }
+                if (tb.Toggle(s_studio.enableLerp, {
+                    .text = "Morph",
+                    .tooltip = "Toggle UiTheme::Lerp morphing",
+                    .icon = guikit::Icon::Flash(),
+                    .color = guikit::StateColor::Warning()
+                }).changed) {
+                    ui.InvalidateAll();
+                }
+
+                tb.Spacer();
+                const keel::f32 txtBgRatio = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.background);
+                ui.Tag(ui.Format("WCAG {:.1f}:1", txtBgRatio), {
+                    .variant = ContrastBadgeVariant(txtBgRatio),
+                    .size = guikit::UiSize::Xs
+                });
+            }
+
             if (auto scroll = ui.ScrollArea({
                 .width = guikit::SizeMode::Stretch,
                 .height = guikit::SizeMode::Stretch

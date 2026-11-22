@@ -129,10 +129,12 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
                 ? (kBaseCount + m_selectedExtension)
                 : keel::as<keel::i32>(m_selectedCategory);
 
+            menu.Section("THEME");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
+
             menu.Section("STRUCTURE");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemHeading),       {.text = "Heading",      .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemElement),       {.text = "Element",      .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
 
             menu.Section("CONTROLS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
@@ -357,7 +359,8 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ThemePresetName(guikit::ThemePreset::Industrial),
             guikit::ThemePresetName(guikit::ThemePreset::IndustrialLight),
             guikit::ThemePresetName(guikit::ThemePreset::HighContrastDark),
-            guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight)
+            guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight),
+            guikit::ThemePresetName(guikit::ThemePreset::Windows98)
         }};
         keel::usize previewPresetIdx = keel::as<keel::usize>(m_demoCtx.previewTheme.preset);
         if (previewPresetIdx >= guikit::kThemePresetCount) {

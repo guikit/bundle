@@ -47,7 +47,7 @@ private:
 
     guikit::SidebarMode m_navSidebarMode = guikit::SidebarMode::Expanded;
     guikit::SidebarMode m_inspectorSidebarMode = guikit::SidebarMode::Expanded;
-    NavCategory m_selectedCategory = NavCategory::ElemHeading;
+    NavCategory m_selectedCategory = NavCategory::ElemThemeStudio;
     keel::i32 m_selectedExtension = -1;
     NavCategory m_prevRenderedCategory = NavCategory::ElemHeading;
     keel::i32 m_prevRenderedExtension = -1;

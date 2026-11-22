@@ -5,10 +5,9 @@ namespace guikit::demo {
 namespace {
 
 struct ThemeStudioState {
-    // Base & Mode
-    guikit::ThemePreset preset = guikit::ThemePreset::Dark;
-    keel::i32 modeOverrideIdx = 0; // 0 = Auto, 1 = Dark, 2 = Light
-    guikit::SurfaceStyle surfaceStyle = guikit::SurfaceStyle::Solid;
+    // Base Preset & Style
+    guikit::ThemePreset preset = guikit::ThemePreset::Windows98;
+    guikit::SurfaceStyle surfaceStyle = guikit::SurfaceStyle::Bevel;
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
     // Seed & Direct Color Overrides
@@ -76,9 +75,8 @@ struct ThemeStudioState {
 ThemeStudioState s_studio;
 
 void ResetToDefaults() noexcept {
-    s_studio.preset = guikit::ThemePreset::Dark;
-    s_studio.modeOverrideIdx = 0;
-    s_studio.surfaceStyle = guikit::SurfaceStyle::Solid;
+    s_studio.preset = guikit::ThemePreset::Windows98;
+    s_studio.surfaceStyle = guikit::SurfaceStyle::Bevel;
     s_studio.syntaxPreset = guikit::SyntaxPreset::Auto;
 
     s_studio.overrideAccent = false;
@@ -109,12 +107,24 @@ void ResetToDefaults() noexcept {
     s_studio.lerpT = 0.0f;
 }
 
+void SelectBasePreset(guikit::ThemePreset preset) noexcept {
+    s_studio.preset = preset;
+    s_studio.surfaceStyle = guikit::UiTheme::FromPreset(preset).surfaceStyle;
+    s_studio.overrideAccent = false;
+    s_studio.overrideNeutral = false;
+    s_studio.overrideBackground = false;
+    s_studio.overrideSurface = false;
+    s_studio.overrideBorder = false;
+    s_studio.overrideText = false;
+    s_studio.overrideSuccess = false;
+    s_studio.overrideWarning = false;
+    s_studio.overrideDanger = false;
+    s_studio.overrideInfo = false;
+}
+
 void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
     ResetToDefaults();
     s_studio.preset = spec.base;
-    if (spec.mode.has_value()) {
-        s_studio.modeOverrideIdx = (*spec.mode == guikit::ThemeMode::Light) ? 2 : 1;
-    }
     s_studio.surfaceStyle = spec.surfaceStyle.value_or(guikit::UiTheme::FromPreset(spec.base).surfaceStyle);
     s_studio.syntaxPreset = spec.syntaxPreset;
     if (spec.accent.has_value()) { s_studio.overrideAccent = true; s_studio.accentColor = *spec.accent; }
@@ -143,8 +153,6 @@ void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
 [[nodiscard]] guikit::ThemeSpec BuildCurrentSpec() noexcept {
     guikit::ThemeSpec spec{};
     spec.base = s_studio.preset;
-    if (s_studio.modeOverrideIdx == 1) spec.mode = guikit::ThemeMode::Dark;
-    else if (s_studio.modeOverrideIdx == 2) spec.mode = guikit::ThemeMode::Light;
     spec.surfaceStyle = s_studio.surfaceStyle;
     spec.syntaxPreset = s_studio.syntaxPreset;
     if (s_studio.overrideAccent)     spec.accent = s_studio.accentColor;
@@ -368,97 +376,13 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
-    // 1. PRESETS & RECIPES
-    if (auto acc = ui.Accordion({.label = "PRESETS & RECIPES", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
+    // 1. THEME PRESET
+    if (auto acc = ui.Accordion({.label = "THEME PRESET", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
         keel::usize presetIdx = keel::as<keel::usize>(s_studio.preset);
         if (auto el = ui.Element({.label = "Base Preset"})) {
             if (ui.Select(presetIdx, kPresetNames, {.size = guikit::UiSize::Sm}).changed) {
-                s_studio.preset = keel::from_underlying<guikit::ThemePreset>(presetIdx);
-                s_studio.surfaceStyle = guikit::UiTheme::FromPreset(s_studio.preset).surfaceStyle;
+                SelectBasePreset(keel::from_underlying<guikit::ThemePreset>(presetIdx));
                 ui.InvalidateAll();
-            }
-        }
-
-        static constexpr keel::StaticArray<keel::StringRef, 3> kModeNames = {"Auto", "Dark", "Light"};
-        if (auto el = ui.Element({.label = "Mode Override"})) {
-            if (ui.Segmented(s_studio.modeOverrideIdx, kModeNames, {.size = guikit::UiSize::Sm}).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = ui.Element({.label = "Designer Recipes", .description = "1-click design system archetypes"})) {
-            if (auto w = ui.Wrap({.gap = 6.0f})) {
-                if (ui.Button({.text = "Linear", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
-                    guikit::ThemeSpec r{};
-                    r.base = guikit::ThemePreset::Dark;
-                    r.surfaceStyle = guikit::SurfaceStyle::Soft;
-                    r.accent = guikit::Color::Hex(0x818CF8FF);
-                    r.neutral = guikit::Color::Hex(0x11121BFF);
-                    r.surfaceContrast = 0.80f;
-                    r.radiusScale = 0.85f;
-                    r.shadowIntensity = 0.70f;
-                    ApplySpecToStudioState(r);
-                    ui.InvalidateAll();
-                }
-                if (ui.Button({.text = "Material 3", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
-                    guikit::ThemeSpec r{};
-                    r.base = guikit::ThemePreset::Light;
-                    r.surfaceStyle = guikit::SurfaceStyle::Soft;
-                    r.accent = guikit::Color::Hex(0x4F46E5FF);
-                    r.neutral = guikit::Color::Hex(0xEEF2FFFF);
-                    r.radiusScale = 1.55f;
-                    r.shadowIntensity = 1.15f;
-                    r.shellStyle = guikit::ShellStyle::Floating;
-                    ApplySpecToStudioState(r);
-                    ui.InvalidateAll();
-                }
-                if (ui.Button({.text = "Vercel", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
-                    guikit::ThemeSpec r{};
-                    r.base = guikit::ThemePreset::Dark;
-                    r.surfaceStyle = guikit::SurfaceStyle::Outline;
-                    r.background = guikit::Color::Hex(0x09090BFF);
-                    r.surface = guikit::Color::Hex(0x111114FF);
-                    r.border = guikit::Color::Hex(0x27272AFF);
-                    r.accent = guikit::Color::Hex(0xFAFAFAFF);
-                    r.radiusScale = 0.75f;
-                    r.shadowIntensity = 0.0f;
-                    ApplySpecToStudioState(r);
-                    ui.InvalidateAll();
-                }
-                if (ui.Button({.text = "Brutalist", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
-                    guikit::ThemeSpec r{};
-                    r.base = guikit::ThemePreset::Light;
-                    r.surfaceStyle = guikit::SurfaceStyle::Brutalist;
-                    r.background = guikit::Color::Hex(0xFAF7F2FF);
-                    r.surface = guikit::Color::Hex(0xFFFFFFFF);
-                    r.accent = guikit::Color::Hex(0xE11D48FF);
-                    r.radiusScale = 0.0f;
-                    r.borderScale = 1.5f;
-                    r.shadowIntensity = 0.0f;
-                    ApplySpecToStudioState(r);
-                    ui.InvalidateAll();
-                }
-                if (ui.Button({.text = "SCADA", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
-                    guikit::ThemeSpec r{};
-                    r.base = guikit::ThemePreset::Industrial;
-                    r.surfaceStyle = guikit::SurfaceStyle::Solid;
-                    r.syntaxPreset = guikit::SyntaxPreset::Monokai;
-                    r.accent = guikit::Color::Hex(0x06B6D4FF);
-                    r.surfaceContrast = 1.35f;
-                    r.radiusScale = 0.30f;
-                    r.borderScale = 1.25f;
-                    r.shadowIntensity = 0.50f;
-                    ApplySpecToStudioState(r);
-                    ui.InvalidateAll();
-                }
-                if (ui.Button({.text = "Win98", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
-                    guikit::ThemeSpec r{};
-                    r.base = guikit::ThemePreset::Windows98;
-                    r.surfaceStyle = guikit::SurfaceStyle::Bevel;
-                    r.shadowIntensity = 0.0f;
-                    ApplySpecToStudioState(r);
-                    ui.InvalidateAll();
-                }
             }
         }
     }
@@ -679,8 +603,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                         for (keel::usize pi = 0; pi < guikit::kThemePresetCount; ++pi) {
                             const auto p = keel::from_underlying<guikit::ThemePreset>(pi);
                             if (presetsSub.Radio(guikit::ThemePresetName(p), presetIdx, keel::as<keel::i32>(pi))) {
-                                s_studio.preset = p;
-                                s_studio.surfaceStyle = guikit::UiTheme::FromPreset(p).surfaceStyle;
+                                SelectBasePreset(p);
                                 ui.InvalidateAll();
                             }
                         }

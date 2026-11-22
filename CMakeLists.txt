@@ -93,6 +93,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/demo_window.cpp
         demo/elements/heading_screen.cpp
         demo/elements/element_screen.cpp
+        demo/elements/theme_studio_screen.cpp
         demo/elements/button_screen.cpp
         demo/elements/slider_screen.cpp
         demo/elements/progress_bar_screen.cpp

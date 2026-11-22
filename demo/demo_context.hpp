@@ -9,6 +9,7 @@ enum class NavCategory : keel::u8 {
     // 1. ELEMENTS (Atomic Controls)
     ElemHeading = 0,
     ElemElement,
+    ElemThemeStudio,
     ElemButton,
     ElemSlider,
     ElemProgressBar,
@@ -59,7 +60,8 @@ constexpr bool IsSandboxCategory(NavCategory cat) noexcept {
 }
 
 constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
-    return cat == NavCategory::PanelSplitView ||
+    return cat == NavCategory::ElemThemeStudio ||
+           cat == NavCategory::PanelSplitView ||
            cat == NavCategory::PanelSidebar ||
            cat == NavCategory::PanelMenuBar ||
            cat == NavCategory::PanelTreeView ||
@@ -111,6 +113,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
     switch (cat) {
         case NavCategory::ElemHeading:       return "Heading — Section & Title Typography";
         case NavCategory::ElemElement:       return "Element — Form-Field Wrapper & Slot Anatomy";
+        case NavCategory::ElemThemeStudio:   return "Theme Studio — Design Tokens, Presets & WCAG";
         case NavCategory::ElemButton:        return "Button — Interactive Push Control";
         case NavCategory::ElemSlider:        return "Slider & StepSlider — Continuous, Discrete & Range";
         case NavCategory::ElemProgressBar:   return "ProgressBar — Smooth, Segmented & Indeterminate";
@@ -152,6 +155,7 @@ constexpr keel::StringRef CategoryControlName(NavCategory cat) noexcept {
     switch (cat) {
         case NavCategory::ElemHeading:       return "Heading";
         case NavCategory::ElemElement:       return "Element";
+        case NavCategory::ElemThemeStudio:   return "Theme Studio";
         case NavCategory::ElemButton:        return "Button";
         case NavCategory::ElemSlider:        return "Slider";
         case NavCategory::ElemProgressBar:   return "ProgressBar";
@@ -413,6 +417,7 @@ struct DemoContext {
 
     guikit::UiTheme shellTheme = guikit::UiTheme::Dark();
     guikit::UiTheme previewTheme = guikit::UiTheme::Dark();
+    keel::Optional<guikit::UiTheme> pendingShellTheme = keel::kNullOpt;
     keel::f32 previewDensity = 1.0f;
 
     // Semantic Element form-field wrapper state (shared across ELEMENTS screens, excluding ElemHeading)
@@ -1190,6 +1195,10 @@ keel::String GenerateHeadingCode(const DemoContext& ctx);
 void RenderElementInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderElementStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateElementCode(const DemoContext& ctx);
+
+void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateThemeStudioCode(const DemoContext& ctx);
 
 void RenderButtonInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderButtonStage(guikit::Context& ui, DemoContext& ctx);

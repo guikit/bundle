@@ -77,6 +77,11 @@ void DemoWindow::OnRender(guikit::Context& ui) {
     RenderWorkspace(ui);
     RenderBottomStatusBar(ui);
 
+    if (m_demoCtx.pendingShellTheme.has_value()) {
+        SetShellTheme(*m_demoCtx.pendingShellTheme);
+        m_demoCtx.pendingShellTheme = keel::kNullOpt;
+    }
+
     if (m_selectedCategory != m_prevRenderedCategory || m_selectedExtension != m_prevRenderedExtension) {
         ReleaseInactiveSceneBuffers(m_prevRenderedCategory, m_prevRenderedExtension, m_extensions);
         m_prevRenderedCategory = m_selectedCategory;
@@ -127,6 +132,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Section("STRUCTURE");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemHeading),       {.text = "Heading",      .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemElement),       {.text = "Element",      .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
 
             menu.Section("CONTROLS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
@@ -341,16 +347,32 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             ui.InvalidateAll();
         }
 
-        if (ui.Switch(m_demoCtx.previewLightMode, {
-            .textLeft = "Dark",
-            .textRight = "Light",
-            .symmetric = true,
-            .size = guikit::UiSize::Md
+        static constexpr keel::StaticArray<keel::StringRef, guikit::kThemePresetCount> kPreviewPresetLabels = {{
+            guikit::ThemePresetName(guikit::ThemePreset::Dark),
+            guikit::ThemePresetName(guikit::ThemePreset::Light),
+            guikit::ThemePresetName(guikit::ThemePreset::Nord),
+            guikit::ThemePresetName(guikit::ThemePreset::Dracula),
+            guikit::ThemePresetName(guikit::ThemePreset::CatppuccinMocha),
+            guikit::ThemePresetName(guikit::ThemePreset::CatppuccinLatte),
+            guikit::ThemePresetName(guikit::ThemePreset::Industrial),
+            guikit::ThemePresetName(guikit::ThemePreset::IndustrialLight),
+            guikit::ThemePresetName(guikit::ThemePreset::HighContrastDark),
+            guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight)
+        }};
+        keel::usize previewPresetIdx = keel::as<keel::usize>(m_demoCtx.previewTheme.preset);
+        if (previewPresetIdx >= guikit::kThemePresetCount) {
+            previewPresetIdx = 0u;
+        }
+        if (ui.Select(previewPresetIdx, kPreviewPresetLabels, {
+            .tooltip = "Preview Stage Theme Preset",
+            .size = guikit::UiSize::Sm,
+            .width = 152.0f
         }).changed) {
+            const guikit::ShellStyle prevShell = m_demoCtx.previewTheme.shellStyle;
+            m_demoCtx.previewTheme = guikit::UiTheme::FromPreset(keel::from_underlying<guikit::ThemePreset>(previewPresetIdx));
+            m_demoCtx.previewTheme.SetShellStyle(prevShell);
+            m_demoCtx.previewLightMode = (m_demoCtx.previewTheme.mode == guikit::ThemeMode::Light);
             m_demoCtx.previewDarkMode = !m_demoCtx.previewLightMode;
-            m_demoCtx.previewTheme.SetMode(m_demoCtx.previewDarkMode
-                ? guikit::ThemeMode::Dark
-                : guikit::ThemeMode::Light);
             ui.InvalidateAll();
         }
 
@@ -472,8 +494,9 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
         sb.Spacer();
 
-        static const keel::StaticArray<guikit::CommandPaletteItem, 15> kGlobalCommands = {{
+        static const keel::StaticArray<guikit::CommandPaletteItem, 16> kGlobalCommands = {{
             {.label = "Go to Element Form-Field Wrapper",      .category = "Structure",  .description = "5 ElementLayout modes & composite slots", .icon = guikit::Icon::Settings()},
+            {.label = "Go to Theme Studio (Presets & Tokens)", .category = "Theme",      .description = "9 presets, WCAG audit, JSON & Zone overrides", .icon = guikit::Icon::Eye()},
             {.label = "Go to LevelMeter / Segmented VU Meter", .category = "Controls",   .description = "LED dB meters, peak-hold & clip LED", .icon = guikit::Icon::Play()},
             {.label = "Go to TagInput Editable Chips",         .category = "Controls",   .description = "Editable tag pills & delimiter split",.icon = guikit::Icon::Edit()},
             {.label = "Go to Select / MultiSelect / ComboBox", .category = "Controls",   .description = "Dropdown, live filter & tag chips",   .icon = guikit::Icon::Plus()},
@@ -507,28 +530,29 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
         if (cmdResp.changed && cmdResp.selectedIndex >= 0) {
             switch (cmdResp.selectedIndex) {
                 case 0:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemElement; break;
-                case 1:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemLevelMeter; break;
-                case 2:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemTagInput; break;
-                case 3:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemSelect; break;
-                case 4:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemDatePicker; break;
-                case 5:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemSpinBox; break;
-                case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemColorPicker; break;
-                case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelSplitView; break;
-                case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelBreadcrumb; break;
-                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelPagination; break;
-                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelOverlays; break;
-                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelTable; break;
-                case 12:
+                case 1:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemThemeStudio; break;
+                case 2:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemLevelMeter; break;
+                case 3:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemTagInput; break;
+                case 4:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemSelect; break;
+                case 5:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemDatePicker; break;
+                case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemSpinBox; break;
+                case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemColorPicker; break;
+                case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelSplitView; break;
+                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelBreadcrumb; break;
+                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelPagination; break;
+                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelOverlays; break;
+                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelTable; break;
+                case 13:
                     m_demoCtx.previewLightMode = !m_demoCtx.previewLightMode;
                     m_demoCtx.previewDarkMode = !m_demoCtx.previewLightMode;
                     m_demoCtx.previewTheme.SetMode(m_demoCtx.previewDarkMode
                         ? guikit::ThemeMode::Dark
                         : guikit::ThemeMode::Light);
                     break;
-                case 13:
+                case 14:
                     m_demoCtx.previewShowCode = !m_demoCtx.previewShowCode;
                     break;
-                case 14:
+                case 15:
                     SetShellFloating(!IsShellFloating());
                     break;
                 default: break;
@@ -540,10 +564,11 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
 void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using InspectorFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<InspectorFn, 35> kInspectors = {
+    static constexpr keel::StaticArray<InspectorFn, 36> kInspectors = {
         // 1. ELEMENTS
         &RenderHeadingInspector,
         &RenderElementInspector,
+        &RenderThemeStudioInspector,
         &RenderButtonInspector,
         &RenderSliderInspector,
         &RenderProgressBarInspector,
@@ -594,10 +619,11 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
 
 void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using StageFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<StageFn, 35> kStages = {
+    static constexpr keel::StaticArray<StageFn, 36> kStages = {
         // 1. ELEMENTS
         &RenderHeadingStage,
         &RenderElementStage,
+        &RenderThemeStudioStage,
         &RenderButtonStage,
         &RenderSliderStage,
         &RenderProgressBarStage,
@@ -648,10 +674,11 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
 
 keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContext& ctx) {
     using CodeGenFn = keel::String (*)(const DemoContext&);
-    static constexpr keel::StaticArray<CodeGenFn, 35> kGenerators = {
+    static constexpr keel::StaticArray<CodeGenFn, 36> kGenerators = {
         // 1. ELEMENTS
         &GenerateHeadingCode,
         &GenerateElementCode,
+        &GenerateThemeStudioCode,
         &GenerateButtonCode,
         &GenerateSliderCode,
         &GenerateProgressBarCode,

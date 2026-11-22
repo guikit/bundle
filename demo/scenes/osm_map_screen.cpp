@@ -29,7 +29,6 @@ struct GisScreenState {
     bool showBorderRulers{true};
     bool showScaleBarOverlay{true};
     bool showControls{true};
-    bool showScrollbars{true};
     keel::f32 radius{8.0f};
 
     guikit::MapViewState lastView{};
@@ -244,7 +243,6 @@ void RenderOsmMapStage(guikit::Context& ui, DemoContext& ctx) {
         .showScaleBarOverlay = s_state.showScaleBarOverlay,
         .height = guikit::SizeMode::Stretch,
         .selectableItems = true,
-        .showScrollbars = s_state.showScrollbars,
         .showControls = s_state.showControls,
         .border = {.width = 1.0f, .radius = s_state.radius}
     })) {

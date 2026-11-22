@@ -115,7 +115,7 @@ void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
     if (spec.mode.has_value()) {
         s_studio.modeOverrideIdx = (*spec.mode == guikit::ThemeMode::Light) ? 2 : 1;
     }
-    s_studio.surfaceStyle = spec.surfaceStyle;
+    s_studio.surfaceStyle = spec.surfaceStyle.value_or(guikit::UiTheme::FromPreset(spec.base).surfaceStyle);
     s_studio.syntaxPreset = spec.syntaxPreset;
     if (spec.accent.has_value()) { s_studio.overrideAccent = true; s_studio.accentColor = *spec.accent; }
     if (spec.neutral.has_value()) { s_studio.overrideNeutral = true; s_studio.neutralColor = *spec.neutral; }
@@ -1095,9 +1095,10 @@ keel::String GenerateThemeStudioCode(const DemoContext&) {
         keel::format_into(out, ",\n    .mode = guikit::ThemeMode::{}",
             (*spec.mode == guikit::ThemeMode::Light) ? "Light" : "Dark");
     }
-    if (spec.surfaceStyle != guikit::SurfaceStyle::Solid) {
+    const guikit::SurfaceStyle presetDefaultSurface = guikit::UiTheme::FromPreset(spec.base).surfaceStyle;
+    if (spec.surfaceStyle.has_value() && *spec.surfaceStyle != presetDefaultSurface) {
         keel::format_into(out, ",\n    .surfaceStyle = guikit::SurfaceStyle::{}",
-            SurfaceStyleEnumIdentifier(spec.surfaceStyle));
+            SurfaceStyleEnumIdentifier(*spec.surfaceStyle));
     }
     if (spec.syntaxPreset != guikit::SyntaxPreset::Auto) {
         keel::format_into(out, ",\n    .syntaxPreset = guikit::SyntaxPreset::{}",

@@ -1,5 +1,7 @@
 build/
 build-*/
+build_native/
+build_sdl/
 build_wasm*/
 dist/
 .emsdk/

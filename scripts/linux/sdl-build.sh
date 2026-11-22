@@ -26,8 +26,10 @@ else
     CONFIG="Release"
 fi
 
+BUILD_DIR="build_sdl"
+
 echo "========================================================"
-echo " GuiKit Desktop Build ($CONFIG)"
+echo " GuiKit SDL Build ($CONFIG) — SDL3 + ThorVG + FreeType"
 echo "========================================================"
 
 if [[ ! -f "/usr/include/X11/Xlib.h" || ! -f "/usr/include/GL/gl.h" ]] || ! command -v pkg-config >/dev/null 2>&1; then
@@ -35,17 +37,32 @@ if [[ ! -f "/usr/include/X11/Xlib.h" || ! -f "/usr/include/GL/gl.h" ]] || ! comm
     "${SCRIPT_DIR}/install-deps.sh"
 fi
 
-if [[ ! -f "build/Makefile" && ! -f "build/build.ninja" ]]; then
-    rm -f build/CMakeCache.txt
-    echo "[INFO] Configuring CMake build directory ($CONFIG)..."
-    cmake -B build -S . -DCMAKE_BUILD_TYPE="$CONFIG"
+NEEDS_CONFIGURE=0
+if [[ ! -f "${BUILD_DIR}/Makefile" && ! -f "${BUILD_DIR}/build.ninja" ]]; then
+    NEEDS_CONFIGURE=1
+elif [[ -f "${BUILD_DIR}/CMakeCache.txt" ]]; then
+    CACHED_TYPE="$(grep -E '^CMAKE_BUILD_TYPE:STRING=' "${BUILD_DIR}/CMakeCache.txt" | cut -d= -f2- || true)"
+    if [[ -n "$CACHED_TYPE" && "$CACHED_TYPE" != "$CONFIG" ]]; then
+        NEEDS_CONFIGURE=1
+    fi
+fi
+
+if [[ "$NEEDS_CONFIGURE" -eq 1 ]]; then
+    echo "[INFO] Configuring CMake SDL3 + ThorVG + FreeType build directory (${BUILD_DIR}, ${CONFIG})..."
+    cmake -B "${BUILD_DIR}" -S . \
+        -DCMAKE_BUILD_TYPE="$CONFIG" \
+        -DGUIKIT_BUNDLE_BUILD_SDL=ON \
+        -DGUIKIT_BUNDLE_BUILD_NATIVE=OFF \
+        -DGUIKIT_BUNDLE_BUILD_DEMO=ON \
+        -DGUIKIT_BUNDLE_BUILD_TESTS=OFF \
+        -DGUIKIT_TEXT_USE_FREETYPE=ON
 fi
 
 echo "[INFO] Building guikit_demo ($CONFIG)..."
-cmake --build build --config "$CONFIG" --target guikit_demo --parallel
+cmake --build "${BUILD_DIR}" --config "$CONFIG" --target guikit_demo --parallel
 
 echo ""
 echo "========================================================"
-echo " Desktop build succeeded!"
-echo " Binary: build/guikit_demo"
+echo " SDL build succeeded (SDL3 + ThorVG + FreeType)!"
+echo " Binary: ${BUILD_DIR}/guikit_demo"
 echo "========================================================"

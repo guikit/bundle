@@ -19,19 +19,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "$REPO_ROOT"
 
-CONFIG="${1:-Release}"
-if [[ "${CONFIG,,}" == "debug" ]]; then
-    CONFIG="Debug"
-    shift || true
-elif [[ "${CONFIG,,}" == "release" ]]; then
-    CONFIG="Release"
-    shift || true
-else
-    CONFIG="Release"
+CONFIG="Release"
+if [[ $# -gt 0 ]]; then
+    if [[ "${1,,}" == "debug" ]]; then
+        CONFIG="Debug"
+        shift
+    elif [[ "${1,,}" == "release" ]]; then
+        CONFIG="Release"
+        shift
+    fi
 fi
 
+BUILD_DIR="build_sdl"
 GUIKIT_BIN=""
-for candidate in "build/guikit_demo" "build/${CONFIG}/guikit_demo" "build/Release/guikit_demo" "build/Debug/guikit_demo"; do
+for candidate in "${BUILD_DIR}/guikit_demo" "${BUILD_DIR}/${CONFIG}/guikit_demo" "${BUILD_DIR}/Release/guikit_demo" "${BUILD_DIR}/Debug/guikit_demo"; do
     if [[ -f "$candidate" ]]; then
         GUIKIT_BIN="$candidate"
         break
@@ -39,9 +40,9 @@ for candidate in "build/guikit_demo" "build/${CONFIG}/guikit_demo" "build/Releas
 done
 
 if [[ -z "$GUIKIT_BIN" ]]; then
-    echo "[guikit] guikit_demo binary not found. Building ${CONFIG} first..."
-    "${SCRIPT_DIR}/desktop-build.sh" "$CONFIG"
-    for candidate in "build/guikit_demo" "build/${CONFIG}/guikit_demo"; do
+    echo "[guikit] guikit_demo binary not found. Building ${CONFIG} (SDL3 + ThorVG + FreeType) first..."
+    "${SCRIPT_DIR}/sdl-build.sh" "$CONFIG"
+    for candidate in "${BUILD_DIR}/guikit_demo" "${BUILD_DIR}/${CONFIG}/guikit_demo"; do
         if [[ -f "$candidate" ]]; then
             GUIKIT_BIN="$candidate"
             break
@@ -54,5 +55,5 @@ if [[ -z "$GUIKIT_BIN" ]]; then
     exit 1
 fi
 
-echo "[guikit] Launching Desktop Demo: $GUIKIT_BIN"
+echo "[guikit] Launching SDL Desktop Demo (SDL3 + ThorVG + FreeType): $GUIKIT_BIN"
 exec "$GUIKIT_BIN" "$@"

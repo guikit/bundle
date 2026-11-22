@@ -48,17 +48,24 @@ cmake -S . -B build
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 
-# Launch the full interactive showcase
-./scripts/linux/desktop-run.sh
+# Native showcase (100% GuiKit + keel::font + OpenGL ES3 — zero SDL3 / ThorVG / FreeType)
+./scripts/linux/native-build.sh
+./scripts/linux/native-run.sh
+
+# SDL3 + ThorVG + FreeType showcase
+./scripts/linux/sdl-build.sh
+./scripts/linux/sdl-run.sh
 ```
 
 **Windows:**
 ```cmd
-:: Configure & build Release
-scripts\windows\desktop-build.cmd
+:: Native showcase (zero SDL3 / ThorVG / FreeType)
+scripts\windows\native-build.cmd
+scripts\windows\native-run.cmd
 
-:: Build & launch the interactive demo
-scripts\windows\desktop-run.cmd
+:: SDL3 + ThorVG + FreeType showcase
+scripts\windows\sdl-build.cmd
+scripts\windows\sdl-run.cmd
 ```
 
 ### 3. WebAssembly Build, Local Preview & GitHub Pages Deploy

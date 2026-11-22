@@ -44,9 +44,13 @@ cmake --build build --parallel
 # Run all 14 ecosystem CTest suites (unit tests + header purity scans)
 ctest --test-dir build --output-on-failure --parallel
 
-# Launch full interactive desktop showcase
-./scripts/linux/desktop-run.sh        # Linux
-# scripts\windows\desktop-run.cmd     # Windows
+# Launch native showcase (zero SDL3 / ThorVG / FreeType)
+./scripts/linux/native-run.sh         # Linux
+# scripts\windows\native-run.cmd      # Windows
+
+# Launch SDL3 + ThorVG + FreeType showcase
+./scripts/linux/sdl-run.sh            # Linux
+# scripts\windows\sdl-run.cmd         # Windows
 
 # Build / preview / publish WebAssembly demo (https://guikit.github.io/demo/)
 ./scripts/linux/web-build.sh

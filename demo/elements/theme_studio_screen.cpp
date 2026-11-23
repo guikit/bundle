@@ -10,6 +10,13 @@ struct ThemeStudioState {
     guikit::SurfaceStyle surfaceStyle = guikit::SurfaceStyle::Bevel;
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
+    // Scrollbar Customization
+    guikit::ScrollbarPreset scrollbarPreset = guikit::ScrollbarPreset::Auto;
+    bool overrideScrollbarWidth = false;
+    keel::f32 scrollbarWidth = 16.0f;
+    bool customizeScrollbarTokens = false;
+    guikit::ScrollbarStyleTokens customScrollbarTokens = guikit::ScrollbarStyleTokens::Windows98();
+
     // Seed & Direct Color Overrides
     bool overrideAccent = false;
     guikit::Color accentColor = guikit::Color::Hex(0x8B5CF6FF);
@@ -78,6 +85,11 @@ void ResetToDefaults() noexcept {
     s_studio.preset = guikit::ThemePreset::Windows98;
     s_studio.surfaceStyle = guikit::SurfaceStyle::Bevel;
     s_studio.syntaxPreset = guikit::SyntaxPreset::Auto;
+    s_studio.scrollbarPreset = guikit::ScrollbarPreset::Auto;
+    s_studio.overrideScrollbarWidth = false;
+    s_studio.scrollbarWidth = 16.0f;
+    s_studio.customizeScrollbarTokens = false;
+    s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::Windows98();
 
     s_studio.overrideAccent = false;
     s_studio.overrideNeutral = false;
@@ -127,6 +139,11 @@ void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
     s_studio.preset = spec.base;
     s_studio.surfaceStyle = spec.surfaceStyle.value_or(guikit::UiTheme::FromPreset(spec.base).surfaceStyle);
     s_studio.syntaxPreset = spec.syntaxPreset;
+    s_studio.scrollbarPreset = spec.scrollbarPreset.value_or(guikit::ScrollbarPreset::Auto);
+    if (spec.scrollbarWidth.has_value()) {
+        s_studio.overrideScrollbarWidth = true;
+        s_studio.scrollbarWidth = *spec.scrollbarWidth;
+    }
     if (spec.accent.has_value()) { s_studio.overrideAccent = true; s_studio.accentColor = *spec.accent; }
     if (spec.neutral.has_value()) { s_studio.overrideNeutral = true; s_studio.neutralColor = *spec.neutral; }
     if (spec.background.has_value()) { s_studio.overrideBackground = true; s_studio.backgroundColor = *spec.background; }
@@ -155,6 +172,12 @@ void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
     spec.base = s_studio.preset;
     spec.surfaceStyle = s_studio.surfaceStyle;
     spec.syntaxPreset = s_studio.syntaxPreset;
+    if (s_studio.scrollbarPreset != guikit::ScrollbarPreset::Auto) {
+        spec.scrollbarPreset = s_studio.scrollbarPreset;
+    }
+    if (s_studio.overrideScrollbarWidth) {
+        spec.scrollbarWidth = s_studio.scrollbarWidth;
+    }
     if (s_studio.overrideAccent)     spec.accent = s_studio.accentColor;
     if (s_studio.overrideNeutral)    spec.neutral = s_studio.neutralColor;
     if (s_studio.overrideBackground) spec.background = s_studio.backgroundColor;
@@ -180,7 +203,13 @@ void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
 }
 
 [[nodiscard]] guikit::UiTheme BuildEffectiveTheme() noexcept {
-    const guikit::UiTheme primary = guikit::UiTheme::Build(BuildCurrentSpec());
+    guikit::UiTheme primary = guikit::UiTheme::Build(BuildCurrentSpec());
+    if (s_studio.customizeScrollbarTokens) {
+        primary.SetScrollbarStyle(s_studio.customScrollbarTokens);
+        if (s_studio.overrideScrollbarWidth) {
+            primary.SetScrollbarWidth(s_studio.scrollbarWidth);
+        }
+    }
     if (s_studio.enableLerp && s_studio.lerpT > 0.001f) {
         const guikit::UiTheme target = guikit::UiTheme::FromPreset(s_studio.lerpTarget);
         return guikit::UiTheme::Lerp(primary, target, s_studio.lerpT);
@@ -244,6 +273,30 @@ void RandomizeHarmonicTheme() noexcept {
         case guikit::SyntaxPreset::MatlabClassic: return "MatlabClassic";
     }
     return "Auto";
+}
+
+[[nodiscard]] constexpr keel::StringRef ScrollbarPresetEnumIdentifier(guikit::ScrollbarPreset p) noexcept {
+    switch (p) {
+        case guikit::ScrollbarPreset::Auto:         return "Auto";
+        case guikit::ScrollbarPreset::Modern:       return "Modern";
+        case guikit::ScrollbarPreset::Classic1988:  return "Classic1988";
+        case guikit::ScrollbarPreset::Windows98:    return "Windows98";
+        case guikit::ScrollbarPreset::WindowsXp:    return "WindowsXp";
+        case guikit::ScrollbarPreset::WindowsVista: return "WindowsVista";
+        case guikit::ScrollbarPreset::Windows7:     return "Windows7";
+        case guikit::ScrollbarPreset::WindowsFlat:  return "WindowsFlat";
+    }
+    return "Auto";
+}
+
+[[nodiscard]] constexpr keel::StringRef ScrollbarChromeLabel(guikit::ScrollbarChromeStyle c) noexcept {
+    switch (c) {
+        case guikit::ScrollbarChromeStyle::Modern:       return "Modern";
+        case guikit::ScrollbarChromeStyle::ClassicBevel: return "Classic 3D";
+        case guikit::ScrollbarChromeStyle::Outlined:     return "Outlined";
+        case guikit::ScrollbarChromeStyle::Flat:         return "Flat";
+    }
+    return "Modern";
 }
 
 [[nodiscard]] keel::FixedString<16> FormatHexLiteral(guikit::Color c) noexcept {
@@ -412,6 +465,125 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             if (ui.Select(synIdx, kSyntaxNames, {.size = guikit::UiSize::Sm}).changed) {
                 s_studio.syntaxPreset = keel::from_underlying<guikit::SyntaxPreset>(synIdx);
                 ui.InvalidateAll();
+            }
+        }
+    }
+
+    // 2b. SCROLLBAR CUSTOMIZATION
+    static constexpr keel::StaticArray<keel::StringRef, guikit::kScrollbarPresetCount> kScrollbarPresetNames = {{
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Auto),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Modern),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Classic1988),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Windows98),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::WindowsXp),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::WindowsVista),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Windows7),
+        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::WindowsFlat)
+    }};
+    static constexpr keel::StaticArray<keel::StringRef, 4> kSbChromeNames = {
+        "Modern", "Classic 3D", "Outlined", "Flat"
+    };
+    static constexpr keel::StaticArray<keel::StringRef, 4> kSbArrowNames = {
+        "None", "Triangle", "Chevron", "Arrow"
+    };
+    static constexpr keel::StaticArray<keel::StringRef, 3> kSbGripNames = {
+        "None", "Lines", "Dots"
+    };
+    if (auto acc = ui.Accordion({.label = "SCROLLBAR", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
+        keel::usize sbPresetIdx = keel::as<keel::usize>(s_studio.scrollbarPreset);
+        if (auto el = ui.Element({.label = "Scrollbar Preset", .description = "Windows 1988–2012 or Modern"})) {
+            if (ui.Select(sbPresetIdx, kScrollbarPresetNames, {.size = guikit::UiSize::Sm}).changed) {
+                s_studio.scrollbarPreset = keel::from_underlying<guikit::ScrollbarPreset>(sbPresetIdx);
+                const auto effectivePreset = (s_studio.scrollbarPreset == guikit::ScrollbarPreset::Auto)
+                    ? (s_studio.surfaceStyle == guikit::SurfaceStyle::Bevel
+                        ? guikit::ScrollbarPreset::Windows98
+                        : guikit::ScrollbarPreset::Modern)
+                    : s_studio.scrollbarPreset;
+                s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::FromPreset(effectivePreset);
+                s_studio.customizeScrollbarTokens = false;
+                ui.InvalidateAll();
+            }
+        }
+
+        if (auto el = ui.Element({.label = "Custom Width", .layout = guikit::ElementLayout::Leading})) {
+            if (ui.Switch(s_studio.overrideScrollbarWidth, {.size = guikit::UiSize::Sm}).changed) {
+                if (s_studio.overrideScrollbarWidth) {
+                    s_studio.scrollbarWidth = BuildEffectiveTheme().GetScrollbar(guikit::UiSize::Md).trackWidth;
+                }
+                ui.InvalidateAll();
+            }
+        }
+        if (s_studio.overrideScrollbarWidth) {
+            if (ui.Slider(s_studio.scrollbarWidth, 4.0f, 24.0f, {.valueFormat = "%.0f dp", .step = 1.0f, .size = guikit::UiSize::Sm}).changed) {
+                ui.InvalidateAll();
+            }
+        }
+
+        if (auto el = ui.Element({.label = "Fine-Tune Tokens", .layout = guikit::ElementLayout::Leading})) {
+            if (ui.Switch(s_studio.customizeScrollbarTokens, {.size = guikit::UiSize::Sm}).changed) {
+                if (s_studio.customizeScrollbarTokens) {
+                    s_studio.customScrollbarTokens = BuildEffectiveTheme().scrollbarStyle;
+                }
+                ui.InvalidateAll();
+            }
+        }
+        if (s_studio.customizeScrollbarTokens) {
+            auto& st = s_studio.customScrollbarTokens;
+            keel::usize chromeIdx = keel::as<keel::usize>(st.chrome);
+            if (auto el = ui.Element({.label = "Chrome Style"})) {
+                if (ui.Select(chromeIdx, kSbChromeNames, {.size = guikit::UiSize::Sm}).changed) {
+                    st.chrome = keel::from_underlying<guikit::ScrollbarChromeStyle>(chromeIdx);
+                    ui.InvalidateAll();
+                }
+            }
+            if (auto el = ui.Element({.label = "Arrow Buttons", .layout = guikit::ElementLayout::Leading})) {
+                if (ui.Switch(st.showButtons, {.size = guikit::UiSize::Sm}).changed) {
+                    if (st.showButtons && st.arrowStyle == guikit::ScrollbarArrowStyle::None) {
+                        st.arrowStyle = guikit::ScrollbarArrowStyle::Triangle;
+                    }
+                    ui.InvalidateAll();
+                }
+            }
+            if (st.showButtons) {
+                keel::usize arrowIdx = keel::as<keel::usize>(st.arrowStyle);
+                if (auto el = ui.Element({.label = "Arrow Glyph"})) {
+                    if (ui.Select(arrowIdx, kSbArrowNames, {.size = guikit::UiSize::Sm}).changed) {
+                        st.arrowStyle = keel::from_underlying<guikit::ScrollbarArrowStyle>(arrowIdx);
+                        ui.InvalidateAll();
+                    }
+                }
+            }
+            keel::usize gripIdx = keel::as<keel::usize>(st.gripStyle);
+            if (auto el = ui.Element({.label = "Thumb Grip"})) {
+                if (ui.Select(gripIdx, kSbGripNames, {.size = guikit::UiSize::Sm}).changed) {
+                    st.gripStyle = keel::from_underlying<guikit::ScrollbarGripStyle>(gripIdx);
+                    ui.InvalidateAll();
+                }
+            }
+            if (auto el = ui.Element({.label = "Thumb Inset"})) {
+                if (ui.Slider(st.thumbInset, 0.0f, 4.0f, {.valueFormat = "%.1f dp", .step = 0.5f, .size = guikit::UiSize::Sm}).changed) {
+                    ui.InvalidateAll();
+                }
+            }
+            if (auto el = ui.Element({.label = "Border Width"})) {
+                if (ui.Slider(st.borderWidth, 0.0f, 3.0f, {.valueFormat = "%.1f dp", .step = 0.5f, .size = guikit::UiSize::Sm}).changed) {
+                    ui.InvalidateAll();
+                }
+            }
+            if (auto el = ui.Element({.label = "Always Show Track", .layout = guikit::ElementLayout::Leading})) {
+                if (ui.Switch(st.alwaysShowTrack, {.size = guikit::UiSize::Sm}).changed) {
+                    ui.InvalidateAll();
+                }
+            }
+            if (auto el = ui.Element({.label = "Track Hatch", .layout = guikit::ElementLayout::Leading})) {
+                if (ui.Switch(st.trackHatch, {.size = guikit::UiSize::Sm}).changed) {
+                    ui.InvalidateAll();
+                }
+            }
+            if (auto el = ui.Element({.label = "Corner Box", .layout = guikit::ElementLayout::Leading})) {
+                if (ui.Switch(st.showCornerBox, {.size = guikit::UiSize::Sm}).changed) {
+                    ui.InvalidateAll();
+                }
             }
         }
     }
@@ -917,6 +1089,34 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                                     ui.LevelMeter(dbVal, -60.0, 0.0, {.segments = 24u, .multiZoneColor = true, .size = guikit::UiSize::Sm});
                                 }
                             }
+
+                            // Interactive 2D Scrollbar Preview (Vertical + Horizontal + Corner Box)
+                            if (auto sbEl = ui.Element({
+                                .label = ui.Format("Scrollbar Preview — {} ({:.0f}dp)",
+                                    guikit::ScrollbarPresetName(built.scrollbarPreset),
+                                    built.GetScrollbar(guikit::UiSize::Md).trackWidth),
+                                .description = "Test vertical/horizontal stepper arrows, thumb drag, grip & corner box"
+                            })) {
+                                if (auto sbBox = ui.ScrollArea({
+                                    .orientation = guikit::Orientation::Both,
+                                    .scrollbar = guikit::VisibilityPolicy::Always,
+                                    .gap = 4.0f,
+                                    .padding = guikit::Padding::All(10.0f),
+                                    .width = guikit::SizeMode::Stretch,
+                                    .height = 136.0f,
+                                    .background = guikit::StateColor{built.palette.inputBackground},
+                                    .border = {.width = 1.0f, .color = guikit::StateColor{built.palette.border}}
+                                })) {
+                                    for (keel::i32 row = 1; row <= 14; ++row) {
+                                        ui.Text(ui.Format(
+                                            "Row {:02d}  |  Scrollbar Preset: {}  |  Chrome: {}  |  Horizontal overflow sample column A · column B · column C · column D",
+                                            row,
+                                            guikit::ScrollbarPresetName(built.scrollbarPreset),
+                                            ScrollbarChromeLabel(built.scrollbarStyle.chrome)
+                                        ), {.role = guikit::TextRole::CodeSmall});
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1026,6 +1226,13 @@ keel::String GenerateThemeStudioCode(const DemoContext&) {
     if (spec.syntaxPreset != guikit::SyntaxPreset::Auto) {
         keel::format_into(out, ",\n    .syntaxPreset = guikit::SyntaxPreset::{}",
             SyntaxPresetEnumIdentifier(spec.syntaxPreset));
+    }
+    if (spec.scrollbarPreset.has_value() && *spec.scrollbarPreset != guikit::ScrollbarPreset::Auto) {
+        keel::format_into(out, ",\n    .scrollbarPreset = guikit::ScrollbarPreset::{}",
+            ScrollbarPresetEnumIdentifier(*spec.scrollbarPreset));
+    }
+    if (spec.scrollbarWidth.has_value()) {
+        keel::format_into(out, ",\n    .scrollbarWidth = {:.1f}f", *spec.scrollbarWidth);
     }
     if (spec.accent.has_value())      keel::format_into(out, ",\n    .accent = guikit::Color::Hex({})", FormatHexLiteral(*spec.accent));
     if (spec.neutral.has_value())     keel::format_into(out, ",\n    .neutral = guikit::Color::Hex({})", FormatHexLiteral(*spec.neutral));

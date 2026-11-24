@@ -1038,7 +1038,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     if (showAll || s_studio.activeStageTab == 2u) {
                         // Flat vs Elevated card comparison
                         if (auto cmpRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
-                            if (auto flatCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .elevated = false})) {
+                            if (auto flatCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .surface = guikit::SurfaceRole::Flat})) {
                                 guikit::Heading(ui, {
                                     .label = "Flat Surface Card",
                                     .description = "Tests surfaceContrast & borderScale separation",
@@ -1051,7 +1051,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                                     guikit::Tag(ui, "Disabled",        {.variant = guikit::UiVariant::Warning, .style = guikit::TagStyle::Soft,    .size = guikit::UiSize::Sm, .disabled = true});
                                 }
                             }
-                            if (auto elevCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .elevated = true})) {
+                            if (auto elevCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .surface = guikit::SurfaceRole::Raised})) {
                                 guikit::Heading(ui, {
                                     .label = "Elevated Surface Card",
                                     .description = "Tests Elevation::Md shadowIntensity & surfaceElevated",
@@ -1068,7 +1068,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                         if (auto card = guikit::Card(ui, {
                             .gap = 12.0f,
                             .padding = guikit::Padding::All(16.0f),
-                            .elevated = true
+                            .surface = guikit::SurfaceRole::Raised
                         })) {
                             guikit::Heading(ui, {
                                 .label = ui.Format("Controls & States — {} / {}",

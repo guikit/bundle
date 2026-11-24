@@ -274,7 +274,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                     .width = s_ov.popoverWidth,
                     .gap = 10.0f,
                     .padding = guikit::Padding::All(14.0f),
-                    .elevated = true
+                    .surface = guikit::SurfaceRole::Raised
                 })) {
                     guikit::Heading(ui, {
                         .label = "Stream Filters",
@@ -546,7 +546,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
             .width = s_ov.modalWidth,
             .gap = 12.0f,
             .padding = guikit::Padding::All(18.0f),
-            .elevated = true
+            .surface = guikit::SurfaceRole::Raised
         })) {
             if (auto hdr = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {
                 guikit::Heading(ui, {
@@ -606,7 +606,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
             .width = 380.0f,
             .gap = 12.0f,
             .padding = guikit::Padding::All(18.0f),
-            .elevated = true
+            .surface = guikit::SurfaceRole::Raised
         })) {
             guikit::Heading(ui, {
                 .label = "Delete Station Node?",
@@ -675,7 +675,7 @@ keel::String GenerateOverlaysCode(const DemoContext& ctx) {
             "        .width = {:.1f}f,\n"
             "        .gap = 12.0f,\n"
             "        .padding = guikit::Padding::All(18.0f),\n"
-            "        .elevated = true\n"
+            "        .surface = guikit::SurfaceRole::Raised\n"
             "    }})) {{\n"
             "        if (auto hdr = ui.Row({{.gap = 8.0f, .align = guikit::Alignment::Center}})) {{\n"
             "            ui.Heading({{\n"
@@ -734,7 +734,7 @@ keel::String GenerateOverlaysCode(const DemoContext& ctx) {
             "        .width = {:.1f}f,\n"
             "        .gap = 10.0f,\n"
             "        .padding = guikit::Padding::All(14.0f),\n"
-            "        .elevated = true\n"
+            "        .surface = guikit::SurfaceRole::Raised\n"
             "    }})) {{\n"
             "        ui.Heading({{.label = \"Stream Filters\", .level = guikit::HeadingLevel::H5, .separator = guikit::HeadingSeparator::Bottom}});\n"
             "        if (auto el = ui.Element({{.label = \"Show Peak Markers\"}})) {{ ui.Switch(showPeaks, {{.size = guikit::UiSize::Sm}}); }}\n"

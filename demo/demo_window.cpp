@@ -308,7 +308,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             .text = {m_demoCtx.previewLandscape ? "Land" : "Port", kOrientationVariants},
             .tooltip = "Rotate Device Orientation (Portrait / Landscape)",
             .icon = guikit::Icon::Refresh(),
-            .color = guikit::StateColor::Info(),
+            .variant = guikit::UiVariant::Info,
             .disabled = !canRotateDevice
         }).changed) {
             ui.InvalidateAll();
@@ -382,20 +382,20 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         previewTb.Toggle(m_demoCtx.previewBounds, {
             .text = "Bounds",
             .icon = m_demoCtx.previewBounds ? guikit::Icon::Eye() : guikit::Icon::EyeOff(),
-            .color = guikit::StateColor::Info()
+            .variant = guikit::UiVariant::Info
         });
 
         previewTb.Toggle(m_demoCtx.previewInspect, {
             .text = "Inspect",
             .icon = guikit::Icon::Search(),
-            .color = guikit::StateColor::Warning()
+            .variant = guikit::UiVariant::Warning
         });
 
         if (m_selectedExtension >= 0 || IsSandboxCategory(m_selectedCategory)) {
             if (previewTb.Toggle(m_demoCtx.previewShowCode, {
                 .text = "Code",
                 .icon = m_demoCtx.previewShowCode ? guikit::Icon::Eye() : guikit::Icon::EyeOff(),
-                .color = guikit::StateColor::Primary()
+                .variant = guikit::UiVariant::Primary
             }).changed) {
                 ui.RequestRepaint(3);
             }

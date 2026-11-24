@@ -163,13 +163,13 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     } else {
         guikit::Heading(ui, {.label = "VIRTUAL JUMP (100,000 ROWS)", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
         if (auto row = guikit::Row(ui, {.gap = 6.0f})) {
-            if (guikit::Button(ui, {.text = "Top (#1)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Secondary()})) {
+            if (guikit::Button(ui, {.text = "Top (#1)", .size = UiSize::Sm, .width = SizeMode::Stretch, .variant = UiVariant::Secondary})) {
                 g_tableDemo.pendingJumpRow = 0;
             }
-            if (guikit::Button(ui, {.text = "Mid (#50k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Secondary()})) {
+            if (guikit::Button(ui, {.text = "Mid (#50k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .variant = UiVariant::Secondary})) {
                 g_tableDemo.pendingJumpRow = 49999;
             }
-            if (guikit::Button(ui, {.text = "End (#100k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Primary()})) {
+            if (guikit::Button(ui, {.text = "End (#100k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .variant = UiVariant::Primary})) {
                 g_tableDemo.pendingJumpRow = 99999;
             }
         }

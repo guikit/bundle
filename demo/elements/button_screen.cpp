@@ -5,6 +5,7 @@ namespace guikit::demo {
 namespace {
 struct ButtonState {
     keel::SmallString<128> text{"Click me"};
+    guikit::ButtonStyle style = guikit::ButtonStyle::Default;
     bool hasIcon = true;
     guikit::Placement iconPlacement = guikit::Placement::Leading;
     bool square = false;
@@ -12,9 +13,29 @@ struct ButtonState {
     keel::i32 clicks = 0;
 };
 ButtonState s_state;
+
+constexpr keel::StringRef ButtonStyleName(guikit::ButtonStyle s) noexcept {
+    switch (s) {
+        case guikit::ButtonStyle::Default: return "Default";
+        case guikit::ButtonStyle::Solid:   return "Solid";
+        case guikit::ButtonStyle::Soft:    return "Soft";
+        case guikit::ButtonStyle::Outline: return "Outline";
+        case guikit::ButtonStyle::Ghost:   return "Ghost";
+    }
+    return "Default";
+}
 } // namespace
 
 void RenderButtonInspector(guikit::Context& ui, DemoContext&) {
+    static constexpr keel::StaticArray<keel::StringRef, 5> kStyleNames = {
+        "Default", "Solid", "Soft", "Outline", "Ghost"
+    };
+    if (auto el = guikit::Element(ui, {.label = "Button Style"})) {
+        if (guikit::Segmented(ui, s_state.style, kStyleNames).changed) {
+            ui.InvalidateAll();
+        }
+    }
+
     if (auto el = guikit::Element(ui, {.label = "Capsule Text"})) {
         if (guikit::InputField(ui, s_state.text, {
             .placeholder = "Icon-only...",
@@ -75,7 +96,11 @@ void RenderButtonStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.color = ctx.GetControlColor();
+        opts.style = s_state.style;
+        opts.variant = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
+        if (ctx.btnVariant == guikit::UiVariant::Ghost && s_state.style == guikit::ButtonStyle::Default) {
+            opts.style = guikit::ButtonStyle::Ghost;
+        }
         opts.background = ctx.GetControlBackground(NavCategory::ElemButton);
         opts.border = ctx.GetCtrlBorder();
 
@@ -92,8 +117,14 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
     const keel::FixedString<64> sizeLine = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
+    const guikit::ButtonStyle effStyle = (ctx.btnVariant == guikit::UiVariant::Ghost && s_state.style == guikit::ButtonStyle::Default)
+        ? guikit::ButtonStyle::Ghost
+        : s_state.style;
+    const guikit::UiVariant effVariant = (ctx.btnVariant == guikit::UiVariant::Ghost)
+        ? guikit::UiVariant::Default
+        : ctx.btnVariant;
     const keel::String ctrlCode = keel::format(
-        "if (ui.Button({{\n"
+        "if (guikit::Button(ui, {{\n"
         "    .text = \"{}\",\n"
         "    .icon = {},\n"
         "    .iconPlacement = guikit::Placement::{},\n"
@@ -104,7 +135,8 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
-        "    .color = {},\n"
+        "    .style = guikit::ButtonStyle::{},\n"
+        "    .variant = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
         "}})) {{\n"
@@ -120,7 +152,8 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatControlWidthCode(),
         ctx.FormatControlHeightCode(),
-        ctx.FormatControlColorCode(),
+        ButtonStyleName(effStyle),
+        VariantName(effVariant),
         ctx.FormatControlBackgroundCode(NavCategory::ElemButton),
         ctx.FormatCtrlBorderCode()
     );

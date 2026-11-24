@@ -93,7 +93,8 @@ void RenderInputStage(guikit::Context& ui, DemoContext& ctx) {
                 .disabled = ctx.elemDisabled,
                 .size = ctx.controlsSize,
                 .height = ctx.ResolveCtrlHeight(),
-                .color = ctx.GetControlColor()
+                .style = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::ButtonStyle::Ghost : guikit::ButtonStyle::Default,
+                .variant = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant
             })) {
                 ++s_state.connectCount;
                 ui.InvalidateAll();

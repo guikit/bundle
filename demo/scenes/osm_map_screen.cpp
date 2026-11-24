@@ -110,7 +110,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
             .icon = guikit::Icon::Search(),
             .size = guikit::UiSize::Sm,
             .width = guikit::SizeMode::Stretch,
-            .color = guikit::StateColor::Primary()
+            .variant = guikit::UiVariant::Primary
         }).clicked) {
             s_state.pendingCenterGeo = s_state.initialCenter;
             s_state.pendingTileZoom = s_state.initialTileZoom;
@@ -120,7 +120,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
             .text = "Clear Sel",
             .disabled = (s_state.selectedFeatureUid == 0),
             .size = guikit::UiSize::Sm,
-            .color = guikit::StateColor::Secondary()
+            .variant = guikit::UiVariant::Secondary
         }).clicked) {
             s_state.selectedFeatureUid = 0;
             ui.InvalidateAll();

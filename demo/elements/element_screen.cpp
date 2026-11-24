@@ -99,7 +99,7 @@ void RenderSlotControl(guikit::Context& ui, ElementSlotPreset preset) {
                 });
                 if (guikit::Button(ui, {
                     .text = "Apply",
-                    .color = guikit::StateColor::Primary()
+                    .variant = guikit::UiVariant::Primary
                 })) {
                     ++s_state.triggerCount;
                 }

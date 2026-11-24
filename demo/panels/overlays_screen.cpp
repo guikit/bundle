@@ -234,7 +234,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 if (guikit::Button(ui, {
                     .text = "Open Modal Dialog...",
                     .icon = guikit::Icon::Settings(),
-                    .color = guikit::StateColor::Primary()
+                    .variant = guikit::UiVariant::Primary
                 }).clicked) {
                     s_ov.customModalOpen = true;
                 }
@@ -242,7 +242,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 if (guikit::Button(ui, {
                     .text = "Confirm Delete Modal...",
                     .icon = guikit::Icon::Trash(),
-                    .color = guikit::StateColor::Danger()
+                    .variant = guikit::UiVariant::Danger
                 }).clicked) {
                     s_ov.confirmDeleteModalOpen = true;
                 }
@@ -257,7 +257,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 .icon = guikit::Icon::ChevronDown(),
                 .iconPlacement = guikit::Placement::Trailing,
                 .active = s_ov.popoverOpen,
-                .color = guikit::StateColor::Secondary()
+                .variant = guikit::UiVariant::Secondary
             });
             if (popBtn.clicked) {
                 s_ov.popoverOpen = !s_ov.popoverOpen;
@@ -298,7 +298,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                         if (guikit::Button(ui, {
                             .text = "Reset",
                             .size = guikit::UiSize::Sm,
-                            .color = guikit::StateColor::Ghost()
+                            .style = guikit::ButtonStyle::Ghost
                         }).clicked) {
                             s_ov.filterShowPeaks = true;
                             s_ov.filterAutoScale = true;
@@ -307,7 +307,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                         if (guikit::Button(ui, {
                             .text = "Done",
                             .size = guikit::UiSize::Sm,
-                            .color = guikit::StateColor::Primary()
+                            .variant = guikit::UiVariant::Primary
                         }).clicked) {
                             s_ov.lastPopoverStatus = keel::format_fixed<128>(
                                 "Peaks={} | AutoScale={} | Gain={:.1f} dB",
@@ -394,7 +394,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                     .icon = guikit::Icon::ChevronDown(),
                     .iconPlacement = guikit::Placement::Trailing,
                     .active = s_ov.btnMenuOpen,
-                    .color = guikit::StateColor::Secondary()
+                    .variant = guikit::UiVariant::Secondary
                 });
                 if (actionBtn.clicked) {
                     s_ov.btnMenuOpen = !s_ov.btnMenuOpen;
@@ -415,7 +415,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 if (guikit::Button(ui, {
                     .text = "Info",
                     .icon = guikit::Icon::Info(),
-                    .color = guikit::StateColor::Info()
+                    .variant = guikit::UiVariant::Info
                 }).clicked) {
                     ++s_ov.toastCounter;
                     guikit::ShowToast(ui, {
@@ -431,7 +431,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 if (guikit::Button(ui, {
                     .text = "Success",
                     .icon = guikit::Icon::Check(),
-                    .color = guikit::StateColor::Success()
+                    .variant = guikit::UiVariant::Success
                 }).clicked) {
                     ++s_ov.toastCounter;
                     guikit::ShowToast(ui, {
@@ -447,7 +447,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 if (guikit::Button(ui, {
                     .text = "Warning",
                     .icon = guikit::Icon::Warning(),
-                    .color = guikit::StateColor::Warning()
+                    .variant = guikit::UiVariant::Warning
                 }).clicked) {
                     ++s_ov.toastCounter;
                     guikit::ShowToast(ui, {
@@ -463,7 +463,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 if (guikit::Button(ui, {
                     .text = "Danger",
                     .icon = guikit::Icon::Error(),
-                    .color = guikit::StateColor::Danger()
+                    .variant = guikit::UiVariant::Danger
                 }).clicked) {
                     ++s_ov.toastCounter;
                     guikit::ShowToast(ui, {
@@ -480,7 +480,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                     .text = "Clear",
                     .icon = guikit::Icon::Trash(),
                     .disabled = (guikit::GetActiveToastCount(ui) == 0),
-                    .color = guikit::StateColor::Secondary()
+                    .variant = guikit::UiVariant::Secondary
                 }).clicked) {
                     guikit::ClearToasts(ui);
                 }
@@ -493,7 +493,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
             if (guikit::Button(ui, {
                 .text = "Open Command Palette (Ctrl+K)...",
                 .icon = guikit::Icon::Search(),
-                .color = guikit::StateColor::Primary()
+                .variant = guikit::UiVariant::Primary
             }).clicked) {
                 s_ov.commandPaletteOpen = true;
             }
@@ -559,7 +559,7 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                     if (guikit::Button(ui, {
                         .icon = guikit::Icon::Close(),
                         .square = true,
-                        .color = guikit::StateColor::Ghost()
+                        .style = guikit::ButtonStyle::Ghost
                     }).clicked) {
                         s_ov.lastModalStatus = "Closed via [X]";
                         modal.Close();
@@ -577,14 +577,14 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 .align = guikit::Alignment::Center,
                 .justify = guikit::Justify::End
             })) {
-                if (guikit::Button(ui, {.text = "Cancel", .color = guikit::StateColor::Secondary()}).clicked) {
+                if (guikit::Button(ui, {.text = "Cancel", .variant = guikit::UiVariant::Secondary}).clicked) {
                     s_ov.lastModalStatus = "Cancelled Modal";
                     modal.Close();
                 }
                 if (guikit::Button(ui, {
                     .text = "Save",
                     .icon = guikit::Icon::Check(),
-                    .color = guikit::StateColor::Primary()
+                    .variant = guikit::UiVariant::Primary
                 }).clicked) {
                     s_ov.lastModalStatus = keel::format_fixed<128>("Saved '{}'", s_ov.profileName.as_ref());
                     modal.Close();
@@ -620,14 +620,14 @@ void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx) {
                 .align = guikit::Alignment::Center,
                 .justify = guikit::Justify::End
             })) {
-                if (guikit::Button(ui, {.text = "Cancel", .color = guikit::StateColor::Secondary()}).clicked) {
+                if (guikit::Button(ui, {.text = "Cancel", .variant = guikit::UiVariant::Secondary}).clicked) {
                     s_ov.lastModalStatus = "Cancelled Delete";
                     modal.Close();
                 }
                 if (guikit::Button(ui, {
                     .text = "Delete",
                     .icon = guikit::Icon::Trash(),
-                    .color = guikit::StateColor::Danger()
+                    .variant = guikit::UiVariant::Danger
                 }).clicked) {
                     s_ov.lastModalStatus = "Confirmed Delete";
                     modal.Close();

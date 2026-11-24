@@ -312,7 +312,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                             guikit::Switch(ui, s_tree.wfTracking);
                             if (guikit::Button(ui, {
                                 .text = "Calibrate",
-                                .color = guikit::StateColor::Secondary()
+                                .variant = guikit::UiVariant::Secondary
                             })) {
                                 ++s_tree.calibrateCount;
                             }

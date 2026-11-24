@@ -423,7 +423,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             .tooltip = "Apply the crafted ThemeSpec live to the entire Demo application",
             .size = guikit::UiSize::Sm,
             .width = guikit::SizeMode::Stretch,
-            .color = guikit::StateColor::Primary()
+            .variant = guikit::UiVariant::Primary
         }).clicked) {
             ctx.pendingShellTheme = BuildEffectiveTheme();
             ui.InvalidateAll();
@@ -433,7 +433,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             .square = true,
             .tooltip = "Generate a harmonic WCAG-compliant theme",
             .size = guikit::UiSize::Sm,
-            .color = guikit::StateColor::Info()
+            .variant = guikit::UiVariant::Info
         }).clicked) {
             RandomizeHarmonicTheme();
             ui.InvalidateAll();
@@ -443,7 +443,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             .square = true,
             .tooltip = "Reset all tokens to default",
             .size = guikit::UiSize::Sm,
-            .color = guikit::StateColor::Secondary()
+            .variant = guikit::UiVariant::Secondary
         }).clicked) {
             ResetToDefaults();
             ui.InvalidateAll();
@@ -638,10 +638,10 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             }
         }
         if (auto rRow = guikit::Row(ui, {.gap = 4.0f, .equalWidths = true})) {
-            if (guikit::Button(ui, {.text = "Sharp", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) { s_studio.radiusScale = 0.0f; ui.InvalidateAll(); }
-            if (guikit::Button(ui, {.text = "Crisp", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) { s_studio.radiusScale = 0.5f; ui.InvalidateAll(); }
-            if (guikit::Button(ui, {.text = "Std",   .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) { s_studio.radiusScale = 1.0f; ui.InvalidateAll(); }
-            if (guikit::Button(ui, {.text = "Soft",  .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) { s_studio.radiusScale = 1.6f; ui.InvalidateAll(); }
+            if (guikit::Button(ui, {.text = "Sharp", .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) { s_studio.radiusScale = 0.0f; ui.InvalidateAll(); }
+            if (guikit::Button(ui, {.text = "Crisp", .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) { s_studio.radiusScale = 0.5f; ui.InvalidateAll(); }
+            if (guikit::Button(ui, {.text = "Std",   .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) { s_studio.radiusScale = 1.0f; ui.InvalidateAll(); }
+            if (guikit::Button(ui, {.text = "Soft",  .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) { s_studio.radiusScale = 1.6f; ui.InvalidateAll(); }
         }
         if (auto el = guikit::Element(ui, {.label = "Spacing Scale"})) {
             if (guikit::Slider(ui, s_studio.spacingScale, 0.70f, 1.40f, {.valueFormat = "%.2fx", .step = 0.05f, .size = guikit::UiSize::Sm}).changed) {
@@ -733,12 +733,12 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             s_studio.jsonDraft = BuildCurrentSpec().ToJson();
         }
         if (auto btnRow = guikit::Row(ui, {.gap = 6.0f, .equalWidths = true})) {
-            if (guikit::Button(ui, {.text = "Snapshot", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Secondary()}).clicked) {
+            if (guikit::Button(ui, {.text = "Snapshot", .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) {
                 s_studio.jsonDraft = BuildCurrentSpec().ToJson();
                 s_studio.jsonImportStatus = 0;
                 ui.InvalidateAll();
             }
-            if (guikit::Button(ui, {.text = "Load JSON", .size = guikit::UiSize::Xs, .color = guikit::StateColor::Primary()}).clicked) {
+            if (guikit::Button(ui, {.text = "Load JSON", .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Primary}).clicked) {
                 const auto parsed = guikit::ThemeSpec::FromJson(s_studio.jsonDraft);
                 if (parsed.has_value()) {
                     ApplySpecToStudioState(*parsed);
@@ -873,7 +873,8 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     .text = "Randomize",
                     .tooltip = "Generate a harmonic color scheme",
                     .icon = guikit::Icon::Refresh(),
-                    .color = guikit::StateColor::Primary()
+                    .style = guikit::ButtonStyle::Solid,
+                    .variant = guikit::UiVariant::Primary
                 }).clicked) {
                     RandomizeHarmonicTheme();
                     ui.InvalidateAll();
@@ -882,7 +883,8 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     .text = "Reset",
                     .tooltip = "Reset all theme studio overrides",
                     .icon = guikit::Icon::Close(),
-                    .color = guikit::StateColor::Secondary()
+                    .style = guikit::ButtonStyle::Default,
+                    .variant = guikit::UiVariant::Secondary
                 }).clicked) {
                     ResetToDefaults();
                     ui.InvalidateAll();
@@ -919,7 +921,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                 if (tb.Toggle(isFloating, {
                     .text = "Floating",
                     .tooltip = "Toggle Docked vs Floating shell panels",
-                    .color = guikit::StateColor::Info()
+                    .variant = guikit::UiVariant::Info
                 }).changed) {
                     s_studio.shellStyle = isFloating ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked;
                     ui.InvalidateAll();
@@ -928,7 +930,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     .text = "Morph",
                     .tooltip = "Toggle UiTheme::Lerp morphing",
                     .icon = guikit::Icon::Flash(),
-                    .color = guikit::StateColor::Warning()
+                    .variant = guikit::UiVariant::Warning
                 }).changed) {
                     ui.InvalidateAll();
                 }
@@ -1080,19 +1082,19 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
 
                             if (auto btnWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
                                 guikit::Button(ui, {.text = "Default"});
-                                guikit::Button(ui, {.text = "Primary", .color = guikit::StateColor::Primary()});
-                                guikit::Button(ui, {.text = "Success", .color = guikit::StateColor::Success()});
-                                guikit::Button(ui, {.text = "Warning", .color = guikit::StateColor::Warning()});
-                                guikit::Button(ui, {.text = "Danger",  .color = guikit::StateColor::Danger()});
-                                guikit::Button(ui, {.text = "Info",    .color = guikit::StateColor::Info()});
-                                guikit::Button(ui, {.text = "Ghost",   .color = guikit::StateColor::Ghost()});
+                                guikit::Button(ui, {.text = "Primary", .variant = guikit::UiVariant::Primary});
+                                guikit::Button(ui, {.text = "Success", .variant = guikit::UiVariant::Success});
+                                guikit::Button(ui, {.text = "Warning", .variant = guikit::UiVariant::Warning});
+                                guikit::Button(ui, {.text = "Danger",  .variant = guikit::UiVariant::Danger});
+                                guikit::Button(ui, {.text = "Info",    .variant = guikit::UiVariant::Info});
+                                guikit::Button(ui, {.text = "Ghost",   .style = guikit::ButtonStyle::Ghost});
                             }
 
                             if (auto disWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
                                 guikit::Button(ui, {.text = "Default (Dis)", .disabled = true});
-                                guikit::Button(ui, {.text = "Primary (Dis)", .disabled = true, .color = guikit::StateColor::Primary()});
-                                guikit::Button(ui, {.text = "Success (Dis)", .disabled = true, .color = guikit::StateColor::Success()});
-                                guikit::Button(ui, {.text = "Danger (Dis)",  .disabled = true, .color = guikit::StateColor::Danger()});
+                                guikit::Button(ui, {.text = "Primary (Dis)", .disabled = true, .variant = guikit::UiVariant::Primary});
+                                guikit::Button(ui, {.text = "Success (Dis)", .disabled = true, .variant = guikit::UiVariant::Success});
+                                guikit::Button(ui, {.text = "Danger (Dis)",  .disabled = true, .variant = guikit::UiVariant::Danger});
                             }
 
                             if (auto controlsRow = guikit::Row(ui, {.gap = 14.0f, .equalWidths = true})) {
@@ -1188,7 +1190,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                                         .level = guikit::HeadingLevel::H6
                                     });
                                     if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
-                                        guikit::Button(ui, {.text = "Tonal CTA", .size = guikit::UiSize::Sm, .color = guikit::StateColor::Primary()});
+                                        guikit::Button(ui, {.text = "Tonal CTA", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
                                         guikit::Tag(ui, "Zero-Alloc", {.variant = guikit::UiVariant::Warning, .size = guikit::UiSize::Sm});
                                     }
                                 }
@@ -1206,7 +1208,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                                         .level = guikit::HeadingLevel::H6
                                     });
                                     if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
-                                        guikit::Button(ui, {.text = "Outlined", .size = guikit::UiSize::Sm, .color = guikit::StateColor::Primary()});
+                                        guikit::Button(ui, {.text = "Outlined", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
                                         guikit::Tag(ui, "Emerald", {.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Sm});
                                     }
                                 }
@@ -1223,7 +1225,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                                         .level = guikit::HeadingLevel::H6
                                     });
                                     if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
-                                        guikit::Button(ui, {.text = "WCAG AAA", .size = guikit::UiSize::Sm, .color = guikit::StateColor::Primary()});
+                                        guikit::Button(ui, {.text = "WCAG AAA", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
                                         guikit::Tag(ui, "3dp Focus", {.variant = guikit::UiVariant::Info, .size = guikit::UiSize::Sm});
                                     }
                                 }

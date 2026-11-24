@@ -90,6 +90,9 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
     const bool isVert = (s_tb.orientation == guikit::Orientation::Vertical);
     const bool isSq = s_tb.squareIcons || isVert;
 
+    const guikit::UiVariant toolVar = (ctx.btnVariant == guikit::UiVariant::Ghost)
+        ? guikit::UiVariant::Primary
+        : ctx.btnVariant;
     if (auto tb = guikit::Toolbar(ui, {
         .style = s_tb.style,
         .orientation = s_tb.orientation,
@@ -100,21 +103,21 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
             .text = "Select",
             .tooltip = "Select Tool (V)",
             .icon = guikit::Icon::Check(),
-            .color = ctx.ResolveControlColor(),
+            .variant = toolVar,
             .square = isSq
         });
         tb.Item(s_tb.activeTool, 1, {
             .text = "Pan",
             .tooltip = "Pan Viewport (H)",
             .icon = guikit::Icon::Folder(),
-            .color = ctx.ResolveControlColor(),
+            .variant = toolVar,
             .square = isSq
         });
         tb.Item(s_tb.activeTool, 2, {
             .text = "Measure",
             .tooltip = "Measure Cursor (M)",
             .icon = guikit::Icon::Search(),
-            .color = ctx.ResolveControlColor(),
+            .variant = toolVar,
             .square = isSq
         });
 
@@ -124,14 +127,14 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
             .text = "Snap",
             .tooltip = "Toggle Grid Snapping",
             .icon = guikit::Icon::Settings(),
-            .color = guikit::StateColor::Info(),
+            .variant = guikit::UiVariant::Info,
             .square = isSq
         });
         tb.Toggle(s_tb.liveCapture, {
             .text = s_tb.liveCapture ? "Recording" : "Capture",
             .tooltip = "Toggle Live Capture",
             .icon = s_tb.liveCapture ? guikit::Icon::Pause() : guikit::Icon::Play(),
-            .color = s_tb.liveCapture ? guikit::StateColor::Success() : guikit::StateColor::Warning(),
+            .variant = s_tb.liveCapture ? guikit::UiVariant::Success : guikit::UiVariant::Warning,
             .square = isSq,
             .badge = (s_tb.showBadges && s_tb.liveCapture) ? "REC" : ""
         });
@@ -164,17 +167,17 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateToolbarCode(const DemoContext& ctx) {
     return keel::format(
-        "if (auto tb = ui.Toolbar({{\n"
+        "if (auto tb = guikit::Toolbar(ui, {{\n"
         "    .style = guikit::ToolbarStyle::{},\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .overflow = guikit::ToolbarOverflow::{}{}\n"
         "}})) {{\n"
-        "    tb.Item(activeTool, 0, {{.text = \"Select\",  .icon = guikit::Icon::Check(),  .color = guikit::StateColor::{}(), .square = {}}});\n"
-        "    tb.Item(activeTool, 1, {{.text = \"Pan\",     .icon = guikit::Icon::Folder(), .color = guikit::StateColor::{}(), .square = {}}});\n"
-        "    tb.Item(activeTool, 2, {{.text = \"Measure\", .icon = guikit::Icon::Search(), .color = guikit::StateColor::{}(), .square = {}}});\n"
+        "    tb.Item(activeTool, 0, {{.text = \"Select\",  .icon = guikit::Icon::Check(),  .variant = guikit::UiVariant::{}, .square = {}}});\n"
+        "    tb.Item(activeTool, 1, {{.text = \"Pan\",     .icon = guikit::Icon::Folder(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
+        "    tb.Item(activeTool, 2, {{.text = \"Measure\", .icon = guikit::Icon::Search(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
         "    tb.Separator();\n"
-        "    tb.Toggle(snapToGrid,  {{.text = \"Snap\",    .icon = guikit::Icon::Settings(), .color = guikit::StateColor::Info(), .square = {}}});\n"
-        "    tb.Toggle(liveCapture, {{.text = \"Capture\", .icon = guikit::Icon::Play(),     .color = guikit::StateColor::Success(), .square = {}}});\n"
+        "    tb.Toggle(snapToGrid,  {{.text = \"Snap\",    .icon = guikit::Icon::Settings(), .variant = guikit::UiVariant::Info,    .square = {}}});\n"
+        "    tb.Toggle(liveCapture, {{.text = \"Capture\", .icon = guikit::Icon::Play(),     .variant = guikit::UiVariant::Success, .square = {}}});\n"
         "    tb.SplitToggle(triggerArmed, triggerMode, {{\"Auto Trigger\", \"Normal Trigger\", \"Single Shot\"}}, {{\n"
         "        .text = \"Trigger\", .icon = guikit::Icon::Flash(), .square = {}\n"
         "    }});\n"

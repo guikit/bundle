@@ -436,7 +436,7 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
             .disabled = !s_sig.selection.active || s_sig.selection.DurationSec() <= 1e-5,
             .size = guikit::UiSize::Sm,
             .width = guikit::SizeMode::Stretch,
-            .color = guikit::StateColor::Primary()
+            .variant = guikit::UiVariant::Primary
         })) {
             s_sig.requestViewStartSec = s_sig.selection.MinTimeSec();
             s_sig.requestViewEndSec = s_sig.selection.MaxTimeSec();
@@ -449,7 +449,7 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
             .icon = guikit::Icon::Refresh(),
             .size = guikit::UiSize::Sm,
             .width = guikit::SizeMode::Stretch,
-            .color = guikit::StateColor::Secondary()
+            .variant = guikit::UiVariant::Secondary
         })) {
             s_sig.requestResetView = true;
             s_sig.waveformGain = 1.0f;

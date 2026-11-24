@@ -383,7 +383,7 @@ void RenderAttitudeInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         .icon = guikit::Icon::Refresh(),
         .size = guikit::UiSize::Sm,
         .width = guikit::SizeMode::Stretch,
-        .color = guikit::StateColor::Secondary()
+        .variant = guikit::UiVariant::Secondary
     })) {
         s_att.rollDeg = 0.0f;
         s_att.pitchDeg = 2.0f;

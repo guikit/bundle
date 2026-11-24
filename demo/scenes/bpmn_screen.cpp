@@ -431,11 +431,11 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
     }
 
     if (auto row = guikit::Row(ui, {.gap = 6.0f})) {
-        if (guikit::Button(ui, {.text = "Reset Preset", .icon = guikit::Icon::Refresh(), .width = guikit::SizeMode::Stretch, .color = guikit::StateColor::Secondary()})) {
+        if (guikit::Button(ui, {.text = "Reset Preset", .icon = guikit::Icon::Refresh(), .width = guikit::SizeMode::Stretch, .variant = guikit::UiVariant::Secondary})) {
             s_bpmn.LoadPreset(s_bpmn.presetIdx);
             ui.InvalidateAll();
         }
-        if (guikit::Button(ui, {.text = "Clear Canvas", .icon = guikit::Icon::Trash(), .width = guikit::SizeMode::Stretch, .color = guikit::StateColor::Ghost()})) {
+        if (guikit::Button(ui, {.text = "Clear Canvas", .icon = guikit::Icon::Trash(), .width = guikit::SizeMode::Stretch, .style = guikit::ButtonStyle::Ghost})) {
             s_bpmn.diagram.Clear();
             s_bpmn.selectedNodeId = 0;
             s_bpmn.selectedEdgeId = 0;
@@ -447,13 +447,13 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
     // --- BPMN 2.0 XML Serialization & Round-Trip Import ---
     guikit::Heading(ui, {.label = "BPMN 2.0 XML SERIALIZATION", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
     if (auto row = guikit::Row(ui, {.gap = 6.0f})) {
-        if (guikit::Button(ui, {.text = "Export BPMN XML", .icon = guikit::Icon::Save(), .width = guikit::SizeMode::Stretch, .color = guikit::StateColor::Secondary()})) {
+        if (guikit::Button(ui, {.text = "Export BPMN XML", .icon = guikit::Icon::Save(), .width = guikit::SizeMode::Stretch, .variant = guikit::UiVariant::Secondary})) {
             s_bpmn.exportedXmlBuffer = guikit::BpmnEditor::ExportBpmnXml(s_bpmn.diagram);
             ui.SetClipboardText(s_bpmn.exportedXmlBuffer.as_ref());
             s_bpmn.xmlStatusText = keel::format("Exported {} bytes of BPMN 2.0 XML (+DI) to clipboard", s_bpmn.exportedXmlBuffer.size());
             ui.InvalidateAll();
         }
-        if (guikit::Button(ui, {.text = "Round-Trip Import", .icon = guikit::Icon::Folder(), .width = guikit::SizeMode::Stretch, .color = guikit::StateColor::Primary()})) {
+        if (guikit::Button(ui, {.text = "Round-Trip Import", .icon = guikit::Icon::Folder(), .width = guikit::SizeMode::Stretch, .variant = guikit::UiVariant::Primary})) {
             if (s_bpmn.exportedXmlBuffer.empty()) {
                 s_bpmn.exportedXmlBuffer = guikit::BpmnEditor::ExportBpmnXml(s_bpmn.diagram);
             }
@@ -568,7 +568,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
             }
         }
         if (keel::abs(selNode->labelOffset.x) > 0.5f || keel::abs(selNode->labelOffset.y) > 0.5f) {
-            if (guikit::Button(ui, {.text = "Reset External Label Position", .width = guikit::SizeMode::Stretch, .color = guikit::StateColor::Ghost()})) {
+            if (guikit::Button(ui, {.text = "Reset External Label Position", .width = guikit::SizeMode::Stretch, .style = guikit::ButtonStyle::Ghost})) {
                 selNode->labelOffset = {0.0f, 0.0f};
                 ui.InvalidateAll();
             }
@@ -589,7 +589,7 @@ void RenderBpmnInspector(guikit::Context& ui, DemoContext&) {
             }
         }
         if (!selEdge->waypoints.empty() || keel::abs(selEdge->labelOffset.x) > 0.5f || keel::abs(selEdge->labelOffset.y) > 0.5f) {
-            if (guikit::Button(ui, {.text = "Reset Custom Route & Label to Auto", .icon = guikit::Icon::Refresh(), .width = guikit::SizeMode::Stretch, .color = guikit::StateColor::Secondary()})) {
+            if (guikit::Button(ui, {.text = "Reset Custom Route & Label to Auto", .icon = guikit::Icon::Refresh(), .width = guikit::SizeMode::Stretch, .variant = guikit::UiVariant::Secondary})) {
                 selEdge->waypoints.clear();
                 selEdge->labelOffset = {0.0f, 0.0f};
                 ui.InvalidateAll();

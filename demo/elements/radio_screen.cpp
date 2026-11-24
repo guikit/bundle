@@ -12,26 +12,26 @@ RadioState s_state;
 } // namespace
 
 void RenderRadioInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "3-Option Radio Group",
         .description = "Preview mutually exclusive group vs single Radio"
     })) {
-        if (ui.Switch(s_state.groupDemo).changed) {
+        if (guikit::Switch(ui, s_state.groupDemo).changed) {
             ui.InvalidateAll();
         }
     }
     if (s_state.groupDemo) {
         static constexpr keel::StaticArray<keel::StringRef, 3> optNames = {"Option A", "Option B", "Option C"};
         keel::usize idx = keel::as<keel::usize>(keel::clamp(s_state.selectedIdx, 0, 2));
-        if (auto el = ui.Element({.label = "Active Selection"})) {
-            if (ui.Segmented(idx, optNames).changed) {
+        if (auto el = guikit::Element(ui, {.label = "Active Selection"})) {
+            if (guikit::Segmented(ui, idx, optNames).changed) {
                 s_state.selectedIdx = keel::as<keel::i32>(idx);
                 ui.InvalidateAll();
             }
         }
     } else {
-        if (auto el = ui.Element({.label = "Selected State"})) {
-            if (ui.Switch(s_state.singleChecked).changed) {
+        if (auto el = guikit::Element(ui, {.label = "Selected State"})) {
+            if (guikit::Switch(ui, s_state.singleChecked).changed) {
                 ui.InvalidateAll();
             }
         }
@@ -45,30 +45,30 @@ void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
     ctrlOpts.color = ctx.GetControlColor();
 
     if (s_state.groupDemo) {
-        if (auto col = ui.Column({.gap = 14.0f})) {
+        if (auto col = guikit::Column(ui, {.gap = 14.0f})) {
             const guikit::UiText lblA{
                 ctx.elemLabel.empty()
                     ? keel::StringRef("Option A — Automatic Gain (AGC)")
                     : ctx.elemLabel.as_ref(),
                 ctx.elemLabelVariant
             };
-            if (auto el = ui.Element(ctx.MakeElementOptions(lblA))) {
-                ui.Radio(s_state.selectedIdx, 0, ctrlOpts);
+            if (auto el = guikit::Element(ui, ctx.MakeElementOptions(lblA))) {
+                guikit::Radio(ui, s_state.selectedIdx, 0, ctrlOpts);
             }
-            if (auto el = ui.Element(ctx.MakeElementOptions(
+            if (auto el = guikit::Element(ui, ctx.MakeElementOptions(
                 guikit::UiText{"Option B — Manual Fixed Gain", ctx.elemLabelVariant}
             ))) {
-                ui.Radio(s_state.selectedIdx, 1, ctrlOpts);
+                guikit::Radio(ui, s_state.selectedIdx, 1, ctrlOpts);
             }
-            if (auto el = ui.Element(ctx.MakeElementOptions(
+            if (auto el = guikit::Element(ui, ctx.MakeElementOptions(
                 guikit::UiText{"Option C — External Hardware Trigger", ctx.elemLabelVariant}
             ))) {
-                ui.Radio(s_state.selectedIdx, 2, ctrlOpts);
+                guikit::Radio(ui, s_state.selectedIdx, 2, ctrlOpts);
             }
         }
     } else {
         ctx.RunElementStage(ui, [&]() {
-            ui.Radio(s_state.singleChecked, ctrlOpts);
+            guikit::Radio(ui, s_state.singleChecked, ctrlOpts);
         });
     }
 }

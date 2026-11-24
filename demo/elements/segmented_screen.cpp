@@ -18,22 +18,22 @@ SegmentedDemoState s_state;
 } // namespace
 
 void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Multi-Toggle Mask Mode",
         .description = "Toggle multiple segments independently (ui.SegmentedMask)"
     })) {
-        if (ui.Switch(s_state.multiSelect).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.multiSelect).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Show Segment Icons"})) {
-        if (ui.Switch(s_state.showIcons).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Segment Icons"})) {
+        if (guikit::Switch(ui, s_state.showIcons).changed) {
             if (!s_state.showIcons && !s_state.showText) s_state.showText = true;
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Segment Labels"})) {
-        if (ui.Switch(s_state.showText).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Segment Labels"})) {
+        if (guikit::Switch(ui, s_state.showText).changed) {
             if (!s_state.showText && !s_state.showIcons) s_state.showIcons = true;
             ui.InvalidateAll();
         }
@@ -42,11 +42,11 @@ void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 4> placeNames = {"Leading", "Trailing", "Top", "Bottom"};
     keel::usize placeIdx = keel::as<keel::usize>(s_state.iconPlacement);
     if (placeIdx > 3) placeIdx = 0;
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Icon Placement",
         .disabled = !(s_state.showIcons && s_state.showText)
     })) {
-        if (ui.Segmented(placeIdx, placeNames, {
+        if (guikit::Segmented(ui, placeIdx, placeNames, {
             .disabled = !(s_state.showIcons && s_state.showText)
         }).changed) {
             s_state.iconPlacement = keel::from_underlying<guikit::Placement>(placeIdx);
@@ -54,19 +54,19 @@ void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Equal Segment Widths",
         .description = "Uniform segment width vs natural content width"
     })) {
-        if (ui.Switch(s_state.equalWidth).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.equalWidth).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Show Track Dividers"})) {
-        if (ui.Switch(s_state.showDividers).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Track Dividers"})) {
+        if (guikit::Switch(ui, s_state.showDividers).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Disable Last Segment"})) {
-        if (ui.Switch(s_state.disableLastSegment).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Disable Last Segment"})) {
+        if (guikit::Switch(ui, s_state.disableLastSegment).changed) ui.InvalidateAll();
     }
 }
 
@@ -112,9 +112,9 @@ void RenderSegmentedStage(guikit::Context& ui, DemoContext& ctx) {
 
     ctx.RunElementStage(ui, [&]() {
         if (s_state.multiSelect) {
-            ui.SegmentedMask(s_state.selectedMask, items, segOpts);
+            guikit::SegmentedMask(ui, s_state.selectedMask, items, segOpts);
         } else {
-            ui.Segmented(s_state.selectedIdx, items, segOpts);
+            guikit::Segmented(ui, s_state.selectedIdx, items, segOpts);
         }
     });
 }

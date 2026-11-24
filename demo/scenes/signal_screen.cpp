@@ -334,15 +334,15 @@ void StepSignalPlayback(SignalDemoState& st) {
 void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
     EnsureSignalInitialized();
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Live Playhead Sweep",
         .description = "Animate playhead at 60 Hz across active viewport"
     })) {
-        ui.Switch(s_sig.livePlayhead);
+        guikit::Switch(ui, s_sig.livePlayhead);
     }
 
-    if (auto el = ui.Element({.label = "Test Signal Generator"})) {
-        if (ui.Select(s_sig.presetIdx, SignalDemoState::presetNames, {
+    if (auto el = guikit::Element(ui, {.label = "Test Signal Generator"})) {
+        if (guikit::Select(ui, s_sig.presetIdx, SignalDemoState::presetNames, {
             .prefix = guikit::Icon::Play()
         }).changed) {
             BuildSignalPreset(s_sig, s_sig.presetIdx);
@@ -350,13 +350,13 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Panel Stack Order"})) {
-        ui.Segmented(s_sig.panelOrder, SignalDemoState::panelOrderNames);
+    if (auto el = guikit::Element(ui, {.label = "Panel Stack Order"})) {
+        guikit::Segmented(ui, s_sig.panelOrder, SignalDemoState::panelOrderNames);
     }
 
     keel::f32 splitPct = s_sig.splitRatio * 100.0f;
-    if (auto el = ui.Element({.label = "Top / Bottom Split Ratio"})) {
-        if (ui.Slider(splitPct, 0.0f, 100.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Top / Bottom Split Ratio"})) {
+        if (guikit::Slider(ui, splitPct, 0.0f, 100.0f, {
             .valueFormat = "%.0f %%",
             .step = 1.0f
         }).changed) {
@@ -364,73 +364,73 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Waveform Amplitude Scale"})) {
-        ui.Segmented(s_sig.amplitudeScale, SignalDemoState::ampScaleNames);
+    if (auto el = guikit::Element(ui, {.label = "Waveform Amplitude Scale"})) {
+        guikit::Segmented(ui, s_sig.amplitudeScale, SignalDemoState::ampScaleNames);
     }
 
-    if (auto el = ui.Element({.label = "Spectrogram Frequency Scale"})) {
-        ui.Segmented(s_sig.frequencyScale, SignalDemoState::freqScaleNames);
+    if (auto el = guikit::Element(ui, {.label = "Spectrogram Frequency Scale"})) {
+        guikit::Segmented(ui, s_sig.frequencyScale, SignalDemoState::freqScaleNames);
     }
 
     keel::usize cmapIdx = keel::as<keel::usize>(s_sig.colormap);
-    if (auto el = ui.Element({.label = "Spectrogram Colormap"})) {
-        if (ui.Select(cmapIdx, guikit::GetAllColormapNames()).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Spectrogram Colormap"})) {
+        if (guikit::Select(ui, cmapIdx, guikit::GetAllColormapNames()).changed) {
             s_sig.colormap = keel::from_underlying<guikit::Colormap>(cmapIdx);
         }
     }
 
-    if (auto el = ui.Element({.label = "STFT Window Size (Bins)"})) {
-        ui.StepSlider(s_sig.fftSizeIdx, SignalDemoState::fftSizeNames, {
+    if (auto el = guikit::Element(ui, {.label = "STFT Window Size (Bins)"})) {
+        guikit::StepSlider(ui, s_sig.fftSizeIdx, SignalDemoState::fftSizeNames, {
             .showTicks = true,
             .showLabels = true
         });
     }
 
-    if (auto el = ui.Element({.label = "FFT Window Function"})) {
-        ui.Select(s_sig.fftWindow, SignalDemoState::windowNames);
+    if (auto el = guikit::Element(ui, {.label = "FFT Window Function"})) {
+        guikit::Select(ui, s_sig.fftWindow, SignalDemoState::windowNames);
     }
 
-    if (auto el = ui.Element({.label = "Spectrogram Noise Floor"})) {
-        ui.Slider(s_sig.dbFloor, -120.0f, -36.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Spectrogram Noise Floor"})) {
+        guikit::Slider(ui, s_sig.dbFloor, -120.0f, -36.0f, {
             .valueFormat = "%.0f dBFS",
             .step = 2.0f
         });
     }
 
-    if (auto el = ui.Element({.label = "Waveform Vertical Gain"})) {
-        ui.Slider(s_sig.waveformGain, 0.25f, 8.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Waveform Vertical Gain"})) {
+        guikit::Slider(ui, s_sig.waveformGain, 0.25f, 8.0f, {
             .valueFormat = "%.2fx",
             .step = 0.05f
         });
     }
 
-    if (auto el = ui.Element({.label = "Overview Minimap Navigator"})) {
-        ui.Switch(s_sig.showOverviewBar);
+    if (auto el = guikit::Element(ui, {.label = "Overview Minimap Navigator"})) {
+        guikit::Switch(ui, s_sig.showOverviewBar);
     }
-    if (auto el = ui.Element({.label = "Adaptive Time & Cue Ruler"})) {
-        ui.Switch(s_sig.showTimeRuler);
+    if (auto el = guikit::Element(ui, {.label = "Adaptive Time & Cue Ruler"})) {
+        guikit::Switch(ui, s_sig.showTimeRuler);
     }
-    if (auto el = ui.Element({.label = "Waveform Amplitude Ruler"})) {
-        ui.Switch(s_sig.showAmplitudeRuler);
+    if (auto el = guikit::Element(ui, {.label = "Waveform Amplitude Ruler"})) {
+        guikit::Switch(ui, s_sig.showAmplitudeRuler);
     }
-    if (auto el = ui.Element({.label = "Spectrogram Frequency Ruler"})) {
-        ui.Switch(s_sig.showFrequencyRuler);
+    if (auto el = guikit::Element(ui, {.label = "Spectrogram Frequency Ruler"})) {
+        guikit::Switch(ui, s_sig.showFrequencyRuler);
     }
-    if (auto el = ui.Element({.label = "Right dBFS Heatmap Legend"})) {
-        ui.Switch(s_sig.showColorbar);
+    if (auto el = guikit::Element(ui, {.label = "Right dBFS Heatmap Legend"})) {
+        guikit::Switch(ui, s_sig.showColorbar);
     }
-    if (auto el = ui.Element({.label = "Dual Peak + RMS Envelope"})) {
-        ui.Switch(s_sig.showRms);
+    if (auto el = guikit::Element(ui, {.label = "Dual Peak + RMS Envelope"})) {
+        guikit::Switch(ui, s_sig.showRms);
     }
-    if (auto el = ui.Element({.label = "Synchronized Overlay Grid"})) {
-        ui.Switch(s_sig.showGrid);
+    if (auto el = guikit::Element(ui, {.label = "Synchronized Overlay Grid"})) {
+        guikit::Switch(ui, s_sig.showGrid);
     }
-    if (auto el = ui.Element({.label = "Crosshair & Live Readout HUD"})) {
-        ui.Switch(s_sig.showCrosshair);
+    if (auto el = guikit::Element(ui, {.label = "Crosshair & Live Readout HUD"})) {
+        guikit::Switch(ui, s_sig.showCrosshair);
     }
 
-    if (auto btnRow = ui.Row({.gap = 8.0f})) {
-        if (ui.Button({
+    if (auto btnRow = guikit::Row(ui, {.gap = 8.0f})) {
+        if (guikit::Button(ui, {
             .text = "Zoom Selection",
             .icon = guikit::Icon::Search(),
             .disabled = !s_sig.selection.active || s_sig.selection.DurationSec() <= 1e-5,
@@ -444,7 +444,7 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
                 s_sig.requestFreqRangeHz = guikit::Vec2{s_sig.selection.MinFreqHz(), s_sig.selection.MaxFreqHz()};
             }
         }
-        if (ui.Button({
+        if (guikit::Button(ui, {
             .text = "Reset View",
             .icon = guikit::Icon::Refresh(),
             .size = guikit::UiSize::Sm,
@@ -456,19 +456,19 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto telCard = ui.Card({
+    if (auto telCard = guikit::Card(ui, {
         .gap = 4.0f,
         .padding = guikit::Padding::All(8.0f),
         .border = {.radius = 6.0f}
     })) {
-        ui.Text(
+        guikit::Text(ui,
             ui.Format("Signal: {} smp ({:.2f} s @ {:.0f} Hz)",
                       s_sig.lastResp.totalSamples,
                       s_sig.lastResp.totalDurationSec,
                       s_sig.sampleRate),
             {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Primary}
         );
-        ui.Text(
+        guikit::Text(ui,
             ui.Format("Viewport: [{:.4f} s .. {:.4f} s] | [{:.0f} .. {:.0f} Hz]",
                       s_sig.lastResp.viewStartSec,
                       s_sig.lastResp.viewEndSec,
@@ -477,7 +477,7 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
             {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Info}
         );
         if (s_sig.lastResp.selection.active) {
-            ui.Text(
+            guikit::Text(ui,
                 ui.Format("Selection: Δt={:.3f}s | Peak={:.1f} dB | RMS={:.1f} dB | Fc={:.0f} Hz",
                           s_sig.lastResp.selection.DurationSec(),
                           s_sig.lastResp.selectionPeakDbFs,
@@ -486,7 +486,7 @@ void RenderSignalInspector(guikit::Context& ui, DemoContext&) {
                 {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Success}
             );
         }
-        ui.Text(
+        guikit::Text(ui,
             "Tip: Wheel=Zoom Time, Drag=2D Spectral Select, Alt+Drag=Pan, Double-Click Ruler=Add Cue",
             {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted}
         );

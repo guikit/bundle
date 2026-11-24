@@ -19,25 +19,25 @@ SchematicState s_state;
 } // namespace
 
 void RenderSchematicInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Canvas Backdrop"})) {
-        if (ui.Segmented(s_state.bg, SchematicState::bgNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Canvas Backdrop"})) {
+        if (guikit::Segmented(ui, s_state.bg, SchematicState::bgNames).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Interactive Item Selection"})) {
-        if (ui.Switch(s_state.selectableItems).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Interactive Item Selection"})) {
+        if (guikit::Switch(ui, s_state.selectableItems).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Floating Zoom & Inspector HUD"})) {
-        if (ui.Switch(s_state.showControls).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Floating Zoom & Inspector HUD"})) {
+        if (guikit::Switch(ui, s_state.showControls).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "2D Scrollbars (H + V)"})) {
-        if (ui.Switch(s_state.showScrollbars).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "2D Scrollbars (H + V)"})) {
+        if (guikit::Switch(ui, s_state.showScrollbars).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Viewport Radius"})) {
-        if (ui.Slider(s_state.radius, 0.0f, 20.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Viewport Radius"})) {
+        if (guikit::Slider(ui, s_state.radius, 0.0f, 20.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Grid Step"})) {
-        if (ui.Slider(s_state.gridStep, 12.0f, 64.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Grid Step"})) {
+        if (guikit::Slider(ui, s_state.gridStep, 12.0f, 64.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
 }
 
@@ -45,7 +45,7 @@ void RenderSchematicStage(guikit::Context& ui, DemoContext& ctx) {
     const auto schemPal = ctx.previewLightMode
         ? SchematicPalette::VintagePaper()
         : SchematicPalette::DarkCad();
-    if (auto scene = ui.Scene({
+    if (auto scene = guikit::Scene(ui, {
         .worldSize = guikit::Vec2{2200.0f, 920.0f},
         .backgroundStyle = s_state.bg,
         .gridStep = s_state.gridStep,

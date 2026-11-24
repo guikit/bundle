@@ -62,61 +62,61 @@ keel::StringRef CardBorderCodeName() noexcept {
 } // namespace
 
 void RenderCardInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "Corner Radius"})) {
-        if (ui.Slider(ctx.cardRadius, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Corner Radius"})) {
+        if (guikit::Slider(ui, ctx.cardRadius, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Internal Padding"})) {
-        if (ui.Slider(ctx.cardPadding, 0.0f, 32.0f, {.valueFormat = "%.0f px"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Internal Padding"})) {
+        if (guikit::Slider(ui, ctx.cardPadding, 0.0f, 32.0f, {.valueFormat = "%.0f px"}).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Content Spacing (Gap)"})) {
-        if (ui.Slider(ctx.cardGap, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Content Spacing (Gap)"})) {
+        if (guikit::Slider(ui, ctx.cardGap, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Background"})) {
-        if (ui.Select(s_card.bgIdx, kBgPresetNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Background"})) {
+        if (guikit::Select(ui, s_card.bgIdx, kBgPresetNames).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Border Width"})) {
-        if (ui.Slider(ctx.cardBorderWidth, 0.0f, 4.0f, {.valueFormat = "%.1f px", .step = 0.5f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Border Width"})) {
+        if (guikit::Slider(ui, ctx.cardBorderWidth, 0.0f, 4.0f, {.valueFormat = "%.1f px", .step = 0.5f}).changed) {
             ui.InvalidateAll();
         }
     }
     const bool hasBorder = (ctx.cardBorderWidth > 0.0f);
-    if (auto el = ui.Element({.label = "Border Color", .disabled = !hasBorder})) {
-        if (ui.Select(s_card.borderIdx, kUiVariantNames, {.disabled = !hasBorder}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Border Color", .disabled = !hasBorder})) {
+        if (guikit::Select(ui, s_card.borderIdx, kUiVariantNames, {.disabled = !hasBorder}).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Stretch Full Width"})) {
-        if (ui.Switch(s_card.fullWidth).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Stretch Full Width"})) {
+        if (guikit::Switch(ui, s_card.fullWidth).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Minimum Width", .disabled = s_card.fullWidth})) {
-        if (ui.Slider(s_card.minWidth, 200.0f, 560.0f, {.valueFormat = "%.0f px", .step = 10.0f, .disabled = s_card.fullWidth}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Minimum Width", .disabled = s_card.fullWidth})) {
+        if (guikit::Slider(ui, s_card.minWidth, 200.0f, 560.0f, {.valueFormat = "%.0f px", .step = 10.0f, .disabled = s_card.fullWidth}).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Show Header"})) {
-        if (ui.Switch(s_card.showHeader).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Header"})) {
+        if (guikit::Switch(ui, s_card.showHeader).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Header Divider", .disabled = !s_card.showHeader})) {
-        if (ui.Switch(s_card.showDivider, {.disabled = !s_card.showHeader}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Header Divider", .disabled = !s_card.showHeader})) {
+        if (guikit::Switch(ui, s_card.showDivider, {.disabled = !s_card.showHeader}).changed) {
             ui.InvalidateAll();
         }
     }
 }
 
 void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
-    if (auto card = ui.Card({
+    if (auto card = guikit::Card(ui, {
         .minWidth = s_card.fullWidth ? keel::Optional<keel::f32>{keel::kNullOpt} : keel::Optional<keel::f32>{s_card.minWidth},
         .width = s_card.fullWidth ? guikit::SizeMode::Stretch : guikit::SizeMode::Fit,
         .gap = ctx.cardGap,
@@ -129,7 +129,7 @@ void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
         }
     })) {
         if (s_card.showHeader) {
-            ui.Heading({
+            guikit::Heading(ui, {
                 .label = "Card Container",
                 .description = "Elevated surface with padding, gap, and border",
                 .icon = guikit::Icon::Folder(),
@@ -138,11 +138,11 @@ void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
             });
         }
 
-        ui.Text("First content row inside the card container.", {
+        guikit::Text(ui, "First content row inside the card container.", {
             .role = guikit::TextRole::BodyMedium
         });
 
-        ui.Text("Second content row spaced by the card's gap property.", {
+        guikit::Text(ui, "Second content row spaced by the card's gap property.", {
             .role = guikit::TextRole::BodySmall,
             .variant = guikit::UiVariant::Secondary
         });

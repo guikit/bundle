@@ -35,19 +35,19 @@ keel::StringRef ModeEnumName(guikit::DatePickerMode mode) noexcept {
 } // namespace
 
 void RenderDatePickerInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Picker Mode"})) {
-        if (ui.Segmented(s_state.modeIdx, {"Date", "DateTime", "Time"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Picker Mode"})) {
+        if (guikit::Segmented(ui, s_state.modeIdx, {"Date", "DateTime", "Time"}).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Show Seconds"})) {
-        if (ui.Switch(s_state.showSeconds).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Seconds"})) {
+        if (guikit::Switch(ui, s_state.showSeconds).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Today / Now Button"})) {
-        if (ui.Switch(s_state.showTodayButton).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Today / Now Button"})) {
+        if (guikit::Switch(ui, s_state.showTodayButton).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Start Week on Monday"})) {
-        if (ui.Switch(s_state.firstDayMonday).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Start Week on Monday"})) {
+        if (guikit::Switch(ui, s_state.firstDayMonday).changed) ui.InvalidateAll();
     }
 }
 
@@ -66,7 +66,7 @@ void RenderDatePickerStage(guikit::Context& ui, DemoContext& ctx) {
         opts.color = ctx.GetControlColor();
         opts.background = ctx.GetControlBackground(navCat);
         opts.border = ctx.GetCtrlBorder();
-        (void)ui.DatePicker(s_state.value, opts);
+        (void)guikit::DatePicker(ui, s_state.value, opts);
     });
 }
 

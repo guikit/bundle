@@ -52,57 +52,57 @@ void RenderTagInputInspector(guikit::Context& ui, DemoContext&) {
             break;
         }
     }
-    if (auto el = ui.Element({.label = "Tag Variant"})) {
-        if (ui.Select(varIdx, kTagVariantLabels).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Tag Variant"})) {
+        if (guikit::Select(ui, varIdx, kTagVariantLabels).changed) {
             s_state.tagVariant = kTagVariants[varIdx];
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Placeholder"})) {
-        if (ui.InputField(s_state.placeholder, {
+    if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
+        if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "No placeholder...",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Prefix Text"})) {
-        if (ui.InputField(s_state.prefix, {
+    if (auto el = guikit::Element(ui, {.label = "Prefix Text"})) {
+        if (guikit::InputField(ui, s_state.prefix, {
             .placeholder = "e.g. Tags:",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Max Tags (0 = Unlimited)"})) {
+    if (auto el = guikit::Element(ui, {.label = "Max Tags (0 = Unlimited)"})) {
         static constexpr keel::StaticArray<keel::StringRef, 2> kMaxTagVariants = {{"Unlimited", "%d tags"}};
-        if (ui.Slider(s_state.maxTags, 0, 12, {
+        if (guikit::Slider(ui, s_state.maxTags, 0, 12, {
             .valueFormat = (s_state.maxTags == 0)
                 ? guikit::UiText{"Unlimited", kMaxTagVariants}
                 : guikit::UiText{"%d tags", kMaxTagVariants}
         }).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Split on Comma / Semicolon"})) {
-        if (ui.Switch(s_state.splitOnComma).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Split on Comma / Semicolon"})) {
+        if (guikit::Switch(ui, s_state.splitOnComma).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Split on Space"})) {
-        if (ui.Switch(s_state.splitOnSpace).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Split on Space"})) {
+        if (guikit::Switch(ui, s_state.splitOnSpace).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Allow Duplicates"})) {
-        if (ui.Switch(s_state.allowDuplicates).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Allow Duplicates"})) {
+        if (guikit::Switch(ui, s_state.allowDuplicates).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Clearable Button ('X')"})) {
-        if (ui.Switch(s_state.clearable).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Clearable Button ('X')"})) {
+        if (guikit::Switch(ui, s_state.clearable).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Counter Badge"})) {
-        if (ui.Switch(s_state.showCounter).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Counter Badge"})) {
+        if (guikit::Switch(ui, s_state.showCounter).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Read Only"})) {
-        if (ui.Switch(s_state.readOnly).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Read Only"})) {
+        if (guikit::Switch(ui, s_state.readOnly).changed) ui.InvalidateAll();
     }
 
-    if (auto row = ui.Row({.gap = 8.0f})) {
-        if (ui.Button({
+    if (auto row = guikit::Row(ui, {.gap = 8.0f})) {
+        if (guikit::Button(ui, {
             .text = "Add Sample Tag",
             .icon = guikit::Icon::Plus(),
             .width = guikit::SizeMode::Stretch,
@@ -115,7 +115,7 @@ void RenderTagInputInspector(guikit::Context& ui, DemoContext&) {
                 ui.InvalidateAll();
             }
         }
-        if (ui.Button({
+        if (guikit::Button(ui, {
             .text = "Reset Default Tags",
             .icon = guikit::Icon::Refresh(),
             .width = guikit::SizeMode::Stretch,
@@ -146,7 +146,7 @@ void RenderTagInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.height = ctx.ResolveCtrlHeight();
         opts.background = ctx.GetControlBackground(NavCategory::ElemTagInput);
         opts.border = ctx.GetCtrlBorder();
-        ui.TagInput(s_state.tags, opts);
+        guikit::TagInput(ui, s_state.tags, opts);
     });
 }
 

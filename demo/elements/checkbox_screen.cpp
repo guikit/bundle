@@ -11,19 +11,19 @@ CheckboxState s_state;
 } // namespace
 
 void RenderCheckboxInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Checked State",
         .description = "Toggle checkbox checked boolean"
     })) {
-        if (ui.Switch(s_state.state).changed) {
+        if (guikit::Switch(ui, s_state.state).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Indeterminate Tri-State",
         .description = "Render horizontal dash inside checkbox"
     })) {
-        if (ui.Switch(s_state.indet).changed) {
+        if (guikit::Switch(ui, s_state.indet).changed) {
             ui.InvalidateAll();
         }
     }
@@ -36,7 +36,7 @@ void RenderCheckboxStage(guikit::Context& ui, DemoContext& ctx) {
         opts.disabled = ctx.elemDisabled;
         opts.size = ctx.controlsSize;
         opts.color = ctx.GetControlColor();
-        ui.Checkbox(s_state.state, opts);
+        guikit::Checkbox(ui, s_state.state, opts);
     });
 }
 

@@ -28,20 +28,20 @@ constexpr keel::StringRef OrientationEnumName(guikit::Orientation o) noexcept {
 } // namespace
 
 void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Indeterminate",
         .description = "Animated shuttle bar for unknown duration"
     })) {
-        if (ui.Switch(s_state.indeterminate).changed) {
+        if (guikit::Switch(ui, s_state.indeterminate).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Progress Value",
         .disabled = s_state.indeterminate
     })) {
-        if (ui.Slider(s_state.val, 0.0f, 100.0f, {
+        if (guikit::Slider(ui, s_state.val, 0.0f, 100.0f, {
             .valueFormat = "%.1f %%",
             .disabled = s_state.indeterminate
         }).changed) {
@@ -54,8 +54,8 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
 
     keel::i32 orientIdx = (s_state.orientation == guikit::Orientation::Vertical) ? 1 : 0;
     static constexpr keel::StaticArray<keel::StringRef, 2> orientNames = {"Horizontal", "Vertical"};
-    if (auto el = ui.Element({.label = "Orientation"})) {
-        if (ui.Segmented(orientIdx, orientNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Orientation"})) {
+        if (guikit::Segmented(ui, orientIdx, orientNames).changed) {
             s_state.orientation = (orientIdx == 1)
                 ? guikit::Orientation::Vertical
                 : guikit::Orientation::Horizontal;
@@ -64,27 +64,27 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
     }
 
     if (s_state.orientation == guikit::Orientation::Vertical) {
-        if (auto el = ui.Element({
+        if (auto el = guikit::Element(ui, {
             .label = "Compact Vertical Height (Fit)",
             .description = "Pass .height = SizeMode::Fit instead of stretching"
         })) {
-            if (ui.Switch(s_state.compactVertical).changed) {
+            if (guikit::Switch(ui, s_state.compactVertical).changed) {
                 ui.InvalidateAll();
             }
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Segmented LED / VU Meter",
         .description = "Discrete LED cells vs smooth continuous bar"
     })) {
-        if (ui.Switch(s_state.segmented).changed) {
+        if (guikit::Switch(ui, s_state.segmented).changed) {
             ui.InvalidateAll();
         }
     }
     if (s_state.segmented) {
-        if (auto el = ui.Element({.label = "LED Segment Count"})) {
-            if (ui.Slider(s_state.segments, 8u, 36u, {
+        if (auto el = guikit::Element(ui, {.label = "LED Segment Count"})) {
+            if (guikit::Slider(ui, s_state.segments, 8u, 36u, {
                 .valueFormat = "%u segs"
             }).changed) {
                 ui.InvalidateAll();
@@ -92,8 +92,8 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Bar Thickness"})) {
-        if (ui.Slider(s_state.barHeight, 4.0f, 20.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Bar Thickness"})) {
+        if (guikit::Slider(ui, s_state.barHeight, 4.0f, 20.0f, {
             .valueFormat = "%.0f dp",
             .step = 1.0f
         }).changed) {
@@ -101,20 +101,20 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "3-Zone Colors (Green/Warn/Danger)"})) {
-        if (ui.Switch(s_state.multiZone).changed) {
+    if (auto el = guikit::Element(ui, {.label = "3-Zone Colors (Green/Warn/Danger)"})) {
+        if (guikit::Switch(ui, s_state.multiZone).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Peak-Hold Marker", .disabled = s_state.indeterminate})) {
-        if (ui.Switch(s_state.showPeak, {.disabled = s_state.indeterminate}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Peak-Hold Marker", .disabled = s_state.indeterminate})) {
+        if (guikit::Switch(ui, s_state.showPeak, {.disabled = s_state.indeterminate}).changed) {
             ui.InvalidateAll();
         }
     }
     if (s_state.showPeak && !s_state.indeterminate) {
-        if (auto el = ui.Element({.label = "Peak-Hold Level"})) {
-            if (ui.Slider(s_state.peakVal, 0.0f, 100.0f, {
+        if (auto el = guikit::Element(ui, {.label = "Peak-Hold Level"})) {
+            if (guikit::Slider(ui, s_state.peakVal, 0.0f, 100.0f, {
                 .valueFormat = "%.1f %%"
             }).changed) {
                 ui.InvalidateAll();
@@ -122,8 +122,8 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Value Tag", .disabled = s_state.indeterminate})) {
-        if (ui.Switch(s_state.showValue, {.disabled = s_state.indeterminate}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Value Tag", .disabled = s_state.indeterminate})) {
+        if (guikit::Switch(ui, s_state.showValue, {.disabled = s_state.indeterminate}).changed) {
             ui.InvalidateAll();
         }
     }
@@ -132,8 +132,8 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
     };
     keel::usize valPlaceIdx = keel::as<keel::usize>(s_state.valuePlacement);
     const bool disablePlacement = !s_state.showValue || s_state.indeterminate;
-    if (auto el = ui.Element({.label = "Value Placement", .disabled = disablePlacement})) {
-        if (ui.Select(valPlaceIdx, valPlaceNames, {
+    if (auto el = guikit::Element(ui, {.label = "Value Placement", .disabled = disablePlacement})) {
+        if (guikit::Select(ui, valPlaceIdx, valPlaceNames, {
             .disabled = disablePlacement
         }).changed) {
             s_state.valuePlacement = keel::from_underlying<guikit::Placement>(valPlaceIdx);
@@ -141,16 +141,16 @@ void RenderProgressBarInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Text Left (Min)"})) {
-        if (ui.InputField(s_state.textLeft, {
+    if (auto el = guikit::Element(ui, {.label = "Text Left (Min)"})) {
+        if (guikit::InputField(ui, s_state.textLeft, {
             .placeholder = "e.g. 0% / Min",
             .clearable = true
         }).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Text Right (Max)"})) {
-        if (ui.InputField(s_state.textRight, {
+    if (auto el = guikit::Element(ui, {.label = "Text Right (Max)"})) {
+        if (guikit::InputField(ui, s_state.textRight, {
             .placeholder = "e.g. 100% / Max",
             .clearable = true
         }).changed) {
@@ -186,7 +186,7 @@ void RenderProgressBarStage(guikit::Context& ui, DemoContext& ctx) {
         opts.width = wSize;
         opts.height = hSize;
         opts.color = ctx.GetControlColor();
-        ui.ProgressBar(s_state.val, 0.0, 100.0, opts);
+        guikit::ProgressBar(ui, s_state.val, 0.0, 100.0, opts);
     });
 }
 

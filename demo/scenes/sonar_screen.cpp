@@ -410,124 +410,124 @@ void RenderSonarInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         "Sweep"
     };
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Live Simulation",
         .size = guikit::UiSize::Sm
     })) {
-        ui.Switch(s_sonar.liveSimulation, {.size = guikit::UiSize::Sm});
+        guikit::Switch(ui, s_sonar.liveSimulation, {.size = guikit::UiSize::Sm});
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Display Geometry",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Segmented(s_sonar.displayModeIndex, kDisplayModeItems, {.size = guikit::UiSize::Sm});
+        guikit::Segmented(ui, s_sonar.displayModeIndex, kDisplayModeItems, {.size = guikit::UiSize::Sm});
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Scan Mode",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Segmented(s_sonar.scanModeIndex, kScanModeItems, {.size = guikit::UiSize::Sm});
+        guikit::Segmented(ui, s_sonar.scanModeIndex, kScanModeItems, {.size = guikit::UiSize::Sm});
     }
 
     keel::i32 cmapIdx = keel::as<keel::i32>(s_sonar.colormap);
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Colormap",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        if (ui.Select(cmapIdx, guikit::GetAllColormapNames(), {.size = guikit::UiSize::Sm}).changed) {
+        if (guikit::Select(ui, cmapIdx, guikit::GetAllColormapNames(), {.size = guikit::UiSize::Sm}).changed) {
             s_sonar.colormap = keel::from_underlying<guikit::Colormap>(cmapIdx);
         }
     }
 
-    ui.Heading({.label = "Processing", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    guikit::Heading(ui, {.label = "Processing", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Gain",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_sonar.gainDb, -15.0f, 25.0f, {
+        guikit::Slider(ui, s_sonar.gainDb, -15.0f, 25.0f, {
             .valueFormat = "%+.1f dB",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "TVG",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_sonar.tvgAmount, 0.0f, 1.0f, {
+        guikit::Slider(ui, s_sonar.tvgAmount, 0.0f, 1.0f, {
             .valueFormat = "%.2f",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Clutter Floor",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_sonar.clutterThreshold, 0.0f, 0.65f, {
+        guikit::Slider(ui, s_sonar.clutterThreshold, 0.0f, 0.65f, {
             .valueFormat = "%.2f",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Persistence",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_sonar.persistence, 0.10f, 0.96f, {
+        guikit::Slider(ui, s_sonar.persistence, 0.10f, 0.96f, {
             .valueFormat = "%.2f",
             .size = guikit::UiSize::Sm
         });
     }
 
     if (s_sonar.displayModeIndex != 0) {
-        if (auto el = ui.Element({
+        if (auto el = guikit::Element(ui, {
             .label = "Sector Aperture",
             .layout = guikit::ElementLayout::Top,
             .size = guikit::UiSize::Sm
         })) {
-            ui.Slider(s_sonar.sectorApertureDeg, 60.0f, 180.0f, {
+            guikit::Slider(ui, s_sonar.sectorApertureDeg, 60.0f, 180.0f, {
                 .valueFormat = "%.0f deg",
                 .size = guikit::UiSize::Sm
             });
         }
     }
 
-    ui.Heading({.label = "Overlays", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    guikit::Heading(ui, {.label = "Overlays", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
 
-    if (auto el = ui.Element({.label = "Guard Zone", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.guardZoneEnabled, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Guard Zone", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.guardZoneEnabled, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Targets", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.showTargets, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Targets", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.showTargets, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Target Labels", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.showTargetLabels, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Target Labels", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.showTargetLabels, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Range Rings", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.showRangeRings, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Range Rings", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.showRangeRings, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Bearing Dial", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.showBearingDial, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Bearing Dial", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.showBearingDial, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "EBL / VRM", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.showEblVrm, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "EBL / VRM", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.showEblVrm, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Colorbar", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_sonar.showColorbar, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Colorbar", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_sonar.showColorbar, {.size = guikit::UiSize::Sm});
     }
 
-    if (ui.Button({
+    if (guikit::Button(ui, {
         .text = "Reset Zoom",
         .icon = guikit::Icon::Refresh(),
         .size = guikit::UiSize::Sm,

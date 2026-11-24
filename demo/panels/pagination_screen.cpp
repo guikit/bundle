@@ -20,26 +20,26 @@ PaginationDemoState s_pg;
 } // namespace
 
 void RenderPaginationInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "Control Size"})) {
-        if (ui.StepSlider(ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Control Size"})) {
+        if (guikit::StepSlider(ui, ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Semantic Variant"})) {
-        if (ui.Select(ctx.btnVariant, kUiVariantNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Semantic Variant"})) {
+        if (guikit::Select(ui, ctx.btnVariant, kUiVariantNames).changed) {
             ui.InvalidateAll();
         }
     }
 
-    ui.Heading({
+    guikit::Heading(ui, {
         .label = "Pagination Options",
         .level = guikit::HeadingLevel::H6,
         .separator = guikit::HeadingSeparator::Bottom
     });
 
-    if (auto el = ui.Element({.label = "Total Pages"})) {
-        if (ui.Slider(s_pg.totalPages, 3, 30, {.valueFormat = "%d pages"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Total Pages"})) {
+        if (guikit::Slider(ui, s_pg.totalPages, 3, 30, {.valueFormat = "%d pages"}).changed) {
             if (s_pg.currentPage >= keel::as<keel::usize>(s_pg.totalPages)) {
                 s_pg.currentPage = keel::as<keel::usize>(s_pg.totalPages - 1);
             }
@@ -47,36 +47,36 @@ void RenderPaginationInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Sibling Count",
         .description = "Neighbors shown on each side of active page"
     })) {
-        if (ui.Slider(s_pg.siblingCount, 0, 3, {.valueFormat = "%d"}).changed) {
+        if (guikit::Slider(ui, s_pg.siblingCount, 0, 3, {.valueFormat = "%d"}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Fast-Jump Ellipsis (...)",
         .description = "Off = static separator (MUI/Shadcn); On = fast-jump button (Ant Design)"
     })) {
-        if (ui.Switch(s_pg.interactiveEllipsis).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_pg.interactiveEllipsis).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "First / Last Buttons (« »)"})) {
-        if (ui.Switch(s_pg.showFirstLast).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "First / Last Buttons (« »)"})) {
+        if (guikit::Switch(ui, s_pg.showFirstLast).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Prev / Next Buttons (‹ ›)"})) {
-        if (ui.Switch(s_pg.showPrevNext).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Prev / Next Buttons (‹ ›)"})) {
+        if (guikit::Switch(ui, s_pg.showPrevNext).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Page Info Summary"})) {
-        if (ui.Switch(s_pg.showPageInfo).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Page Info Summary"})) {
+        if (guikit::Switch(ui, s_pg.showPageInfo).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Surface Well Frame"})) {
-        if (ui.Switch(s_pg.showSurfaceBox).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Surface Well Frame"})) {
+        if (guikit::Switch(ui, s_pg.showSurfaceBox).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Disabled State"})) {
-        if (ui.Switch(ctx.elemDisabled).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Disabled State"})) {
+        if (guikit::Switch(ui, ctx.elemDisabled).changed) ui.InvalidateAll();
     }
 }
 
@@ -88,7 +88,7 @@ void RenderPaginationStage(guikit::Context& ui, DemoContext& ctx) {
     }
 
     auto renderPager = [&]() {
-        ui.Pagination(s_pg.currentPage, totalPages, {
+        guikit::Pagination(ui, s_pg.currentPage, totalPages, {
             .siblingCount = keel::as<keel::u32>(keel::max(0, s_pg.siblingCount)),
             .showFirstLast = s_pg.showFirstLast,
             .showPrevNext = s_pg.showPrevNext,
@@ -101,7 +101,7 @@ void RenderPaginationStage(guikit::Context& ui, DemoContext& ctx) {
     };
 
     if (s_pg.showSurfaceBox) {
-        if (auto well = ui.Box({
+        if (auto well = guikit::Box(ui, {
             .width = guikit::SizeMode::Fit,
             .padding = guikit::Padding::Symmetric(10.0f, 6.0f),
             .background = guikit::StateColor::Surface(),

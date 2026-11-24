@@ -40,8 +40,8 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
     keel::usize styleIdx = (s_tb.style == guikit::ToolbarStyle::Header)
         ? 1
         : (s_tb.style == guikit::ToolbarStyle::Floating ? 2 : 0);
-    if (auto el = ui.Element({.label = "Toolbar Style", .layout = guikit::ElementLayout::Stacked})) {
-        if (ui.Segmented(styleIdx, kStyleLabels).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Toolbar Style", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, styleIdx, kStyleLabels).changed) {
             s_tb.style = (styleIdx == 1)
                 ? guikit::ToolbarStyle::Header
                 : (styleIdx == 2 ? guikit::ToolbarStyle::Floating : guikit::ToolbarStyle::Surface);
@@ -51,8 +51,8 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
 
     static constexpr keel::StaticArray<keel::StringRef, 2> kOrientLabels = {"Horizontal", "Vertical"};
     keel::usize orientIdx = (s_tb.orientation == guikit::Orientation::Vertical) ? 1 : 0;
-    if (auto el = ui.Element({.label = "Orientation", .layout = guikit::ElementLayout::Stacked})) {
-        if (ui.Segmented(orientIdx, kOrientLabels).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Orientation", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, orientIdx, kOrientLabels).changed) {
             s_tb.orientation = (orientIdx == 1)
                 ? guikit::Orientation::Vertical
                 : guikit::Orientation::Horizontal;
@@ -63,26 +63,26 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
     if (s_tb.orientation == guikit::Orientation::Horizontal) {
         static constexpr keel::StaticArray<keel::StringRef, 4> kOverflowLabels = {"Compact", "Scroll", "Wrap", "Clip"};
         keel::usize overflowIdx = keel::as<keel::usize>(s_tb.overflow);
-        if (auto el = ui.Element({.label = "Overflow Policy", .layout = guikit::ElementLayout::Stacked})) {
-            if (ui.Segmented(overflowIdx, kOverflowLabels).changed) {
+        if (auto el = guikit::Element(ui, {.label = "Overflow Policy", .layout = guikit::ElementLayout::Stacked})) {
+            if (guikit::Segmented(ui, overflowIdx, kOverflowLabels).changed) {
                 s_tb.overflow = keel::from_underlying<guikit::ToolbarOverflow>(overflowIdx);
                 ui.InvalidateAll();
             }
         }
     }
 
-    if (auto el = ui.Element({.label = "Toolbar Size"})) {
-        if (ui.StepSlider(ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Toolbar Size"})) {
+        if (guikit::StepSlider(ui, ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
             ui.InvalidateAll();
         }
     }
     ctx.RenderVariantPicker(ui);
 
-    if (auto el = ui.Element({.label = "Icon-Only Square Tools"})) {
-        if (ui.Switch(s_tb.squareIcons).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Icon-Only Square Tools"})) {
+        if (guikit::Switch(ui, s_tb.squareIcons).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Action Badges"})) {
-        if (ui.Switch(s_tb.showBadges).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Action Badges"})) {
+        if (guikit::Switch(ui, s_tb.showBadges).changed) ui.InvalidateAll();
     }
 }
 
@@ -90,7 +90,7 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
     const bool isVert = (s_tb.orientation == guikit::Orientation::Vertical);
     const bool isSq = s_tb.squareIcons || isVert;
 
-    if (auto tb = ui.Toolbar({
+    if (auto tb = guikit::Toolbar(ui, {
         .style = s_tb.style,
         .orientation = s_tb.orientation,
         .overflow = s_tb.overflow,

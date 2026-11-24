@@ -58,8 +58,8 @@ constexpr keel::StringRef GuidesEnumName(guikit::TreeGuides g) noexcept {
 } // namespace
 
 void RenderTreeViewInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "Tree Size"})) {
-        if (ui.StepSlider(ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Tree Size"})) {
+        if (guikit::StepSlider(ui, ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
             ui.InvalidateAll();
         }
     }
@@ -67,8 +67,8 @@ void RenderTreeViewInspector(guikit::Context& ui, DemoContext& ctx) {
 
     static constexpr keel::StaticArray<keel::StringRef, 2> kSelStyleNames = {"Pill", "Indicator"};
     keel::usize selStyleIdx = (s_tree.selectionStyle == guikit::TreeSelectionStyle::Indicator) ? 1 : 0;
-    if (auto el = ui.Element({.label = "Selection Style"})) {
-        if (ui.Segmented(selStyleIdx, kSelStyleNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Selection Style"})) {
+        if (guikit::Segmented(ui, selStyleIdx, kSelStyleNames).changed) {
             s_tree.selectionStyle = (selStyleIdx == 1)
                 ? guikit::TreeSelectionStyle::Indicator
                 : guikit::TreeSelectionStyle::Pill;
@@ -78,51 +78,51 @@ void RenderTreeViewInspector(guikit::Context& ui, DemoContext& ctx) {
 
     static constexpr keel::StaticArray<keel::StringRef, 3> kGuideNames = {"None", "Vertical", "Connected"};
     keel::usize guideIdx = keel::as<keel::usize>(s_tree.guides);
-    if (auto el = ui.Element({.label = "Hierarchy Guides"})) {
-        if (ui.Segmented(guideIdx, kGuideNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Hierarchy Guides"})) {
+        if (guikit::Segmented(ui, guideIdx, kGuideNames).changed) {
             s_tree.guides = keel::from_underlying<guikit::TreeGuides>(guideIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Indent Step"})) {
-        if (ui.Slider(s_tree.indent, 12.0f, 32.0f, {.valueFormat = "%.0f px", .step = 2.0f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Indent Step"})) {
+        if (guikit::Slider(ui, s_tree.indent, 12.0f, 32.0f, {.valueFormat = "%.0f px", .step = 2.0f}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Multi-Column Mode (TreeTable)"})) {
-        if (ui.Switch(s_tree.showColumns).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Multi-Column Mode (TreeTable)"})) {
+        if (guikit::Switch(ui, s_tree.showColumns).changed) ui.InvalidateAll();
     }
     if (s_tree.showColumns) {
-        if (auto el = ui.Element({.label = "Column Grid Lines"})) {
-            if (ui.Switch(s_tree.gridLines).changed) ui.InvalidateAll();
+        if (auto el = guikit::Element(ui, {.label = "Column Grid Lines"})) {
+            if (guikit::Switch(ui, s_tree.gridLines).changed) ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Search Filter Bar"})) {
-        if (ui.Switch(s_tree.searchable).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Search Filter Bar"})) {
+        if (guikit::Switch(ui, s_tree.searchable).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Expand/Collapse Toolbar"})) {
-        if (ui.Switch(s_tree.showToolbar).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Expand/Collapse Toolbar"})) {
+        if (guikit::Switch(ui, s_tree.showToolbar).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Striped Rows"})) {
-        if (ui.Switch(s_tree.striped).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Striped Rows"})) {
+        if (guikit::Switch(ui, s_tree.striped).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Expand Branch on Select"})) {
-        if (ui.Switch(s_tree.expandOnSelect).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Expand Branch on Select"})) {
+        if (guikit::Switch(ui, s_tree.expandOnSelect).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Tri-State Checkboxes"})) {
-        if (ui.Switch(s_tree.showCheckboxes).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Tri-State Checkboxes"})) {
+        if (guikit::Switch(ui, s_tree.showCheckboxes).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Embedded Controls"})) {
-        if (ui.Switch(s_tree.showEmbeddedControls).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Embedded Controls"})) {
+        if (guikit::Switch(ui, s_tree.showEmbeddedControls).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Row Descriptions"})) {
-        if (ui.Switch(s_tree.showDescriptions).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Row Descriptions"})) {
+        if (guikit::Switch(ui, s_tree.showDescriptions).changed) ui.InvalidateAll();
     }
     if (!s_tree.showColumns) {
-        if (auto el = ui.Element({.label = "Show Details & Badges"})) {
-            if (ui.Switch(s_tree.showBadgesAndDetails).changed) ui.InvalidateAll();
+        if (auto el = guikit::Element(ui, {.label = "Show Details & Badges"})) {
+            if (guikit::Switch(ui, s_tree.showBadgesAndDetails).changed) ui.InvalidateAll();
         }
     }
 }
@@ -159,7 +159,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
     const bool useCols = s_tree.showColumns;
     const bool inlineDecor = !useCols && s_tree.showBadgesAndDetails;
 
-    if (auto tree = ui.TreeView({
+    if (auto tree = guikit::TreeView(ui, {
         .title = "SCENE & ASSET HIERARCHY",
         .columns = useCols ? keel::ArrayRef<guikit::TableColumn>(kTreeCols) : keel::ArrayRef<guikit::TableColumn>{},
         .gridLines = useCols && s_tree.gridLines,
@@ -177,7 +177,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
         .size = ctx.controlsSize
     })) {
         // 1. Root Branch: Scene Hierarchy
-        if (auto sceneItem = ui.TreeItem({
+        if (auto sceneItem = guikit::TreeItem(ui, {
             .label = "Scene Hierarchy",
             .description = s_tree.showDescriptions ? "Active viewport nodes & real-time subsystems" : "",
             .badge = inlineDecor ? guikit::UiText{"5 nodes", guikit::StateColor::Primary()} : guikit::UiText{},
@@ -190,15 +190,15 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 s_tree.chkSun = s_tree.chkFog = s_tree.chkSonar = s_tree.chkWaterfall = s_tree.chkImu = chkSceneAll;
             }
             if (useCols) {
-                ui.Text("Viewport", {.variant = guikit::UiVariant::Secondary});
-                ui.Element({.badge = {"5 nodes", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});
+                guikit::Text(ui, "Viewport", {.variant = guikit::UiVariant::Secondary});
+                guikit::Element(ui, {.badge = {"5 nodes", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});
             }
             if (s_tree.showEmbeddedControls) {
-                ui.Switch(s_tree.sceneActive);
+                guikit::Switch(ui, s_tree.sceneActive);
             }
 
             // 1.1 Environment & Lighting
-            if (auto envItem = ui.TreeItem({
+            if (auto envItem = guikit::TreeItem(ui, {
                 .label = "Environment & Lighting",
                 .description = s_tree.showDescriptions ? "PBR skybox, directional sun, and volumetric fog" : "",
                 .icon = guikit::Icon::Eye(),
@@ -210,17 +210,17 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     s_tree.chkSun = s_tree.chkFog = chkEnvAll;
                 }
                 if (useCols) {
-                    ui.Text("PBR Group", {.variant = guikit::UiVariant::Secondary});
-                    ui.Element({.badge = {"2 passes", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
+                    guikit::Text(ui, "PBR Group", {.variant = guikit::UiVariant::Secondary});
+                    guikit::Element(ui, {.badge = {"2 passes", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
                 }
                 if (s_tree.showEmbeddedControls) {
-                    ui.Slider(s_tree.envExposure, 0.0f, 2.5f, {
+                    guikit::Slider(ui, s_tree.envExposure, 0.0f, 2.5f, {
                         .valueFormat = "%.2f EV",
                         .width = useCols ? guikit::AxisSize::Auto() : guikit::AxisSize::Fixed(128.0f)
                     });
                 }
 
-                if (auto sunItem = ui.TreeItem({
+                if (auto sunItem = guikit::TreeItem(ui, {
                     .label = "Directional Sun",
                     .description = s_tree.showDescriptions ? "Cascaded shadow map primary light source" : "",
                     .detail = inlineDecor ? "6500K" : "",
@@ -229,15 +229,15 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkSun : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("6500K", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"HDR", guikit::UiVariant::Warning}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "6500K", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"HDR", guikit::UiVariant::Warning}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
-                        ui.Switch(s_tree.sunEnabled);
+                        guikit::Switch(ui, s_tree.sunEnabled);
                     }
                 }
 
-                if (auto fogItem = ui.TreeItem({
+                if (auto fogItem = guikit::TreeItem(ui, {
                     .label = "Volumetric Fog",
                     .description = s_tree.showDescriptions ? "Exponential height fog with temporal reprojection" : "",
                     .detail = inlineDecor ? "Raymarched" : "",
@@ -245,11 +245,11 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkFog : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("Raymarched", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"Froxel", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "Raymarched", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"Froxel", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
-                        ui.Slider(s_tree.fogDensity, 0.0f, 100.0f, {
+                        guikit::Slider(ui, s_tree.fogDensity, 0.0f, 100.0f, {
                             .valueFormat = "%.0f%%",
                             .width = useCols ? guikit::AxisSize::Auto() : guikit::AxisSize::Fixed(110.0f)
                         });
@@ -258,7 +258,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
             }
 
             // 1.2 Sensors & Telemetry
-            if (auto sensorsItem = ui.TreeItem({
+            if (auto sensorsItem = guikit::TreeItem(ui, {
                 .label = "Sensors & Telemetry",
                 .description = s_tree.showDescriptions ? "Acoustic, RF spectrum, and inertial streams" : "",
                 .badge = inlineDecor ? guikit::UiText{"3 ch", guikit::StateColor::Info()} : guikit::UiText{},
@@ -271,12 +271,12 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     s_tree.chkSonar = s_tree.chkWaterfall = s_tree.chkImu = chkSensorsAll;
                 }
                 if (useCols) {
-                    ui.Text("DSP Bus", {.variant = guikit::UiVariant::Secondary});
-                    ui.Element({.badge = {"3 ch", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
+                    guikit::Text(ui, "DSP Bus", {.variant = guikit::UiVariant::Secondary});
+                    guikit::Element(ui, {.badge = {"3 ch", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
                 }
 
                 static constexpr keel::StaticArray<keel::StringRef, 3> kSonarModes = {"Active", "Passive", "CW"};
-                if (auto sonarItem = ui.TreeItem({
+                if (auto sonarItem = guikit::TreeItem(ui, {
                     .label = "Sonar Array PPI",
                     .description = s_tree.showDescriptions ? "128-beam polar acoustic beamforming receiver" : "",
                     .detail = inlineDecor ? "750 kHz" : "",
@@ -284,17 +284,17 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkSonar : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("750 kHz", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"128-Beam", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "750 kHz", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"128-Beam", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
-                        ui.Select(s_tree.sonarModeIdx, kSonarModes, {
+                        guikit::Select(ui, s_tree.sonarModeIdx, kSonarModes, {
                             .width = useCols ? guikit::AxisSize::Auto() : guikit::AxisSize::Fixed(100.0f)
                         });
                     }
                 }
 
-                if (auto wfItem = ui.TreeItem({
+                if (auto wfItem = guikit::TreeItem(ui, {
                     .label = "RTSA Waterfall",
                     .description = s_tree.showDescriptions ? "Real-time FFT spectrum & DOA target tracker" : "",
                     .detail = inlineDecor ? "2.4 GHz" : "",
@@ -303,14 +303,14 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkWaterfall : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("2.4 GHz", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"LIVE", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "2.4 GHz", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"LIVE", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
                         // Multi-widget cell: Switch + Button grouped inside a single column cell
                         if (auto cell = wfItem.Cell()) {
-                            ui.Switch(s_tree.wfTracking);
-                            if (ui.Button({
+                            guikit::Switch(ui, s_tree.wfTracking);
+                            if (guikit::Button(ui, {
                                 .text = "Calibrate",
                                 .color = guikit::StateColor::Secondary()
                             })) {
@@ -320,7 +320,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     }
                 }
 
-                if (auto imuItem = ui.TreeItem({
+                if (auto imuItem = guikit::TreeItem(ui, {
                     .label = "Inertial Navigation (IMU)",
                     .description = s_tree.showDescriptions ? "6-DOF strapdown attitude & heading reference" : "",
                     .detail = inlineDecor ? "400 Hz" : "",
@@ -328,18 +328,18 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkImu : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("400 Hz", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"6-DOF", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "400 Hz", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"6-DOF", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
-                        ui.Switch(s_tree.imuEnabled);
+                        guikit::Switch(ui, s_tree.imuEnabled);
                     }
                 }
             }
         }
 
         // 2. Root Branch: Build & Assets
-        if (auto assetsItem = ui.TreeItem({
+        if (auto assetsItem = guikit::TreeItem(ui, {
             .label = "Build & Assets",
             .description = s_tree.showDescriptions ? "Compiled GLSL shaders and runtime theme bundles" : "",
             .detail = inlineDecor ? "14.2 MB" : "",
@@ -352,11 +352,11 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 s_tree.chkShaderSonar = s_tree.chkShaderWaterfall = s_tree.chkThemeJson = chkAssetsAll;
             }
             if (useCols) {
-                ui.Text("14.2 MB", {.variant = guikit::UiVariant::Secondary});
-                ui.Element({.badge = {"Bundle", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
+                guikit::Text(ui, "14.2 MB", {.variant = guikit::UiVariant::Secondary});
+                guikit::Element(ui, {.badge = {"Bundle", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
             }
 
-            if (auto shadersItem = ui.TreeItem({
+            if (auto shadersItem = guikit::TreeItem(ui, {
                 .label = "Shaders (GLSL 330)",
                 .description = s_tree.showDescriptions ? "Hardware-accelerated GPU underlay programs" : "",
                 .badge = inlineDecor ? guikit::UiText{"2 files", guikit::StateColor::Muted()} : guikit::UiText{},
@@ -369,11 +369,11 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     s_tree.chkShaderSonar = s_tree.chkShaderWaterfall = chkShadersAll;
                 }
                 if (useCols) {
-                    ui.Text("GLSL 330", {.variant = guikit::UiVariant::Secondary});
-                    ui.Element({.badge = {"2 files", guikit::UiVariant::Secondary}, .width = guikit::SizeMode::Fit});
+                    guikit::Text(ui, "GLSL 330", {.variant = guikit::UiVariant::Secondary});
+                    guikit::Element(ui, {.badge = {"2 files", guikit::UiVariant::Secondary}, .width = guikit::SizeMode::Fit});
                 }
 
-                if (auto s1 = ui.TreeItem({
+                if (auto s1 = guikit::TreeItem(ui, {
                     .label = "sonar_ppi.frag",
                     .detail = inlineDecor ? "4.8 KB" : "",
                     .badge = inlineDecor ? guikit::UiText{"OK", guikit::StateColor::Success()} : guikit::UiText{},
@@ -381,12 +381,12 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkShaderSonar : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("4.8 KB", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"OK", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "4.8 KB", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"OK", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
                     }
                 }
 
-                if (auto s2 = ui.TreeItem({
+                if (auto s2 = guikit::TreeItem(ui, {
                     .label = "waterfall_doa.frag",
                     .detail = inlineDecor ? "6.1 KB" : "",
                     .badge = inlineDecor ? guikit::UiText{"OK", guikit::StateColor::Success()} : guikit::UiText{},
@@ -394,13 +394,13 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .checked = s_tree.showCheckboxes ? &s_tree.chkShaderWaterfall : nullptr
                 })) {
                     if (useCols) {
-                        ui.Text("6.1 KB", {.variant = guikit::UiVariant::Secondary});
-                        ui.Element({.badge = {"OK", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "6.1 KB", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"OK", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
                     }
                 }
             }
 
-            if (auto themeItem = ui.TreeItem({
+            if (auto themeItem = guikit::TreeItem(ui, {
                 .label = "theme_tokens.json",
                 .description = s_tree.showDescriptions ? "Design system color & typography specification" : "",
                 .detail = inlineDecor ? "2.1 KB" : "",
@@ -408,8 +408,8 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 .checked = s_tree.showCheckboxes ? &s_tree.chkThemeJson : nullptr
             })) {
                 if (useCols) {
-                    ui.Text("2.1 KB", {.variant = guikit::UiVariant::Secondary});
-                    ui.Element({.badge = {"JSON", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
+                    guikit::Text(ui, "2.1 KB", {.variant = guikit::UiVariant::Secondary});
+                    guikit::Element(ui, {.badge = {"JSON", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
                 }
             }
         }

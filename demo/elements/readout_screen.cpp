@@ -64,39 +64,39 @@ constexpr guikit::ReadoutUnit kTempUnits[] = {
 } // namespace
 
 void RenderReadoutInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Live Signal Simulation"})) {
-        if (ui.Switch(s_state.liveSim).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Live Signal Simulation"})) {
+        if (guikit::Switch(ui, s_state.liveSim).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show '+' Sign"})) {
-        if (ui.Switch(s_state.showPlusSign).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show '+' Sign"})) {
+        if (guikit::Switch(ui, s_state.showPlusSign).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Elevated Card"})) {
-        if (ui.Switch(s_state.elevated).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Elevated Card"})) {
+        if (guikit::Switch(ui, s_state.elevated).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Lock Zero Action"})) {
-        if (ui.Switch(s_state.lockZero).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Lock Zero Action"})) {
+        if (guikit::Switch(ui, s_state.lockZero).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Allow Channel Menu"})) {
-        if (ui.Switch(s_state.allowChannelMenu).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Allow Channel Menu"})) {
+        if (guikit::Switch(ui, s_state.allowChannelMenu).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Allow Precision Menu"})) {
-        if (ui.Switch(s_state.allowPrecisionMenu).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Allow Precision Menu"})) {
+        if (guikit::Switch(ui, s_state.allowPrecisionMenu).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Allow Unit Menu"})) {
-        if (ui.Switch(s_state.allowUnitMenu).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Allow Unit Menu"})) {
+        if (guikit::Switch(ui, s_state.allowUnitMenu).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Max Precision"})) {
+    if (auto el = guikit::Element(ui, {.label = "Max Precision"})) {
         static constexpr keel::StaticArray<keel::StringRef, 6> kPrecSteps = {
             "1", "2", "3", "4", "5", "6"
         };
         keel::i32 stepIdx = keel::clamp(s_state.maxPrecision - 1, 0, 5);
-        if (ui.StepSlider(stepIdx, kPrecSteps).changed) {
+        if (guikit::StepSlider(ui, stepIdx, kPrecSteps).changed) {
             s_state.maxPrecision = stepIdx + 1;
             ui.InvalidateAll();
         }
     }
 
-    if (ui.Button({
+    if (guikit::Button(ui, {
         .text = "Clear All Zero Offsets",
         .icon = guikit::Icon::Refresh(),
         .width = guikit::SizeMode::Stretch,
@@ -223,7 +223,7 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Md : ctx.controlsSize;
 
     ctx.RunElementStage(ui, [&]() {
-        if (auto bar = ui.Wrap({.gap = 10.0f})) {
+        if (auto bar = guikit::Wrap(ui, {.gap = 10.0f})) {
             for (keel::usize i = 0; i < 3; ++i) {
                 guikit::ReadoutOptions ro{};
                 ro.size = effSize;
@@ -239,7 +239,7 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
                 ro.precisionMenuTitle = "PRECISION";
                 ro.unitMenuTitle = "UNITS";
 
-                const auto resp = ui.Readout(s_state.slots[i], channels, ro);
+                const auto resp = guikit::Readout(ui, s_state.slots[i], channels, ro);
                 if (resp.actionClicked) {
                     const keel::i32 ch = s_state.slots[i].channelIndex;
                     if (ch == 0) {
@@ -251,7 +251,7 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
                     } else if (ch == 4) {
                         s_state.tempZeroC = (keel::abs(s_state.tempZeroC) > 1e-4) ? 0.0 : rawTempC;
                     }
-                    ui.ShowToast({
+                    guikit::ShowToast(ui, {
                         .title = "Relative Zero Updated",
                         .message = channels[keel::as<keel::usize>(ch)].label,
                         .variant = guikit::UiVariant::Success

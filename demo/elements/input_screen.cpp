@@ -19,47 +19,47 @@ InputState s_state;
 } // namespace
 
 void RenderInputInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Multi-Control Slot (Input + Button)",
         .description = "Place InputField + Button inside a single ui.Element"
     })) {
-        if (ui.Switch(s_state.companionButton).changed) {
+        if (guikit::Switch(ui, s_state.companionButton).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Placeholder"})) {
-        if (ui.InputField(s_state.placeholder, {
+    if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
+        if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "No placeholder...",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Prefix Text"})) {
-        if (ui.InputField(s_state.prefix, {
+    if (auto el = guikit::Element(ui, {.label = "Prefix Text"})) {
+        if (guikit::InputField(ui, s_state.prefix, {
             .placeholder = "e.g. https://",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Suffix Text"})) {
-        if (ui.InputField(s_state.suffix, {
+    if (auto el = guikit::Element(ui, {.label = "Suffix Text"})) {
+        if (guikit::InputField(ui, s_state.suffix, {
             .placeholder = "e.g. :443",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Clearable Button ('X')"})) {
-        if (ui.Switch(s_state.clearable).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Clearable Button ('X')"})) {
+        if (guikit::Switch(ui, s_state.clearable).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Password Mask & Reveal"})) {
-        if (ui.Switch(s_state.password).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Password Mask & Reveal"})) {
+        if (guikit::Switch(ui, s_state.password).changed) ui.InvalidateAll();
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 3> cursorModes = {"Blinking", "Solid", "Hidden"};
-    if (auto el = ui.Element({.label = "Cursor Blink Mode"})) {
-        if (ui.Segmented(s_state.cursorMode, cursorModes).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Cursor Blink Mode"})) {
+        if (guikit::Segmented(ui, s_state.cursorMode, cursorModes).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Read Only"})) {
-        if (ui.Switch(s_state.readOnly).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Read Only"})) {
+        if (guikit::Switch(ui, s_state.readOnly).changed) ui.InvalidateAll();
     }
 }
 
@@ -81,13 +81,13 @@ void RenderInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.height = ctx.ResolveCtrlHeight();
         opts.background = ctx.GetControlBackground(NavCategory::ElemInputField);
         opts.border = ctx.GetCtrlBorder();
-        ui.InputField(s_state.text, opts);
+        guikit::InputField(ui, s_state.text, opts);
 
         if (s_state.companionButton) {
             const keel::StringRef btnLbl = (s_state.connectCount > 0)
                 ? ui.Format("Connect ({})", s_state.connectCount)
                 : keel::StringRef("Connect");
-            if (ui.Button({
+            if (guikit::Button(ui, {
                 .text = btnLbl,
                 .icon = guikit::Icon::Play(),
                 .disabled = ctx.elemDisabled,

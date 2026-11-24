@@ -419,11 +419,11 @@ void RenderWaterfallInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         LoadWaterfallScenario(s_wf, s_wf.scenarioIndex);
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Live Signal Stream",
         .size = guikit::UiSize::Sm
     })) {
-        ui.Switch(s_wf.liveStream, {.size = guikit::UiSize::Sm});
+        guikit::Switch(ui, s_wf.liveStream, {.size = guikit::UiSize::Sm});
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 4> kScenarios = {
@@ -433,12 +433,12 @@ void RenderWaterfallInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         "DOA/BTR: RF MUSIC Direction Finder"
     };
     keel::i32 scenIdx = s_wf.scenarioIndex;
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Preset Scenario",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        if (ui.Select(scenIdx, kScenarios, {.size = guikit::UiSize::Sm}).changed) {
+        if (guikit::Select(ui, scenIdx, kScenarios, {.size = guikit::UiSize::Sm}).changed) {
             LoadWaterfallScenario(s_wf, scenIdx);
         }
     }
@@ -448,133 +448,133 @@ void RenderWaterfallInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         "Waterfall",
         "Trace"
     };
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Viewport Layout",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Segmented(s_wf.layoutIndex, kLayouts, {.size = guikit::UiSize::Sm});
+        guikit::Segmented(ui, s_wf.layoutIndex, kLayouts, {.size = guikit::UiSize::Sm});
     }
 
     keel::i32 cmapIdx = keel::as<keel::i32>(s_wf.colormap);
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "GPU Colormap LUT",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        if (ui.Select(cmapIdx, guikit::GetAllColormapNames(), {.size = guikit::UiSize::Sm}).changed) {
+        if (guikit::Select(ui, cmapIdx, guikit::GetAllColormapNames(), {.size = guikit::UiSize::Sm}).changed) {
             s_wf.colormap = keel::from_underlying<guikit::Colormap>(cmapIdx);
         }
     }
 
-    ui.Heading({.label = "GPU Ring-Buffer & Conditioning", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    guikit::Heading(ui, {.label = "GPU Ring-Buffer & Conditioning", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Digital Gain",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.gainDb, -20.0f, 20.0f, {
+        guikit::Slider(ui, s_wf.gainDb, -20.0f, 20.0f, {
             .valueFormat = "%+.1f dB",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Dynamic Range Floor",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.dbFloor, -130.0f, -45.0f, {
+        guikit::Slider(ui, s_wf.dbFloor, -130.0f, -45.0f, {
             .valueFormat = "%.0f dB",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Dynamic Range Ceiling",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.dbCeil, -40.0f, 10.0f, {
+        guikit::Slider(ui, s_wf.dbCeil, -40.0f, 10.0f, {
             .valueFormat = "%.0f dB",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Detection Gate",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.thresholdGateDb, s_wf.dbFloor + 5.0f, s_wf.dbCeil - 5.0f, {
+        guikit::Slider(ui, s_wf.thresholdGateDb, s_wf.dbFloor + 5.0f, s_wf.dbCeil - 5.0f, {
             .valueFormat = "%+.0f dB",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Noise Gate Suppression",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.gateSuppression, 0.0f, 1.0f, {
+        guikit::Slider(ui, s_wf.gateSuppression, 0.0f, 1.0f, {
             .valueFormat = "%.2f",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Contrast Gamma",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.gamma, 0.45f, 2.0f, {
+        guikit::Slider(ui, s_wf.gamma, 0.45f, 2.0f, {
             .valueFormat = "%.2f",
             .size = guikit::UiSize::Sm
         });
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Scroll Rate (Slices/sec)",
         .layout = guikit::ElementLayout::Top,
         .size = guikit::UiSize::Sm
     })) {
-        ui.Slider(s_wf.updateRateHz, 5.0f, 60.0f, {
+        guikit::Slider(ui, s_wf.updateRateHz, 5.0f, 60.0f, {
             .valueFormat = "%.0f Hz",
             .size = guikit::UiSize::Sm
         });
     }
 
-    ui.Heading({.label = "Traces & Tracking Overlays", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    guikit::Heading(ui, {.label = "Traces & Tracking Overlays", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
 
-    if (auto el = ui.Element({.label = "Live Instantaneous Trace", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showLiveTrace, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Live Instantaneous Trace", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showLiveTrace, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Peak Hold Envelope", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showPeakHold, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Peak Hold Envelope", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showPeakHold, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "RMS Exponential Average", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showAverageTrace, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "RMS Exponential Average", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showAverageTrace, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Auto Peak / DOA Callouts", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showPeakMarkers, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Auto Peak / DOA Callouts", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showPeakMarkers, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "DOA / Emitter Target Tracks", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showTracks, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "DOA / Emitter Target Tracks", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showTracks, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Track Association Gates", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showTrackGates, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Track Association Gates", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showTrackGates, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Harmonic Comb (f0..6f0)", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.showHarmonicComb, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Harmonic Comb (f0..6f0)", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.showHarmonicComb, {.size = guikit::UiSize::Sm});
     }
-    if (auto el = ui.Element({.label = "Invert Time Flow (Bottom-Up)", .size = guikit::UiSize::Sm})) {
-        ui.Switch(s_wf.invertTimeAxis, {.size = guikit::UiSize::Sm});
+    if (auto el = guikit::Element(ui, {.label = "Invert Time Flow (Bottom-Up)", .size = guikit::UiSize::Sm})) {
+        guikit::Switch(ui, s_wf.invertTimeAxis, {.size = guikit::UiSize::Sm});
     }
 
-    if (auto btnRow = ui.Row({.gap = 8.0f})) {
-        if (ui.Button({
+    if (auto btnRow = guikit::Row(ui, {.gap = 8.0f})) {
+        if (guikit::Button(ui, {
             .text = "Clear Peak",
             .icon = guikit::Icon::Refresh(),
             .size = guikit::UiSize::Sm,
@@ -583,7 +583,7 @@ void RenderWaterfallInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         })) {
             s_wf.requestResetPeakHold = true;
         }
-        if (ui.Button({
+        if (guikit::Button(ui, {
             .text = "Reset Zoom",
             .icon = guikit::Icon::Search(),
             .size = guikit::UiSize::Sm,

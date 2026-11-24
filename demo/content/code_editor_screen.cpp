@@ -428,73 +428,73 @@ CodeEditorState s_state;
 } // namespace
 
 void RenderCodeEditorInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Language Preset"})) {
-        if (ui.Select(s_state.syntaxMode, CodeEditorState::syntaxLabels).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Language Preset"})) {
+        if (guikit::Select(ui, s_state.syntaxMode, CodeEditorState::syntaxLabels).changed) {
             s_state.LoadPreset(s_state.syntaxMode);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Syntax Color Scheme"})) {
-        if (ui.Select(s_state.colorScheme, CodeEditorState::colorSchemeLabels).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Syntax Color Scheme"})) {
+        if (guikit::Select(ui, s_state.colorScheme, CodeEditorState::colorSchemeLabels).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Hidden Whitespace"})) {
-        if (ui.Switch(s_state.showWhitespace).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Hidden Whitespace"})) {
+        if (guikit::Switch(ui, s_state.showWhitespace).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Code Minimap"})) {
-        if (ui.Switch(s_state.showMinimap).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Code Minimap"})) {
+        if (guikit::Switch(ui, s_state.showMinimap).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Code Folding (Gutter)"})) {
-        if (ui.Switch(s_state.codeFolding).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Code Folding (Gutter)"})) {
+        if (guikit::Switch(ui, s_state.codeFolding).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Indent Guides"})) {
-        if (ui.Switch(s_state.showIndentGuides).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Indent Guides"})) {
+        if (guikit::Switch(ui, s_state.showIndentGuides).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show IDE Status Bar"})) {
-        if (ui.Switch(s_state.showStatusBar).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show IDE Status Bar"})) {
+        if (guikit::Switch(ui, s_state.showStatusBar).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Floating Debug Toolbar"})) {
-        if (ui.Switch(s_state.showDebugToolbar).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Floating Debug Toolbar"})) {
+        if (guikit::Switch(ui, s_state.showDebugToolbar).changed) ui.InvalidateAll();
     }
     if (s_state.showDebugToolbar) {
-        if (auto el = ui.Element({.label = "Debug Toolbar Position"})) {
-            if (ui.Segmented(s_state.debugToolbarAlignIdx, CodeEditorState::debugToolbarAlignLabels).changed) {
+        if (auto el = guikit::Element(ui, {.label = "Debug Toolbar Position"})) {
+            if (guikit::Segmented(ui, s_state.debugToolbarAlignIdx, CodeEditorState::debugToolbarAlignLabels).changed) {
                 ui.InvalidateAll();
             }
         }
     }
-    if (auto el = ui.Element({.label = "Inline Debug Values"})) {
-        if (ui.Switch(s_state.showInlineValues).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Inline Debug Values"})) {
+        if (guikit::Switch(ui, s_state.showInlineValues).changed) {
             s_state.RebuildDynamicDebugData();
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Hover Variable DataTips"})) {
-        if (ui.Switch(s_state.showHoverDataTips).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Hover Variable DataTips"})) {
+        if (guikit::Switch(ui, s_state.showHoverDataTips).changed) {
             s_state.RebuildDynamicDebugData();
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Diagnostic Squiggles"})) {
-        if (ui.Switch(s_state.showDiagnostics).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Diagnostic Squiggles"})) {
+        if (guikit::Switch(ui, s_state.showDiagnostics).changed) {
             s_state.RebuildDynamicDebugData();
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Line Numbers Gutter"})) {
-        if (ui.Switch(s_state.lineNumbers).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Line Numbers Gutter"})) {
+        if (guikit::Switch(ui, s_state.lineNumbers).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Word Wrap"})) {
-        if (ui.Switch(s_state.wordWrap).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Word Wrap"})) {
+        if (guikit::Switch(ui, s_state.wordWrap).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Read-Only Mode"})) {
-        if (ui.Switch(s_state.readOnly).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Read-Only Mode"})) {
+        if (guikit::Switch(ui, s_state.readOnly).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Editor Zoom"})) {
-        if (ui.Slider(s_state.zoom, 0.5f, 2.5f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Editor Zoom"})) {
+        if (guikit::Slider(ui, s_state.zoom, 0.5f, 2.5f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
     }
 }
 
@@ -542,12 +542,12 @@ void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
         : ((s_state.debugToolbarAlignIdx == 2) ? guikit::Align::End : guikit::Align::Center);
 
     guikit::TextAreaResponse resp{};
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = s_state.showLabel ? "Code Editor & Debugger" : "",
         .description = s_state.showDesc ? s_state.lastDebugEvent.as_ref() : keel::StringRef{},
         .size = ctx.elemSize
     })) {
-        resp = ui.TextArea(s_state.editorBuffer, {
+        resp = guikit::TextArea(ui, s_state.editorBuffer, {
             .autoHeight = false,
             .readOnly = s_state.readOnly,
             .showLineNumbers = s_state.lineNumbers,

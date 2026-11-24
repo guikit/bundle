@@ -202,13 +202,13 @@ ImageViewDemoState s_imgDemo{};
 void RenderImageViewInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     s_imgDemo.EnsureGenerated();
 
-    ui.Heading({.label = "DATASET & CHANNELS", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
+    guikit::Heading(ui, {.label = "DATASET & CHANNELS", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
     static constexpr keel::StaticArray<keel::StringRef, 2> kDatasetNames = {
         "16-bit Radiograph Phantom (1ch)",
         "Multispectral Fluorescence (3ch RGB)"
     };
-    if (auto el = ui.Element({.label = "Synthetic Dataset"})) {
-        if (ui.Select(s_imgDemo.datasetIndex, kDatasetNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Synthetic Dataset"})) {
+        if (guikit::Select(ui, s_imgDemo.datasetIndex, kDatasetNames).changed) {
             ui.InvalidateAll();
         }
     }
@@ -216,66 +216,66 @@ void RenderImageViewInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     ImageViewParams& activeParams = (s_imgDemo.datasetIndex == 0) ? s_imgDemo.paramsMono : s_imgDemo.paramsRgb;
 
     static constexpr keel::StaticArray<keel::StringRef, 3> kHistScales = {"Sqrt", "Log", "Linear"};
-    if (auto el = ui.Element({.label = "Histogram Scale"})) {
-        if (ui.Segmented(activeParams.histScaleMode, kHistScales).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Histogram Scale"})) {
+        if (guikit::Segmented(ui, activeParams.histScaleMode, kHistScales).changed) {
             ui.InvalidateAll();
         }
     }
 
-    ui.Heading({.label = "WORKSTATION LAYOUT", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
-    if (auto el = ui.Element({.label = "Show Built-in Sidebar"})) {
-        if (ui.Switch(s_imgDemo.viewOpts.showSidebar).changed) ui.InvalidateAll();
+    guikit::Heading(ui, {.label = "WORKSTATION LAYOUT", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
+    if (auto el = guikit::Element(ui, {.label = "Show Built-in Sidebar"})) {
+        if (guikit::Switch(ui, s_imgDemo.viewOpts.showSidebar).changed) ui.InvalidateAll();
     }
     static constexpr keel::StaticArray<keel::StringRef, 2> kSidebarSides = {"Left", "Right"};
     keel::usize sideIdx = s_imgDemo.viewOpts.sidebarOnRight ? 1u : 0u;
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Sidebar Side",
         .disabled = !s_imgDemo.viewOpts.showSidebar
     })) {
-        if (ui.Segmented(sideIdx, kSidebarSides, {
+        if (guikit::Segmented(ui, sideIdx, kSidebarSides, {
             .disabled = !s_imgDemo.viewOpts.showSidebar
         }).changed) {
             s_imgDemo.viewOpts.sidebarOnRight = (sideIdx == 1u);
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Sidebar Width",
         .disabled = !s_imgDemo.viewOpts.showSidebar
     })) {
-        if (ui.Slider(s_imgDemo.viewOpts.sidebarWidth, 240.0f, 380.0f, {
+        if (guikit::Slider(ui, s_imgDemo.viewOpts.sidebarWidth, 240.0f, 380.0f, {
             .valueFormat = "%.0f px",
             .disabled = !s_imgDemo.viewOpts.showSidebar
         }).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Show Top Quick Toolbar"})) {
-        if (ui.Switch(s_imgDemo.viewOpts.showTopToolbar).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Top Quick Toolbar"})) {
+        if (guikit::Switch(ui, s_imgDemo.viewOpts.showTopToolbar).changed) ui.InvalidateAll();
     }
     UiSize tbSize = s_imgDemo.viewOpts.toolbarSize.value_or(UiSize::Md);
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Toolbar Size",
         .disabled = !s_imgDemo.viewOpts.showTopToolbar
     })) {
-        if (ui.StepSlider(tbSize, {
+        if (guikit::StepSlider(ui, tbSize, {
             .disabled = !s_imgDemo.viewOpts.showTopToolbar
         }).changed) {
             s_imgDemo.viewOpts.toolbarSize = tbSize;
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Show Bottom Status Bar"})) {
-        if (ui.Switch(s_imgDemo.viewOpts.showStatusBar).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Bottom Status Bar"})) {
+        if (guikit::Switch(ui, s_imgDemo.viewOpts.showStatusBar).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "High-Zoom Pixel Grid (>=12x)"})) {
-        if (ui.Switch(s_imgDemo.viewOpts.showPixelGridAtHighZoom).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "High-Zoom Pixel Grid (>=12x)"})) {
+        if (guikit::Switch(ui, s_imgDemo.viewOpts.showPixelGridAtHighZoom).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Enable RMB Line Profile"})) {
-        if (ui.Switch(s_imgDemo.viewOpts.enableLineProfile).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Enable RMB Line Profile"})) {
+        if (guikit::Switch(ui, s_imgDemo.viewOpts.enableLineProfile).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Enable Ctrl+LMB W/L Drag"})) {
-        if (ui.Switch(s_imgDemo.viewOpts.enableCtrlWlDrag).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Enable Ctrl+LMB W/L Drag"})) {
+        if (guikit::Switch(ui, s_imgDemo.viewOpts.enableCtrlWlDrag).changed) ui.InvalidateAll();
     }
 }
 
@@ -290,7 +290,7 @@ void RenderImageViewStage(guikit::Context& ui, DemoContext& /*ctx*/) {
             1,
             1001ull
         );
-        s_imgDemo.lastResp = ui.ImageView(data, s_imgDemo.paramsMono, s_imgDemo.viewOpts);
+        s_imgDemo.lastResp = guikit::ImageView(ui, data, s_imgDemo.paramsMono, s_imgDemo.viewOpts);
     } else {
         const ImageViewData data = ImageViewData::FromFloat(
             s_imgDemo.rgbFloatPixels,
@@ -299,7 +299,7 @@ void RenderImageViewStage(guikit::Context& ui, DemoContext& /*ctx*/) {
             3,
             2002ull
         );
-        s_imgDemo.lastResp = ui.ImageView(data, s_imgDemo.paramsRgb, s_imgDemo.viewOpts);
+        s_imgDemo.lastResp = guikit::ImageView(ui, data, s_imgDemo.paramsRgb, s_imgDemo.viewOpts);
     }
 }
 

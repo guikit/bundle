@@ -65,8 +65,8 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 6> kLevelNames = {
         "H1", "H2", "H3", "H4", "H5", "H6"
     };
-    if (auto el = ui.Element({.label = "Level"})) {
-        if (ui.StepSlider(s_state.level, kLevelNames, {
+    if (auto el = guikit::Element(ui, {.label = "Level"})) {
+        if (guikit::StepSlider(ui, s_state.level, kLevelNames, {
             .showTicks = true,
             .showLabels = true
         }).changed) {
@@ -77,8 +77,8 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 3> kHeadingLayouts = {
         "Stacked", "Overline", "Inline"
     };
-    if (auto el = ui.Element({.label = "Layout"})) {
-        if (ui.Segmented(s_state.layout, kHeadingLayouts).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Layout"})) {
+        if (guikit::Segmented(ui, s_state.layout, kHeadingLayouts).changed) {
             ui.InvalidateAll();
         }
     }
@@ -86,32 +86,32 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 3> kSepStyles = {
         "None", "Bottom", "Trailing"
     };
-    if (auto el = ui.Element({.label = "Separator"})) {
-        if (ui.Segmented(s_state.separator, kSepStyles).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Separator"})) {
+        if (guikit::Segmented(ui, s_state.separator, kSepStyles).changed) {
             ui.InvalidateAll();
         }
     }
 
     keel::usize alignIdx = keel::as<keel::usize>(s_state.align);
-    if (auto el = ui.Element({.label = "Alignment"})) {
-        if (ui.Segmented(alignIdx, kLabelAlignNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Alignment"})) {
+        if (guikit::Segmented(ui, alignIdx, kLabelAlignNames).changed) {
             s_state.align = keel::from_underlying<guikit::Align>(alignIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Width",
         .badge = {"Stretch", guikit::UiVariant::Secondary}
     })) {
-        if (ui.Segmented(s_state.widthModeIdx, kAxisModeNames).changed) {
+        if (guikit::Segmented(ui, s_state.widthModeIdx, kAxisModeNames).changed) {
             ui.InvalidateAll();
         }
     }
 
     const bool fixedWidth = (s_state.widthModeIdx == 3);
-    if (auto el = ui.Element({.label = "Width (dp)", .disabled = !fixedWidth})) {
-        if (ui.Slider(s_state.widthDp, 140.0f, 560.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Width (dp)", .disabled = !fixedWidth})) {
+        if (guikit::Slider(ui, s_state.widthDp, 140.0f, 560.0f, {
             .valueFormat = "%.0f dp",
             .step = 10.0f,
             .disabled = !fixedWidth
@@ -120,26 +120,26 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Subtitle"})) {
-        if (ui.Switch(s_state.showSubtitle).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Subtitle"})) {
+        if (guikit::Switch(ui, s_state.showSubtitle).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Icon & Badge"})) {
-        if (ui.Switch(s_state.showIconAndBadge).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Icon & Badge"})) {
+        if (guikit::Switch(ui, s_state.showIconAndBadge).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Preview on Surface Card"})) {
-        if (ui.Switch(s_state.wrapInCard).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Preview on Surface Card"})) {
+        if (guikit::Switch(ui, s_state.wrapInCard).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Disabled"})) {
-        if (ui.Switch(s_state.disabled).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
+        if (guikit::Switch(ui, s_state.disabled).changed) {
             ui.InvalidateAll();
         }
     }
@@ -148,16 +148,16 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
 void RenderHeadingStage(guikit::Context& ui, DemoContext&) {
     const guikit::HeadingOptions opts = BuildHeadingOptions();
     if (s_state.wrapInCard) {
-        if (auto card = ui.Card({
+        if (auto card = guikit::Card(ui, {
             .minWidth = 340.0f,
             .maxWidth = 560.0f,
             .gap = 14.0f,
             .padding = guikit::Padding::All(18.0f)
         })) {
-            ui.Heading(opts);
+            guikit::Heading(ui, opts);
         }
     } else {
-        ui.Heading(opts);
+        guikit::Heading(ui, opts);
     }
 }
 

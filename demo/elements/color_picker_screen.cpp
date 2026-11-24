@@ -14,33 +14,33 @@ ColorPickerDemoState s_state;
 } // namespace
 
 void RenderColorPickerInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Inline Picker Panel",
         .description = "Embed full SV + Hue/Alpha panel inline vs Popover button"
     })) {
-        if (ui.Switch(s_state.inlinePanel).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.inlinePanel).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Show #HEX Readout",
         .description = "Show formatted hex code inside closed swatch button",
         .disabled = s_state.inlinePanel
     })) {
-        if (ui.Switch(s_state.showHex, {.disabled = s_state.inlinePanel}).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showHex, {.disabled = s_state.inlinePanel}).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Enable Alpha Channel",
         .description = "Include opacity slider and #RRGGBBAA format"
     })) {
-        if (ui.Switch(s_state.showAlpha).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showAlpha).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Show Preset Swatches",
         .description = "Display quick-pick color palette row"
     })) {
-        if (ui.Switch(s_state.showSwatches).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showSwatches).changed) ui.InvalidateAll();
     }
 }
 
@@ -57,7 +57,7 @@ void RenderColorPickerStage(guikit::Context& ui, DemoContext& ctx) {
         opts.height = ctx.ResolveCtrlHeight();
         opts.background = ctx.GetControlBackground(NavCategory::ElemColorPicker);
         opts.border = ctx.GetCtrlBorder();
-        ui.ColorPicker(s_state.color, opts);
+        guikit::ColorPicker(ui, s_state.color, opts);
     });
 }
 

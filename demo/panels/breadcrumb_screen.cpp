@@ -29,19 +29,19 @@ constexpr keel::StringRef SeparatorEnumName(guikit::BreadcrumbSeparator s) noexc
 } // namespace
 
 void RenderBreadcrumbInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "Control Size"})) {
-        if (ui.StepSlider(ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Control Size"})) {
+        if (guikit::StepSlider(ui, ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Semantic Variant"})) {
-        if (ui.Select(ctx.btnVariant, kUiVariantNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Semantic Variant"})) {
+        if (guikit::Select(ui, ctx.btnVariant, kUiVariantNames).changed) {
             ui.InvalidateAll();
         }
     }
 
-    ui.Heading({
+    guikit::Heading(ui, {
         .label = "Breadcrumb Options",
         .level = guikit::HeadingLevel::H6,
         .separator = guikit::HeadingSeparator::Bottom
@@ -50,35 +50,35 @@ void RenderBreadcrumbInspector(guikit::Context& ui, DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, 4> kSepNames = {
         "Chevron", "Slash", "Arrow", "Dot"
     };
-    if (auto el = ui.Element({.label = "Separator Style"})) {
-        if (ui.Segmented(s_bc.separatorIdx, kSepNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Separator Style"})) {
+        if (guikit::Segmented(ui, s_bc.separatorIdx, kSepNames).changed) {
             s_bc.separator = keel::from_underlying<guikit::BreadcrumbSeparator>(s_bc.separatorIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Max Visible Items",
         .description = "0 = show all; >= 2 collapses middle items into '...'"
     })) {
-        if (ui.Slider(s_bc.maxVisibleItems, 0, 5, {
+        if (guikit::Slider(ui, s_bc.maxVisibleItems, 0, 5, {
             .valueFormat = (s_bc.maxVisibleItems < 2) ? "All" : "%d items"
         }).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Item Icons"})) {
-        if (ui.Switch(s_bc.showCrumbIcons).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Item Icons"})) {
+        if (guikit::Switch(ui, s_bc.showCrumbIcons).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Item Badges"})) {
-        if (ui.Switch(s_bc.showCrumbBadges).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Item Badges"})) {
+        if (guikit::Switch(ui, s_bc.showCrumbBadges).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Surface Well Frame"})) {
-        if (ui.Switch(s_bc.showSurfaceBox).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Surface Well Frame"})) {
+        if (guikit::Switch(ui, s_bc.showSurfaceBox).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Disabled State"})) {
-        if (ui.Switch(ctx.elemDisabled).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Disabled State"})) {
+        if (guikit::Switch(ui, ctx.elemDisabled).changed) ui.InvalidateAll();
     }
 }
 
@@ -95,7 +95,7 @@ void RenderBreadcrumbStage(guikit::Context& ui, DemoContext& ctx) {
     }};
 
     auto renderTrail = [&]() {
-        ui.Breadcrumb(s_bc.crumbIdx, crumbs, {
+        guikit::Breadcrumb(ui, s_bc.crumbIdx, crumbs, {
             .separator = s_bc.separator,
             .maxVisibleItems = maxVis,
             .disabled = ctx.elemDisabled,
@@ -105,7 +105,7 @@ void RenderBreadcrumbStage(guikit::Context& ui, DemoContext& ctx) {
     };
 
     if (s_bc.showSurfaceBox) {
-        if (auto well = ui.Box({
+        if (auto well = guikit::Box(ui, {
             .width = guikit::SizeMode::Fit,
             .padding = guikit::Padding::Symmetric(10.0f, 6.0f),
             .background = guikit::StateColor::Surface(),

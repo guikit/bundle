@@ -93,7 +93,7 @@ void DemoWindow::OnRender(guikit::Context& ui) {
 }
 
 void DemoWindow::RenderTopToolbar(guikit::Context& ui) {
-    if (auto tb = ui.Toolbar()) {
+    if (auto tb = guikit::Toolbar(ui)) {
         RenderSidebarCycleButton(tb, m_navSidebarMode, "Nav", "Navigation Sidebar", guikit::Icon::Folder());
         RenderSidebarToggle(tb, m_inspectorSidebarMode, "Inspector", "Inspector Sidebar", guikit::Icon::Settings());
 
@@ -107,14 +107,14 @@ void DemoWindow::RenderTopToolbar(guikit::Context& ui) {
         RenderEngineControls(tb);
 
         tb.Spacer();
-        if (ui.Text("https://github.com/guikit/", {.role = guikit::TextRole::TitleMedium, .variant = guikit::UiVariant::Info})) {
+        if (guikit::Text(ui, "https://github.com/guikit/", {.role = guikit::TextRole::TitleMedium, .variant = guikit::UiVariant::Info})) {
             OpenUrl("https://github.com/guikit/");
         }
     }
 }
 
 void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
-    if (auto railSidebar = ui.Sidebar(m_navSidebarMode, {
+    if (auto railSidebar = guikit::Sidebar(ui, m_navSidebarMode, {
         .side = guikit::SidebarSide::Left,
         .maxRatio = 0.35f,
         .resizable = true,
@@ -123,7 +123,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
     })) {
         const NavCategory prevCat = m_selectedCategory;
         const keel::i32 prevExt = m_selectedExtension;
-        if (auto menu = ui.SidebarMenu({.size = guikit::UiSize::Sm})) {
+        if (auto menu = guikit::SidebarMenu(ui, {.size = guikit::UiSize::Sm})) {
             constexpr keel::i32 kBaseCount = keel::as<keel::i32>(NavCategory::SceneImageView) + 1;
             keel::i32 activeIdx = (m_selectedExtension >= 0)
                 ? (kBaseCount + m_selectedExtension)
@@ -206,7 +206,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
 }
 
 void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
-    if (auto inspectorSidebar = ui.Sidebar(m_inspectorSidebarMode, {
+    if (auto inspectorSidebar = guikit::Sidebar(ui, m_inspectorSidebarMode, {
         .side = guikit::SidebarSide::Left,
         .width = 320.0f,
         .maxRatio = 0.45f,
@@ -215,7 +215,7 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
         .gap = 8.0f,
         .padding = guikit::Padding::All(12.0f)
     })) {
-        ui.Heading({
+        guikit::Heading(ui, {
             .label = "INSPECTOR",
             .level = guikit::HeadingLevel::H6,
             .separator = guikit::HeadingSeparator::Bottom
@@ -226,7 +226,7 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
                 fn(ui, m_demoCtx);
             }
         } else if (IsControlCategory(m_selectedCategory)) {
-            if (auto elemAcc = ui.Accordion({
+            if (auto elemAcc = guikit::Accordion(ui, {
                 .label = "ELEMENT",
                 .defaultOpen = false,
                 .size = guikit::UiSize::Sm
@@ -234,7 +234,7 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
                 m_demoCtx.RenderElementSection(ui);
             }
 
-            if (auto elemLayoutAcc = ui.Accordion({
+            if (auto elemLayoutAcc = guikit::Accordion(ui, {
                 .label = "ELEMENT LAYOUT",
                 .defaultOpen = false,
                 .size = guikit::UiSize::Sm
@@ -253,14 +253,14 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
             if (!hasCtrlLayout) {
                 ctrlLayoutAccOpts.badge = {"Fit", guikit::UiVariant::Secondary};
             }
-            if (auto ctrlLayoutAcc = ui.Accordion(
+            if (auto ctrlLayoutAcc = guikit::Accordion(ui,
                 hasCtrlLayout ? m_demoCtx.ctrlLayoutOpen : collapsedOpen,
                 ctrlLayoutAccOpts
             )) {
                 m_demoCtx.RenderControlLayoutSection(ui, m_selectedCategory);
             }
 
-            if (auto ctrlStyleAcc = ui.Accordion({
+            if (auto ctrlStyleAcc = guikit::Accordion(ui, {
                 .label = "CONTROL STYLE",
                 .defaultOpen = false,
                 .size = guikit::UiSize::Sm
@@ -268,7 +268,7 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
                 m_demoCtx.RenderControlStyleSection(ui, m_selectedCategory);
             }
 
-            if (auto specAcc = ui.Accordion({
+            if (auto specAcc = guikit::Accordion(ui, {
                 .label = "CONTROL SPECIFIC",
                 .badge = {CategoryControlName(m_selectedCategory), guikit::UiVariant::Secondary},
                 .defaultOpen = true,
@@ -283,11 +283,11 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
 }
 
 void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
-    if (auto previewTb = ui.Toolbar()) {
-        ui.Text("PREVIEW", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
+    if (auto previewTb = guikit::Toolbar(ui)) {
+        guikit::Text(ui, "PREVIEW", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
         previewTb.Separator();
 
-        if (ui.Select(m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {.size = guikit::UiSize::Sm, .width = 96.0f}).changed) {
+        if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {.size = guikit::UiSize::Sm, .width = 96.0f}).changed) {
             if (m_demoCtx.previewFormFactorIdx == 1) {
                 m_demoCtx.previewLandscape = true;  // Tablet defaults to Landscape
                 if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
@@ -341,9 +341,9 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
                 kPreviewZoomPresetNames[7],
                 customLabel
             };
-            zoomChanged = ui.Select(m_demoCtx.previewZoomModeIdx, zoomItemsWithCustom, zoomSelectOpts).changed;
+            zoomChanged = guikit::Select(ui, m_demoCtx.previewZoomModeIdx, zoomItemsWithCustom, zoomSelectOpts).changed;
         } else {
-            zoomChanged = ui.Select(m_demoCtx.previewZoomModeIdx, kPreviewZoomPresetNames, zoomSelectOpts).changed;
+            zoomChanged = guikit::Select(ui, m_demoCtx.previewZoomModeIdx, kPreviewZoomPresetNames, zoomSelectOpts).changed;
         }
         if (zoomChanged) {
             ui.InvalidateAll();
@@ -366,7 +366,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         if (previewPresetIdx >= guikit::kThemePresetCount) {
             previewPresetIdx = 0u;
         }
-        if (ui.Select(previewPresetIdx, kPreviewPresetLabels, {
+        if (guikit::Select(ui, previewPresetIdx, kPreviewPresetLabels, {
             .tooltip = "Preview Stage Theme Preset",
             .size = guikit::UiSize::Sm,
             .width = 152.0f
@@ -404,16 +404,16 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
 }
 
 void DemoWindow::RenderCodePanel(guikit::Context& ui) {
-    if (auto codePanel = ui.BottomPanel(m_demoCtx.previewShowCode, {
+    if (auto codePanel = guikit::BottomPanel(ui, m_demoCtx.previewShowCode, {
         .height = 240.0f,
         .resizable = true,
         .allowCollapse = true
     })) {
-        if (auto codeTb = ui.Toolbar({
+        if (auto codeTb = guikit::Toolbar(ui, {
             .style = guikit::ToolbarStyle::Header,
             .size = guikit::UiSize::Sm
         })) {
-            ui.Text("GENERATED C++20 CODE", {
+            guikit::Text(ui, "GENERATED C++20 CODE", {
                 .role = guikit::TextRole::LabelSmall,
                 .variant = guikit::UiVariant::Secondary
             });
@@ -440,7 +440,7 @@ void DemoWindow::RenderCodePanel(guikit::Context& ui) {
             m_cachedCodeCategory = m_selectedCategory;
             m_cachedCodeExtension = m_selectedExtension;
         }
-        ui.TextArea(m_cachedCodeSnippet, {
+        guikit::TextArea(ui, m_cachedCodeSnippet, {
             .autoHeight = false,
             .readOnly = true,
             .showLineNumbers = true,
@@ -456,11 +456,11 @@ void DemoWindow::RenderCodePanel(guikit::Context& ui) {
 }
 
 void DemoWindow::RenderWorkspace(guikit::Context& ui) {
-    if (auto workspaceRow = ui.Row({.height = guikit::SizeMode::Stretch})) {
+    if (auto workspaceRow = guikit::Row(ui, {.height = guikit::SizeMode::Stretch})) {
         RenderCatalogSidebar(ui);
         RenderInspectorSidebar(ui);
 
-        if (auto contentCol = ui.Column({
+        if (auto contentCol = guikit::Column(ui, {
             .width = guikit::SizeMode::Stretch,
             .height = guikit::SizeMode::Stretch
         })) {
@@ -489,7 +489,7 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
 }
 
 void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
-    if (auto sb = ui.StatusBar()) {
+    if (auto sb = guikit::StatusBar(ui)) {
         const bool isGpuScene = (m_selectedExtension >= 0 &&
                                  keel::as<keel::usize>(m_selectedExtension) < m_extensions.size() &&
                                  m_extensions[keel::as<keel::usize>(m_selectedExtension)].isGpuScene);

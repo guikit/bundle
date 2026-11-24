@@ -32,50 +32,50 @@ constexpr keel::StringRef StepStyleEnumName(guikit::SpinBoxStepStyle style) noex
 void RenderSpinBoxInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 4> stepStyleLabels = {"None", "Inline", "Detached", "Split"};
     keel::i32 styleIdx = keel::as<keel::i32>(s_state.stepStyle);
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Stepper Style (- / +)",
         .description = "None, Inline inside box, Detached square buttons after box, or Split sides"
     })) {
-        if (ui.Segmented(styleIdx, stepStyleLabels).changed) {
+        if (guikit::Segmented(ui, styleIdx, stepStyleLabels).changed) {
             s_state.stepStyle = keel::from_underlying<guikit::SpinBoxStepStyle>(keel::clamp(styleIdx, 0, 3));
             ui.InvalidateAll();
         }
     }
     static constexpr keel::StaticArray<keel::StringRef, 3> iconStyleLabels = {"Minus / Plus", "Chevrons", "Arrows"};
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Stepper Icons",
         .description = "Custom vector icons for decrement / increment buttons"
     })) {
-        if (ui.Segmented(s_state.iconStyleIdx, iconStyleLabels).changed) {
+        if (guikit::Segmented(ui, s_state.iconStyleIdx, iconStyleLabels).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Progress Fill Bar",
         .description = "Render normalized [min, max] fill bar along bottom edge"
     })) {
-        if (ui.Switch(s_state.showFillBar).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showFillBar).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Step Increment"})) {
-        if (ui.Slider(s_state.step, 0.5f, 25.0f, {.valueFormat = "%.1f", .step = 0.5f}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Step Increment"})) {
+        if (guikit::Slider(ui, s_state.step, 0.5f, 25.0f, {.valueFormat = "%.1f", .step = 0.5f}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Prefix Text"})) {
-        if (ui.InputField(s_state.prefix, {.placeholder = "e.g. Fc =", .clearable = true}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Prefix Text"})) {
+        if (guikit::InputField(ui, s_state.prefix, {.placeholder = "e.g. Fc =", .clearable = true}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Unit Suffix"})) {
-        if (ui.InputField(s_state.suffix, {.placeholder = "e.g. MHz / dB / %", .clearable = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Unit Suffix"})) {
+        if (guikit::InputField(ui, s_state.suffix, {.placeholder = "e.g. MHz / dB / %", .clearable = true}).changed) {
             ui.InvalidateAll();
         }
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 3> cursorModes = {"Blinking", "Solid", "Hidden"};
-    if (auto el = ui.Element({.label = "Cursor Blink Mode"})) {
-        if (ui.Segmented(s_state.cursorMode, cursorModes).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Cursor Blink Mode"})) {
+        if (guikit::Segmented(ui, s_state.cursorMode, cursorModes).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Read Only"})) {
-        if (ui.Switch(s_state.readOnly).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Read Only"})) {
+        if (guikit::Switch(ui, s_state.readOnly).changed) ui.InvalidateAll();
     }
 }
 
@@ -109,7 +109,7 @@ void RenderSpinBoxStage(guikit::Context& ui, DemoContext& ctx) {
         opts.color = ctx.GetControlColor();
         opts.background = ctx.GetControlBackground(NavCategory::ElemSpinBox);
         opts.border = ctx.GetCtrlBorder();
-        ui.SpinBox(s_state.val, opts);
+        guikit::SpinBox(ui, s_state.val, opts);
     });
 }
 

@@ -47,21 +47,21 @@ constexpr keel::StringRef StatusStyleName(guikit::StatusBarStyle s) noexcept {
 } // namespace
 
 void RenderSidebarInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "Sidebar Mode", .layout = guikit::ElementLayout::Stacked})) {
-        if (ui.Segmented(s_state.mode, {"Expanded", "Compact", "Collapsed"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Sidebar Mode", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, s_state.mode, {"Expanded", "Compact", "Collapsed"}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Menu Size"})) {
-        if (ui.StepSlider(ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Menu Size"})) {
+        if (guikit::StepSlider(ui, ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) ui.InvalidateAll();
     }
     ctx.RenderVariantPicker(ui);
 
     static constexpr keel::StaticArray<keel::StringRef, 2> sbMenuStyleNames = {"Pill", "Indicator"};
     keel::usize sbStyleIdx = (s_state.menuStyle == guikit::SidebarMenuStyle::Indicator) ? 1 : 0;
-    if (auto el = ui.Element({.label = "Menu Style"})) {
-        if (ui.Segmented(sbStyleIdx, sbMenuStyleNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Menu Style"})) {
+        if (guikit::Segmented(ui, sbStyleIdx, sbMenuStyleNames).changed) {
             s_state.menuStyle = (sbStyleIdx == 1) ? guikit::SidebarMenuStyle::Indicator : guikit::SidebarMenuStyle::Pill;
             ui.InvalidateAll();
         }
@@ -69,92 +69,92 @@ void RenderSidebarInspector(guikit::Context& ui, DemoContext& ctx) {
 
     static constexpr keel::StaticArray<keel::StringRef, 2> sbSideNames = {"Left", "Right"};
     keel::usize sbSideIdx = (s_state.side == guikit::SidebarSide::Right) ? 1 : 0;
-    if (auto el = ui.Element({.label = "Dock Side"})) {
-        if (ui.Segmented(sbSideIdx, sbSideNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Dock Side"})) {
+        if (guikit::Segmented(ui, sbSideIdx, sbSideNames).changed) {
             s_state.side = (sbSideIdx == 1) ? guikit::SidebarSide::Right : guikit::SidebarSide::Left;
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Mouse Resizable (Sash)",
         .description = "Drag inner border to resize or snap"
     })) {
-        if (ui.Switch(s_state.resizable).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.resizable).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Allow Compact (Icons)",
         .description = "Snap/toggle to icons-only rail"
     })) {
-        if (ui.Switch(s_state.allowCompact).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.allowCompact).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Allow Collapse (0px)",
         .description = "Snap/toggle to completely minimized"
     })) {
-        if (ui.Switch(s_state.allowCollapse).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.allowCollapse).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Section Headers"})) {
-        if (ui.Switch(s_state.showSections).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Section Headers"})) {
+        if (guikit::Switch(ui, s_state.showSections).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Badges"})) {
-        if (ui.Switch(s_state.showBadges).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Badges"})) {
+        if (guikit::Switch(ui, s_state.showBadges).changed) ui.InvalidateAll();
     }
     const bool notExpanded = (s_state.mode != guikit::SidebarMode::Expanded);
-    if (auto el = ui.Element({.label = "Auto-Fit Width", .disabled = notExpanded})) {
-        if (ui.Switch(s_state.autoWidth, {.disabled = notExpanded}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Auto-Fit Width", .disabled = notExpanded})) {
+        if (guikit::Switch(ui, s_state.autoWidth, {.disabled = notExpanded}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Default Width", .disabled = notExpanded || s_state.autoWidth})) {
-        if (ui.Slider(s_state.sidebarWidth, 140.0f, 320.0f, {.valueFormat = "%.0f px", .disabled = notExpanded || s_state.autoWidth}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Default Width", .disabled = notExpanded || s_state.autoWidth})) {
+        if (guikit::Slider(ui, s_state.sidebarWidth, 140.0f, 320.0f, {.valueFormat = "%.0f px", .disabled = notExpanded || s_state.autoWidth}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    ui.Heading({.label = "SHELL COMPANIONS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    guikit::Heading(ui, {.label = "SHELL COMPANIONS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
 
     keel::usize frameIdx = s_state.floatingFrame ? 1 : 0;
-    if (auto el = ui.Element({.label = "Shell Frame", .layout = guikit::ElementLayout::Stacked})) {
-        if (ui.Segmented(frameIdx, {"Docked (Flush)", "Floating (Island)"}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Shell Frame", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, frameIdx, {"Docked (Flush)", "Floating (Island)"}).changed) {
             s_state.floatingFrame = (frameIdx == 1);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "ActivityBar Rail",
         .description = "Primary icon rail docked flush to Sidebar"
     })) {
-        if (ui.Switch(s_state.showActivityBar).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showActivityBar).changed) ui.InvalidateAll();
     }
 
     if (s_state.showActivityBar) {
         static constexpr keel::StaticArray<keel::StringRef, 2> abStyleNames = {"Indicator", "Pill"};
         keel::usize abStyleIdx = (s_state.activityStyle == guikit::ActivityBarStyle::Pill) ? 1 : 0;
-        if (auto el = ui.Element({.label = "ActivityBar Style"})) {
-            if (ui.Segmented(abStyleIdx, abStyleNames).changed) {
+        if (auto el = guikit::Element(ui, {.label = "ActivityBar Style"})) {
+            if (guikit::Segmented(ui, abStyleIdx, abStyleNames).changed) {
                 s_state.activityStyle = (abStyleIdx == 1) ? guikit::ActivityBarStyle::Pill : guikit::ActivityBarStyle::Indicator;
                 ui.InvalidateAll();
             }
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "BottomPanel Dock",
         .description = "Resizable bottom panel below workspace"
     })) {
-        if (ui.Switch(s_state.showBottomPanel).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showBottomPanel).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "StatusBar Strip",
         .description = "Compact status strip at window bottom"
     })) {
-        if (ui.Switch(s_state.showStatusBar).changed) ui.InvalidateAll();
+        if (guikit::Switch(ui, s_state.showStatusBar).changed) ui.InvalidateAll();
     }
 
     if (s_state.showStatusBar) {
-        if (auto el = ui.Element({.label = "StatusBar Style", .layout = guikit::ElementLayout::Stacked})) {
-            if (ui.Segmented(s_state.statusBarStyle, {"Surface", "Header", "Accent"}).changed) {
+        if (auto el = guikit::Element(ui, {.label = "StatusBar Style", .layout = guikit::ElementLayout::Stacked})) {
+            if (guikit::Segmented(ui, s_state.statusBarStyle, {"Surface", "Header", "Accent"}).changed) {
                 ui.InvalidateAll();
             }
         }
@@ -167,17 +167,17 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
     stageTheme.SetShellStyle(isFloating ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked);
 
     if (auto stageZone = ui.Zone({.theme = stageTheme})) {
-        if (auto workbenchShell = ui.Column({
+        if (auto workbenchShell = guikit::Column(ui, {
             .width = guikit::SizeMode::Stretch,
             .height = guikit::SizeMode::Stretch
         })) {
-            if (auto demoWorkspace = ui.Box({
+            if (auto demoWorkspace = guikit::Box(ui, {
                 .width = guikit::SizeMode::Stretch,
                 .height = guikit::SizeMode::Stretch
             })) {
                 // 1. Optional VS Code style ActivityBar docked on the outer edge, linked to s_state.mode
                 if (s_state.showActivityBar) {
-                    if (auto bar = ui.ActivityBar(s_state.mode, {
+                    if (auto bar = guikit::ActivityBar(ui, s_state.mode, {
                         .side = s_state.side,
                         .style = s_state.activityStyle,
                         .color = ctx.ResolveControlColor(),
@@ -219,7 +219,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                         if (gearBtn.clicked) {
                             s_state.gearMenuOpen = !s_state.gearMenuOpen;
                         }
-                        const auto gearMenu = ui.ContextMenu(s_state.gearMenuOpen, {
+                        const auto gearMenu = guikit::ContextMenu(ui, s_state.gearMenuOpen, {
                             {.label = "Command Palette...", .shortcut = "Ctrl+Shift+P", .icon = guikit::Icon::Search()},
                             {.label = "Settings",           .shortcut = "Ctrl+,",       .icon = guikit::Icon::Settings(), .separatorAfter = true},
                             {.label = "Toggle Sidebar",     .shortcut = "Ctrl+B",       .icon = guikit::Icon::ChevronLeft()},
@@ -247,7 +247,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                 }
 
                 // 2. Primary Sidebar docked flush next to ActivityBar (or on outer edge when standalone)
-                if (auto sb = ui.Sidebar(s_state.mode, {
+                if (auto sb = guikit::Sidebar(ui, s_state.mode, {
                     .side = s_state.side,
                     .width = s_state.autoWidth ? keel::kNullOpt : keel::Optional<keel::f32>(s_state.sidebarWidth),
                     .resizable = s_state.resizable,
@@ -256,7 +256,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                     .scrollable = true
                 })) {
                     const keel::i32 prevIdx = s_state.menuIdx;
-                    if (auto menu = ui.SidebarMenu({
+                    if (auto menu = guikit::SidebarMenu(ui, {
                         .style = s_state.menuStyle,
                         .color = ctx.ResolveControlColor(),
                         .size = ctx.controlsSize
@@ -300,7 +300,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                 }
 
                 // 3. Minimal Center Area (keeps visual focus on the Sidebar)
-                if (auto mainPane = ui.Column({
+                if (auto mainPane = guikit::Column(ui, {
                     .padding = guikit::Padding::All(24.0f),
                     .align = guikit::Alignment::Center,
                     .justify = guikit::Justify::Center,
@@ -310,7 +310,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                     static constexpr keel::StaticArray<keel::StringRef, 4> pageTitles = {
                         "Overview", "Analytics", "Deployments", "Settings"
                     };
-                    ui.Heading({
+                    guikit::Heading(ui, {
                         .label = pageTitles[keel::as<keel::usize>(keel::clamp(s_state.menuIdx, 0, 3))],
                         .description = "Drag the Sidebar border sash to resize or snap between Expanded, Compact, and Collapsed modes.",
                         .badge = {ModeEnumName(s_state.mode), ctx.ResolveControlColor()},
@@ -319,12 +319,12 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                 }
 
                 // 4. Resizable & Collapsible BottomPanel (docked below Main Pane)
-                if (auto bp = ui.BottomPanel(s_state.showBottomPanel, {
+                if (auto bp = guikit::BottomPanel(ui, s_state.showBottomPanel, {
                     .height = 145.0f,
                     .resizable = s_state.resizable,
                     .allowCollapse = s_state.allowCollapse
                 })) {
-                    if (auto bpTb = ui.Toolbar({
+                    if (auto bpTb = guikit::Toolbar(ui, {
                         .style = guikit::ToolbarStyle::Header,
                         .size = guikit::UiSize::Sm
                     })) {
@@ -336,7 +336,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                         });
                         bpTb.Item(s_state.bottomTabIdx, 2, {.text = "Cross-Section 2D", .icon = guikit::Icon::Eye()});
                         bpTb.Spacer();
-                        ui.Text(ui.Format("H: {:.0f}px", bp.Height()), {
+                        guikit::Text(ui, ui.Format("H: {:.0f}px", bp.Height()), {
                             .role = guikit::TextRole::LabelSmall,
                             .variant = guikit::UiVariant::Muted
                         });
@@ -351,7 +351,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                         }
                     }
 
-                    if (auto bpBody = ui.Box({
+                    if (auto bpBody = guikit::Box(ui, {
                         .gap = 6.0f,
                         .width = guikit::SizeMode::Stretch,
                         .height = guikit::SizeMode::Stretch,
@@ -362,7 +362,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                             "[Warn] 2 boundary reflections attenuated below -65 dB threshold.",
                             "[Slice 2D] Drag the top border of this BottomPanel up/down to resize the cross-section viewport."
                         };
-                        ui.Text(tabContents[keel::as<keel::usize>(keel::clamp(s_state.bottomTabIdx, 0, 2))], {
+                        guikit::Text(ui, tabContents[keel::as<keel::usize>(keel::clamp(s_state.bottomTabIdx, 0, 2))], {
                             .role = guikit::TextRole::BodySmall,
                             .variant = guikit::UiVariant::Secondary
                         });
@@ -372,7 +372,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
 
             // 5. Optional Bottom StatusBar spanning the full workbench width
             if (s_state.showStatusBar) {
-                if (auto sb = ui.StatusBar({
+                if (auto sb = guikit::StatusBar(ui, {
                     .style = s_state.statusBarStyle,
                     .size = ctx.controlsSize
                 })) {

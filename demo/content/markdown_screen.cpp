@@ -146,104 +146,104 @@ end
 } // namespace
 
 void RenderMarkdownInspector(guikit::Context& ui, DemoContext&) {
-    ui.Text("Zoom, Selection & Search", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
-    if (auto el = ui.Element({.label = "Document Zoom (Ctrl+Wheel)"})) {
-        if (ui.Slider(s_state.zoom, 0.5f, 2.5f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
+    guikit::Text(ui, "Zoom, Selection & Search", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
+    if (auto el = guikit::Element(ui, {.label = "Document Zoom (Ctrl+Wheel)"})) {
+        if (guikit::Slider(ui, s_state.zoom, 0.5f, 2.5f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Highlight Search Query (Ctrl+F)"})) {
-        if (ui.InputField(s_state.searchQuery, {.placeholder = "Type to highlight matches..."}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Highlight Search Query (Ctrl+F)"})) {
+        if (guikit::InputField(ui, s_state.searchQuery, {.placeholder = "Type to highlight matches..."}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Text Selection & Cursor (Ctrl+C)"})) {
-        if (ui.Switch(s_state.enableSelection).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Text Selection & Cursor (Ctrl+C)"})) {
+        if (guikit::Switch(ui, s_state.enableSelection).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Interactive Task Checkboxes"})) {
-        if (ui.Switch(s_state.interactiveTasks).changed) ui.InvalidateAll();
-    }
-
-    ui.Text("Typography & Font Sizing", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
-    if (auto el = ui.Element({.label = "Body Font Size"})) {
-        if (ui.Slider(s_state.bodyFontSize, 10.0f, 22.0f, {.valueFormat = "%.1f pt"}).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Heading Scale (H1..H6)"})) {
-        if (ui.Slider(s_state.headingScale, 0.7f, 1.6f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Inline Code Font Size (`code`)"})) {
-        if (ui.Slider(s_state.inlineCodeFontSize, 9.0f, 20.0f, {.valueFormat = "%.1f pt"}).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Display Code Font Size (```)"})) {
-        if (ui.Slider(s_state.codeFontSize, 9.0f, 20.0f, {.valueFormat = "%.1f pt"}).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Line Height Multiplier"})) {
-        if (ui.Slider(s_state.lineHeightScale, 0.9f, 1.8f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Interactive Task Checkboxes"})) {
+        if (guikit::Switch(ui, s_state.interactiveTasks).changed) ui.InvalidateAll();
     }
 
-    ui.Text("Page Layout, Indents & Spacing", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
-    if (auto el = ui.Element({.label = "Document Padding"})) {
-        if (ui.Slider(s_state.documentPadding, 0.0f, 40.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    guikit::Text(ui, "Typography & Font Sizing", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
+    if (auto el = guikit::Element(ui, {.label = "Body Font Size"})) {
+        if (guikit::Slider(ui, s_state.bodyFontSize, 10.0f, 22.0f, {.valueFormat = "%.1f pt"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Constrain Reading Column Width"})) {
-        if (ui.Switch(s_state.constrainContentWidth).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Heading Scale (H1..H6)"})) {
+        if (guikit::Slider(ui, s_state.headingScale, 0.7f, 1.6f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Inline Code Font Size (`code`)"})) {
+        if (guikit::Slider(ui, s_state.inlineCodeFontSize, 9.0f, 20.0f, {.valueFormat = "%.1f pt"}).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Display Code Font Size (```)"})) {
+        if (guikit::Slider(ui, s_state.codeFontSize, 9.0f, 20.0f, {.valueFormat = "%.1f pt"}).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Line Height Multiplier"})) {
+        if (guikit::Slider(ui, s_state.lineHeightScale, 0.9f, 1.8f, {.valueFormat = "%.2fx"}).changed) ui.InvalidateAll();
+    }
+
+    guikit::Text(ui, "Page Layout, Indents & Spacing", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
+    if (auto el = guikit::Element(ui, {.label = "Document Padding"})) {
+        if (guikit::Slider(ui, s_state.documentPadding, 0.0f, 40.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Constrain Reading Column Width"})) {
+        if (guikit::Switch(ui, s_state.constrainContentWidth).changed) ui.InvalidateAll();
     }
     if (s_state.constrainContentWidth) {
-        if (auto el = ui.Element({.label = "Max Content Width"})) {
-            if (ui.Slider(s_state.maxContentWidth, 420.0f, 960.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+        if (auto el = guikit::Element(ui, {.label = "Max Content Width"})) {
+            if (guikit::Slider(ui, s_state.maxContentWidth, 420.0f, 960.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Block Vertical Gap"})) {
-        if (ui.Slider(s_state.blockGap, 4.0f, 28.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Block Vertical Gap"})) {
+        if (guikit::Slider(ui, s_state.blockGap, 4.0f, 28.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Paragraph First-Line Indent"})) {
-        if (ui.Slider(s_state.paragraphIndent, 0.0f, 36.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Paragraph First-Line Indent"})) {
+        if (guikit::Slider(ui, s_state.paragraphIndent, 0.0f, 36.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "List Level Indent"})) {
-        if (ui.Slider(s_state.listIndent, 10.0f, 36.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "List Level Indent"})) {
+        if (guikit::Slider(ui, s_state.listIndent, 10.0f, 36.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Callout / Code Inner Padding"})) {
-        if (ui.Slider(s_state.blockPadding, 6.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Callout / Code Inner Padding"})) {
+        if (guikit::Slider(ui, s_state.blockPadding, 6.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Block Corner Radius"})) {
-        if (ui.Slider(s_state.blockRadius, 0.0f, 16.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Block Corner Radius"})) {
+        if (guikit::Slider(ui, s_state.blockRadius, 0.0f, 16.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "H1 / H2 Divider Lines"})) {
-        if (ui.Switch(s_state.headingDividers).changed) ui.InvalidateAll();
-    }
-
-    ui.Text("Code Blocks (Shared CodeEditor Engine)", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
-    if (auto el = ui.Element({.label = "Code Color Scheme"})) {
-        if (ui.Select(s_state.codeSchemeIdx, MarkdownDemoState::codeSchemeLabels).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Multi-Language Syntax Highlight"})) {
-        if (ui.Switch(s_state.syntaxHighlight).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Line Numbers Gutter"})) {
-        if (ui.Switch(s_state.codeLineNumbers).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Show Hidden Whitespace (Space/Tab)"})) {
-        if (ui.Switch(s_state.codeShowWhitespace).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Show Indentation Guides"})) {
-        if (ui.Switch(s_state.codeIndentGuides).changed) ui.InvalidateAll();
-    }
-    if (auto el = ui.Element({.label = "Interactive Copy Button"})) {
-        if (ui.Switch(s_state.showCopyButton).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "H1 / H2 Divider Lines"})) {
+        if (guikit::Switch(ui, s_state.headingDividers).changed) ui.InvalidateAll();
     }
 
-    ui.Text("Embedded Images", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
-    if (auto el = ui.Element({.label = "Embedded Image Checkerboard"})) {
-        if (ui.Switch(s_state.imageCheckerboard).changed) ui.InvalidateAll();
+    guikit::Text(ui, "Code Blocks (Shared CodeEditor Engine)", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
+    if (auto el = guikit::Element(ui, {.label = "Code Color Scheme"})) {
+        if (guikit::Select(ui, s_state.codeSchemeIdx, MarkdownDemoState::codeSchemeLabels).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Image Max Height"})) {
-        if (ui.Slider(s_state.imageMaxHeight, 100.0f, 320.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Multi-Language Syntax Highlight"})) {
+        if (guikit::Switch(ui, s_state.syntaxHighlight).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Image Corner Radius"})) {
-        if (ui.Slider(s_state.imageRadius, 0.0f, 20.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Line Numbers Gutter"})) {
+        if (guikit::Switch(ui, s_state.codeLineNumbers).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Show Hidden Whitespace (Space/Tab)"})) {
+        if (guikit::Switch(ui, s_state.codeShowWhitespace).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Show Indentation Guides"})) {
+        if (guikit::Switch(ui, s_state.codeIndentGuides).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Interactive Copy Button"})) {
+        if (guikit::Switch(ui, s_state.showCopyButton).changed) ui.InvalidateAll();
+    }
+
+    guikit::Text(ui, "Embedded Images", {.role = guikit::TextRole::LabelMedium, .variant = guikit::UiVariant::Primary});
+    if (auto el = guikit::Element(ui, {.label = "Embedded Image Checkerboard"})) {
+        if (guikit::Switch(ui, s_state.imageCheckerboard).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Image Max Height"})) {
+        if (guikit::Slider(ui, s_state.imageMaxHeight, 100.0f, 320.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Image Corner Radius"})) {
+        if (guikit::Slider(ui, s_state.imageRadius, 0.0f, 20.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
 
     if (!s_state.lastClickedLink.empty()) {
-        ui.Text(ui.Format("Clicked link: {}", s_state.lastClickedLink.as_ref()), {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Info});
+        guikit::Text(ui, ui.Format("Clicked link: {}", s_state.lastClickedLink.as_ref()), {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Info});
     }
     if (s_state.lastToggledTask >= 0) {
-        ui.Text(
+        guikit::Text(ui,
             ui.Format("Task #{} -> {}", s_state.lastToggledTask + 1, s_state.lastToggledChecked ? "Checked" : "Unchecked"),
             {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Success}
         );
@@ -251,8 +251,8 @@ void RenderMarkdownInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderMarkdownStage(guikit::Context& ui, DemoContext& ctx) {
-    if (auto mdScroll = ui.ScrollArea()) {
-        const auto mdRes = ui.Markdown(kDemoMarkdownDoc, {
+    if (auto mdScroll = guikit::ScrollArea(ui)) {
+        const auto mdRes = guikit::Markdown(ui, kDemoMarkdownDoc, {
             .allowZoom = true,
             .zoom = &s_state.zoom,
             .bodyFontSize = s_state.bodyFontSize,

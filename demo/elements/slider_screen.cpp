@@ -30,19 +30,19 @@ constexpr keel::StringRef OrientationEnumName(guikit::Orientation o) noexcept {
 
 void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 3> modeNames = {"Slider", "Step", "Range"};
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Slider Mode",
         .description = "Slider / StepSlider / RangeSlider"
     })) {
-        if (ui.Segmented(s_state.modeIdx, modeNames).changed) {
+        if (guikit::Segmented(ui, s_state.modeIdx, modeNames).changed) {
             ui.InvalidateAll();
         }
     }
 
     keel::i32 orientIdx = (s_state.orientation == guikit::Orientation::Vertical) ? 1 : 0;
     static constexpr keel::StaticArray<keel::StringRef, 2> orientNames = {"Horizontal", "Vertical (Fader)"};
-    if (auto el = ui.Element({.label = "Orientation"})) {
-        if (ui.Segmented(orientIdx, orientNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Orientation"})) {
+        if (guikit::Segmented(ui, orientIdx, orientNames).changed) {
             s_state.orientation = (orientIdx == 1)
                 ? guikit::Orientation::Vertical
                 : guikit::Orientation::Horizontal;
@@ -51,60 +51,60 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
     }
 
     if (s_state.orientation == guikit::Orientation::Vertical) {
-        if (auto el = ui.Element({
+        if (auto el = guikit::Element(ui, {
             .label = "Compact Vertical Height (Fit)",
             .description = "Pass .height = SizeMode::Fit instead of stretching"
         })) {
-            if (ui.Switch(s_state.compactVertical).changed) {
+            if (guikit::Switch(ui, s_state.compactVertical).changed) {
                 ui.InvalidateAll();
             }
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Value Tag"})) {
-        if (ui.Switch(s_state.showValue).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Value Tag"})) {
+        if (guikit::Switch(ui, s_state.showValue).changed) ui.InvalidateAll();
     }
     static constexpr keel::StaticArray<keel::StringRef, 5> valPlaceNames = {
         "Leading", "Trailing", "Top", "Bottom", "Thumb"
     };
     keel::usize valPlaceIdx = keel::as<keel::usize>(s_state.valuePlacement);
-    if (auto el = ui.Element({.label = "Value Placement", .disabled = !s_state.showValue})) {
-        if (ui.Select(valPlaceIdx, valPlaceNames, {
+    if (auto el = guikit::Element(ui, {.label = "Value Placement", .disabled = !s_state.showValue})) {
+        if (guikit::Select(ui, valPlaceIdx, valPlaceNames, {
             .disabled = !s_state.showValue
         }).changed) {
             s_state.valuePlacement = keel::from_underlying<guikit::Placement>(valPlaceIdx);
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Text Left (Min)"})) {
-        if (ui.InputField(s_state.textLeft, {
+    if (auto el = guikit::Element(ui, {.label = "Text Left (Min)"})) {
+        if (guikit::InputField(ui, s_state.textLeft, {
             .placeholder = "e.g. 0% / Min",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Text Right (Max)"})) {
-        if (ui.InputField(s_state.textRight, {
+    if (auto el = guikit::Element(ui, {.label = "Text Right (Max)"})) {
+        if (guikit::InputField(ui, s_state.textRight, {
             .placeholder = "e.g. 100% / Max",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
 
     if (s_state.modeIdx == 0 || s_state.modeIdx == 2) {
-        if (auto el = ui.Element({.label = "Quantize Step (5.0%)"})) {
-            if (ui.Switch(s_state.quantizeStep).changed) ui.InvalidateAll();
+        if (auto el = guikit::Element(ui, {.label = "Quantize Step (5.0%)"})) {
+            if (guikit::Switch(ui, s_state.quantizeStep).changed) ui.InvalidateAll();
         }
     }
 
     if (s_state.modeIdx == 1) {
-        if (auto el = ui.Element({.label = "Show Step Ticks"})) {
-            if (ui.Switch(s_state.showTicks).changed) ui.InvalidateAll();
+        if (auto el = guikit::Element(ui, {.label = "Show Step Ticks"})) {
+            if (guikit::Switch(ui, s_state.showTicks).changed) ui.InvalidateAll();
         }
-        if (auto el = ui.Element({.label = "Show Step Labels"})) {
-            if (ui.Switch(s_state.showLabels).changed) ui.InvalidateAll();
+        if (auto el = guikit::Element(ui, {.label = "Show Step Labels"})) {
+            if (guikit::Switch(ui, s_state.showLabels).changed) ui.InvalidateAll();
         }
     } else if (s_state.modeIdx == 2) {
-        if (auto el = ui.Element({.label = "Minimum Span"})) {
-            if (ui.Slider(s_state.rangeMinSpan, 0.0f, 40.0f, {
+        if (auto el = guikit::Element(ui, {.label = "Minimum Span"})) {
+            if (guikit::Slider(ui, s_state.rangeMinSpan, 0.0f, 40.0f, {
                 .valueFormat = "%.0f %%",
                 .step = 5.0f
             }).changed) {
@@ -137,7 +137,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.width = wSize;
             opts.height = hSize;
             opts.color = ctx.GetControlColor();
-            ui.Slider(s_state.val, 0.0f, 100.0f, opts);
+            guikit::Slider(ui, s_state.val, 0.0f, 100.0f, opts);
         } else if (s_state.modeIdx == 1) {
             static constexpr keel::StaticArray<keel::StringRef, 5> stepItems = {"Off", "Low", "Mid", "High", "Max"};
             guikit::StepSliderOptions opts{};
@@ -153,7 +153,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.width = wSize;
             opts.height = hSize;
             opts.color = ctx.GetControlColor();
-            ui.StepSlider(s_state.stepIdx, stepItems, opts);
+            guikit::StepSlider(ui, s_state.stepIdx, stepItems, opts);
         } else {
             guikit::RangeSliderOptions opts{};
             opts.orientation = s_state.orientation;
@@ -169,7 +169,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.width = wSize;
             opts.height = hSize;
             opts.color = ctx.GetControlColor();
-            ui.RangeSlider(s_state.rangeLow, s_state.rangeHigh, 0.0f, 100.0f, opts);
+            guikit::RangeSlider(ui, s_state.rangeLow, s_state.rangeHigh, 0.0f, 100.0f, opts);
         }
     });
 }

@@ -40,7 +40,7 @@ keel::StringRef StyleName(guikit::MenuBarStyle st) noexcept {
 
 void RecordAction(guikit::Context& ui, keel::StringRef action, guikit::UiVariant var = guikit::UiVariant::Info) {
     s_mb.lastAction.assign(action);
-    ui.ShowToast({.title = "Menu Command", .message = action, .variant = var, .duration = 2.6f});
+    guikit::ShowToast(ui, {.title = "Menu Command", .message = action, .variant = var, .duration = 2.6f});
     ui.InvalidateAll();
 }
 
@@ -48,18 +48,18 @@ void RecordAction(guikit::Context& ui, keel::StringRef action, guikit::UiVariant
 
 void RenderMenuBarInspector(guikit::Context& ui, DemoContext&) {
     keel::i32 styleIdx = keel::as<keel::i32>(s_mb.style);
-    if (auto el = ui.Element({.label = "MenuBar Style"})) {
-        if (ui.Segmented(styleIdx, kStyleLabels).changed) {
+    if (auto el = guikit::Element(ui, {.label = "MenuBar Style"})) {
+        if (guikit::Segmented(ui, styleIdx, kStyleLabels).changed) {
             s_mb.style = keel::from_underlying<guikit::MenuBarStyle>(styleIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Max Dropdown Height",
         .description = "Long menus (e.g. Tools) scroll smoothly when taller than this limit"
     })) {
-        if (ui.Slider(s_mb.maxMenuHeight, 140.0f, 420.0f, {
+        if (guikit::Slider(ui, s_mb.maxMenuHeight, 140.0f, 420.0f, {
             .valueFormat = "%.0f dp",
             .step = 10.0f
         }).changed) {
@@ -67,11 +67,11 @@ void RenderMenuBarInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Trailing Status Tag"})) {
-        if (ui.Switch(s_mb.showRightPill).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Trailing Status Tag"})) {
+        if (guikit::Switch(ui, s_mb.showRightPill).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Disabled"})) {
-        if (ui.Switch(s_mb.disabled).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
+        if (guikit::Switch(ui, s_mb.disabled).changed) ui.InvalidateAll();
     }
 }
 
@@ -81,13 +81,13 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
     dropOpts.size = effSize;
     dropOpts.maxHeight = s_mb.maxMenuHeight;
 
-    if (auto root = ui.Column({
+    if (auto root = guikit::Column(ui, {
         .gap = 0.0f,
         .width = guikit::SizeMode::Stretch,
         .height = guikit::SizeMode::Stretch
     })) {
         // 1. Desktop MenuBar with hover-scrubbing, cascading SubMenus, Sections, Checkboxes, Radios & Scrolling
-        if (auto mb = ui.MenuBar({
+        if (auto mb = guikit::MenuBar(ui, {
             .style = s_mb.style,
             .size = effSize,
             .disabled = s_mb.disabled || ctx.elemDisabled
@@ -188,7 +188,7 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
 
             if (s_mb.showRightPill) {
                 mb.Spacer();
-                (void)ui.Tag(ui.Format("Zoom {}%", s_mb.zoomPct), {
+                (void)guikit::Tag(ui, ui.Format("Zoom {}%", s_mb.zoomPct), {
                     .variant = guikit::UiVariant::Info,
                     .style = guikit::TagStyle::Soft,
                     .size = guikit::UiSize::Xs
@@ -197,7 +197,7 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
         }
 
         // 2. Clean workspace area supporting Right-Click RAII ContextMenu with cascading submenus
-        if (auto body = ui.Column({
+        if (auto body = guikit::Column(ui, {
             .gap = 8.0f,
             .padding = guikit::Padding::All(18.0f),
             .align = guikit::Alignment::Center,
@@ -212,13 +212,13 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
                 ui.InvalidateAll();
             }
 
-            ui.Text(s_mb.lastAction.as_ref(), {
+            guikit::Text(ui, s_mb.lastAction.as_ref(), {
                 .role = guikit::TextRole::BodySmall,
                 .variant = guikit::UiVariant::Muted
             });
 
             // Right-click RAII ContextMenu using the exact same cascading engine
-            if (auto ctxMenu = ui.ContextMenu(s_mb.ctxMenuOpen, {
+            if (auto ctxMenu = guikit::ContextMenu(ui, s_mb.ctxMenuOpen, {
                 .title = "WORKSPACE",
                 .anchorPos = s_mb.ctxMenuPos,
                 .maxHeight = s_mb.maxMenuHeight,

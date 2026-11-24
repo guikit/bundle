@@ -19,40 +19,40 @@ TabBarState s_state;
 } // namespace
 
 void RenderTabBarInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "TabBar Size"})) {
-        if (ui.StepSlider(ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "TabBar Size"})) {
+        if (guikit::StepSlider(ui, ctx.controlsSize, {.showTicks = true, .showLabels = true, .includeNone = true}).changed) {
             ui.InvalidateAll();
         }
     }
     static constexpr keel::StaticArray<keel::StringRef, 4> styleNames = {"Underline", "Pill", "Card", "Folder"};
-    if (auto el = ui.Element({.label = "TabBar Style"})) {
-        if (ui.Segmented(s_state.style, styleNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "TabBar Style"})) {
+        if (guikit::Segmented(ui, s_state.style, styleNames).changed) {
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Container Background Fill"})) {
-        if (ui.Switch(s_state.hasBg).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Container Background Fill"})) {
+        if (guikit::Switch(ui, s_state.hasBg).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Container Corner Radius", .disabled = !s_state.hasBg})) {
-        if (ui.Slider(s_state.radius, 0.0f, 24.0f, {.valueFormat = "%.0f px", .disabled = !s_state.hasBg}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Container Corner Radius", .disabled = !s_state.hasBg})) {
+        if (guikit::Slider(ui, s_state.radius, 0.0f, 24.0f, {.valueFormat = "%.0f px", .disabled = !s_state.hasBg}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Container Internal Padding", .disabled = !s_state.hasBg})) {
-        if (ui.Slider(s_state.padding, 0.0f, 12.0f, {.valueFormat = "%.0f px", .disabled = !s_state.hasBg}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Container Internal Padding", .disabled = !s_state.hasBg})) {
+        if (guikit::Slider(ui, s_state.padding, 0.0f, 12.0f, {.valueFormat = "%.0f px", .disabled = !s_state.hasBg}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Container Border Width", .disabled = !s_state.hasBg})) {
-        if (ui.Slider(s_state.borderWidth, 0.0f, 4.0f, {.valueFormat = "%.1f px", .disabled = !s_state.hasBg}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Container Border Width", .disabled = !s_state.hasBg})) {
+        if (guikit::Slider(ui, s_state.borderWidth, 0.0f, 4.0f, {.valueFormat = "%.1f px", .disabled = !s_state.hasBg}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Tab Spacing (Gap)"})) {
-        if (ui.Slider(s_state.gap, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Tab Spacing (Gap)"})) {
+        if (guikit::Slider(ui, s_state.gap, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Baseline Separator"})) {
-        if (ui.Switch(s_state.showSep).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Baseline Separator"})) {
+        if (guikit::Switch(ui, s_state.showSep).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Full Width Stretch"})) {
-        if (ui.Switch(s_state.fullWidth).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Full Width Stretch"})) {
+        if (guikit::Switch(ui, s_state.fullWidth).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Scrollable Ribbon"})) {
-        if (ui.Switch(s_state.scrollable).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Scrollable Ribbon"})) {
+        if (guikit::Switch(ui, s_state.scrollable).changed) ui.InvalidateAll();
     }
 }
 
@@ -63,7 +63,7 @@ void RenderTabBarStage(guikit::Context& ui, DemoContext& ctx) {
         {.label = "Third", .icon = guikit::Icon::Play()}
     }};
     auto& th = ctx.previewTheme;
-    ui.TabBar(s_state.idx, demoTabs, {
+    guikit::TabBar(ui, s_state.idx, demoTabs, {
         .style = s_state.style,
         .showSeparator = s_state.showSep,
         .fullWidth = s_state.fullWidth,

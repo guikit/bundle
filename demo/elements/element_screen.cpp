@@ -80,24 +80,24 @@ guikit::ElementOptions BuildElementOptions() noexcept {
 void RenderSlotControl(guikit::Context& ui, ElementSlotPreset preset) {
     switch (preset) {
         case ElementSlotPreset::InputField: {
-            ui.InputField(s_state.endpointHost, {
+            guikit::InputField(ui, s_state.endpointHost, {
                 .placeholder = "host:port",
                 .clearable = true
             });
             break;
         }
         case ElementSlotPreset::Switch: {
-            ui.Switch(s_state.switchEnabled);
+            guikit::Switch(ui, s_state.switchEnabled);
             break;
         }
         case ElementSlotPreset::CompositeRow: {
-            if (auto row = ui.Row({.gap = 8.0f, .align = guikit::Alignment::Center})) {
-                ui.InputField(s_state.searchQuery, {
+            if (auto row = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {
+                guikit::InputField(ui, s_state.searchQuery, {
                     .placeholder = "Filter symbol...",
                     .prefix = {guikit::Icon::Search()},
                     .clearable = true
                 });
-                if (ui.Button({
+                if (guikit::Button(ui, {
                     .text = "Apply",
                     .color = guikit::StateColor::Primary()
                 })) {
@@ -142,8 +142,8 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
         "Standalone (No Slot)"
     };
     keel::usize presetIdx = keel::as<keel::usize>(s_state.slotPreset);
-    if (auto el = ui.Element({.label = "Control Slot"})) {
-        if (ui.Select(presetIdx, kSlotNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Control Slot"})) {
+        if (guikit::Select(ui, presetIdx, kSlotNames).changed) {
             s_state.slotPreset = keel::from_underlying<ElementSlotPreset>(presetIdx);
             ui.InvalidateAll();
         }
@@ -151,41 +151,41 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
 
     const auto explicitLayout = ResolveExplicitLayout();
     const guikit::ElementLayout effLayout = explicitLayout.value_or(DefaultSlotLayout(s_state.slotPreset));
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Layout",
         .badge = {
             ElementLayoutEnumName(effLayout),
             explicitLayout.has_value() ? guikit::UiVariant::Primary : guikit::UiVariant::Secondary
         }
     })) {
-        if (ui.Select(s_state.layoutIdx, kElemLayoutNames).changed) {
+        if (guikit::Select(ui, s_state.layoutIdx, kElemLayoutNames).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Size"})) {
-        if (ui.StepSlider(s_state.elemSize, {.showTicks = true, .showLabels = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Size"})) {
+        if (guikit::StepSlider(ui, s_state.elemSize, {.showTicks = true, .showLabels = true}).changed) {
             ui.InvalidateAll();
         }
     }
 
     keel::usize alignIdx = keel::as<keel::usize>(s_state.align);
-    if (auto el = ui.Element({.label = "Alignment"})) {
-        if (ui.Segmented(alignIdx, kLabelAlignNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Alignment"})) {
+        if (guikit::Segmented(ui, alignIdx, kLabelAlignNames).changed) {
             s_state.align = keel::from_underlying<guikit::Align>(alignIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Width"})) {
-        if (ui.Segmented(s_state.widthModeIdx, kAxisModeNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Width"})) {
+        if (guikit::Segmented(ui, s_state.widthModeIdx, kAxisModeNames).changed) {
             ui.InvalidateAll();
         }
     }
 
     const bool fixedWidth = (s_state.widthModeIdx == 3);
-    if (auto el = ui.Element({.label = "Width (dp)", .disabled = !fixedWidth})) {
-        if (ui.Slider(s_state.widthDp, 160.0f, 560.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Width (dp)", .disabled = !fixedWidth})) {
+        if (guikit::Slider(ui, s_state.widthDp, 160.0f, 560.0f, {
             .valueFormat = "%.0f dp",
             .step = 10.0f,
             .disabled = !fixedWidth
@@ -194,26 +194,26 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Description"})) {
-        if (ui.Switch(s_state.showDescription).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Description"})) {
+        if (guikit::Switch(ui, s_state.showDescription).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Icon & Badge"})) {
-        if (ui.Switch(s_state.showIconAndBadge).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Icon & Badge"})) {
+        if (guikit::Switch(ui, s_state.showIconAndBadge).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Preview on Surface Card"})) {
-        if (ui.Switch(s_state.wrapInCard).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Preview on Surface Card"})) {
+        if (guikit::Switch(ui, s_state.wrapInCard).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Disabled"})) {
-        if (ui.Switch(s_state.disabled).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
+        if (guikit::Switch(ui, s_state.disabled).changed) {
             ui.InvalidateAll();
         }
     }
@@ -223,14 +223,14 @@ void RenderElementStage(guikit::Context& ui, DemoContext&) {
     auto renderContent = [&]() {
         const guikit::ElementOptions opts = BuildElementOptions();
         if (s_state.slotPreset == ElementSlotPreset::Standalone) {
-            ui.Element(opts);
-        } else if (auto el = ui.Element(opts)) {
+            guikit::Element(ui, opts);
+        } else if (auto el = guikit::Element(ui, opts)) {
             RenderSlotControl(ui, s_state.slotPreset);
         }
     };
 
     if (s_state.wrapInCard) {
-        if (auto card = ui.Card({
+        if (auto card = guikit::Card(ui, {
             .minWidth = 340.0f,
             .maxWidth = 560.0f,
             .gap = 14.0f,

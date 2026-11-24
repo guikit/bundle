@@ -104,8 +104,8 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
     s_state.EnsureLoaded();
 
     // 1. Camera & Dataset Header Actions
-    if (auto row = ui.Row({.gap = 6.0f})) {
-        if (ui.Button({
+    if (auto row = guikit::Row(ui, {.gap = 6.0f})) {
+        if (guikit::Button(ui, {
             .text = "Fit Chart Bounds",
             .icon = guikit::Icon::Search(),
             .size = guikit::UiSize::Sm,
@@ -116,7 +116,7 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
             s_state.pendingTileZoom = s_state.initialTileZoom;
             ui.InvalidateAll();
         }
-        if (ui.Button({
+        if (guikit::Button(ui, {
             .text = "Clear Sel",
             .disabled = (s_state.selectedFeatureUid == 0),
             .size = guikit::UiSize::Sm,
@@ -129,15 +129,15 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
 
     // 2. S-52 / ENC Palette & Bathymetry Safety Thresholds
     keel::usize palIdx = keel::as<keel::usize>(s_state.renderConfig.chartPalette);
-    if (auto el = ui.Element({.label = "Chart Color Palette (S-52 / ENC)"})) {
-        if (ui.Select(palIdx, GisScreenState::paletteNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Chart Color Palette (S-52 / ENC)"})) {
+        if (guikit::Select(ui, palIdx, GisScreenState::paletteNames).changed) {
             s_state.renderConfig.chartPalette = keel::from_underlying<guikit::ChartPalette>(palIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Safety Contour Depth (m)"})) {
-        if (ui.Slider(s_state.renderConfig.safetyContourM, 1.0f, 20.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Safety Contour Depth (m)"})) {
+        if (guikit::Slider(ui, s_state.renderConfig.safetyContourM, 1.0f, 20.0f, {
             .valueFormat = "%.1f m",
             .step = 0.5
         }).changed) {
@@ -147,16 +147,16 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
 
     // 3. Projection (CRS), Coordinate Readout Format & Tile Size
     keel::usize crsIdx = keel::as<keel::usize>(s_state.crs);
-    if (auto el = ui.Element({.label = "Projection (CRS)"})) {
-        if (ui.Select(crsIdx, GisScreenState::crsNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Projection (CRS)"})) {
+        if (guikit::Select(ui, crsIdx, GisScreenState::crsNames).changed) {
             s_state.crs = keel::from_underlying<guikit::MapCrs>(crsIdx);
             ui.InvalidateAll();
         }
     }
 
     keel::usize fmtIdx = keel::as<keel::usize>(s_state.coordFormat);
-    if (auto el = ui.Element({.label = "Coordinate Format"})) {
-        if (ui.Select(fmtIdx, GisScreenState::coordFormatNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Coordinate Format"})) {
+        if (guikit::Select(ui, fmtIdx, GisScreenState::coordFormatNames).changed) {
             s_state.coordFormat = keel::from_underlying<guikit::GeoCoordFormat>(fmtIdx);
             ui.InvalidateAll();
         }
@@ -164,58 +164,58 @@ void RenderOsmMapInspector(guikit::Context& ui, DemoContext&) {
 
     keel::usize tileSizeIdx = (s_state.renderConfig.tileSizePx <= 128u) ? 0u
                        : ((s_state.renderConfig.tileSizePx >= 512u) ? 2u : 1u);
-    if (auto el = ui.Element({.label = "Tile Resolution [z/x/y]"})) {
-        if (ui.StepSlider(tileSizeIdx, GisScreenState::tileSizeNames, {.showTicks = true, .showLabels = true}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Tile Resolution [z/x/y]"})) {
+        if (guikit::StepSlider(ui, tileSizeIdx, GisScreenState::tileSizeNames, {.showTicks = true, .showLabels = true}).changed) {
             s_state.renderConfig.tileSizePx = (tileSizeIdx == 0u) ? 128u : ((tileSizeIdx == 2u) ? 512u : 256u);
             ui.InvalidateAll();
         }
     }
 
     // 4. S-52 Vector Display & Tile Engine Filters
-    ui.Heading({.label = "S-52 & TILE ENGINE FILTERS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
-    if (auto el = ui.Element({.label = "Vector Tile Cache [z/x/y]"})) {
-        if (ui.Switch(s_state.renderConfig.useVectorTileCache).changed) ui.InvalidateAll();
+    guikit::Heading(ui, {.label = "S-52 & TILE ENGINE FILTERS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    if (auto el = guikit::Element(ui, {.label = "Vector Tile Cache [z/x/y]"})) {
+        if (guikit::Switch(ui, s_state.renderConfig.useVectorTileCache).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Loading Tile Placeholders"})) {
-        if (ui.Switch(s_state.renderConfig.showLoadingTilePlaceholders).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Loading Tile Placeholders"})) {
+        if (guikit::Switch(ui, s_state.renderConfig.showLoadingTilePlaceholders).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Raster Basemap Underlay"})) {
-        if (ui.Switch(s_state.renderConfig.showOsmBasemap).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Raster Basemap Underlay"})) {
+        if (guikit::Switch(ui, s_state.renderConfig.showOsmBasemap).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Depth Contours (DEPCNT)"})) {
-        if (ui.Switch(s_state.renderConfig.showDepthContours).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Depth Contours (DEPCNT)"})) {
+        if (guikit::Switch(ui, s_state.renderConfig.showDepthContours).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Spot Soundings (SOUNDG)"})) {
-        if (ui.Switch(s_state.renderConfig.showSoundings).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Spot Soundings (SOUNDG)"})) {
+        if (guikit::Switch(ui, s_state.renderConfig.showSoundings).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Cartographic Labels & Callouts"})) {
-        if (ui.Switch(s_state.renderConfig.showFeatureCallouts).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Cartographic Labels & Callouts"})) {
+        if (guikit::Switch(ui, s_state.renderConfig.showFeatureCallouts).changed) ui.InvalidateAll();
     }
 
     // 5. Cartographic Grid & HUD Overlays
-    ui.Heading({.label = "CARTOGRAPHIC OVERLAYS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
-    if (auto el = ui.Element({.label = "Nautical Graticule (1' = 1 NM)"})) {
-        if (ui.Switch(s_state.showNauticalGraticule).changed) ui.InvalidateAll();
+    guikit::Heading(ui, {.label = "CARTOGRAPHIC OVERLAYS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+    if (auto el = guikit::Element(ui, {.label = "Nautical Graticule (1' = 1 NM)"})) {
+        if (guikit::Switch(ui, s_state.showNauticalGraticule).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Border Lat/Lon Zebra Rulers"})) {
-        if (ui.Switch(s_state.showBorderRulers).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Border Lat/Lon Zebra Rulers"})) {
+        if (guikit::Switch(ui, s_state.showBorderRulers).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Dual Scale Bar (NM + km)"})) {
-        if (ui.Switch(s_state.showScaleBarOverlay).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Dual Scale Bar (NM + km)"})) {
+        if (guikit::Switch(ui, s_state.showScaleBarOverlay).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Vector Tile Grid [z/x/y]"})) {
-        if (ui.Switch(s_state.showTileGrid).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Vector Tile Grid [z/x/y]"})) {
+        if (guikit::Switch(ui, s_state.showTileGrid).changed) ui.InvalidateAll();
     }
 
     // 6. Thematic Layers from demo_bay.geojson
     if (!s_state.layers.empty()) {
-        ui.Heading({.label = "THEMATIC ENC LAYERS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
+        guikit::Heading(ui, {.label = "THEMATIC ENC LAYERS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
         for (auto& layer : s_state.layers) {
-            if (auto el = ui.Element({
+            if (auto el = guikit::Element(ui, {
                 .label = ui.Format("{} ({})", layer.name.as_ref(), layer.features.size()),
                 .size = guikit::UiSize::Sm
             })) {
-                if (ui.Switch(layer.visible, {.size = guikit::UiSize::Sm}).changed) {
+                if (guikit::Switch(ui, layer.visible, {.size = guikit::UiSize::Sm}).changed) {
                     ui.InvalidateAll();
                 }
             }

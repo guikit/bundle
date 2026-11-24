@@ -35,20 +35,20 @@ void RenderPanePlaceholder(
     keel::f32 ratioPct,
     guikit::UiVariant badgeVariant
 ) {
-    if (auto col = ui.Column({
+    if (auto col = guikit::Column(ui, {
         .gap = 6.0f,
         .align = guikit::Alignment::Center,
         .justify = guikit::Justify::Center,
         .width = guikit::SizeMode::Stretch,
         .height = guikit::SizeMode::Stretch
     })) {
-        ui.Heading({
+        guikit::Heading(ui, {
             .label = title,
             .badge = {ui.Format("{:.0f}%", ratioPct), guikit::StateColor::FromVariant(badgeVariant)},
             .align = guikit::Align::Center,
             .width = guikit::SizeMode::Fit
         });
-        ui.Text("Drag sash to resize • Double-click sash to reset", {
+        guikit::Text(ui, "Drag sash to resize • Double-click sash to reset", {
             .role = guikit::TextRole::LabelSmall,
             .variant = guikit::UiVariant::Muted
         });
@@ -58,69 +58,69 @@ void RenderPanePlaceholder(
 } // namespace
 
 void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = ui.Element({.label = "Topology", .layout = guikit::ElementLayout::Stacked})) {
-        if (ui.Segmented(s_split.layoutModeIdx, kLayoutModes).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Topology", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, s_split.layoutModeIdx, kLayoutModes).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Orientation", .layout = guikit::ElementLayout::Stacked})) {
-        if (ui.Segmented(s_split.orientationIdx, kOrientations).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Orientation", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, s_split.orientationIdx, kOrientations).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Primary Ratio"})) {
-        if (ui.Slider(s_split.primaryRatio, 0.0f, 1.0f, {.valueFormat = "%.2f", .step = 0.01f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Primary Ratio"})) {
+        if (guikit::Slider(ui, s_split.primaryRatio, 0.0f, 1.0f, {.valueFormat = "%.2f", .step = 0.01f}).changed) {
             ui.InvalidateAll();
         }
     }
 
     if (s_split.layoutModeIdx == 0) {
-        if (auto el = ui.Element({.label = "Secondary Ratio"})) {
-            if (ui.Slider(s_split.secondaryRatio, 0.0f, 1.0f, {.valueFormat = "%.2f", .step = 0.01f}).changed) {
+        if (auto el = guikit::Element(ui, {.label = "Secondary Ratio"})) {
+            if (guikit::Slider(ui, s_split.secondaryRatio, 0.0f, 1.0f, {.valueFormat = "%.2f", .step = 0.01f}).changed) {
                 ui.InvalidateAll();
             }
         }
     }
 
-    if (auto el = ui.Element({.label = "Sash Thickness"})) {
-        if (ui.Slider(s_split.sashSize, 4.0f, 14.0f, {.valueFormat = "%.0f dp", .step = 1.0f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Sash Thickness"})) {
+        if (guikit::Slider(ui, s_split.sashSize, 4.0f, 14.0f, {.valueFormat = "%.0f dp", .step = 1.0f}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Ratio Bounds"})) {
-        if (ui.RangeSlider(s_split.minRatio, s_split.maxRatio, 0.05f, 0.95f, {.valueFormat = "%.2f", .step = 0.05f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Ratio Bounds"})) {
+        if (guikit::RangeSlider(ui, s_split.minRatio, s_split.maxRatio, 0.05f, 0.95f, {.valueFormat = "%.2f", .step = 0.05f}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Min Pane Size"})) {
-        if (ui.Slider(s_split.minPaneSize, 24.0f, 140.0f, {.valueFormat = "%.0f dp", .step = 4.0f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Min Pane Size"})) {
+        if (guikit::Slider(ui, s_split.minPaneSize, 24.0f, 140.0f, {.valueFormat = "%.0f dp", .step = 4.0f}).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Sash Grip Pill"})) {
-        if (ui.Switch(s_split.showGrip).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Sash Grip Pill"})) {
+        if (guikit::Switch(ui, s_split.showGrip).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Collapsible Edge Snap"})) {
-        if (ui.Switch(s_split.collapsible).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Collapsible Edge Snap"})) {
+        if (guikit::Switch(ui, s_split.collapsible).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Outer Frame"})) {
-        if (ui.Switch(s_split.showOuterBorder).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Show Outer Frame"})) {
+        if (guikit::Switch(ui, s_split.showOuterBorder).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (ui.Button({
+    if (guikit::Button(ui, {
         .text = "Reset Ratios",
         .icon = guikit::Icon::Refresh(),
         .width = guikit::SizeMode::Stretch,
@@ -162,7 +162,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
         .clipChildren = true
     };
 
-    if (auto outerSplit = guikit::SplitView::Open(ui, s_split.primaryRatio, primaryOpts)) {
+    if (auto outerSplit = guikit::SplitView(ui, s_split.primaryRatio, primaryOpts)) {
         if (auto pane1 = outerSplit.First({
             .width = guikit::SizeMode::Stretch,
             .height = guikit::SizeMode::Stretch,
@@ -194,7 +194,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .clipChildren = true
                 };
 
-                if (auto innerSplit = guikit::SplitView::Open(ui, s_split.secondaryRatio, nestedOpts)) {
+                if (auto innerSplit = guikit::SplitView(ui, s_split.secondaryRatio, nestedOpts)) {
                     if (auto topPane = innerSplit.First({
                         .width = guikit::SizeMode::Stretch,
                         .height = guikit::SizeMode::Stretch,
@@ -216,7 +216,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
                     }
                 }
             } else {
-                if (auto singleRight = ui.Box({
+                if (auto singleRight = guikit::Box(ui, {
                     .width = guikit::SizeMode::Stretch,
                     .height = guikit::SizeMode::Stretch,
                     .padding = guikit::Padding::All(16.0f),

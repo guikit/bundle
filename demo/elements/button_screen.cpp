@@ -15,8 +15,8 @@ ButtonState s_state;
 } // namespace
 
 void RenderButtonInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Capsule Text"})) {
-        if (ui.InputField(s_state.text, {
+    if (auto el = guikit::Element(ui, {.label = "Capsule Text"})) {
+        if (guikit::InputField(ui, s_state.text, {
             .placeholder = "Icon-only...",
             .clearable = true
         }).changed) {
@@ -25,8 +25,8 @@ void RenderButtonInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Show Capsule Icon"})) {
-        if (ui.Switch(s_state.hasIcon).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Capsule Icon"})) {
+        if (guikit::Switch(ui, s_state.hasIcon).changed) ui.InvalidateAll();
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 4> placeNames = {"Leading", "Trailing", "Top", "Bottom"};
@@ -36,8 +36,8 @@ void RenderButtonInspector(guikit::Context& ui, DemoContext&) {
             ? 2
             : ((s_state.iconPlacement == guikit::Placement::Bottom) ? 3 : 0));
     const bool placeDisabled = !s_state.hasIcon || s_state.square;
-    if (auto el = ui.Element({.label = "Icon Placement", .disabled = placeDisabled})) {
-        if (ui.Segmented(placeIdx, placeNames, {
+    if (auto el = guikit::Element(ui, {.label = "Icon Placement", .disabled = placeDisabled})) {
+        if (guikit::Segmented(ui, placeIdx, placeNames, {
             .disabled = placeDisabled
         }).changed) {
             s_state.iconPlacement = (placeIdx == 1)
@@ -49,12 +49,12 @@ void RenderButtonInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Loading Spinner"})) {
-        if (ui.Switch(s_state.loading).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Loading Spinner"})) {
+        if (guikit::Switch(ui, s_state.loading).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Square ToolButton"})) {
-        if (ui.Switch(s_state.square).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Square ToolButton"})) {
+        if (guikit::Switch(ui, s_state.square).changed) ui.InvalidateAll();
     }
 }
 
@@ -79,7 +79,7 @@ void RenderButtonStage(guikit::Context& ui, DemoContext& ctx) {
         opts.background = ctx.GetControlBackground(NavCategory::ElemButton);
         opts.border = ctx.GetCtrlBorder();
 
-        if (ui.Button(opts)) {
+        if (guikit::Button(ui, opts)) {
             ++s_state.clicks;
             ui.InvalidateAll();
         }

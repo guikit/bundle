@@ -30,14 +30,14 @@ ImageState s_state;
 } // namespace
 
 void RenderImageInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Image Source"})) {
-        if (ui.Select(s_state.sourceIdx, ImageState::sourceNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Image Source"})) {
+        if (guikit::Select(ui, s_state.sourceIdx, ImageState::sourceNames).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Alt Fallback Text"})) {
-        if (ui.InputField(s_state.altText, {
+    if (auto el = guikit::Element(ui, {.label = "Alt Fallback Text"})) {
+        if (guikit::InputField(ui, s_state.altText, {
             .placeholder = "Fallback text when missing...",
             .clearable = true
         }).changed) {
@@ -45,30 +45,30 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "ObjectFit Policy"})) {
-        if (ui.Select(s_state.fit, ImageState::fitModeNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "ObjectFit Policy"})) {
+        if (guikit::Select(ui, s_state.fit, ImageState::fitModeNames).changed) {
             ui.InvalidateAll();
         }
     }
 
     keel::usize axIdx = keel::as<keel::usize>(s_state.alignX);
-    if (auto el = ui.Element({.label = "Horizontal Fit Align"})) {
-        if (ui.Segmented(axIdx, kLabelAlignNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Horizontal Fit Align"})) {
+        if (guikit::Segmented(ui, axIdx, kLabelAlignNames).changed) {
             s_state.alignX = keel::from_underlying<guikit::Align>(axIdx);
             ui.InvalidateAll();
         }
     }
 
     keel::usize ayIdx = keel::as<keel::usize>(s_state.alignY);
-    if (auto el = ui.Element({.label = "Vertical Fit Align"})) {
-        if (ui.Segmented(ayIdx, kLabelAlignNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Vertical Fit Align"})) {
+        if (guikit::Segmented(ui, ayIdx, kLabelAlignNames).changed) {
             s_state.alignY = keel::from_underlying<guikit::Align>(ayIdx);
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Opacity"})) {
-        if (ui.Slider(s_state.opacityPct, 10.0f, 100.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Opacity"})) {
+        if (guikit::Slider(ui, s_state.opacityPct, 10.0f, 100.0f, {
             .valueFormat = "%.0f %%",
             .step = 5.0f
         }).changed) {
@@ -76,8 +76,8 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Checkerboard Backdrop"})) {
-        if (ui.Switch(s_state.checkerboard).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Checkerboard Backdrop"})) {
+        if (guikit::Switch(ui, s_state.checkerboard).changed) {
             ui.InvalidateAll();
         }
     }
@@ -99,7 +99,7 @@ void RenderImageStage(guikit::Context& ui, DemoContext& ctx) {
         opts.height = ctx.ResolveCtrlHeight();
         opts.background = ctx.GetControlBackground(NavCategory::ElemImage);
         opts.border = ctx.GetCtrlBorder();
-        ui.Image(ImageState::sources[s_state.sourceIdx % ImageState::sources.size()], opts);
+        guikit::Image(ui, ImageState::sources[s_state.sourceIdx % ImageState::sources.size()], opts);
     });
 }
 

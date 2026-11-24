@@ -48,7 +48,7 @@ inline void RenderDotGridBackdrop(const guikit::Node* n, guikit::ICanvas& canvas
 
 inline void RenderBackdropHudBadge(const guikit::Node* n, guikit::ICanvas& canvas, const guikit::UiTheme& theme) noexcept {
     if (n->type == guikit::NodeType::ScrollArea) {
-        guikit::ScrollArea::RenderScrollbar(n, canvas, theme);
+        guikit::RenderScrollbar(n, canvas, theme);
     }
     if (n->text.empty()) return;
     const guikit::Rect& r = n->computedRect;
@@ -303,7 +303,7 @@ inline void RenderPreviewViewport(
     const keel::f32 clientPad = isShellScreen ? 0.0f : (isFullStage ? 8.0f : 24.0f);
 
     // 1. Recessed Studio Artboard Backdrop (2D ScrollArea in Device / Custom-Sized Window mode, Stretch Box otherwise)
-    if (auto backdropBox = ui.ScrollArea({
+    if (auto backdropBox = guikit::ScrollArea(ui, {
         .orientation = guikit::Orientation::Both,
         .scrollbar = useCenteredScrollCanvas ? guikit::VisibilityPolicy::Auto : guikit::VisibilityPolicy::Never,
         .align = useCenteredScrollCanvas ? guikit::Alignment::Center : guikit::Alignment::Stretch,
@@ -426,15 +426,15 @@ inline void RenderPreviewViewport(
         auto invokeStageInsideClient = [&]() {
             if (isFullStage) {
                 renderClientContent();
-            } else if (auto centerRow = ui.Row({
+            } else if (auto centerRow = guikit::Row(ui, {
                 .align = guikit::Alignment::Center,
                 .justify = guikit::Justify::Center,
                 .height = guikit::SizeMode::Stretch
             })) {
                 renderClientContent();
             }
-            if (!ui.HasToastHostVisited()) {
-                ui.ToastHost({.confineToParent = true});
+            if (!guikit::HasToastHostVisited(ui)) {
+                guikit::ToastHost(ui, {.confineToParent = true});
             }
         };
 
@@ -460,7 +460,7 @@ inline void RenderPreviewViewport(
 
                 // The slot is the area the window occupies, in studio units: edge / corner resizing is hit-tested here,
                 // so the drag stays stable while the centered window moves. The window itself is scaled inside it.
-                if (auto windowSlot = ui.Box({
+                if (auto windowSlot = guikit::Box(ui, {
                     .width = demoCtx.previewWindowCustomSize
                         ? guikit::AxisSize::Fixed(demoCtx.previewWindowW * relScale)
                         : guikit::AxisSize::Stretch(),
@@ -606,7 +606,7 @@ inline void RenderPreviewViewport(
                     }
 
                     if (auto previewZoneScope = ui.Zone(previewZone)) {
-                        if (auto windowFrame = ui.Box({
+                        if (auto windowFrame = guikit::Box(ui, {
                             .gap = 0.0f,
                             .width = guikit::SizeMode::Stretch,
                             .height = guikit::SizeMode::Stretch,
@@ -623,7 +623,7 @@ inline void RenderPreviewViewport(
                             const guikit::Color titlebarBg = (ui.GetTheme().mode == guikit::ThemeMode::Light)
                                 ? guikit::Color(241, 245, 249, 255)
                                 : guikit::Color(15, 23, 42, 255);
-                            if (auto titlebar = ui.Box({
+                            if (auto titlebar = guikit::Box(ui, {
                                 .width = guikit::SizeMode::Stretch,
                                 .height = 28.0f,
                                 .padding = guikit::Padding::Symmetric(12.0f, 0.0f),
@@ -631,29 +631,29 @@ inline void RenderPreviewViewport(
                                 .border = {.width = 0.0f, .radius = 0.0f}
                             })) {
                                 titlebar.GetNode()->postRenderFn = &detail::RenderWindowTitlebarTrafficLights;
-                                if (auto titleRow = ui.Row({
+                                if (auto titleRow = guikit::Row(ui, {
                                     .gap = 8.0f,
                                     .align = guikit::Alignment::Center,
                                     .height = guikit::SizeMode::Stretch
                                 })) {
                                     // Left slot reserved for Traffic Lights (3 dots * 10px + 2 * 7px gaps = 44px + 8px breathing room)
-                                    if (auto tlSlot = ui.Box({
+                                    if (auto tlSlot = guikit::Box(ui, {
                                         .width = 52.0f,
                                         .height = guikit::SizeMode::Stretch
                                     })) {}
-                                    ui.Spacer();
-                                    ui.Text(displayTitle, {
+                                    guikit::Spacer(ui);
+                                    guikit::Text(ui, displayTitle, {
                                         .role = guikit::TextRole::LabelSmall,
                                         .variant = guikit::UiVariant::Secondary
                                     });
-                                    ui.Spacer();
+                                    guikit::Spacer(ui);
                                     const keel::i32 clientW = demoCtx.previewWindowCustomSize
                                         ? keel::max(0, keel::round_i32(demoCtx.previewWindowW))
                                         : keel::max(0, keel::round_i32(availPxW / relScale));
                                     const keel::i32 clientH = demoCtx.previewWindowCustomSize
                                         ? keel::max(0, keel::round_i32(demoCtx.previewWindowH - 28.0f))
                                         : keel::max(0, keel::round_i32(availPxH / relScale - 28.0f));
-                                    ui.Text(ui.Format("{} x {}", clientW, clientH), {
+                                    guikit::Text(ui, ui.Format("{} x {}", clientW, clientH), {
                                         .role = guikit::TextRole::CodeSmall,
                                         .variant = guikit::UiVariant::Muted
                                     });
@@ -661,7 +661,7 @@ inline void RenderPreviewViewport(
                             }
 
                             if (auto inspectZoneScope = ui.Zone(inspectOpts)) {
-                                if (auto clientBox = ui.Box({
+                                if (auto clientBox = guikit::Box(ui, {
                                     .width = guikit::SizeMode::Stretch,
                                     .height = guikit::SizeMode::Stretch,
                                     .padding = guikit::Padding::All(clientPad),
@@ -678,7 +678,7 @@ inline void RenderPreviewViewport(
                 const keel::f32 devicePad = isShellScreen ? 0.0f : (isFullStage ? 6.0f : 16.0f);
 
                 if (auto previewZoneScope = ui.Zone(previewZone)) {
-                    if (auto chassisBox = ui.Box({
+                    if (auto chassisBox = guikit::Box(ui, {
                         .gap = 0.0f,
                         .width = targetW,
                         .height = targetH,
@@ -694,7 +694,7 @@ inline void RenderPreviewViewport(
                             ? &detail::RenderDeviceChassisButtons<true>
                             : &detail::RenderDeviceChassisButtons<false>;
 
-                        if (auto screenBox = ui.Box({
+                        if (auto screenBox = guikit::Box(ui, {
                             .gap = 0.0f,
                             .width = guikit::SizeMode::Stretch,
                             .height = guikit::SizeMode::Stretch,
@@ -712,7 +712,7 @@ inline void RenderPreviewViewport(
                             }
 
                             // 1. Top Safe Area (9:41 Clock + Signal/Battery)
-                            if (auto safeTop = ui.Box({
+                            if (auto safeTop = guikit::Box(ui, {
                                 .width = guikit::SizeMode::Stretch,
                                 .height = (isPhone && !demoCtx.previewLandscape) ? 36.0f : 24.0f
                             })) {
@@ -726,7 +726,7 @@ inline void RenderPreviewViewport(
                                 ? guikit::Padding{devicePad + 26.0f, devicePad, devicePad, devicePad}
                                 : guikit::Padding::All(devicePad);
                             if (auto inspectZoneScope = ui.Zone(inspectOpts)) {
-                                if (auto clientBox = ui.Box({
+                                if (auto clientBox = guikit::Box(ui, {
                                     .width = guikit::SizeMode::Stretch,
                                     .height = guikit::SizeMode::Stretch,
                                     .padding = clientSafePad,
@@ -737,7 +737,7 @@ inline void RenderPreviewViewport(
                             }
 
                             // 3. Bottom Safe Area (Home Indicator Bar)
-                            if (auto safeBottom = ui.Box({
+                            if (auto safeBottom = guikit::Box(ui, {
                                 .width = guikit::SizeMode::Stretch,
                                 .height = 16.0f
                             })) {
@@ -749,7 +749,7 @@ inline void RenderPreviewViewport(
             } else {
                 // Full Artboard Mode (clean bordered surface on the recessed backdrop)
                 if (auto previewZoneScope = ui.Zone(previewZone)) {
-                    if (auto artboard = ui.Box({
+                    if (auto artboard = guikit::Box(ui, {
                         .width = guikit::SizeMode::Stretch,
                         .height = guikit::SizeMode::Stretch,
                         .background = {demoCtx.previewTheme.palette.surface},
@@ -761,7 +761,7 @@ inline void RenderPreviewViewport(
                         .clipChildren = true
                     })) {
                         if (auto inspectZoneScope = ui.Zone(inspectOpts)) {
-                            if (auto clientBox = ui.Box({
+                            if (auto clientBox = guikit::Box(ui, {
                                 .width = guikit::SizeMode::Stretch,
                                 .height = guikit::SizeMode::Stretch,
                                 .padding = guikit::Padding::All(clientPad)

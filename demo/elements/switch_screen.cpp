@@ -13,20 +13,20 @@ SwitchState s_state;
 } // namespace
 
 void RenderSwitchInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = ui.Element({.label = "Text Left (Off)"})) {
-        if (ui.InputField(s_state.textLeft, {
+    if (auto el = guikit::Element(ui, {.label = "Text Left (Off)"})) {
+        if (guikit::InputField(ui, s_state.textLeft, {
             .placeholder = "e.g. Off",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Text Right (On)"})) {
-        if (ui.InputField(s_state.textRight, {
+    if (auto el = guikit::Element(ui, {.label = "Text Right (On)"})) {
+        if (guikit::InputField(ui, s_state.textRight, {
             .placeholder = "e.g. On",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Symmetric (Neutral Track)"})) {
-        if (ui.Switch(s_state.symmetric).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Symmetric (Neutral Track)"})) {
+        if (guikit::Switch(ui, s_state.symmetric).changed) ui.InvalidateAll();
     }
 }
 
@@ -39,7 +39,7 @@ void RenderSwitchStage(guikit::Context& ui, DemoContext& ctx) {
         opts.disabled = ctx.elemDisabled;
         opts.size = ctx.controlsSize;
         opts.color = ctx.GetControlColor();
-        ui.Switch(s_state.state, opts);
+        guikit::Switch(ui, s_state.state, opts);
     });
 }
 

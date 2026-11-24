@@ -29,38 +29,38 @@ LevelMeterDemoState s_state;
 
 void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 2> channelModes = {"Mono (1ch)", "Stereo (L/R)"};
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Channel Configuration",
         .description = "Single-channel dBFS vs Stereo L/R pair"
     })) {
-        if (ui.Segmented(s_state.channelModeIdx, channelModes).changed) {
+        if (guikit::Segmented(ui, s_state.channelModeIdx, channelModes).changed) {
             ui.InvalidateAll();
         }
     }
 
     static constexpr keel::StaticArray<keel::StringRef, 2> orientNames = {"Horizontal", "Vertical"};
-    if (auto el = ui.Element({.label = "Orientation"})) {
-        if (ui.Segmented(s_state.orientationIdx, orientNames).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Orientation"})) {
+        if (guikit::Segmented(ui, s_state.orientationIdx, orientNames).changed) {
             ui.InvalidateAll();
         }
     }
 
     if (s_state.orientationIdx == 1) {
-        if (auto el = ui.Element({
+        if (auto el = guikit::Element(ui, {
             .label = "Compact Vertical Height (Fit)",
             .description = "Pass .height = SizeMode::Fit instead of stretching"
         })) {
-            if (ui.Switch(s_state.compactVertical).changed) {
+            if (guikit::Switch(ui, s_state.compactVertical).changed) {
                 ui.InvalidateAll();
             }
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Signal Level (dBFS)",
         .description = "Drive to 0.0 dB to trigger Clip LED (click meter to clear)"
     })) {
-        if (ui.Slider(s_state.levelDb, -60.0f, 0.0f, {
+        if (guikit::Slider(ui, s_state.levelDb, -60.0f, 0.0f, {
             .valueFormat = "%.1f dB",
             .step = 0.5f
         }).changed) {
@@ -69,8 +69,8 @@ void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
     }
 
     if (s_state.channelModeIdx == 1) {
-        if (auto el = ui.Element({.label = "Stereo L/R Offset"})) {
-            if (ui.Slider(s_state.stereoSpreadDb, -12.0f, 12.0f, {
+        if (auto el = guikit::Element(ui, {.label = "Stereo L/R Offset"})) {
+            if (guikit::Slider(ui, s_state.stereoSpreadDb, -12.0f, 12.0f, {
                 .valueFormat = "%+.1f dB",
                 .step = 0.5f
             }).changed) {
@@ -79,27 +79,27 @@ void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Simulate Live Signal",
         .description = "Animate dynamic RF / Audio telemetry modulation"
     })) {
-        if (ui.Switch(s_state.simulateLive).changed) {
+        if (guikit::Switch(ui, s_state.simulateLive).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Discrete LED Segments",
         .description = "Segmented LED bar vs smooth continuous ribbon"
     })) {
-        if (ui.Switch(s_state.segmented).changed) {
+        if (guikit::Switch(ui, s_state.segmented).changed) {
             ui.InvalidateAll();
         }
     }
 
     if (s_state.segmented) {
-        if (auto el = ui.Element({.label = "LED Segment Count"})) {
-            if (ui.Slider(s_state.segments, 8u, 40u, {
+        if (auto el = guikit::Element(ui, {.label = "LED Segment Count"})) {
+            if (guikit::Slider(ui, s_state.segments, 8u, 40u, {
                 .valueFormat = "%u LEDs",
                 .step = 2.0
             }).changed) {
@@ -108,8 +108,8 @@ void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Bar Thickness"})) {
-        if (ui.Slider(s_state.barThickness, 6.0f, 24.0f, {
+    if (auto el = guikit::Element(ui, {.label = "Bar Thickness"})) {
+        if (guikit::Slider(ui, s_state.barThickness, 6.0f, 24.0f, {
             .valueFormat = "%.0f dp",
             .step = 1.0f
         }).changed) {
@@ -117,24 +117,24 @@ void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = ui.Element({.label = "3-Zone Colors (Green / Warn / Danger)"})) {
-        if (ui.Switch(s_state.multiZoneColor).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "3-Zone Colors (Green / Warn / Danger)"})) {
+        if (guikit::Switch(ui, s_state.multiZoneColor).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Auto Peak-Hold & Decay"})) {
-        if (ui.Switch(s_state.autoPeakHold).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Auto Peak-Hold & Decay"})) {
+        if (guikit::Switch(ui, s_state.autoPeakHold).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Show Overload / Clip LED"})) {
-        if (ui.Switch(s_state.showClipLed).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Overload / Clip LED"})) {
+        if (guikit::Switch(ui, s_state.showClipLed).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Show Calibrated dB Scale"})) {
-        if (ui.Switch(s_state.showScale).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Calibrated dB Scale"})) {
+        if (guikit::Switch(ui, s_state.showScale).changed) ui.InvalidateAll();
     }
 
-    if (auto el = ui.Element({.label = "Show Numeric Readout"})) {
-        if (ui.Switch(s_state.showValue).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Numeric Readout"})) {
+        if (guikit::Switch(ui, s_state.showValue).changed) ui.InvalidateAll();
     }
 }
 
@@ -191,9 +191,9 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
     ctx.RunElementStage(ui, [&]() {
         if (s_state.channelModeIdx == 1) {
             const keel::StaticArray<keel::f32, 2> stereoVals = {chLeft, chRight};
-            guikit::LevelMeter::Run(ui, stereoVals, -60.0f, 0.0f, opts);
+            guikit::LevelMeter(ui, stereoVals, -60.0f, 0.0f, opts);
         } else {
-            guikit::LevelMeter::Run(ui, keel::as<keel::f64>(chLeft), -60.0, 0.0, opts);
+            guikit::LevelMeter(ui, keel::as<keel::f64>(chLeft), -60.0, 0.0, opts);
         }
     });
 }

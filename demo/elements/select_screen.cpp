@@ -45,35 +45,35 @@ void RenderSelectInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 4> kControlModes = {
         "Select", "ComboBox", "Autocomplete", "MultiSelect"
     };
-    if (auto el = ui.Element({.label = "Control Mode"})) {
-        if (ui.Select(s_state.mode, kControlModes).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Control Mode"})) {
+        if (guikit::Select(ui, s_state.mode, kControlModes).changed) {
             if (s_state.mode == 2 && s_state.customText.empty() && s_state.idx < kPlainItems.size()) {
                 s_state.customText.assign(kPlainItems[s_state.idx]);
             }
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Placeholder"})) {
-        if (ui.InputField(s_state.placeholder, {
+    if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
+        if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "Select...",
             .clearable = true
         }).changed) ui.InvalidateAll();
     }
     keel::f32 maxItemsFloat = keel::as<keel::f32>(s_state.maxItems);
-    if (auto el = ui.Element({.label = "Max Visible Menu Items"})) {
-        if (ui.Slider(maxItemsFloat, 2.0f, 8.0f, {.valueFormat = "%.0f items", .step = 1.0f}).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Max Visible Menu Items"})) {
+        if (guikit::Slider(ui, maxItemsFloat, 2.0f, 8.0f, {.valueFormat = "%.0f items", .step = 1.0f}).changed) {
             s_state.maxItems = keel::as<keel::u32>(maxItemsFloat);
             ui.InvalidateAll();
         }
     }
-    if (auto el = ui.Element({.label = "Clearable (X Button)"})) {
-        if (ui.Switch(s_state.clearable).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Clearable (X Button)"})) {
+        if (guikit::Switch(ui, s_state.clearable).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Rich Items (Icons & Units)"})) {
-        if (ui.Switch(s_state.richItems).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Rich Items (Icons & Units)"})) {
+        if (guikit::Switch(ui, s_state.richItems).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Default Prefix Icon"})) {
-        if (ui.Switch(s_state.hasPrefix).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Default Prefix Icon"})) {
+        if (guikit::Switch(ui, s_state.hasPrefix).changed) ui.InvalidateAll();
     }
 }
 
@@ -95,28 +95,28 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
         const auto richList = BuildRichSelectItems();
         if (s_state.mode == 0) {
             if (s_state.richItems) {
-                ui.Select(s_state.idx, richList, opts);
+                guikit::Select(ui, s_state.idx, richList, opts);
             } else {
-                ui.Select(s_state.idx, kPlainItems, opts);
+                guikit::Select(ui, s_state.idx, kPlainItems, opts);
             }
         } else if (s_state.mode == 1) {
             if (s_state.richItems) {
-                ui.ComboBox(s_state.idx, richList, opts);
+                guikit::ComboBox(ui, s_state.idx, richList, opts);
             } else {
-                ui.ComboBox(s_state.idx, kPlainItems, opts);
+                guikit::ComboBox(ui, s_state.idx, kPlainItems, opts);
             }
         } else if (s_state.mode == 2) {
             if (s_state.richItems) {
-                ui.Autocomplete(s_state.customText, richList, opts);
+                guikit::Autocomplete(ui, s_state.customText, richList, opts);
             } else {
-                ui.Autocomplete(s_state.customText, kPlainItems, opts);
+                guikit::Autocomplete(ui, s_state.customText, kPlainItems, opts);
             }
         } else {
             opts.searchable = true;
             if (s_state.richItems) {
-                ui.MultiSelect(s_state.multiSelected, richList, opts);
+                guikit::MultiSelect(ui, s_state.multiSelected, richList, opts);
             } else {
-                ui.MultiSelect(s_state.multiSelected, kPlainItems, opts);
+                guikit::MultiSelect(ui, s_state.multiSelected, kPlainItems, opts);
             }
         }
     });

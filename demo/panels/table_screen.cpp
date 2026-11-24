@@ -101,17 +101,17 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     g_tableDemo.EnsureInitialized();
 
     static constexpr keel::StaticArray<keel::StringRef, 2> kModeLabels = {"Rich DataGrid", "100k Virtual"};
-    if (auto el = ui.Element({
+    if (auto el = guikit::Element(ui, {
         .label = "Table Mode",
         .description = "Switch between Rich Widget DataGrid (48 targets) and 100,000-row O(1) virtualized log"
     })) {
-        if (ui.Segmented(g_tableDemo.datasetMode, kModeLabels).changed) {
+        if (guikit::Segmented(ui, g_tableDemo.datasetMode, kModeLabels).changed) {
             ui.InvalidateAll();
         }
     }
 
-    if (auto el = ui.Element({.label = "Row & Header Size"})) {
-        if (ui.StepSlider(g_tableDemo.tableSize, {
+    if (auto el = guikit::Element(ui, {.label = "Row & Header Size"})) {
+        if (guikit::StepSlider(ui, g_tableDemo.tableSize, {
             .showTicks = true,
             .showLabels = true
         }).changed) {
@@ -119,31 +119,31 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         }
     }
 
-    if (auto el = ui.Element({.label = "Zebra Striped Rows"})) {
-        if (ui.Switch(g_tableDemo.striped).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Zebra Striped Rows"})) {
+        if (guikit::Switch(ui, g_tableDemo.striped).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Cell Grid Lines"})) {
-        if (ui.Switch(g_tableDemo.gridLines).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Cell Grid Lines"})) {
+        if (guikit::Switch(ui, g_tableDemo.gridLines).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Sticky Header"})) {
-        if (ui.Switch(g_tableDemo.stickyHeader).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Sticky Header"})) {
+        if (guikit::Switch(ui, g_tableDemo.stickyHeader).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Resizable Columns"})) {
-        if (ui.Switch(g_tableDemo.resizableColumns).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Resizable Columns"})) {
+        if (guikit::Switch(ui, g_tableDemo.resizableColumns).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Row Numbers (#)"})) {
-        if (ui.Switch(g_tableDemo.showRowNumbers).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Row Numbers (#)"})) {
+        if (guikit::Switch(ui, g_tableDemo.showRowNumbers).changed) ui.InvalidateAll();
     }
-    if (auto el = ui.Element({.label = "Show Summary Footer"})) {
-        if (ui.Switch(g_tableDemo.showFooter).changed) ui.InvalidateAll();
+    if (auto el = guikit::Element(ui, {.label = "Show Summary Footer"})) {
+        if (guikit::Switch(ui, g_tableDemo.showFooter).changed) ui.InvalidateAll();
     }
 
     if (g_tableDemo.datasetMode == 0) {
-        if (auto el = ui.Element({
+        if (auto el = guikit::Element(ui, {
             .label = "Filter Rows",
             .layout = ElementLayout::Top
         })) {
-            if (ui.InputField(g_tableDemo.filterQuery, {
+            if (guikit::InputField(ui, g_tableDemo.filterQuery, {
                 .placeholder = "Callsign or modulation...",
                 .prefix = Icon::Search(),
                 .clearable = true,
@@ -152,24 +152,24 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
                 g_tableDemo.selectedRow = 0;
             }
         }
-        if (auto el = ui.Element({
+        if (auto el = guikit::Element(ui, {
             .label = "Live Signal Telemetry",
             .description = "Animate SNR level meters and bearings in real time"
         })) {
-            if (ui.Switch(g_tableDemo.liveTelemetry).changed) {
+            if (guikit::Switch(ui, g_tableDemo.liveTelemetry).changed) {
                 ui.InvalidateAll();
             }
         }
     } else {
-        ui.Heading({.label = "VIRTUAL JUMP (100,000 ROWS)", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
-        if (auto row = ui.Row({.gap = 6.0f})) {
-            if (ui.Button({.text = "Top (#1)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Secondary()})) {
+        guikit::Heading(ui, {.label = "VIRTUAL JUMP (100,000 ROWS)", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
+        if (auto row = guikit::Row(ui, {.gap = 6.0f})) {
+            if (guikit::Button(ui, {.text = "Top (#1)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Secondary()})) {
                 g_tableDemo.pendingJumpRow = 0;
             }
-            if (ui.Button({.text = "Mid (#50k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Secondary()})) {
+            if (guikit::Button(ui, {.text = "Mid (#50k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Secondary()})) {
                 g_tableDemo.pendingJumpRow = 49999;
             }
-            if (ui.Button({.text = "End (#100k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Primary()})) {
+            if (guikit::Button(ui, {.text = "End (#100k)", .size = UiSize::Sm, .width = SizeMode::Stretch, .color = StateColor::Primary()})) {
                 g_tableDemo.pendingJumpRow = 99999;
             }
         }
@@ -231,7 +231,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
             selCallsign
         );
 
-        if (auto table = ui.Table(kSignalCols, {
+        if (auto table = guikit::Table(ui, kSignalCols, {
             .totalRows = filteredIndices.size(),
             .selectedRow = &g_tableDemo.selectedRow,
             .sortColumn = &g_tableDemo.sortCol,
@@ -260,28 +260,28 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
 
                 if (auto row = table.Row(visRow, rowOpts)) {
                     // Col 0: Embedded Checkbox widget
-                    ui.Checkbox(item.tracked, {.size = UiSize::Sm, .color = StateColor::Primary()});
+                    guikit::Checkbox(ui, item.tracked, {.size = UiSize::Sm, .color = StateColor::Primary()});
 
                     // Col 1: Target ID
-                    ui.Text(ui.Format("T-{:04d}", item.id), {.variant = UiVariant::Secondary});
+                    guikit::Text(ui, ui.Format("T-{:04d}", item.id), {.variant = UiVariant::Secondary});
 
                     // Col 2: Callsign with leading icon
-                    ui.Element({.label = item.callsign.as_ref(), .icon = Icon::Play(), .width = SizeMode::Fit});
+                    guikit::Element(ui, {.label = item.callsign.as_ref(), .icon = Icon::Play(), .width = SizeMode::Fit});
 
                     // Col 3: Modulation badge
-                    ui.Element({.badge = {item.modulation.as_ref(), UiVariant::Info}, .width = SizeMode::Fit});
+                    guikit::Element(ui, {.badge = {item.modulation.as_ref(), UiVariant::Info}, .width = SizeMode::Fit});
 
                     // Col 4: Frequency
-                    ui.Text(ui.Format("{:.3f} MHz", item.freqMhz));
+                    guikit::Text(ui, ui.Format("{:.3f} MHz", item.freqMhz));
 
                     // Col 5: Azimuth bearing
-                    ui.Text(
+                    guikit::Text(ui,
                         ui.Format("{:+05.1f} deg", item.bearingDeg),
                         {.variant = (keel::abs(item.bearingDeg) < 25.0f) ? UiVariant::Success : UiVariant::Default}
                     );
 
                     // Col 6: Embedded Segmented VU ProgressBar widget
-                    ui.ProgressBar(item.snrDb, 0.0f, 40.0f, {
+                    guikit::ProgressBar(ui, item.snrDb, 0.0f, 40.0f, {
                         .valueFormat = "%.1f dB",
                         .segments = 12,
                         .multiZoneColor = true,
@@ -294,7 +294,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                         UiVariant::Success, UiVariant::Primary, UiVariant::Warning, UiVariant::Danger
                     };
                     const keel::usize stIdx = keel::as<keel::usize>(keel::clamp(item.status, 0, 3));
-                    ui.Element({.badge = {kStatusLabels[stIdx], kStatusVars[stIdx]}, .width = SizeMode::Fit});
+                    guikit::Element(ui, {.badge = {kStatusLabels[stIdx], kStatusVars[stIdx]}, .width = SizeMode::Fit});
                 }
             }
         }
@@ -318,7 +318,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
             g_tableDemo.lastVisibleCount
         );
 
-        if (auto table = ui.Table(kVirtualCols, {
+        if (auto table = guikit::Table(ui, kVirtualCols, {
             .totalRows = kTotalVirtualRows,
             .selectedRow = &g_tableDemo.virtualSelectedRow,
             .sortColumn = &g_tableDemo.virtualSortCol,
@@ -347,24 +347,24 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
             for (keel::usize r = firstRow; r < endRow; ++r) {
                 const keel::usize logicalIdx = desc ? (kTotalVirtualRows - 1 - r) : r;
                 if (auto row = table.Row(r)) {
-                    ui.Text(ui.Format("PKT-{:06}", logicalIdx + 1), {.variant = UiVariant::Secondary});
+                    guikit::Text(ui, ui.Format("PKT-{:06}", logicalIdx + 1), {.variant = UiVariant::Secondary});
 
                     const keel::u32 mins = keel::as<keel::u32>((logicalIdx / 600) % 60);
                     const keel::u32 secs = keel::as<keel::u32>((logicalIdx / 10) % 60);
                     const keel::u32 tenths = keel::as<keel::u32>(logicalIdx % 10);
-                    ui.Text(ui.Format("12:{:02}:{:02}.{}00", mins, secs, tenths));
+                    guikit::Text(ui, ui.Format("12:{:02}:{:02}.{}00", mins, secs, tenths));
 
                     static constexpr keel::StaticArray<const char*, 6> kNodes = {
                         "ARRAY-NORTH-A1", "ARRAY-EAST-B4", "HYDROPHONE-C2",
                         "SDR-RECEIVER-09", "BEAMFORMER-DSP", "SATCOM-GATEWAY"
                     };
-                    ui.Text(kNodes[logicalIdx % kNodes.size()]);
+                    guikit::Text(ui, kNodes[logicalIdx % kNodes.size()]);
 
                     const keel::f32 freq = 430.000f + keel::as<keel::f32>(logicalIdx % 250) * 0.025f;
-                    ui.Text(ui.Format("{:.3f} MHz", freq));
+                    guikit::Text(ui, ui.Format("{:.3f} MHz", freq));
 
                     const keel::f32 rssi = -95.0f + keel::as<keel::f32>((logicalIdx * 17) % 65);
-                    ui.ProgressBar(rssi, -100.0f, -30.0f, {
+                    guikit::ProgressBar(ui, rssi, -100.0f, -30.0f, {
                         .valueFormat = "%.0f dBm",
                         .segments = 10,
                         .multiZoneColor = true,
@@ -372,7 +372,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                     });
 
                     const bool crcOk = (logicalIdx % 19 != 0);
-                    ui.Element({
+                    guikit::Element(ui, {
                         .badge = {crcOk ? "CRC OK" : "RETRANSMIT", crcOk ? UiVariant::Success : UiVariant::Warning},
                         .width = SizeMode::Fit
                     });

@@ -21,6 +21,10 @@ constexpr keel::StaticArray<keel::StringRef, 4> kAlignNames = {
     "Start", "Center", "End", "Stretch"
 };
 
+constexpr keel::StaticArray<keel::StringRef, 4> kJustifyLabels = {
+    "Start", "Center", "End", "Between"
+};
+
 constexpr keel::StaticArray<keel::StringRef, 4> kJustifyNames = {
     "Start", "Center", "End", "SpaceBetween"
 };
@@ -94,7 +98,7 @@ void RenderWrapInspector(guikit::Context& ui, DemoContext&) {
         .label = "Line Justify",
         .layout = guikit::ElementLayout::Stacked
     })) {
-        if (guikit::Select(ui, s_wrap.justifyIdx, kJustifyNames).changed) {
+        if (guikit::Segmented(ui, s_wrap.justifyIdx, kJustifyLabels).changed) {
             ui.InvalidateAll();
         }
     }

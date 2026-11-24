@@ -23,6 +23,10 @@ constexpr keel::StaticArray<keel::StringRef, 4> kAlignNames = {
     "Start", "Center", "End", "Stretch"
 };
 
+constexpr keel::StaticArray<keel::StringRef, 4> kJustifyLabels = {
+    "Start", "Center", "End", "Between"
+};
+
 constexpr keel::StaticArray<keel::StringRef, 4> kJustifyNames = {
     "Start", "Center", "End", "SpaceBetween"
 };
@@ -82,7 +86,7 @@ void RenderFlexInspector(guikit::Context& ui, DemoContext& ctx) {
         .layout = guikit::ElementLayout::Stacked,
         .disabled = isSpacerDemo || (isRow && s_flex.equalWidths)
     })) {
-        if (guikit::Select(ui, s_flex.justifyIdx, kJustifyNames, {
+        if (guikit::Segmented(ui, s_flex.justifyIdx, kJustifyLabels, {
             .disabled = isSpacerDemo || (isRow && s_flex.equalWidths)
         }).changed) {
             ui.InvalidateAll();

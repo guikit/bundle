@@ -26,9 +26,10 @@ This repository (`guikit/bundle`) is the unified workspace aggregating the entir
 ## 2. Core Golden Rules (Summary of [`guikit/AGENTS.md`](guikit/AGENTS.md))
 
 1. **Zero-STL Public Headers (`keel` only)**: All public headers across `guikit/`, `geo/`, `signal/`, `cockpit/`, and `diagram/` are checked by `guikit_enforce_guidelines` (`*_header_purity_scan` in CTest). Use `keel::*` types (`keel::i32`, `keel::usize`, `keel::StringRef`, `keel::ArrayRef`, `keel::Optional`, `keel::SmallArray`, `"keel/math.h"`), never STL containers or `<cmath>`/`<cstdint>` in public headers.
-2. **Unified Free-Function Widget API & UI Idioms**: All core widgets, layouts, and panels are free functions taking `guikit::Context& ui` as the first argument (`guikit::Button(ui, ...)`, `guikit::Row(ui, ...)`, `guikit::Card(ui, ...)`, `guikit::Element(ui, ...)`, `guikit::Heading(ui, ...)`, matching `guikit::geo::MapView(ui, ...)`, `guikit::signal::SignalView(ui, ...)`, `guikit::cockpit::AttitudeView(ui, ...)`, `guikit::diagram::BpmnEditor(ui, ...)`). Never add widget forwarding methods onto `guikit::Context`. Use `guikit::MainWindow` (no raw SDL/GL loops), flat `.size` (`UiSize`) / `.width` / `.height` (`AxisSize`), `ui.Zone(...)` for theme/scale/density, `ui.IdScope(...)` for dynamic list stability, `ui.Format(...)` for zero-heap per-frame strings, and `StateColor` / `ui.GetThemePalette()` instead of hardcoded colors.
-3. **Header Hygiene**: `guikit/context.hpp` is a pure engine header with zero widget/panel/layout includes; include individual widget headers or `"guikit/guikit.hpp"` / `"guikit/core.hpp"` for full umbrella access.
-4. **Demo Assets**: Core library assets live in `guikit/assets/`; module-specific assets live in `<module>/assets/` (e.g. `geo/assets/geo/demo_bay.geojson`); showcase-only assets live in `demo/assets/` and are embedded via `cmake/GenerateDemoAssets.cmake` (`guikit::demo::RegisterDemoEmbeddedAssets()`).
+2. **Orthogonal 3-Axis Design System & 8-Class Element Taxonomy**: Core headers & sources are organized into `style/` (`tokens`, `theme`, `style_painter`, `field_frame`) plus 8 element classes (`layout/`, `surfaces/`, `overlays/`, `actions/`, `fields/`, `controls/`, `display/`, `views/`). Themes compose orthogonally as `ThemePreset/ThemePalette (colors) × ChromeStyle/ChromeTokens (16 structural tokens, 0 colors) × FillStyle (Solid | Soft | Outline)`. Buttons use `ButtonStyle` + `UiVariant`, fields use `FieldStyle` + `UiVariant status` via shared `FieldFrame`, and surfaces use `SurfaceRole`. Direct chrome/preset checks inside widget code are forbidden and enforced by `guikit_style_architecture_guard` in CTest.
+3. **Unified Free-Function Widget API & UI Idioms**: All core widgets, layouts, and panels are free functions taking `guikit::Context& ui` as the first argument (`guikit::Button(ui, ...)`, `guikit::Row(ui, ...)`, `guikit::Card(ui, ...)`, `guikit::Element(ui, ...)`, `guikit::Heading(ui, ...)`, matching `guikit::geo::MapView(ui, ...)`, `guikit::signal::SignalView(ui, ...)`, `guikit::cockpit::AttitudeView(ui, ...)`, `guikit::diagram::BpmnEditor(ui, ...)`). Never add widget forwarding methods onto `guikit::Context`. Use `guikit::MainWindow` (no raw SDL/GL loops), flat `.size` (`UiSize`) / `.width` / `.height` (`AxisSize`), `ui.Zone(...)` for theme/scale/density, `ui.IdScope(...)` for dynamic list stability, `ui.Format(...)` for zero-heap per-frame strings, and `StateColor` / `ui.GetThemePalette()` instead of hardcoded colors.
+4. **Header Hygiene**: `guikit/context.hpp` is a pure engine header with zero widget/panel/layout includes; include individual widget headers or `"guikit/guikit.hpp"` / `"guikit/core.hpp"` for full umbrella access.
+5. **Demo Assets**: Core library assets live in `guikit/assets/`; module-specific assets live in `<module>/assets/` (e.g. `geo/assets/geo/demo_bay.geojson`); showcase-only assets live in `demo/assets/` and are embedded via `cmake/GenerateDemoAssets.cmake` (`guikit::demo::RegisterDemoEmbeddedAssets()`).
 
 ---
 
@@ -41,7 +42,7 @@ Run from the `bundle/` root:
 cmake -S . -B build
 cmake --build build --parallel
 
-# Run all 14 ecosystem CTest suites (unit tests + header purity scans)
+# Run all 21 ecosystem CTest suites (unit tests, header purity scans & style architecture guard)
 ctest --test-dir build --output-on-failure --parallel
 
 # Launch native showcase (zero SDL3 / ThorVG / FreeType)

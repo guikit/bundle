@@ -459,6 +459,34 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 ui.InvalidateAll();
             }
         }
+        if (auto el = guikit::Element(ui, {
+            .label = "Orthogonal Cross-Combos",
+            .description = "Any color palette combined with any ChromeStyle & FillStyle"
+        })) {
+            auto applyCombo = [&](guikit::ThemePreset p, guikit::ChromeStyle c, guikit::FillStyle f) {
+                SelectBasePreset(p);
+                s_studio.chrome = c;
+                s_studio.fillStyle = f;
+                s_studio.scrollbarPreset = guikit::ScrollbarPreset::Auto;
+                const auto tok = guikit::ChromeTokens::FromStyle(c);
+                s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
+                ui.InvalidateAll();
+            };
+            if (auto w = guikit::Wrap(ui, {.gap = 4.0f, .runGap = 4.0f})) {
+                if (guikit::Button(ui, {.text = "Dracula x 3D", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Primary}).clicked) {
+                    applyCombo(guikit::ThemePreset::Dracula, guikit::ChromeStyle::Classic3D, guikit::FillStyle::Soft);
+                }
+                if (guikit::Button(ui, {.text = "Dark x Fluent", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Info}).clicked) {
+                    applyCombo(guikit::ThemePreset::Dark, guikit::ChromeStyle::Fluent, guikit::FillStyle::Solid);
+                }
+                if (guikit::Button(ui, {.text = "Win98 x Modern", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Success}).clicked) {
+                    applyCombo(guikit::ThemePreset::Windows98, guikit::ChromeStyle::Modern, guikit::FillStyle::Solid);
+                }
+                if (guikit::Button(ui, {.text = "Industrial x Brutal", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Warning}).clicked) {
+                    applyCombo(guikit::ThemePreset::Industrial, guikit::ChromeStyle::Brutalist, guikit::FillStyle::Solid);
+                }
+            }
+        }
     }
 
     // 2. APPEARANCE & PALETTE
@@ -1083,10 +1111,11 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                             if (auto btnWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
                                 guikit::Button(ui, {.text = "Default"});
                                 guikit::Button(ui, {.text = "Primary", .variant = guikit::UiVariant::Primary});
+                                guikit::Button(ui, {.text = "Soft",    .style = guikit::ButtonStyle::Soft,    .variant = guikit::UiVariant::Primary});
+                                guikit::Button(ui, {.text = "Outline", .style = guikit::ButtonStyle::Outline, .variant = guikit::UiVariant::Info});
                                 guikit::Button(ui, {.text = "Success", .variant = guikit::UiVariant::Success});
                                 guikit::Button(ui, {.text = "Warning", .variant = guikit::UiVariant::Warning});
                                 guikit::Button(ui, {.text = "Danger",  .variant = guikit::UiVariant::Danger});
-                                guikit::Button(ui, {.text = "Info",    .variant = guikit::UiVariant::Info});
                                 guikit::Button(ui, {.text = "Ghost",   .style = guikit::ButtonStyle::Ghost});
                             }
 

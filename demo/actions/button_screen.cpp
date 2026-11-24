@@ -13,17 +13,6 @@ struct ButtonState {
     keel::i32 clicks = 0;
 };
 ButtonState s_state;
-
-constexpr keel::StringRef ButtonStyleName(guikit::ButtonStyle s) noexcept {
-    switch (s) {
-        case guikit::ButtonStyle::Default: return "Default";
-        case guikit::ButtonStyle::Solid:   return "Solid";
-        case guikit::ButtonStyle::Soft:    return "Soft";
-        case guikit::ButtonStyle::Outline: return "Outline";
-        case guikit::ButtonStyle::Ghost:   return "Ghost";
-    }
-    return "Default";
-}
 } // namespace
 
 void RenderButtonInspector(guikit::Context& ui, DemoContext&) {
@@ -152,7 +141,7 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatControlWidthCode(),
         ctx.FormatControlHeightCode(),
-        ButtonStyleName(effStyle),
+        ButtonStyleEnumName(effStyle),
         VariantName(effVariant),
         ctx.FormatControlBackgroundCode(NavCategory::ActionButton),
         ctx.FormatCtrlBorderCode()

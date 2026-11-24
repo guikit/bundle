@@ -18,17 +18,6 @@ struct SplitButtonDemoState {
 
 SplitButtonDemoState s_sb;
 
-constexpr keel::StringRef StyleName(guikit::ButtonStyle s) noexcept {
-    switch (s) {
-        case guikit::ButtonStyle::Default: return "Default";
-        case guikit::ButtonStyle::Solid:   return "Solid";
-        case guikit::ButtonStyle::Soft:    return "Soft";
-        case guikit::ButtonStyle::Outline: return "Outline";
-        case guikit::ButtonStyle::Ghost:   return "Ghost";
-    }
-    return "Default";
-}
-
 } // namespace
 
 void RenderSplitButtonInspector(guikit::Context& ui, DemoContext&) {
@@ -87,11 +76,7 @@ void RenderSplitButtonStage(guikit::Context& ui, DemoContext& ctx) {
     guikit::ContextMenuOptions menuOpts{};
     menuOpts.minWidth = s_sb.menuMinWidth;
 
-    if (auto stageCol = guikit::Column(ui, {
-        .gap = 12.0f,
-        .align = guikit::Alignment::Center,
-        .justify = guikit::Justify::Center
-    })) {
+    ctx.RunElementStage(ui, [&]() {
         if (s_sb.apiModeIdx == 0) {
             const keel::StaticArray<guikit::ContextMenuItem, 4> items = {{
                 {.label = "Build Debug",       .shortcut = "F7",      .icon = guikit::Icon::Play(),     .id = 1},
@@ -139,12 +124,12 @@ void RenderSplitButtonStage(guikit::Context& ui, DemoContext& ctx) {
                 s_sb.lastAction = keel::format_fixed<128>("Primary action triggered #{}", s_sb.primaryCount);
             }
         }
+    });
 
-        guikit::Text(ui, s_sb.lastAction.as_ref(), {
-            .role = guikit::TextRole::BodySmall,
-            .variant = guikit::UiVariant::Secondary
-        });
-    }
+    guikit::Text(ui, s_sb.lastAction.as_ref(), {
+        .role = guikit::TextRole::BodySmall,
+        .variant = guikit::UiVariant::Secondary
+    });
 }
 
 keel::String GenerateSplitButtonCode(const DemoContext& ctx) {
@@ -153,14 +138,17 @@ keel::String GenerateSplitButtonCode(const DemoContext& ctx) {
         ? keel::format("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::String{};
 
+    keel::String ctrl;
     if (s_sb.apiModeIdx == 0) {
-        return keel::format(
+        ctrl = keel::format(
             "auto res = guikit::SplitButton(ui, buildItems, {{\n"
             "    .text = \"{}\",\n"
             "    .icon = {},\n"
             "    .loading = {},\n"
             "    .disabled = {},\n"
             "{}"
+            "    .width = {},\n"
+            "    .height = {},\n"
             "    .style = guikit::ButtonStyle::{},\n"
             "    .variant = guikit::UiVariant::{}\n"
             "}}, {{.minWidth = {:.1f}f}});\n"
@@ -174,40 +162,47 @@ keel::String GenerateSplitButtonCode(const DemoContext& ctx) {
             s_sb.loading ? "true" : "false",
             ctx.elemDisabled ? "true" : "false",
             sizeLine,
-            StyleName(s_sb.style),
+            ctx.FormatCtrlWidthCode(),
+            ctx.FormatCtrlHeightCode(),
+            ButtonStyleEnumName(s_sb.style),
+            VariantName(effVar),
+            s_sb.menuMinWidth
+        );
+    } else {
+        ctrl = keel::format(
+            "bool runPrimary = false;\n"
+            "if (auto menu = guikit::SplitButton(ui, runPrimary, {{\n"
+            "    .text = \"{}\",\n"
+            "    .icon = {},\n"
+            "    .loading = {},\n"
+            "    .disabled = {},\n"
+            "{}"
+            "    .width = {},\n"
+            "    .height = {},\n"
+            "    .style = guikit::ButtonStyle::{},\n"
+            "    .variant = guikit::UiVariant::{}\n"
+            "}}, {{.minWidth = {:.1f}f}})) {{\n"
+            "    if (menu.Item(\"Build Debug\", {{.shortcut = \"F7\", .icon = guikit::Icon::Play()}})) {{}}\n"
+            "    if (menu.Item(\"Build Release\", {{.shortcut = \"Ctrl+F7\", .icon = guikit::Icon::Flash()}})) {{}}\n"
+            "    menu.Separator();\n"
+            "    menu.Checkbox(\"Clean Before Build\", cleanFirst, {{.keepOpen = true}});\n"
+            "}}\n"
+            "if (runPrimary) {{\n"
+            "    RunPrimaryBuild();\n"
+            "}}",
+            s_sb.label,
+            s_sb.hasIcon ? "guikit::Icon::Play()" : "{}",
+            s_sb.loading ? "true" : "false",
+            ctx.elemDisabled ? "true" : "false",
+            sizeLine,
+            ctx.FormatCtrlWidthCode(),
+            ctx.FormatCtrlHeightCode(),
+            ButtonStyleEnumName(s_sb.style),
             VariantName(effVar),
             s_sb.menuMinWidth
         );
     }
-
-    return keel::format(
-        "bool runPrimary = false;\n"
-        "if (auto menu = guikit::SplitButton(ui, runPrimary, {{\n"
-        "    .text = \"{}\",\n"
-        "    .icon = {},\n"
-        "    .loading = {},\n"
-        "    .disabled = {},\n"
-        "{}"
-        "    .style = guikit::ButtonStyle::{},\n"
-        "    .variant = guikit::UiVariant::{}\n"
-        "}}, {{.minWidth = {:.1f}f}})) {{\n"
-        "    if (menu.Item(\"Build Debug\", {{.shortcut = \"F7\", .icon = guikit::Icon::Play()}})) {{}}\n"
-        "    if (menu.Item(\"Build Release\", {{.shortcut = \"Ctrl+F7\", .icon = guikit::Icon::Flash()}})) {{}}\n"
-        "    menu.Separator();\n"
-        "    menu.Checkbox(\"Clean Before Build\", cleanFirst, {{.keepOpen = true}});\n"
-        "}}\n"
-        "if (runPrimary) {{\n"
-        "    RunPrimaryBuild();\n"
-        "}}",
-        s_sb.label,
-        s_sb.hasIcon ? "guikit::Icon::Play()" : "{}",
-        s_sb.loading ? "true" : "false",
-        ctx.elemDisabled ? "true" : "false",
-        sizeLine,
-        StyleName(s_sb.style),
-        VariantName(effVar),
-        s_sb.menuMinWidth
-    );
+    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

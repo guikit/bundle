@@ -19,17 +19,6 @@ struct MenuButtonDemoState {
 
 MenuButtonDemoState s_mb;
 
-constexpr keel::StringRef StyleName(guikit::ButtonStyle s) noexcept {
-    switch (s) {
-        case guikit::ButtonStyle::Default: return "Default";
-        case guikit::ButtonStyle::Solid:   return "Solid";
-        case guikit::ButtonStyle::Soft:    return "Soft";
-        case guikit::ButtonStyle::Outline: return "Outline";
-        case guikit::ButtonStyle::Ghost:   return "Ghost";
-    }
-    return "Default";
-}
-
 } // namespace
 
 void RenderMenuButtonInspector(guikit::Context& ui, DemoContext&) {
@@ -92,11 +81,7 @@ void RenderMenuButtonStage(guikit::Context& ui, DemoContext& ctx) {
     guikit::ContextMenuOptions menuOpts{};
     menuOpts.minWidth = s_mb.menuMinWidth;
 
-    if (auto stageCol = guikit::Column(ui, {
-        .gap = 12.0f,
-        .align = guikit::Alignment::Center,
-        .justify = guikit::Justify::Center
-    })) {
+    ctx.RunElementStage(ui, [&]() {
         if (s_mb.apiModeIdx == 0) {
             if (auto menu = guikit::MenuButton(ui, opts, menuOpts)) {
                 if (menu.Item("Export PNG", {.shortcut = "Ctrl+E", .icon = guikit::Icon::Save()})) {
@@ -156,12 +141,12 @@ void RenderMenuButtonStage(guikit::Context& ui, DemoContext& ctx) {
                 }
             }
         }
+    });
 
-        guikit::Text(ui, s_mb.lastAction.as_ref(), {
-            .role = guikit::TextRole::BodySmall,
-            .variant = guikit::UiVariant::Secondary
-        });
-    }
+    guikit::Text(ui, s_mb.lastAction.as_ref(), {
+        .role = guikit::TextRole::BodySmall,
+        .variant = guikit::UiVariant::Secondary
+    });
 }
 
 keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
@@ -170,14 +155,17 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
         ? keel::format("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::String{};
 
+    keel::String ctrl;
     if (s_mb.apiModeIdx == 0) {
-        return keel::format(
+        ctrl = keel::format(
             "if (auto menu = guikit::MenuButton(ui, {{\n"
             "    .text = \"{}\",\n"
             "    .icon = {},\n"
             "    .square = {},\n"
             "    .disabled = {},\n"
             "{}"
+            "    .width = {},\n"
+            "    .height = {},\n"
             "    .style = guikit::ButtonStyle::{},\n"
             "    .variant = guikit::UiVariant::{}\n"
             "}}, {{.minWidth = {:.1f}f}})) {{\n"
@@ -191,34 +179,41 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
             s_mb.square ? "true" : "false",
             ctx.elemDisabled ? "true" : "false",
             sizeLine,
-            StyleName(s_mb.style),
+            ctx.FormatCtrlWidthCode(),
+            ctx.FormatCtrlHeightCode(),
+            ButtonStyleEnumName(s_mb.style),
+            VariantName(effVar),
+            s_mb.menuMinWidth
+        );
+    } else {
+        ctrl = keel::format(
+            "auto res = guikit::MenuButton(ui, menuItems, {{\n"
+            "    .text = \"{}\",\n"
+            "    .icon = {},\n"
+            "    .square = {},\n"
+            "    .disabled = {},\n"
+            "{}"
+            "    .width = {},\n"
+            "    .height = {},\n"
+            "    .style = guikit::ButtonStyle::{},\n"
+            "    .variant = guikit::UiVariant::{}\n"
+            "}}, {{.minWidth = {:.1f}f}});\n"
+            "if (res.changed) {{\n"
+            "    HandleCommand(res.clickedId);\n"
+            "}}",
+            s_mb.label,
+            (s_mb.hasIcon || s_mb.square) ? "guikit::Icon::Save()" : "{}",
+            s_mb.square ? "true" : "false",
+            ctx.elemDisabled ? "true" : "false",
+            sizeLine,
+            ctx.FormatCtrlWidthCode(),
+            ctx.FormatCtrlHeightCode(),
+            ButtonStyleEnumName(s_mb.style),
             VariantName(effVar),
             s_mb.menuMinWidth
         );
     }
-
-    return keel::format(
-        "auto res = guikit::MenuButton(ui, menuItems, {{\n"
-        "    .text = \"{}\",\n"
-        "    .icon = {},\n"
-        "    .square = {},\n"
-        "    .disabled = {},\n"
-        "{}"
-        "    .style = guikit::ButtonStyle::{},\n"
-        "    .variant = guikit::UiVariant::{}\n"
-        "}}, {{.minWidth = {:.1f}f}});\n"
-        "if (res.changed) {{\n"
-        "    HandleCommand(res.clickedId);\n"
-        "}}",
-        s_mb.label,
-        (s_mb.hasIcon || s_mb.square) ? "guikit::Icon::Save()" : "{}",
-        s_mb.square ? "true" : "false",
-        ctx.elemDisabled ? "true" : "false",
-        sizeLine,
-        StyleName(s_mb.style),
-        VariantName(effVar),
-        s_mb.menuMinWidth
-    );
+    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

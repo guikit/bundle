@@ -357,6 +357,17 @@ constexpr keel::StringRef VariantName(guikit::UiVariant v) noexcept {
     }
 }
 
+constexpr keel::StringRef ButtonStyleEnumName(guikit::ButtonStyle s) noexcept {
+    switch (s) {
+        case guikit::ButtonStyle::Default: return "Default";
+        case guikit::ButtonStyle::Solid:   return "Solid";
+        case guikit::ButtonStyle::Soft:    return "Soft";
+        case guikit::ButtonStyle::Outline: return "Outline";
+        case guikit::ButtonStyle::Ghost:   return "Ghost";
+    }
+    return "Default";
+}
+
 constexpr keel::StringRef SizeName(guikit::UiSize s) noexcept {
     switch (s.GetPreset()) {
         case guikit::UiSize::Preset::Xs: return "Xs";
@@ -1140,7 +1151,10 @@ struct DemoContext {
             }
         }
 
-        if (cat == NavCategory::ActionButton || cat == NavCategory::FieldSelect) {
+        if (cat == NavCategory::ActionButton ||
+            cat == NavCategory::ActionMenuButton ||
+            cat == NavCategory::ActionSplitButton ||
+            cat == NavCategory::FieldSelect) {
             guikit::Align& targetAlign = (cat == NavCategory::FieldSelect) ? ctrlSelectAlign : ctrlAlign;
             keel::usize alignIdx = (targetAlign == guikit::Align::Start)
                 ? 0

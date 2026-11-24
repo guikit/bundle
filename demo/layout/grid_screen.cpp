@@ -136,25 +136,25 @@ void RenderGridStage(guikit::Context& ui, DemoContext& ctx) {
                 .align = align
             })) {
                 if (auto c = grid.Cell8()) {
-                    RenderGridCard(ui, "Primary Spectrum", "Wide hero panel spanning 8 of 12 columns", "Cell8", guikit::UiVariant::Primary, 112.0f);
+                    RenderGridCard(ui, "Block A", "8 of 12 columns", "Cell8", guikit::UiVariant::Primary, 112.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Telemetry", "Side summary", "Cell4", guikit::UiVariant::Info, 84.0f);
+                    RenderGridCard(ui, "Block B", "4 of 12 columns", "Cell4", guikit::UiVariant::Info, 84.0f);
                 }
                 if (auto c = grid.Cell6()) {
-                    RenderGridCard(ui, "RX Channel A", "Half-width analytical card", "Cell6", guikit::UiVariant::Success, 92.0f);
+                    RenderGridCard(ui, "Block C", "6 of 12 columns", "Cell6", guikit::UiVariant::Success, 92.0f);
                 }
                 if (auto c = grid.Cell6()) {
-                    RenderGridCard(ui, "RX Channel B", "Half-width analytical card", "Cell6", guikit::UiVariant::Warning, 72.0f);
+                    RenderGridCard(ui, "Block D", "6 of 12 columns", "Cell6", guikit::UiVariant::Warning, 72.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Power", "24.1 V / 1.8 A", "Cell4", guikit::UiVariant::Secondary, 76.0f);
+                    RenderGridCard(ui, "Block E", "4 of 12 columns", "Cell4", guikit::UiVariant::Secondary, 76.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Thermal", "42.5 °C Nominal", "Cell4", guikit::UiVariant::Success, 96.0f);
+                    RenderGridCard(ui, "Block F", "4 of 12 columns", "Cell4", guikit::UiVariant::Success, 96.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Alerts", "0 active faults", "Cell4", guikit::UiVariant::Danger, 76.0f);
+                    RenderGridCard(ui, "Block G", "4 of 12 columns", "Cell4", guikit::UiVariant::Danger, 76.0f);
                 }
             }
         } else {
@@ -173,8 +173,8 @@ void RenderGridStage(guikit::Context& ui, DemoContext& ctx) {
                     if (auto c = grid.Cell(1)) {
                         RenderGridCard(
                             ui,
-                            ui.Format("Node {:02u}", i + 1u),
-                            "Equal-width track cell",
+                            ui.Format("Cell {:02u}", i + 1u),
+                            "Equal-width track",
                             ui.Format("1/{}", s_grid.equalColumns),
                             var,
                             minH
@@ -200,13 +200,13 @@ keel::String GenerateGridCode(const DemoContext& ctx) {
             "    .padding = guikit::Padding::All({:.0f}.0f),\n"
             "    .align = guikit::Alignment::{}\n"
             "}})) {{\n"
-            "    if (auto c = grid.Cell8()) {{ /* Primary panel */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Side summary */ }}\n"
-            "    if (auto c = grid.Cell6()) {{ /* Half left */ }}\n"
-            "    if (auto c = grid.Cell6()) {{ /* Half right */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Metric 1 */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Metric 2 */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Metric 3 */ }}\n"
+            "    if (auto c = grid.Cell8()) {{ /* Block A */ }}\n"
+            "    if (auto c = grid.Cell4()) {{ /* Block B */ }}\n"
+            "    if (auto c = grid.Cell6()) {{ /* Block C */ }}\n"
+            "    if (auto c = grid.Cell6()) {{ /* Block D */ }}\n"
+            "    if (auto c = grid.Cell4()) {{ /* Block E */ }}\n"
+            "    if (auto c = grid.Cell4()) {{ /* Block F */ }}\n"
+            "    if (auto c = grid.Cell4()) {{ /* Block G */ }}\n"
             "}}",
             s_grid.minColWidth,
             s_grid.gap,
@@ -229,7 +229,7 @@ keel::String GenerateGridCode(const DemoContext& ctx) {
         "        auto scope = ui.IdScope(i);\n"
         "        if (auto cell = grid.Cell(1)) {{\n"
         "            if (auto card = guikit::Card(ui)) {{\n"
-        "                guikit::Text(ui, ui.Format(\"Node {{:02d}}\", i + 1));\n"
+        "                guikit::Text(ui, ui.Format(\"Cell {{:02d}}\", i + 1));\n"
         "            }}\n"
         "        }}\n"
         "    }}\n"

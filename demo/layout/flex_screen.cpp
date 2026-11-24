@@ -199,7 +199,7 @@ void RenderFlexStage(guikit::Context& ui, DemoContext& ctx) {
                     const keel::StringRef dimText = (align == guikit::Alignment::Stretch)
                         ? keel::StringRef("Stretch")
                         : ui.Format("{:.0f} px", itemW.Dp());
-                    RenderFlexTile(ui, ui.Format("Row {}", i + 1), dimText, kTileVariants[i], itemW, itemH);
+                    RenderFlexTile(ui, ui.Format("Item {}", i + 1), dimText, kTileVariants[i], itemW, itemH);
                 }
             }
         } else {
@@ -215,13 +215,13 @@ void RenderFlexStage(guikit::Context& ui, DemoContext& ctx) {
                     ? guikit::AxisSize(guikit::SizeMode::Stretch)
                     : guikit::AxisSize::Fixed(80.0f);
 
-                RenderFlexTile(ui, "Brand", "Leading", guikit::UiVariant::Primary, guikit::AxisSize::Fixed(132.0f), h);
-                RenderFlexTile(ui, "Nav", "Leading", guikit::UiVariant::Info, guikit::AxisSize::Fixed(116.0f), h);
+                RenderFlexTile(ui, "Item 1", "Leading", guikit::UiVariant::Primary, guikit::AxisSize::Fixed(132.0f), h);
+                RenderFlexTile(ui, "Item 2", "Leading", guikit::UiVariant::Info, guikit::AxisSize::Fixed(132.0f), h);
 
                 guikit::Spacer(ui);
 
-                RenderFlexTile(ui, "Status", "Trailing", guikit::UiVariant::Success, guikit::AxisSize::Fixed(128.0f), h);
-                RenderFlexTile(ui, "Action", "Trailing", guikit::UiVariant::Warning, guikit::AxisSize::Fixed(128.0f), h);
+                RenderFlexTile(ui, "Item 3", "Trailing", guikit::UiVariant::Success, guikit::AxisSize::Fixed(132.0f), h);
+                RenderFlexTile(ui, "Item 4", "Trailing", guikit::UiVariant::Warning, guikit::AxisSize::Fixed(132.0f), h);
             }
         }
     }
@@ -273,7 +273,7 @@ keel::String GenerateFlexCode(const DemoContext& ctx) {
             "    for (int i = 0; i < {}; ++i) {{\n"
             "        auto scope = ui.IdScope(i);\n"
             "        if (auto card = guikit::Card(ui, {{.width = {}, .height = 64.0f}})) {{\n"
-            "            guikit::Text(ui, ui.Format(\"Row {{}}\", i + 1));\n"
+            "            guikit::Text(ui, ui.Format(\"Item {{}}\", i + 1));\n"
             "        }}\n"
             "    }}\n"
             "}}",

@@ -112,9 +112,9 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
                     .padding = guikit::Padding::Symmetric(14.0f, 10.0f)
                 })) {
                     guikit::Heading(ui, {
-                        .label = ui.Format("Telemetry Channel {:02u}", i + 1u),
-                        .description = ui.Format("Sample rate: {} kHz • Buffer nominal", 48u + (i % 4u) * 16u),
-                        .badge = {ui.Format("CH-{:02u}", i + 1u), guikit::StateColor::FromVariant(var)},
+                        .label = ui.Format("Item {:02u}", i + 1u),
+                        .description = "Scrollable list item",
+                        .badge = {ui.Format("#{:02u}", i + 1u), guikit::StateColor::FromVariant(var)},
                         .level = guikit::HeadingLevel::H5
                     });
                 }
@@ -134,8 +134,8 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
                     .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(var).WithAlphaF(0.45f)}
                 })) {
                     guikit::Heading(ui, {
-                        .label = ui.Format("Slot {:02u}", i + 1u),
-                        .description = "Horizontal strip card",
+                        .label = ui.Format("Item {:02u}", i + 1u),
+                        .description = "Horizontal strip item",
                         .badge = {ui.Format("#{:02u}", i + 1u), guikit::StateColor::FromVariant(var)},
                         .level = guikit::HeadingLevel::H5
                     });
@@ -169,7 +169,7 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
                         })) {
                             guikit::Heading(ui, {
                                 .label = ui.Format("R{:02u} · C{:02u}", r + 1u, c + 1u),
-                                .description = "2D matrix tile",
+                                .description = "2D grid cell",
                                 .level = guikit::HeadingLevel::H6
                             });
                         }

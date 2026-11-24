@@ -30,32 +30,30 @@ constexpr keel::StaticArray<keel::StringRef, 4> kJustifyNames = {
 };
 
 struct WrapSampleItem {
-    keel::StringRef label;
-    keel::StringRef badge;
     guikit::UiVariant variant;
     keel::f32 width;
     keel::f32 height;
 };
 
 constexpr keel::StaticArray<WrapSampleItem, 18> kWrapItems = {{
-    {"RF Front-End",     "RX",   guikit::UiVariant::Primary,   156.0f, 52.0f},
-    {"GPS",              "3D",   guikit::UiVariant::Success,   112.0f, 44.0f},
-    {"Kalman Filter",    "IMU",  guikit::UiVariant::Info,      168.0f, 64.0f},
-    {"CAN Bus",          "1M",   guikit::UiVariant::Warning,   128.0f, 48.0f},
-    {"Spectrum FFT",     "4K",   guikit::UiVariant::Primary,   164.0f, 56.0f},
-    {"BMS",              "96%",  guikit::UiVariant::Success,   108.0f, 44.0f},
-    {"Attitude AHRS",    "200Hz",guikit::UiVariant::Info,      176.0f, 60.0f},
-    {"Telemetry Log",    "SD",   guikit::UiVariant::Secondary, 162.0f, 48.0f},
-    {"Link Quality",     "98%",  guikit::UiVariant::Success,   158.0f, 52.0f},
-    {"Thermal Guard",    "OK",   guikit::UiVariant::Warning,   164.0f, 44.0f},
-    {"Watchdog",         "ARM",  guikit::UiVariant::Danger,    142.0f, 60.0f},
-    {"PWM Servo",        "8ch",  guikit::UiVariant::Primary,   146.0f, 48.0f},
-    {"AIS Decoder",      "VHF",  guikit::UiVariant::Info,      154.0f, 56.0f},
-    {"Audio Codec",      "48k",  guikit::UiVariant::Secondary, 152.0f, 44.0f},
-    {"Compass",          "MAG",  guikit::UiVariant::Info,      132.0f, 52.0f},
-    {"Barometer",        "hPa",  guikit::UiVariant::Success,   144.0f, 48.0f},
-    {"Power Rail",       "24V",  guikit::UiVariant::Warning,   148.0f, 60.0f},
-    {"Time Sync",        "PTP",  guikit::UiVariant::Primary,   140.0f, 44.0f}
+    {guikit::UiVariant::Primary,   156.0f, 52.0f},
+    {guikit::UiVariant::Success,   112.0f, 44.0f},
+    {guikit::UiVariant::Info,      168.0f, 64.0f},
+    {guikit::UiVariant::Warning,   128.0f, 48.0f},
+    {guikit::UiVariant::Primary,   164.0f, 56.0f},
+    {guikit::UiVariant::Success,   108.0f, 44.0f},
+    {guikit::UiVariant::Info,      176.0f, 60.0f},
+    {guikit::UiVariant::Secondary, 162.0f, 48.0f},
+    {guikit::UiVariant::Success,   158.0f, 52.0f},
+    {guikit::UiVariant::Warning,   164.0f, 44.0f},
+    {guikit::UiVariant::Danger,    142.0f, 60.0f},
+    {guikit::UiVariant::Primary,   146.0f, 48.0f},
+    {guikit::UiVariant::Info,      154.0f, 56.0f},
+    {guikit::UiVariant::Secondary, 152.0f, 44.0f},
+    {guikit::UiVariant::Info,      132.0f, 52.0f},
+    {guikit::UiVariant::Success,   144.0f, 48.0f},
+    {guikit::UiVariant::Warning,   148.0f, 60.0f},
+    {guikit::UiVariant::Primary,   140.0f, 44.0f}
 }};
 
 } // namespace
@@ -157,8 +155,8 @@ void RenderWrapStage(guikit::Context& ui, DemoContext&) {
                     .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(it.variant).WithAlphaF(0.45f)}
                 })) {
                     guikit::Heading(ui, {
-                        .label = it.label,
-                        .badge = {it.badge, guikit::StateColor::FromVariant(it.variant)},
+                        .label = ui.Format("Item {:02u}", i + 1u),
+                        .badge = {ui.Format("{:.0f} px", it.width), guikit::StateColor::FromVariant(it.variant)},
                         .level = guikit::HeadingLevel::H6
                     });
                 }
@@ -180,7 +178,7 @@ keel::String GenerateWrapCode(const DemoContext&) {
         "    for (int i = 0; i < {}; ++i) {{\n"
         "        auto scope = ui.IdScope(i);\n"
         "        if (auto card = guikit::Card(ui, {{.width = 148.0f, .height = {}}})) {{\n"
-        "            guikit::Text(ui, ui.Format(\"Module {{}}\", i + 1));\n"
+        "            guikit::Text(ui, ui.Format(\"Item {{:02d}}\", i + 1));\n"
         "        }}\n"
         "    }}\n"
         "}}",

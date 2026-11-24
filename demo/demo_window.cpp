@@ -299,7 +299,6 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
 void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
     if (auto previewTb = guikit::Toolbar(ui)) {
         guikit::Text(ui, "PREVIEW", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
-        previewTb.Separator();
 
         if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {
             .tooltip = "Preview Viewport Form Factor & Orientation",
@@ -318,8 +317,6 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             }
             ui.InvalidateAll();
         }
-
-        previewTb.Separator();
 
         const keel::i32 effZoomPct = keel::round_i32(m_demoCtx.previewEffectiveZoom * 100.0f);
         guikit::SelectOptions zoomSelectOpts{

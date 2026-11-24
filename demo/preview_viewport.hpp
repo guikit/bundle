@@ -294,10 +294,12 @@ inline void RenderPreviewViewport(
     ContentFn&& renderClientContent
 ) {
     const PreviewFormFactor formFactor = keel::from_underlying<PreviewFormFactor>(
-        keel::min<keel::usize>(demoCtx.previewFormFactorIdx, 3)
+        keel::min<keel::usize>(demoCtx.previewFormFactorIdx, kPreviewFormFactorNames.size() - 1u)
     );
-    const bool isDeviceMode = (formFactor == PreviewFormFactor::Tablet || formFactor == PreviewFormFactor::Phone);
-    const bool isPhone = (formFactor == PreviewFormFactor::Phone);
+    const bool isPhone = (formFactor == PreviewFormFactor::PhonePortrait || formFactor == PreviewFormFactor::PhoneLandscape);
+    const bool isTablet = (formFactor == PreviewFormFactor::TabletLandscape || formFactor == PreviewFormFactor::TabletPortrait);
+    const bool isDeviceMode = isPhone || isTablet;
+    const bool isLandscape = (formFactor == PreviewFormFactor::TabletLandscape || formFactor == PreviewFormFactor::PhoneLandscape);
     const bool isResizableWindow = (formFactor == PreviewFormFactor::Window);
     const bool useCenteredScrollCanvas = isDeviceMode || (isResizableWindow && demoCtx.previewWindowCustomSize);
     const keel::f32 clientPad = isShellScreen ? 0.0f : (isFullStage ? 8.0f : 24.0f);
@@ -334,8 +336,8 @@ inline void RenderPreviewViewport(
         const keel::f32 basePortraitH = isPhone ? 784.0f : 782.0f;
         const keel::f32 baseMmW       = isPhone ? 71.5f  : 134.8f;
         const keel::f32 baseMmH       = isPhone ? 149.6f : 195.4f;
-        const keel::f32 targetW       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitH : basePortraitW) : demoCtx.previewWindowW;
-        const keel::f32 targetH       = isDeviceMode ? (demoCtx.previewLandscape ? basePortraitW : basePortraitH) : demoCtx.previewWindowH;
+        const keel::f32 targetW       = isDeviceMode ? (isLandscape ? basePortraitH : basePortraitW) : demoCtx.previewWindowW;
+        const keel::f32 targetH       = isDeviceMode ? (isLandscape ? basePortraitW : basePortraitH) : demoCtx.previewWindowH;
 
         const PreviewZoomMode zoomMode = keel::from_underlying<PreviewZoomMode>(
             keel::min<keel::usize>(demoCtx.previewZoomModeIdx, keel::as<keel::usize>(PreviewZoomMode::Custom))
@@ -354,7 +356,7 @@ inline void RenderPreviewViewport(
                 break;
             case PreviewZoomMode::Real1To1:
                 if (isDeviceMode) {
-                    const keel::f32 devMmW = demoCtx.previewLandscape ? baseMmH : baseMmW;
+                    const keel::f32 devMmW = isLandscape ? baseMmH : baseMmW;
                     effectiveZoom = keel::clamp((devMmW * pxPerMm) / targetW, 0.35f, 2.50f);
                 } else {
                     effectiveZoom = 1.0f;
@@ -372,10 +374,10 @@ inline void RenderPreviewViewport(
         }
 
         const keel::f32 realMmW = isDeviceMode
-            ? (demoCtx.previewLandscape ? baseMmH : baseMmW)
+            ? (isLandscape ? baseMmH : baseMmW)
             : ((targetW * effectiveZoom) / pxPerMm);
         const keel::f32 realMmH = isDeviceMode
-            ? (demoCtx.previewLandscape ? baseMmW : baseMmH)
+            ? (isLandscape ? baseMmW : baseMmH)
             : ((targetH * effectiveZoom) / pxPerMm);
 
         // Interactive Ctrl + MouseWheel zoom over the preview viewport
@@ -415,7 +417,6 @@ inline void RenderPreviewViewport(
         backdropNode->visualHash = guikit::detail::HashArgs(
             keel::as<keel::u8>(demoCtx.shellTheme.mode),
             keel::as<keel::u8>(formFactor),
-            demoCtx.previewLandscape,
             demoCtx.previewZoomModeIdx,
             zoomPct,
             demoCtx.previewWindowCustomSize,
@@ -714,7 +715,7 @@ inline void RenderPreviewViewport(
                             // 1. Top Safe Area (9:41 Clock + Signal/Battery)
                             if (auto safeTop = guikit::Box(ui, {
                                 .width = guikit::SizeMode::Stretch,
-                                .height = (isPhone && !demoCtx.previewLandscape) ? 36.0f : 24.0f
+                                .height = (isPhone && !isLandscape) ? 36.0f : 24.0f
                             })) {
                                 safeTop.GetNode()->postRenderFn = isPhone
                                     ? &detail::RenderDeviceStatusSafeArea<true>
@@ -722,7 +723,7 @@ inline void RenderPreviewViewport(
                             }
 
                             // 2. Isolated Application Client Area (includes left safe-area clearance in Phone Landscape)
-                            const guikit::Padding clientSafePad = (isPhone && demoCtx.previewLandscape)
+                            const guikit::Padding clientSafePad = (isPhone && isLandscape)
                                 ? guikit::Padding{devicePad + 26.0f, devicePad, devicePad, devicePad}
                                 : guikit::Padding::All(devicePad);
                             if (auto inspectZoneScope = ui.Zone(inspectOpts)) {

@@ -301,30 +301,21 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         guikit::Text(ui, "PREVIEW", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
         previewTb.Separator();
 
-        if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {.size = guikit::UiSize::Sm, .width = 96.0f}).changed) {
-            if (m_demoCtx.previewFormFactorIdx == 1) {
-                m_demoCtx.previewLandscape = true;  // Tablet defaults to Landscape
-                if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
-                    m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
-                }
-            } else if (m_demoCtx.previewFormFactorIdx == 2) {
-                m_demoCtx.previewLandscape = false; // Phone defaults to Portrait
-                if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
-                    m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
-                }
-            }
-            ui.InvalidateAll();
-        }
-
-        static constexpr keel::StaticArray<keel::StringRef, 2> kOrientationVariants = {"Port", "Land"};
-        const bool canRotateDevice = (m_demoCtx.previewFormFactorIdx == 1 || m_demoCtx.previewFormFactorIdx == 2);
-        if (previewTb.Toggle(m_demoCtx.previewLandscape, {
-            .text = {m_demoCtx.previewLandscape ? "Land" : "Port", kOrientationVariants},
-            .tooltip = "Rotate Device Orientation (Portrait / Landscape)",
-            .icon = guikit::Icon::Refresh(),
-            .variant = guikit::UiVariant::Info,
-            .disabled = !canRotateDevice
+        if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {
+            .tooltip = "Preview Viewport Form Factor & Orientation",
+            .size = guikit::UiSize::Sm,
+            .width = 156.0f
         }).changed) {
+            const PreviewFormFactor ff = keel::from_underlying<PreviewFormFactor>(
+                keel::min<keel::usize>(m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames.size() - 1u)
+            );
+            const bool isDevice = (ff == PreviewFormFactor::TabletLandscape ||
+                                   ff == PreviewFormFactor::TabletPortrait ||
+                                   ff == PreviewFormFactor::PhonePortrait ||
+                                   ff == PreviewFormFactor::PhoneLandscape);
+            if (isDevice && m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
+                m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
+            }
             ui.InvalidateAll();
         }
 

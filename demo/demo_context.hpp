@@ -132,16 +132,20 @@ constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
 }
 
 enum class PreviewFormFactor : keel::u8 {
-    Window = 0, ///< Desktop OS Window with titlebar (traffic lights, title, W x H badge)
-    Tablet,     ///< Tablet / Touch Panel bezel (camera dot + Home Indicator)
-    Phone,      ///< Smartphone / Handheld bezel (Dynamic Island + 9:41 status + Home Indicator)
-    Full        ///< Clean edge-to-edge artboard on the recessed backdrop
+    Window = 0,      ///< Desktop OS Window with titlebar (traffic lights, title, W x H badge)
+    TabletLandscape, ///< Tablet / Touch Panel bezel in Landscape orientation
+    TabletPortrait,  ///< Tablet / Touch Panel bezel in Portrait orientation
+    PhonePortrait,   ///< Smartphone / Handheld bezel in Portrait orientation
+    PhoneLandscape,  ///< Smartphone / Handheld bezel in Landscape orientation
+    Full             ///< Clean edge-to-edge artboard on the recessed backdrop
 };
 
-inline constexpr keel::StaticArray<keel::StringRef, 4> kPreviewFormFactorNames = {
+inline constexpr keel::StaticArray<keel::StringRef, 6> kPreviewFormFactorNames = {
     "Window",
-    "Tablet",
-    "Phone",
+    "Tablet (Landscape)",
+    "Tablet (Portrait)",
+    "Phone (Portrait)",
+    "Phone (Landscape)",
     "Full"
 };
 
@@ -502,8 +506,7 @@ struct DemoContext {
     bool previewBounds = false;
     bool previewInspect = false;
     bool previewShowCode = true;
-    keel::usize previewFormFactorIdx = 0; // 0 = Window, 1 = Tablet, 2 = Phone, 3 = Full
-    bool previewLandscape = false;        // Orientation state for Tablet / Phone
+    keel::usize previewFormFactorIdx = 0; // PreviewFormFactor index (0 = Window .. 5 = Full)
     keel::usize previewZoomModeIdx = 3;   // 0=Fit, 1=Real 1:1, 2=75%, 3=100%, 4=125%, 5=150%, 6=175%, 7=200%, 8=Custom
     keel::f32 previewCustomZoom = 1.0f;       // Custom zoom factor set via Ctrl + MouseWheel
     keel::f32 previewEffectiveZoom = 1.0f;    // Resolved effective zoom factor for current frame

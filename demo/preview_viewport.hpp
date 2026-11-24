@@ -61,8 +61,9 @@ inline void RenderBackdropHudBadge(const guikit::Node* n, guikit::ICanvas& canva
     const keel::f32 padY = 4.0f * s;
     const keel::f32 pillW = textSz.x + padX * 2.0f;
     const keel::f32 pillH = keel::max(fontSize + padY * 2.0f, 20.0f * s);
-    const keel::f32 extraRight = (n->type == guikit::NodeType::ScrollArea && n->scrollContentSize.y > r.h + 0.5f) ? (10.0f * s) : 0.0f;
-    const keel::f32 extraBottom = (n->type == guikit::NodeType::ScrollArea && n->scrollContentSize.x > r.w + 0.5f) ? (10.0f * s) : 0.0f;
+    const guikit::Vec2 scrollContent = n->GetScrollContentSize();
+    const keel::f32 extraRight = (n->type == guikit::NodeType::ScrollArea && scrollContent.y > r.h + 0.5f) ? (10.0f * s) : 0.0f;
+    const keel::f32 extraBottom = (n->type == guikit::NodeType::ScrollArea && scrollContent.x > r.w + 0.5f) ? (10.0f * s) : 0.0f;
     const keel::f32 pillX = r.Right() - pillW - 10.0f * s - extraRight;
     const keel::f32 pillY = r.Bottom() - pillH - 8.0f * s - extraBottom;
 
@@ -81,13 +82,19 @@ inline void RenderBackdropHudBadge(const guikit::Node* n, guikit::ICanvas& canva
     canvas.DrawText(n->text, {pillX + padX, pillY + (pillH - textSz.y) * 0.5f}, fontSize, pillFg);
 }
 
+struct ResizeGripPayload {
+    bool highlighted{false};
+};
+
 inline void RenderWindowResizeGrip(const guikit::Node* n, guikit::ICanvas& canvas, const guikit::UiTheme& theme) noexcept {
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 20.0f || r.h <= 20.0f) return;
 
     // Subtle diagonal resize grip lines in the bottom-right corner of the window frame
     constexpr keel::f32 s = 1.0f;
-    const guikit::Color gripCol = (n->scrollbarActive || n->scrollbarHovered)
+    const auto* payload = n->As<ResizeGripPayload>();
+    const bool highlighted = payload && payload->highlighted;
+    const guikit::Color gripCol = highlighted
         ? theme.GetVariant(guikit::UiVariant::Primary).bg
         : theme.palette.textSecondary.WithAlphaF(0.55f);
     const keel::f32 bx = r.Right() - 4.0f * s;
@@ -610,8 +617,8 @@ inline void RenderPreviewViewport(
                         })) {
                             guikit::Node* winNode = windowFrame.GetNode();
                             winNode->postRenderFn = &detail::RenderWindowResizeGrip;
-                            winNode->scrollbarHovered = (demoCtx.previewWindowHoverEdge != 0);
-                            winNode->scrollbarActive = (demoCtx.previewWindowResizeEdge != 0);
+                            auto* grip = ui.AllocPayload<detail::ResizeGripPayload>(winNode);
+                            grip->highlighted = (demoCtx.previewWindowHoverEdge != 0) || (demoCtx.previewWindowResizeEdge != 0);
 
                             const guikit::Color titlebarBg = (ui.GetTheme().mode == guikit::ThemeMode::Light)
                                 ? guikit::Color(241, 245, 249, 255)

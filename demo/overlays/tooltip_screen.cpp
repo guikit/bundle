@@ -5,7 +5,6 @@ namespace guikit::demo {
 namespace {
 
 struct TooltipDemoState {
-    keel::usize anchorModeIdx = 0;  // 0 = Widget (.tooltip), 1 = Anchored (Rect), 2 = Follow Cursor
     keel::usize contentPresetIdx = 0; // 0 = Short, 1 = Multi-Line, 2 = Rich Text, 3 = Live Coordinates
     keel::FixedString<192> customText = "Save active station profile (Ctrl+S)";
     bool pinnedPreview = false;
@@ -13,10 +12,6 @@ struct TooltipDemoState {
 };
 
 TooltipDemoState s_tip;
-
-constexpr keel::StaticArray<keel::StringRef, 3> kAnchorModes = {
-    "Widget", "Anchored", "Cursor"
-};
 
 constexpr keel::StaticArray<keel::StringRef, 4> kContentPresets = {
     "Short", "Multi-Line", "Rich Text", "Live Cursor"
@@ -49,11 +44,6 @@ guikit::UiText BuildTooltipText(guikit::Context& ui) {
 } // namespace
 
 void RenderTooltipInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = guikit::Element(ui, {.label = "Trigger Mode", .layout = guikit::ElementLayout::Stacked})) {
-        if (guikit::Segmented(ui, s_tip.anchorModeIdx, kAnchorModes).changed) {
-            ui.InvalidateAll();
-        }
-    }
     if (auto el = guikit::Element(ui, {.label = "Content Preset"})) {
         if (guikit::Select(ui, s_tip.contentPresetIdx, kContentPresets).changed) {
             ui.InvalidateAll();
@@ -82,7 +72,8 @@ void RenderTooltipInspector(guikit::Context& ui, DemoContext&) {
     }
 }
 
-void RenderTooltipStage(guikit::Context& ui, DemoContext&) {
+void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
+    const keel::usize anchorModeIdx = ctx.GetDemoVariant(NavCategory::OverlayTooltip);
     const guikit::UiText tip = BuildTooltipText(ui);
 
     if (auto stageCol = guikit::Column(ui, {
@@ -90,7 +81,7 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext&) {
         .align = guikit::Alignment::Center,
         .justify = guikit::Justify::Center
     })) {
-        if (s_tip.anchorModeIdx == 0) {
+        if (anchorModeIdx == 0u) {
             if (auto row = guikit::Row(ui, {.gap = 10.0f, .align = guikit::Alignment::Center})) {
                 const auto saveBtn = guikit::Button(ui, {
                     .text = "Save Profile",
@@ -123,7 +114,7 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext&) {
                 .role = guikit::TextRole::BodySmall,
                 .variant = guikit::UiVariant::Secondary
             });
-        } else if (s_tip.anchorModeIdx == 1) {
+        } else if (anchorModeIdx == 1u) {
             if (auto zone = guikit::Box(ui, {
                 .gap = 4.0f,
                 .padding = guikit::Padding::Symmetric(32.0f, 22.0f),
@@ -163,7 +154,8 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext&) {
     }
 }
 
-keel::String GenerateTooltipCode(const DemoContext&) {
+keel::String GenerateTooltipCode(const DemoContext& ctx) {
+    const keel::usize anchorModeIdx = ctx.GetDemoVariant(NavCategory::OverlayTooltip);
     keel::String tipExpr;
     switch (s_tip.contentPresetIdx) {
         case 1:
@@ -186,7 +178,7 @@ keel::String GenerateTooltipCode(const DemoContext&) {
             break;
     }
 
-    if (s_tip.anchorModeIdx == 0) {
+    if (anchorModeIdx == 0u) {
         return keel::format(
             "guikit::Button(ui, {{\n"
             "    .text = \"Save Profile\",\n"
@@ -198,7 +190,7 @@ keel::String GenerateTooltipCode(const DemoContext&) {
         );
     }
 
-    if (s_tip.anchorModeIdx == 1) {
+    if (anchorModeIdx == 1u) {
         return keel::format(
             "if (auto zone = guikit::Box(ui, {{.padding = guikit::Padding::Symmetric(32.0f, 22.0f)}})) {{\n"
             "    guikit::Text(ui, \"Hover this anchored target box\");\n"

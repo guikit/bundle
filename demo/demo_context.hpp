@@ -580,6 +580,7 @@ struct DemoContext {
     guikit::Align ctrlAlign = guikit::Align::Center;      // Capsule content alignment for Button
     guikit::Align ctrlSelectAlign = guikit::Align::Start; // Content alignment for Select
     keel::StaticArray<keel::usize, kNavCategoryCount> ctrlBgIdxByCat{}; // 0 = Default (Theme) for all controls
+    keel::StaticArray<keel::usize, kNavCategoryCount> demoVariantIdx{}; // Per-screen Demo Variant index (0 = default)
     keel::f32 ctrlBgTint = 1.0f;
     keel::f32 ctrlBgAlpha = 1.0f;
     keel::f32 ctrlBorderWidth = 0.0f;
@@ -595,6 +596,85 @@ struct DemoContext {
     keel::f32 gridRowGap = 10.0f;
     keel::f32 colGap = 12.0f;
     keel::f32 rowGap = 8.0f;
+
+    static keel::ArrayRef<keel::StringRef> DemoVariantsFor(NavCategory cat) noexcept {
+        static constexpr keel::StaticArray<keel::StringRef, 2> kSplitView = {"3-Pane Nested", "2-Pane Single"};
+        static constexpr keel::StaticArray<keel::StringRef, 4> kElement = {
+            "InputField (Stretch)", "Switch (Compact)", "Composite Row", "Standalone (No Slot)"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 3> kTooltip = {
+            "Widget (.tooltip)", "Anchored (Rect)", "Follow Cursor"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 2> kInputField = {
+            "Single Field", "Field + Action Button"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 4> kSelect = {
+            "Select", "ComboBox", "Autocomplete", "MultiSelect"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 2> kRadio = {
+            "3-Option Group", "Single Radio"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 3> kSlider = {
+            "Slider", "StepSlider", "RangeSlider"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 2> kKnob = {
+            "Single Knob", "4-Knob Channel Strip"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 2> kLevelMeter = {
+            "Stereo (L/R)", "Mono (1ch)"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 2> kTable = {
+            "Rich DataGrid", "100k Virtual Log"
+        };
+        static constexpr keel::StaticArray<keel::StringRef, 2> kImageView = {
+            "16-bit Monochrome", "RGB Multi-Channel"
+        };
+        switch (cat) {
+            case NavCategory::LayoutSplitView:   return kSplitView;
+            case NavCategory::LayoutElement:     return kElement;
+            case NavCategory::OverlayTooltip:    return kTooltip;
+            case NavCategory::FieldInputField:   return kInputField;
+            case NavCategory::FieldSelect:       return kSelect;
+            case NavCategory::ControlRadio:      return kRadio;
+            case NavCategory::ControlSlider:     return kSlider;
+            case NavCategory::ControlKnob:       return kKnob;
+            case NavCategory::DisplayLevelMeter: return kLevelMeter;
+            case NavCategory::ViewTable:         return kTable;
+            case NavCategory::ViewImageView:     return kImageView;
+            default:                             return {};
+        }
+    }
+
+    keel::usize GetDemoVariant(NavCategory cat) const noexcept {
+        const keel::usize ci = keel::as<keel::usize>(cat);
+        if (ci >= demoVariantIdx.size()) return 0u;
+        const auto variants = DemoVariantsFor(cat);
+        if (variants.empty()) return 0u;
+        return keel::min(demoVariantIdx[ci], variants.size() - 1u);
+    }
+
+    bool RenderDemoVariantSelector(guikit::Context& ui, NavCategory cat) {
+        const auto variants = DemoVariantsFor(cat);
+        if (variants.size() < 2u) {
+            return false;
+        }
+        const keel::usize ci = keel::as<keel::usize>(cat);
+        if (demoVariantIdx[ci] >= variants.size()) {
+            demoVariantIdx[ci] = 0u;
+        }
+        bool changed = false;
+        if (auto el = guikit::Element(ui, {
+            .label = "Demo Variant",
+            .layout = guikit::ElementLayout::Top
+        })) {
+            if (guikit::Select(ui, demoVariantIdx[ci], variants).changed) {
+                changed = true;
+                ui.InvalidateAll();
+            }
+        }
+        guikit::Separator(ui);
+        return changed;
+    }
 
     static constexpr guikit::SizeMode DefaultCtrlWidthMode(NavCategory cat) noexcept {
         switch (cat) {

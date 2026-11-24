@@ -4,7 +4,6 @@ namespace guikit::demo {
 
 namespace {
 struct SliderDemoState {
-    keel::usize modeIdx = 0; // 0 = Slider, 1 = StepSlider, 2 = RangeSlider
     keel::f32 val = 65.0f;
     keel::usize stepIdx = 2;
     keel::f32 rangeLow = 22.0f;
@@ -28,16 +27,8 @@ constexpr keel::StringRef OrientationEnumName(guikit::Orientation o) noexcept {
 }
 } // namespace
 
-void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
-    static constexpr keel::StaticArray<keel::StringRef, 3> modeNames = {"Slider", "Step", "Range"};
-    if (auto el = guikit::Element(ui, {
-        .label = "Slider Mode",
-        .description = "Slider / StepSlider / RangeSlider"
-    })) {
-        if (guikit::Segmented(ui, s_state.modeIdx, modeNames).changed) {
-            ui.InvalidateAll();
-        }
-    }
+void RenderSliderInspector(guikit::Context& ui, DemoContext& ctx) {
+    const keel::usize modeIdx = ctx.GetDemoVariant(NavCategory::ControlSlider);
 
     keel::i32 orientIdx = (s_state.orientation == guikit::Orientation::Vertical) ? 1 : 0;
     static constexpr keel::StaticArray<keel::StringRef, 2> orientNames = {"Horizontal", "Vertical (Fader)"};
@@ -89,20 +80,20 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
         }).changed) ui.InvalidateAll();
     }
 
-    if (s_state.modeIdx == 0 || s_state.modeIdx == 2) {
+    if (modeIdx == 0u || modeIdx == 2u) {
         if (auto el = guikit::Element(ui, {.label = "Quantize Step (5.0%)"})) {
             if (guikit::Switch(ui, s_state.quantizeStep).changed) ui.InvalidateAll();
         }
     }
 
-    if (s_state.modeIdx == 1) {
+    if (modeIdx == 1u) {
         if (auto el = guikit::Element(ui, {.label = "Show Step Ticks"})) {
             if (guikit::Switch(ui, s_state.showTicks).changed) ui.InvalidateAll();
         }
         if (auto el = guikit::Element(ui, {.label = "Show Step Labels"})) {
             if (guikit::Switch(ui, s_state.showLabels).changed) ui.InvalidateAll();
         }
-    } else if (s_state.modeIdx == 2) {
+    } else if (modeIdx == 2u) {
         if (auto el = guikit::Element(ui, {.label = "Minimum Span"})) {
             if (guikit::Slider(ui, s_state.rangeMinSpan, 0.0f, 40.0f, {
                 .valueFormat = "%.0f %%",
@@ -115,6 +106,7 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
+    const keel::usize modeIdx = ctx.GetDemoVariant(NavCategory::ControlSlider);
     const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
     const guikit::AxisSize wSize = ctx.ResolveCtrlWidth();
     const guikit::AxisSize hSize =
@@ -123,7 +115,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             : ctx.ResolveCtrlHeight();
 
     ctx.RunElementStage(ui, [&]() {
-        if (s_state.modeIdx == 0) {
+        if (modeIdx == 0u) {
             guikit::SliderOptions opts{};
             opts.orientation = s_state.orientation;
             opts.textLeft = s_state.textLeft;
@@ -138,7 +130,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
             opts.height = hSize;
             opts.color = ctx.GetControlColor();
             guikit::Slider(ui, s_state.val, 0.0f, 100.0f, opts);
-        } else if (s_state.modeIdx == 1) {
+        } else if (modeIdx == 1u) {
             static constexpr keel::StaticArray<keel::StringRef, 5> stepItems = {"Off", "Low", "Mid", "High", "Max"};
             guikit::StepSliderOptions opts{};
             opts.orientation = s_state.orientation;
@@ -175,6 +167,7 @@ void RenderSliderStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateSliderCode(const DemoContext& ctx) {
+    const keel::usize modeIdx = ctx.GetDemoVariant(NavCategory::ControlSlider);
     const guikit::AxisSize ctrlH =
         (s_state.orientation == guikit::Orientation::Vertical && s_state.compactVertical && ctx.ResolveCtrlHeight().IsAuto())
             ? guikit::AxisSize(guikit::SizeMode::Fit)
@@ -185,7 +178,7 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
 
-    if (s_state.modeIdx == 0) {
+    if (modeIdx == 0u) {
         const keel::String ctrl = keel::format(
             "guikit::Slider(ui, gainValue, 0.0f, 100.0f, {{\n"
             "    .orientation = guikit::Orientation::{},\n"
@@ -215,7 +208,7 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
         );
         return ctx.WrapInElementCode(ctrl);
     }
-    if (s_state.modeIdx == 1) {
+    if (modeIdx == 1u) {
         const keel::String ctrl = keel::format(
             "guikit::StepSlider(ui, presetIndex, stepItems, {{\n"
             "    .orientation = guikit::Orientation::{},\n"

@@ -17,7 +17,6 @@ struct SignalTargetRow {
 };
 
 struct TableDemoState {
-    keel::usize datasetMode{0}; // 0 = Rich Signal DataGrid (Widgets + Sort), 1 = 100,000 Rows Virtualized
     UiSize tableSize{UiSize::Md};
     bool striped{true};
     bool gridLines{true};
@@ -97,18 +96,9 @@ TableDemoState g_tableDemo;
 
 } // namespace
 
-void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
+void RenderTableInspector(guikit::Context& ui, DemoContext& ctx) {
     g_tableDemo.EnsureInitialized();
-
-    static constexpr keel::StaticArray<keel::StringRef, 2> kModeLabels = {"Rich DataGrid", "100k Virtual"};
-    if (auto el = guikit::Element(ui, {
-        .label = "Table Mode",
-        .description = "Switch between Rich Widget DataGrid (48 targets) and 100,000-row O(1) virtualized log"
-    })) {
-        if (guikit::Segmented(ui, g_tableDemo.datasetMode, kModeLabels).changed) {
-            ui.InvalidateAll();
-        }
-    }
+    const keel::usize datasetMode = ctx.GetDemoVariant(NavCategory::ViewTable);
 
     if (auto el = guikit::Element(ui, {.label = "Row & Header Size"})) {
         if (guikit::StepSlider(ui, g_tableDemo.tableSize, {
@@ -138,7 +128,7 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         if (guikit::Switch(ui, g_tableDemo.showFooter).changed) ui.InvalidateAll();
     }
 
-    if (g_tableDemo.datasetMode == 0) {
+    if (datasetMode == 0u) {
         if (auto el = guikit::Element(ui, {
             .label = "Filter Rows",
             .layout = ElementLayout::Top
@@ -176,10 +166,11 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     }
 }
 
-void RenderTableStage(guikit::Context& ui, DemoContext& /*ctx*/) {
+void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
     g_tableDemo.EnsureInitialized();
+    const keel::usize datasetMode = ctx.GetDemoVariant(NavCategory::ViewTable);
 
-    if (g_tableDemo.datasetMode == 0) {
+    if (datasetMode == 0u) {
         // Animate live telemetry if enabled
         if (g_tableDemo.liveTelemetry) {
             const keel::f32 t = keel::as<keel::f32>((ui.GetCurrentTime)());

@@ -17,7 +17,6 @@ constexpr keel::u32 kDemoImgH = 768;
 
 struct ImageViewDemoState {
     bool initialized{false};
-    keel::i32 datasetIndex{0}; // 0 = 16-bit Radiographic/NDT Phantom (1ch), 1 = Multi-Channel Fluorescence/Spectral (3ch RGB)
 
     keel::Array<keel::u16> mono16Pixels{};
     keel::Array<keel::f32> rgbFloatPixels{};
@@ -38,8 +37,8 @@ struct ImageViewDemoState {
     };
     ImageViewResponse lastResp{};
 
-    void EnsureGenerated() {
-        if (datasetIndex == 0) {
+    void EnsureGenerated(keel::usize datasetIdx) {
+        if (datasetIdx == 0u) {
             if (mono16Pixels.empty()) {
                 GenerateMono16Phantom();
             }
@@ -199,21 +198,12 @@ ImageViewDemoState s_imgDemo{};
 
 } // namespace
 
-void RenderImageViewInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
-    s_imgDemo.EnsureGenerated();
+void RenderImageViewInspector(guikit::Context& ui, DemoContext& ctx) {
+    const keel::usize datasetIdx = ctx.GetDemoVariant(NavCategory::ViewImageView);
+    s_imgDemo.EnsureGenerated(datasetIdx);
 
-    guikit::Heading(ui, {.label = "DATASET & CHANNELS", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
-    static constexpr keel::StaticArray<keel::StringRef, 2> kDatasetNames = {
-        "16-bit Radiograph Phantom (1ch)",
-        "Multispectral Fluorescence (3ch RGB)"
-    };
-    if (auto el = guikit::Element(ui, {.label = "Synthetic Dataset"})) {
-        if (guikit::Select(ui, s_imgDemo.datasetIndex, kDatasetNames).changed) {
-            ui.InvalidateAll();
-        }
-    }
-
-    ImageViewParams& activeParams = (s_imgDemo.datasetIndex == 0) ? s_imgDemo.paramsMono : s_imgDemo.paramsRgb;
+    guikit::Heading(ui, {.label = "HISTOGRAM", .level = HeadingLevel::H6, .separator = HeadingSeparator::Bottom});
+    ImageViewParams& activeParams = (datasetIdx == 0u) ? s_imgDemo.paramsMono : s_imgDemo.paramsRgb;
 
     static constexpr keel::StaticArray<keel::StringRef, 3> kHistScales = {"Sqrt", "Log", "Linear"};
     if (auto el = guikit::Element(ui, {.label = "Histogram Scale"})) {
@@ -279,10 +269,11 @@ void RenderImageViewInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     }
 }
 
-void RenderImageViewStage(guikit::Context& ui, DemoContext& /*ctx*/) {
-    s_imgDemo.EnsureGenerated();
+void RenderImageViewStage(guikit::Context& ui, DemoContext& ctx) {
+    const keel::usize datasetIdx = ctx.GetDemoVariant(NavCategory::ViewImageView);
+    s_imgDemo.EnsureGenerated(datasetIdx);
 
-    if (s_imgDemo.datasetIndex == 0) {
+    if (datasetIdx == 0u) {
         const ImageViewData data = ImageViewData::FromU16(
             s_imgDemo.mono16Pixels,
             kDemoImgW,
@@ -303,8 +294,9 @@ void RenderImageViewStage(guikit::Context& ui, DemoContext& /*ctx*/) {
     }
 }
 
-keel::String GenerateImageViewCode(const DemoContext& /*ctx*/) {
-    const ImageViewParams& prm = (s_imgDemo.datasetIndex == 0) ? s_imgDemo.paramsMono : s_imgDemo.paramsRgb;
+keel::String GenerateImageViewCode(const DemoContext& ctx) {
+    const keel::usize datasetIdx = ctx.GetDemoVariant(NavCategory::ViewImageView);
+    const ImageViewParams& prm = (datasetIdx == 0u) ? s_imgDemo.paramsMono : s_imgDemo.paramsRgb;
     const auto& ch = prm.channels[keel::as<keel::usize>(prm.activeHistChannel)];
 
     return keel::format(
@@ -323,7 +315,7 @@ keel::String GenerateImageViewCode(const DemoContext& /*ctx*/) {
         "    .showStatusBar = {},\n"
         "    .enableLineProfile = {}\n"
         "}});",
-        (s_imgDemo.datasetIndex == 0)
+        (datasetIdx == 0u)
             ? "guikit::ImageViewData::FromU16(pixels16, 1024, 768, 1)"
             : "guikit::ImageViewData::FromFloat(pixelsRgb, 1024, 768, 3)",
         GetColormapName(prm.colormap),

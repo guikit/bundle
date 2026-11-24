@@ -15,7 +15,6 @@ inline constexpr keel::StaticArray<keel::StringRef, 8> kPlainItems = {
 };
 
 struct SelectState {
-    keel::i32 mode = 1; // 0 = Select, 1 = ComboBox (Searchable), 2 = Autocomplete (Editable), 3 = MultiSelect
     keel::usize idx = 0;
     keel::SmallString<128> customText{"Option Alpha"};
     keel::SmallArray<keel::usize, 8> multiSelected = keel::SmallArray<keel::usize, 8>::from({0, 2, 5});
@@ -42,17 +41,6 @@ keel::StaticArray<guikit::SelectItem, 8> BuildRichSelectItems() {
 } // namespace
 
 void RenderSelectInspector(guikit::Context& ui, DemoContext&) {
-    static constexpr keel::StaticArray<keel::StringRef, 4> kControlModes = {
-        "Select", "ComboBox", "Autocomplete", "MultiSelect"
-    };
-    if (auto el = guikit::Element(ui, {.label = "Control Mode"})) {
-        if (guikit::Select(ui, s_state.mode, kControlModes).changed) {
-            if (s_state.mode == 2 && s_state.customText.empty() && s_state.idx < kPlainItems.size()) {
-                s_state.customText.assign(kPlainItems[s_state.idx]);
-            }
-            ui.InvalidateAll();
-        }
-    }
     if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
         if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "Select...",
@@ -94,20 +82,24 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
         opts.background = ctx.GetControlBackground(NavCategory::FieldSelect);
         opts.border = ctx.GetCtrlBorder();
 
+        const keel::usize mode = ctx.GetDemoVariant(NavCategory::FieldSelect);
+        if (mode == 2u && s_state.customText.empty() && s_state.idx < kPlainItems.size()) {
+            s_state.customText.assign(kPlainItems[s_state.idx]);
+        }
         const auto richList = BuildRichSelectItems();
-        if (s_state.mode == 0) {
+        if (mode == 0u) {
             if (s_state.richItems) {
                 guikit::Select(ui, s_state.idx, richList, opts);
             } else {
                 guikit::Select(ui, s_state.idx, kPlainItems, opts);
             }
-        } else if (s_state.mode == 1) {
+        } else if (mode == 1u) {
             if (s_state.richItems) {
                 guikit::ComboBox(ui, s_state.idx, richList, opts);
             } else {
                 guikit::ComboBox(ui, s_state.idx, kPlainItems, opts);
             }
-        } else if (s_state.mode == 2) {
+        } else if (mode == 2u) {
             if (s_state.richItems) {
                 guikit::Autocomplete(ui, s_state.customText, richList, opts);
             } else {
@@ -125,11 +117,12 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateSelectCode(const DemoContext& ctx) {
-    const keel::StringRef widgetCall = (s_state.mode == 0)
+    const keel::usize mode = ctx.GetDemoVariant(NavCategory::FieldSelect);
+    const keel::StringRef widgetCall = (mode == 0u)
         ? "Select(ui, presetIndex"
-        : ((s_state.mode == 1)
+        : ((mode == 1u)
             ? "ComboBox(ui, presetIndex"
-            : ((s_state.mode == 2) ? "Autocomplete(ui, customText" : "MultiSelect(ui, selectedIndices"));
+            : ((mode == 2u) ? "Autocomplete(ui, customText" : "MultiSelect(ui, selectedIndices"));
     const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::FieldSelect);
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize

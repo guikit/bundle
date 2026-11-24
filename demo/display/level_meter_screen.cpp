@@ -7,7 +7,6 @@ namespace guikit::demo {
 namespace {
 
 struct LevelMeterDemoState {
-    keel::usize channelModeIdx = 1; // 0 = Single-Channel (Mono dBFS), 1 = Stereo Dual-Channel (L / R)
     keel::usize orientationIdx = 0; // 0 = Horizontal, 1 = Vertical
     bool compactVertical = false;
     keel::f32 levelDb = -8.5f;
@@ -27,16 +26,8 @@ LevelMeterDemoState s_state;
 
 } // namespace
 
-void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
-    static constexpr keel::StaticArray<keel::StringRef, 2> channelModes = {"Mono (1ch)", "Stereo (L/R)"};
-    if (auto el = guikit::Element(ui, {
-        .label = "Channel Configuration",
-        .description = "Single-channel dBFS vs Stereo L/R pair"
-    })) {
-        if (guikit::Segmented(ui, s_state.channelModeIdx, channelModes).changed) {
-            ui.InvalidateAll();
-        }
-    }
+void RenderLevelMeterInspector(guikit::Context& ui, DemoContext& ctx) {
+    const bool stereo = (ctx.GetDemoVariant(NavCategory::DisplayLevelMeter) == 0u);
 
     static constexpr keel::StaticArray<keel::StringRef, 2> orientNames = {"Horizontal", "Vertical"};
     if (auto el = guikit::Element(ui, {.label = "Orientation"})) {
@@ -68,7 +59,7 @@ void RenderLevelMeterInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (s_state.channelModeIdx == 1) {
+    if (stereo) {
         if (auto el = guikit::Element(ui, {.label = "Stereo L/R Offset"})) {
             if (guikit::Slider(ui, s_state.stereoSpreadDb, -12.0f, 12.0f, {
                 .valueFormat = "%+.1f dB",
@@ -166,6 +157,8 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, 2> kStereoLabels = {"L", "R"};
     static constexpr keel::StaticArray<keel::StringRef, 1> kMonoLabels = {"IN"};
 
+    const bool stereo = (ctx.GetDemoVariant(NavCategory::DisplayLevelMeter) == 0u);
+
     guikit::LevelMeterOptions opts{};
     opts.orientation = orient;
     opts.segments = s_state.segmented ? s_state.segments : 0u;
@@ -175,7 +168,7 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
     opts.showScale = s_state.showScale;
     opts.showValue = s_state.showValue;
     opts.valueFormat = "%.1f dB";
-    opts.channelLabels = (s_state.channelModeIdx == 1)
+    opts.channelLabels = stereo
         ? keel::ArrayRef<keel::StringRef>(kStereoLabels)
         : keel::ArrayRef<keel::StringRef>(kMonoLabels);
     opts.barThickness = s_state.barThickness;
@@ -189,7 +182,7 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
     opts.color = ctx.GetControlColor();
 
     ctx.RunElementStage(ui, [&]() {
-        if (s_state.channelModeIdx == 1) {
+        if (stereo) {
             const keel::StaticArray<keel::f32, 2> stereoVals = {chLeft, chRight};
             guikit::LevelMeter(ui, stereoVals, -60.0f, 0.0f, opts);
         } else {
@@ -199,6 +192,7 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
+    const bool stereo = (ctx.GetDemoVariant(NavCategory::DisplayLevelMeter) == 0u);
     const keel::StringRef orientName = (s_state.orientationIdx == 0) ? "Horizontal" : "Vertical";
     const guikit::AxisSize ctrlH =
         (s_state.orientationIdx == 1 && s_state.compactVertical && ctx.ResolveCtrlHeight().IsAuto())
@@ -211,7 +205,7 @@ keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
 
-    if (s_state.channelModeIdx == 1) {
+    if (stereo) {
         const keel::String ctrl = keel::format(
             "guikit::LevelMeter(ui, levelsDb, -60.0f, 0.0f, {{\n"
             "    .orientation = guikit::Orientation::{},\n"

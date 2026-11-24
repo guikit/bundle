@@ -12,21 +12,12 @@ struct InputState {
     bool password = false;
     bool clearable = true;
     bool readOnly = false;
-    bool companionButton = false;
     keel::i32 connectCount = 0;
 };
 InputState s_state;
 } // namespace
 
 void RenderInputInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = guikit::Element(ui, {
-        .label = "Multi-Control Slot (Input + Button)",
-        .description = "Place InputField + Button inside a single Element"
-    })) {
-        if (guikit::Switch(ui, s_state.companionButton).changed) {
-            ui.InvalidateAll();
-        }
-    }
     if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
         if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "No placeholder...",
@@ -85,7 +76,7 @@ void RenderInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.border = ctx.GetCtrlBorder();
         guikit::InputField(ui, s_state.text, opts);
 
-        if (s_state.companionButton) {
+        if (ctx.GetDemoVariant(NavCategory::FieldInputField) == 1u) {
             const keel::StringRef btnLbl = (s_state.connectCount > 0)
                 ? ui.Format("Connect ({})", s_state.connectCount)
                 : keel::StringRef("Connect");
@@ -150,7 +141,7 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
         ctx.FormatCtrlBorderCode()
     );
 
-    if (s_state.companionButton) {
+    if (ctx.GetDemoVariant(NavCategory::FieldInputField) == 1u) {
         keel::format_into(
             ctrl,
             "\nif (guikit::Button(ui, {{.text = \"Connect\", .icon = guikit::Icon::Play(), {}.variant = guikit::UiVariant::{}}})) {{\n"

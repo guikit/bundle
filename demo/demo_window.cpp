@@ -235,59 +235,63 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
             if (auto fn = m_extensions[keel::as<keel::usize>(m_selectedExtension)].renderInspector) {
                 fn(ui, m_demoCtx);
             }
-        } else if (IsControlCategory(m_selectedCategory)) {
-            if (auto elemAcc = guikit::Accordion(ui, {
-                .label = "ELEMENT",
-                .defaultOpen = false,
-                .size = guikit::UiSize::Sm
-            })) {
-                m_demoCtx.RenderElementSection(ui);
-            }
+        } else {
+            m_demoCtx.RenderDemoVariantSelector(ui, m_selectedCategory);
 
-            if (auto elemLayoutAcc = guikit::Accordion(ui, {
-                .label = "ELEMENT LAYOUT",
-                .defaultOpen = false,
-                .size = guikit::UiSize::Sm
-            })) {
-                m_demoCtx.RenderElementLayoutSection(ui, m_selectedCategory);
-            }
+            if (IsControlCategory(m_selectedCategory)) {
+                if (auto elemAcc = guikit::Accordion(ui, {
+                    .label = "ELEMENT",
+                    .defaultOpen = false,
+                    .size = guikit::UiSize::Sm
+                })) {
+                    m_demoCtx.RenderElementSection(ui);
+                }
 
-            const bool hasCtrlLayout = DemoContext::HasCtrlLayoutCategory(m_selectedCategory);
-            bool collapsedOpen = false;
-            guikit::AccordionOptions ctrlLayoutAccOpts{
-                .label = "CONTROL LAYOUT",
-                .defaultOpen = false,
-                .size = guikit::UiSize::Sm,
-                .disabled = !hasCtrlLayout
-            };
-            if (!hasCtrlLayout) {
-                ctrlLayoutAccOpts.badge = {"Fit", guikit::UiVariant::Secondary};
-            }
-            if (auto ctrlLayoutAcc = guikit::Accordion(ui,
-                hasCtrlLayout ? m_demoCtx.ctrlLayoutOpen : collapsedOpen,
-                ctrlLayoutAccOpts
-            )) {
-                m_demoCtx.RenderControlLayoutSection(ui, m_selectedCategory);
-            }
+                if (auto elemLayoutAcc = guikit::Accordion(ui, {
+                    .label = "ELEMENT LAYOUT",
+                    .defaultOpen = false,
+                    .size = guikit::UiSize::Sm
+                })) {
+                    m_demoCtx.RenderElementLayoutSection(ui, m_selectedCategory);
+                }
 
-            if (auto ctrlStyleAcc = guikit::Accordion(ui, {
-                .label = "CONTROL STYLE",
-                .defaultOpen = false,
-                .size = guikit::UiSize::Sm
-            })) {
-                m_demoCtx.RenderControlStyleSection(ui, m_selectedCategory);
-            }
+                const bool hasCtrlLayout = DemoContext::HasCtrlLayoutCategory(m_selectedCategory);
+                bool collapsedOpen = false;
+                guikit::AccordionOptions ctrlLayoutAccOpts{
+                    .label = "CONTROL LAYOUT",
+                    .defaultOpen = false,
+                    .size = guikit::UiSize::Sm,
+                    .disabled = !hasCtrlLayout
+                };
+                if (!hasCtrlLayout) {
+                    ctrlLayoutAccOpts.badge = {"Fit", guikit::UiVariant::Secondary};
+                }
+                if (auto ctrlLayoutAcc = guikit::Accordion(ui,
+                    hasCtrlLayout ? m_demoCtx.ctrlLayoutOpen : collapsedOpen,
+                    ctrlLayoutAccOpts
+                )) {
+                    m_demoCtx.RenderControlLayoutSection(ui, m_selectedCategory);
+                }
 
-            if (auto specAcc = guikit::Accordion(ui, {
-                .label = "CONTROL SPECIFIC",
-                .badge = {CategoryControlName(m_selectedCategory), guikit::UiVariant::Secondary},
-                .defaultOpen = true,
-                .size = guikit::UiSize::Sm
-            })) {
+                if (auto ctrlStyleAcc = guikit::Accordion(ui, {
+                    .label = "CONTROL STYLE",
+                    .defaultOpen = false,
+                    .size = guikit::UiSize::Sm
+                })) {
+                    m_demoCtx.RenderControlStyleSection(ui, m_selectedCategory);
+                }
+
+                if (auto specAcc = guikit::Accordion(ui, {
+                    .label = "CONTROL SPECIFIC",
+                    .badge = {CategoryControlName(m_selectedCategory), guikit::UiVariant::Secondary},
+                    .defaultOpen = true,
+                    .size = guikit::UiSize::Sm
+                })) {
+                    DispatchInspector(ui, m_selectedCategory, m_demoCtx);
+                }
+            } else {
                 DispatchInspector(ui, m_selectedCategory, m_demoCtx);
             }
-        } else {
-            DispatchInspector(ui, m_selectedCategory, m_demoCtx);
         }
     }
 }

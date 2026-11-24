@@ -13,7 +13,6 @@ struct KnobDemoState {
     keel::u32 tickCount = 11;
     bool showValue = true;
     guikit::Placement valuePlacement = guikit::Placement::Bottom;
-    bool rackDemo = false;
 
     // 4-Knob Rack Strip state
     keel::f32 rackGainDb = 3.5f;
@@ -25,13 +24,6 @@ KnobDemoState s_state;
 } // namespace
 
 void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = guikit::Element(ui, {
-        .label = "4-Knob Channel Strip Preview",
-        .description = "Preview 4-knob studio rack strip vs single Knob"
-    })) {
-        if (guikit::Switch(ui, s_state.rackDemo).changed) ui.InvalidateAll();
-    }
-
     if (auto el = guikit::Element(ui, {
         .label = "Bipolar Center-Zero Sweep",
         .description = "Fill arc from 12 o'clock center (-50..+50)"
@@ -78,9 +70,10 @@ void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
+    const bool rackDemo = (ctx.GetDemoVariant(NavCategory::ControlKnob) == 1u);
     const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
 
-    if (s_state.rackDemo) {
+    if (rackDemo) {
         if (auto card = guikit::Card(ui, {
             .gap = 16.0f,
             .padding = guikit::Padding::All(18.0f),

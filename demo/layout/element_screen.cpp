@@ -12,7 +12,6 @@ enum class ElementSlotPreset : keel::u8 {
 };
 
 struct ElementStudioState {
-    ElementSlotPreset slotPreset = ElementSlotPreset::InputField;
     keel::usize layoutIdx = 0; // 0 = Auto, 1 = Stacked, 2 = Top, 3 = Bottom, 4 = Leading, 5 = Trailing
     guikit::UiSize elemSize = guikit::UiSize::Md;
     guikit::Align align = guikit::Align::Start;
@@ -133,23 +132,10 @@ keel::String FormatSlotControlCode(ElementSlotPreset preset) {
 
 } // namespace
 
-void RenderElementInspector(guikit::Context& ui, DemoContext&) {
-    static constexpr keel::StaticArray<keel::StringRef, 4> kSlotNames = {
-        "InputField (Stretch)",
-        "Switch (Compact)",
-        "Composite Row",
-        "Standalone (No Slot)"
-    };
-    keel::usize presetIdx = keel::as<keel::usize>(s_state.slotPreset);
-    if (auto el = guikit::Element(ui, {.label = "Control Slot"})) {
-        if (guikit::Select(ui, presetIdx, kSlotNames).changed) {
-            s_state.slotPreset = keel::from_underlying<ElementSlotPreset>(presetIdx);
-            ui.InvalidateAll();
-        }
-    }
-
+void RenderElementInspector(guikit::Context& ui, DemoContext& ctx) {
+    const auto slotPreset = keel::from_underlying<ElementSlotPreset>(ctx.GetDemoVariant(NavCategory::LayoutElement));
     const auto explicitLayout = ResolveExplicitLayout();
-    const guikit::ElementLayout effLayout = explicitLayout.value_or(DefaultSlotLayout(s_state.slotPreset));
+    const guikit::ElementLayout effLayout = explicitLayout.value_or(DefaultSlotLayout(slotPreset));
     if (auto el = guikit::Element(ui, {
         .label = "Layout",
         .badge = {
@@ -212,20 +198,22 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
     }
 }
 
-void RenderElementStage(guikit::Context& ui, DemoContext&) {
+void RenderElementStage(guikit::Context& ui, DemoContext& ctx) {
+    const auto slotPreset = keel::from_underlying<ElementSlotPreset>(ctx.GetDemoVariant(NavCategory::LayoutElement));
     const guikit::ElementOptions opts = BuildElementOptions();
-    if (s_state.slotPreset == ElementSlotPreset::Standalone) {
+    if (slotPreset == ElementSlotPreset::Standalone) {
         guikit::Element(ui, opts);
     } else if (auto el = guikit::Element(ui, opts)) {
-        RenderSlotControl(ui, s_state.slotPreset);
+        RenderSlotControl(ui, slotPreset);
     }
 }
 
-keel::String GenerateElementCode(const DemoContext&) {
+keel::String GenerateElementCode(const DemoContext& ctx) {
+    const auto slotPreset = keel::from_underlying<ElementSlotPreset>(ctx.GetDemoVariant(NavCategory::LayoutElement));
     keel::String elemOpen = keel::format(
         "{}guikit::Element(ui, {{\n"
         "    .label = \"{}\"",
-        (s_state.slotPreset == ElementSlotPreset::Standalone) ? "" : "if (auto el = ",
+        (slotPreset == ElementSlotPreset::Standalone) ? "" : "if (auto el = ",
         kSampleLabel
     );
 
@@ -260,12 +248,12 @@ keel::String GenerateElementCode(const DemoContext&) {
         elemOpen.append(",\n    .disabled = true");
     }
 
-    if (s_state.slotPreset == ElementSlotPreset::Standalone) {
+    if (slotPreset == ElementSlotPreset::Standalone) {
         elemOpen.append("\n});");
         return elemOpen;
     }
     elemOpen.append("\n})) {\n");
-    const keel::String slotCode = FormatSlotControlCode(s_state.slotPreset);
+    const keel::String slotCode = FormatSlotControlCode(slotPreset);
     AppendIndentedLines(elemOpen, slotCode.as_ref(), "    ");
     elemOpen.push_back('}');
     return elemOpen;

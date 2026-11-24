@@ -4,23 +4,15 @@ namespace guikit::demo {
 
 namespace {
 struct RadioState {
-    bool groupDemo = true;
     keel::i32 selectedIdx = 0;
     bool singleChecked = true;
 };
 RadioState s_state;
 } // namespace
 
-void RenderRadioInspector(guikit::Context& ui, DemoContext&) {
-    if (auto el = guikit::Element(ui, {
-        .label = "3-Option Radio Group",
-        .description = "Preview mutually exclusive group vs single Radio"
-    })) {
-        if (guikit::Switch(ui, s_state.groupDemo).changed) {
-            ui.InvalidateAll();
-        }
-    }
-    if (s_state.groupDemo) {
+void RenderRadioInspector(guikit::Context& ui, DemoContext& ctx) {
+    const bool groupDemo = (ctx.GetDemoVariant(NavCategory::ControlRadio) == 0u);
+    if (groupDemo) {
         static constexpr keel::StaticArray<keel::StringRef, 3> optNames = {"Option A", "Option B", "Option C"};
         keel::usize idx = keel::as<keel::usize>(keel::clamp(s_state.selectedIdx, 0, 2));
         if (auto el = guikit::Element(ui, {.label = "Active Selection"})) {
@@ -39,12 +31,13 @@ void RenderRadioInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
+    const bool groupDemo = (ctx.GetDemoVariant(NavCategory::ControlRadio) == 0u);
     guikit::RadioOptions ctrlOpts{};
     ctrlOpts.disabled = ctx.elemDisabled;
     ctrlOpts.size = ctx.controlsSize;
     ctrlOpts.color = ctx.GetControlColor();
 
-    if (s_state.groupDemo) {
+    if (groupDemo) {
         if (auto col = guikit::Column(ui, {.gap = 14.0f})) {
             const guikit::UiText lblA{
                 ctx.elemLabel.empty()
@@ -74,7 +67,8 @@ void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateRadioCode(const DemoContext& ctx) {
-    const keel::StringRef callHead = s_state.groupDemo
+    const bool groupDemo = (ctx.GetDemoVariant(NavCategory::ControlRadio) == 0u);
+    const keel::StringRef callHead = groupDemo
         ? "Radio(ui, selectedMode, 0"
         : "Radio(ui, radioSelected";
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);

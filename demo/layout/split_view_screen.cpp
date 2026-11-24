@@ -6,7 +6,6 @@ namespace guikit::demo {
 namespace {
 
 struct SplitViewDemoState {
-    keel::usize layoutModeIdx = 1;      // 0 = 3-Pane Nested, 1 = 2-Pane Single (default to clean 2-Pane)
     keel::usize orientationIdx = 0;     // 0 = Horizontal, 1 = Vertical
     keel::f32 primaryRatio = 0.35f;
     keel::f32 secondaryRatio = 0.55f;
@@ -20,10 +19,6 @@ struct SplitViewDemoState {
 };
 
 SplitViewDemoState s_split;
-
-constexpr keel::StaticArray<keel::StringRef, 2> kLayoutModes = {
-    "3-Pane Nested", "2-Pane Single"
-};
 
 constexpr keel::StaticArray<keel::StringRef, 2> kOrientations = {
     "Horizontal", "Vertical"
@@ -58,11 +53,7 @@ void RenderPanePlaceholder(
 } // namespace
 
 void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
-    if (auto el = guikit::Element(ui, {.label = "Topology", .layout = guikit::ElementLayout::Stacked})) {
-        if (guikit::Segmented(ui, s_split.layoutModeIdx, kLayoutModes).changed) {
-            ui.InvalidateAll();
-        }
-    }
+    const bool isNested = (ctx.GetDemoVariant(NavCategory::LayoutSplitView) == 0u);
 
     if (auto el = guikit::Element(ui, {.label = "Orientation", .layout = guikit::ElementLayout::Stacked})) {
         if (guikit::Segmented(ui, s_split.orientationIdx, kOrientations).changed) {
@@ -76,7 +67,7 @@ void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
-    if (s_split.layoutModeIdx == 0) {
+    if (isNested) {
         if (auto el = guikit::Element(ui, {.label = "Secondary Ratio"})) {
             if (guikit::Slider(ui, s_split.secondaryRatio, 0.0f, 1.0f, {.valueFormat = "%.2f", .step = 0.01f}).changed) {
                 ui.InvalidateAll();
@@ -138,7 +129,7 @@ void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
 }
 
 void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
-    (void)ctx;
+    const bool isNested = (ctx.GetDemoVariant(NavCategory::LayoutSplitView) == 0u);
     const auto& pal = ui.GetTheme().palette;
     const guikit::Orientation primaryOrient = (s_split.orientationIdx == 0)
         ? guikit::Orientation::Horizontal
@@ -182,7 +173,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
             .height = guikit::SizeMode::Stretch,
             .clipChildren = true
         })) {
-            if (s_split.layoutModeIdx == 0) {
+            if (isNested) {
                 const guikit::SplitViewOptions nestedOpts{
                     .orientation = secondaryOrient,
                     .defaultRatio = 0.55f,
@@ -235,9 +226,9 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateSplitViewCode(const DemoContext& ctx) {
-    (void)ctx;
+    const bool isNested = (ctx.GetDemoVariant(NavCategory::LayoutSplitView) == 0u);
     const keel::StringRef orientName = kOrientations[s_split.orientationIdx];
-    if (s_split.layoutModeIdx == 1) {
+    if (!isNested) {
         return keel::format(
             "float primaryRatio = {:.2f}f;\n\n"
             "if (auto split = guikit::SplitView(ui, primaryRatio, {{\n"

@@ -235,7 +235,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
     const keel::StringRef orientName = kOrientations[s_split.orientationIdx];
     if (s_split.layoutModeIdx == 1) {
         return keel::format(
-            "if (auto split = ui.SplitView(ratio, {{\n"
+            "if (auto split = guikit::SplitView(ui, ratio, {{\n"
             "    .orientation = guikit::Orientation::{},\n"
             "    .defaultRatio = 0.35f,\n"
             "    .minRatio = {:.2f}f,\n"
@@ -266,7 +266,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
 
     const keel::StringRef nestedOrientName = (s_split.orientationIdx == 0) ? "Vertical" : "Horizontal";
     return keel::format(
-        "if (auto split = ui.SplitView(primaryRatio, {{\n"
+        "if (auto split = guikit::SplitView(ui, primaryRatio, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .defaultRatio = 0.35f,\n"
         "    .sashSize = {:.0f}f,\n"
@@ -275,7 +275,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
         "}})) {{\n"
         "    if (auto first = split.First()) {{ /* Pane 1 */ }}\n"
         "    if (auto second = split.Second()) {{\n"
-        "        if (auto inner = ui.SplitView(secondaryRatio, {{\n"
+        "        if (auto inner = guikit::SplitView(ui, secondaryRatio, {{\n"
         "            .orientation = guikit::Orientation::{},\n"
         "            .defaultRatio = 0.55f,\n"
         "            .sashSize = {:.0f}f\n"

@@ -418,7 +418,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
     if (s_state.showActivityBar) {
         keel::format_into(
             out,
-            "if (auto bar = ui.ActivityBar(sidebarMode, {{\n"
+            "if (auto bar = guikit::ActivityBar(ui, sidebarMode, {{\n"
             "    .side = guikit::SidebarSide::{},\n"
             "    .style = guikit::ActivityBarStyle::{},\n"
             "    .color = guikit::StateColor::{}(){}\n"
@@ -443,7 +443,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
 
     keel::format_into(
         out,
-        "if (auto sb = ui.Sidebar(sidebarMode, {{\n"
+        "if (auto sb = guikit::Sidebar(ui, sidebarMode, {{\n"
         "    .side = guikit::SidebarSide::{},\n"
         "    .width = {},\n"
         "    .resizable = {},\n"
@@ -475,12 +475,12 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
     if (s_state.showBottomPanel) {
         keel::format_into(
             out,
-            "\n\nif (auto bp = ui.BottomPanel(showBottomPanel, {{\n"
+            "\n\nif (auto bp = guikit::BottomPanel(ui, showBottomPanel, {{\n"
             "    .height = 180.0f,\n"
             "    .resizable = {},\n"
             "    .allowCollapse = {}\n"
             "}})) {{\n"
-            "    if (auto tb = ui.Toolbar({{.style = guikit::ToolbarStyle::Header}})) {{\n"
+            "    if (auto tb = guikit::Toolbar(ui, {{.style = guikit::ToolbarStyle::Header}})) {{\n"
             "        tb.Item(activeTab, 0, {{.text = \"Output\", .icon = guikit::Icon::Play()}});\n"
             "        tb.Spacer();\n"
             "        if (tb.Action({{.icon = guikit::Icon::Close(), .square = true}}).clicked) showBottomPanel = false;\n"
@@ -495,7 +495,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
     if (s_state.showStatusBar) {
         keel::format_into(
             out,
-            "\n\nif (auto sb = ui.StatusBar({{.style = guikit::StatusBarStyle::{}}})) {{\n"
+            "\n\nif (auto sb = guikit::StatusBar(ui, {{.style = guikit::StatusBarStyle::{}}})) {{\n"
             "    sb.Item({{.text = \"Ready\", .dotColor = theme.variants.success.base}});\n"
             "    sb.Spacer();\n"
             "    if (sb.Action({{.text = \"Bottom Panel\", .active = showBottomPanel}}).clicked) {{\n"

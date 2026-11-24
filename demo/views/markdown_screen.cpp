@@ -88,7 +88,7 @@ keel::StringRef CodePaletteExpr(keel::usize idx) noexcept {
 constexpr keel::StringRef kDemoMarkdownDoc =
 R"(# GuiKit Rich Markdown Engine
 
-Welcome to **GuiKit's** native vector `ui.Markdown` viewer! Everything is parsed into a lightweight cached AST and rendered at **60+ FPS** via *ThorVG* with crisp typography, **bold**, *italic*, ~~strikethrough~~, `inline code` pills, and interactive links like [https://github.com/guikit](https://github.com/guikit).
+Welcome to **GuiKit's** native vector `guikit::Markdown` viewer! Everything is parsed into a lightweight cached AST and rendered at **60+ FPS** via *ThorVG* with crisp typography, **bold**, *italic*, ~~strikethrough~~, `inline code` pills, and interactive links like [https://github.com/guikit](https://github.com/guikit).
 
 > [!TIP]
 > Hold **Ctrl + MouseWheel** (or press `Ctrl+=` / `Ctrl+-` / `Ctrl+0`) to smoothly zoom, click and drag to **select text** across blocks, press `Ctrl+C` to copy, or press `Ctrl+F` to search!
@@ -101,7 +101,7 @@ Welcome to **GuiKit's** native vector `ui.Markdown` viewer! Everything is parsed
 
 ```cpp
 // C++20: Autonomous 2D World Camera & Embedded Assets
-if (auto scene = ui.Scene({.worldSize = {1600.0f, 1000.0f}})) {
+if (auto scene = guikit::Scene(ui, {.worldSize = {1600.0f, 1000.0f}})) {
     scene.DrawImage("assets/images/lena.png", {0, 0, 512, 512});
     const guikit::Rect visible = scene.GetVisibleWorldRect();
 }
@@ -120,7 +120,7 @@ end
 
 ```json
 {
-  "widget": "ui.Markdown",
+  "widget": "guikit::Markdown",
   "zoomRange": [0.5, 3.0],
   "sharedHighlighter": true,
   "features": ["Selection", "Copy", "Find", "TaskLists"]
@@ -137,8 +137,8 @@ end
 | Component | Layer | Coordinate Space | Responsibility |
 | :--- | :---: | :---: | :--- |
 | `Keymap` | Core | Input Dispatch | Configurable `KeyAction` bindings |
-| `ui.TextArea` | Widget | Line Virtualized | IDE Code Editor & Syntax Engine |
-| `ui.Markdown` | Widget | Flow Layout | Rich AST Document Viewer |
+| `guikit::TextArea` | Widget | Line Virtualized | IDE Code Editor & Syntax Engine |
+| `guikit::Markdown` | Widget | Flow Layout | Rich AST Document Viewer |
 
 > [!WARNING]
 > Hover over any `[link](...)` to preview its target URL tooltip, or click **Copy** on any code block above!
@@ -301,8 +301,8 @@ keel::String GenerateMarkdownCode(const DemoContext& ctx) {
         : keel::FixedString<32>("keel::kNullOpt");
 
     return keel::format(
-        "if (auto scroll = ui.ScrollArea()) {{\n"
-        "    auto res = ui.Markdown(markdownSource, {{\n"
+        "if (auto scroll = guikit::ScrollArea(ui)) {{\n"
+        "    auto res = guikit::Markdown(ui, markdownSource, {{\n"
         "        .allowZoom = true,\n"
         "        .zoom = &zoomFactor, // {:.2f}x\n"
         "        .bodyFontSize = {:.1f}f,\n"

@@ -243,7 +243,7 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateMenuBarCode(const DemoContext&) {
     return keel::format(
-        "if (auto mb = ui.MenuBar({{.style = guikit::MenuBarStyle::{}}})) {{\n"
+        "if (auto mb = guikit::MenuBar(ui, {{.style = guikit::MenuBarStyle::{}}})) {{\n"
         "    if (auto file = mb.Menu(\"File\")) {{\n"
         "        if (file.Item(\"New\", {{.shortcut = \"Ctrl+N\", .icon = guikit::Icon::Plus()}})) {{}}\n"
         "        if (auto exp = file.SubMenu(\"Export\", {{.icon = guikit::Icon::Save()}})) {{\n"
@@ -259,7 +259,7 @@ keel::String GenerateMenuBarCode(const DemoContext&) {
         "        view.Radio(\"Standard\", densityIdx, 1);\n"
         "    }}\n"
         "    mb.Spacer();\n"
-        "    ui.Tag(\"Ready\", {{.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Xs}});\n"
+        "    guikit::Tag(ui, \"Ready\", {{.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Xs}});\n"
         "}}",
         StyleName(s_mb.style)
     );

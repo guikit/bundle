@@ -75,14 +75,14 @@ void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateRadioCode(const DemoContext& ctx) {
     const keel::StringRef callHead = s_state.groupDemo
-        ? "Radio(selectedMode, 0"
-        : "Radio(radioSelected";
+        ? "Radio(ui, selectedMode, 0"
+        : "Radio(ui, radioSelected";
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.{}, {{\n"
+        "guikit::{}, {{\n"
         "    .disabled = {},\n"
         "{}"
         "    .color = {}\n"

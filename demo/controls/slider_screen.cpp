@@ -187,7 +187,7 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
 
     if (s_state.modeIdx == 0) {
         const keel::String ctrl = keel::format(
-            "ui.Slider(gainValue, 0.0f, 100.0f, {{\n"
+            "guikit::Slider(ui, gainValue, 0.0f, 100.0f, {{\n"
             "    .orientation = guikit::Orientation::{},\n"
             "    .textLeft = \"{}\",\n"
             "    .textRight = \"{}\",\n"
@@ -217,7 +217,7 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
     }
     if (s_state.modeIdx == 1) {
         const keel::String ctrl = keel::format(
-            "ui.StepSlider(presetIndex, stepItems, {{\n"
+            "guikit::StepSlider(ui, presetIndex, stepItems, {{\n"
             "    .orientation = guikit::Orientation::{},\n"
             "    .textLeft = \"{}\",\n"
             "    .textRight = \"{}\",\n"
@@ -252,7 +252,7 @@ keel::String GenerateSliderCode(const DemoContext& ctx) {
         return out;
     }
     const keel::String ctrl = keel::format(
-        "ui.RangeSlider(bandLow, bandHigh, 0.0f, 100.0f, {{\n"
+        "guikit::RangeSlider(ui, bandLow, bandHigh, 0.0f, 100.0f, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .textLeft = \"{}\",\n"
         "    .textRight = \"{}\",\n"

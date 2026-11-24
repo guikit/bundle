@@ -315,7 +315,7 @@ keel::String GenerateImageViewCode(const DemoContext& /*ctx*/) {
         "params.channels[0].level  = {:.1f}f;\n"
         "params.channels[0].gamma  = {:.2f}f;\n"
         "params.channels[0].invert = {};\n\n"
-        "auto resp = ui.ImageView(img, params, {{\n"
+        "auto resp = guikit::ImageView(ui, img, params, {{\n"
         "    .showSidebar = {},\n"
         "    .sidebarOnRight = {},\n"
         "    .sidebarWidth = {:.0f}f,\n"

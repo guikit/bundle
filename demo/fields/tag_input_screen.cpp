@@ -106,7 +106,7 @@ void RenderTagInputInspector(guikit::Context& ui, DemoContext&) {
             .text = "Add Sample Tag",
             .icon = guikit::Icon::Plus(),
             .width = guikit::SizeMode::Stretch,
-            .background = guikit::StateColor::Secondary()
+            .variant = guikit::UiVariant::Secondary
         }).clicked) {
             const keel::StringRef candidate = kSampleTags[s_state.sampleCounter % kSampleTags.size()];
             ++s_state.sampleCounter;
@@ -119,7 +119,7 @@ void RenderTagInputInspector(guikit::Context& ui, DemoContext&) {
             .text = "Reset Default Tags",
             .icon = guikit::Icon::Refresh(),
             .width = guikit::SizeMode::Stretch,
-            .background = guikit::StateColor::Ghost()
+            .style = guikit::ButtonStyle::Ghost
         }).clicked) {
             s_state.tags.assign({"C++20", "Vulkan", "Immediate-Mode", "Zero-Alloc"});
             ui.InvalidateAll();
@@ -144,6 +144,8 @@ void RenderTagInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
+        opts.style = ctx.ctrlFieldStyle;
+        opts.status = ctx.ctrlFieldStatus;
         opts.background = ctx.GetControlBackground(NavCategory::FieldTagInput);
         opts.border = ctx.GetCtrlBorder();
         guikit::TagInput(ui, s_state.tags, opts);
@@ -156,7 +158,7 @@ keel::String GenerateTagInputCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.TagInput(tags, {{\n"
+        "guikit::TagInput(ui, tags, {{\n"
         "    .placeholder = \"{}\",\n"
         "    .prefix = \"{}\",\n"
         "    .tagVariant = guikit::UiVariant::{},\n"
@@ -171,6 +173,8 @@ keel::String GenerateTagInputCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
+        "    .status = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
         "}});",
@@ -188,6 +192,8 @@ keel::String GenerateTagInputCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
+        FieldStyleEnumName(ctx.ctrlFieldStyle),
+        VariantName(ctx.ctrlFieldStatus),
         ctx.FormatControlBackgroundCode(NavCategory::FieldTagInput),
         ctx.FormatCtrlBorderCode()
     );

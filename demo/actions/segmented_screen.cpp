@@ -20,7 +20,7 @@ SegmentedDemoState s_state;
 void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
     if (auto el = guikit::Element(ui, {
         .label = "Multi-Toggle Mask Mode",
-        .description = "Toggle multiple segments independently (ui.SegmentedMask)"
+        .description = "Toggle multiple segments independently (guikit::SegmentedMask)"
     })) {
         if (guikit::Switch(ui, s_state.multiSelect).changed) ui.InvalidateAll();
     }

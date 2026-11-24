@@ -116,7 +116,7 @@ void RenderTagStage(guikit::Context& ui, DemoContext& ctx) {
 keel::String GenerateTagCode(const DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
     const keel::String ctrl = keel::format(
-        "if (auto r = ui.Tag(\"{}\", {{\n"
+        "if (auto r = guikit::Tag(ui, \"{}\", {{\n"
         "    .variant = guikit::UiVariant::{},\n"
         "    .style = guikit::TagStyle::{},\n"
         "    .size = guikit::UiSize::{},\n"

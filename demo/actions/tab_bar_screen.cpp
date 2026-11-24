@@ -84,7 +84,7 @@ keel::String GenerateTabBarCode(const DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, 4> kStyleCodeNames = {"Underline", "Pill", "Card", "Folder"};
     const keel::usize styleIdx = keel::min<keel::usize>(keel::as<keel::usize>(s_state.style), 3);
     return keel::format(
-        "ui.TabBar(activeTab, tabItems, {{\n"
+        "guikit::TabBar(ui, activeTab, tabItems, {{\n"
         "    .style = guikit::TabBarStyle::{},\n"
         "    .showSeparator = {},\n"
         "    .fullWidth = {},\n"

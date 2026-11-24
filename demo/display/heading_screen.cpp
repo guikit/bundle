@@ -163,7 +163,7 @@ void RenderHeadingStage(guikit::Context& ui, DemoContext&) {
 
 keel::String GenerateHeadingCode(const DemoContext&) {
     keel::String stmt = keel::format(
-        "ui.Heading({{\n"
+        "guikit::Heading(ui, {{\n"
         "    .label = \"{}\"",
         kSampleTitle
     );
@@ -210,7 +210,7 @@ keel::String GenerateHeadingCode(const DemoContext&) {
     }
 
     keel::String out = keel::String::from(
-        "if (auto card = ui.Card({.minWidth = 340.0f, .maxWidth = 560.0f, .gap = 14.0f, .padding = guikit::Padding::All(18.0f)})) {\n"
+        "if (auto card = guikit::Card(ui, {.minWidth = 340.0f, .maxWidth = 560.0f, .gap = 14.0f, .padding = guikit::Padding::All(18.0f)})) {\n"
     );
     AppendIndentedLines(out, stmt.as_ref(), "    ");
     out.push_back('}');

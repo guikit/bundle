@@ -61,7 +61,7 @@ void RenderSchematicStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateSchematicCode(const DemoContext& ctx) {
     return keel::format(
-        "if (auto scene = ui.Scene({{\n"
+        "if (auto scene = guikit::Scene(ui, {{\n"
         "    .worldSize = guikit::Vec2{{2200.0f, 920.0f}},\n"
         "    .backgroundStyle = guikit::SceneBackground::{},\n"
         "    .gridStep = {:.1f}f,\n"

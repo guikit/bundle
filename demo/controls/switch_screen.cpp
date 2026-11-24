@@ -49,7 +49,7 @@ keel::String GenerateSwitchCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.Switch(switchState, {{\n"
+        "guikit::Switch(ui, switchState, {{\n"
         "    .textLeft = \"{}\",\n"
         "    .textRight = \"{}\",\n"
         "    .symmetric = {},\n"

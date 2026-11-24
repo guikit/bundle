@@ -115,15 +115,15 @@ keel::String FormatSlotControlCode(ElementSlotPreset preset) {
     switch (preset) {
         case ElementSlotPreset::InputField:
             return keel::String::from(
-                "ui.InputField(endpointHost, {.placeholder = \"host:port\", .clearable = true});"
+                "guikit::InputField(ui, endpointHost, {.placeholder = \"host:port\", .clearable = true});"
             );
         case ElementSlotPreset::Switch:
-            return keel::String::from("ui.Switch(enabled);");
+            return keel::String::from("guikit::Switch(ui, enabled);");
         case ElementSlotPreset::CompositeRow:
             return keel::String::from(
-                "if (auto row = ui.Row({.gap = 8.0f, .align = guikit::Alignment::Center})) {\n"
-                "    ui.InputField(searchQuery, {.placeholder = \"Filter symbol...\", .prefix = {guikit::Icon::Search()}, .clearable = true});\n"
-                "    ui.Button({.text = \"Apply\", .color = guikit::StateColor::Primary()});\n"
+                "if (auto row = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {\n"
+                "    guikit::InputField(ui, searchQuery, {.placeholder = \"Filter symbol...\", .prefix = {guikit::Icon::Search()}, .clearable = true});\n"
+                "    guikit::Button(ui, {.text = \"Apply\", .variant = guikit::UiVariant::Primary});\n"
                 "}"
             );
         case ElementSlotPreset::Standalone:
@@ -138,7 +138,7 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
     static constexpr keel::StaticArray<keel::StringRef, 4> kSlotNames = {
         "InputField (Stretch)",
         "Switch (Compact)",
-        "Composite ui.Row",
+        "Composite Row",
         "Standalone (No Slot)"
     };
     keel::usize presetIdx = keel::as<keel::usize>(s_state.slotPreset);
@@ -245,7 +245,7 @@ void RenderElementStage(guikit::Context& ui, DemoContext&) {
 
 keel::String GenerateElementCode(const DemoContext&) {
     keel::String elemOpen = keel::format(
-        "{}ui.Element({{\n"
+        "{}guikit::Element(ui, {{\n"
         "    .label = \"{}\"",
         (s_state.slotPreset == ElementSlotPreset::Standalone) ? "" : "if (auto el = ",
         kSampleLabel
@@ -299,7 +299,7 @@ keel::String GenerateElementCode(const DemoContext&) {
     }
 
     keel::String out = keel::String::from(
-        "if (auto card = ui.Card({.minWidth = 340.0f, .maxWidth = 560.0f, .gap = 14.0f, .padding = guikit::Padding::All(18.0f)})) {\n"
+        "if (auto card = guikit::Card(ui, {.minWidth = 340.0f, .maxWidth = 560.0f, .gap = 14.0f, .padding = guikit::Padding::All(18.0f)})) {\n"
     );
     AppendIndentedLines(out, stmt.as_ref(), "    ");
     out.push_back('}');

@@ -213,7 +213,7 @@ keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
 
     if (s_state.channelModeIdx == 1) {
         const keel::String ctrl = keel::format(
-            "ui.LevelMeter(levelsDb, -60.0f, 0.0f, {{\n"
+            "guikit::LevelMeter(ui, levelsDb, -60.0f, 0.0f, {{\n"
             "    .orientation = guikit::Orientation::{},\n"
             "    .segments = {}u,\n"
             "    .multiZoneColor = {},\n"
@@ -255,7 +255,7 @@ keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
     }
 
     const keel::String ctrl = keel::format(
-        "ui.LevelMeter(signalDb, -60.0, 0.0, {{\n"
+        "guikit::LevelMeter(ui, signalDb, -60.0, 0.0, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .segments = {}u,\n"
         "    .multiZoneColor = {},\n"

@@ -427,7 +427,8 @@ CodeEditorState s_state;
 
 } // namespace
 
-void RenderCodeEditorInspector(guikit::Context& ui, DemoContext&) {
+void RenderCodeEditorInspector(guikit::Context& ui, DemoContext& ctx) {
+    ctx.RenderFieldStyleControls(ui);
     if (auto el = guikit::Element(ui, {.label = "Language Preset"})) {
         if (guikit::Select(ui, s_state.syntaxMode, CodeEditorState::syntaxLabels).changed) {
             s_state.LoadPreset(s_state.syntaxMode);
@@ -560,6 +561,8 @@ void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
             .syntaxPalette = synPalette,
             .size = ctx.controlsSize,
             .height = guikit::SizeMode::Stretch,
+            .style = ctx.ctrlFieldStyle,
+            .status = ctx.ctrlFieldStatus,
             .background = guikit::StateColor{},
             .showMinimap = s_state.showMinimap,
             .showStatusBar = s_state.showStatusBar,
@@ -618,10 +621,12 @@ keel::String GenerateCodeEditorCode(const DemoContext& ctx) {
         : keel::String{};
 
     return keel::format(
-        "auto resp = ui.TextArea(sourceBuffer, {{\n"
+        "auto resp = guikit::TextArea(ui, sourceBuffer, {{\n"
         "    .showLineNumbers = {},\n"
         "    .syntax = {},\n"
         "    .syntaxPalette = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
+        "    .status = guikit::UiVariant::{},\n"
         "{}"
         "    .height = guikit::SizeMode::Stretch,\n"
         "    .showMinimap = {},\n"
@@ -643,6 +648,8 @@ keel::String GenerateCodeEditorCode(const DemoContext& ctx) {
         s_state.lineNumbers ? "true" : "false",
         synLine,
         palLine,
+        FieldStyleEnumName(ctx.ctrlFieldStyle),
+        VariantName(ctx.ctrlFieldStatus),
         sizeLine,
         s_state.showMinimap ? "true" : "false",
         s_state.showStatusBar ? "true" : "false",

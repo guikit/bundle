@@ -5,9 +5,10 @@ namespace guikit::demo {
 namespace {
 
 struct CardDemoState {
+    guikit::SurfaceRole surface = guikit::SurfaceRole::Flat;
     bool fullWidth = false;
     keel::f32 minWidth = 280.0f;
-    keel::usize bgIdx = 1;     // 0=None/Off, 1=Surface, 2=Primary, 3=Secondary, 4=Success, 5=Warning, 6=Danger, 7=Info, 8=Ghost
+    keel::usize bgIdx = 0;     // 0=Default(Theme), 1=None/Transparent, 2=Surface, 3..9=Semantic
     keel::usize borderIdx = 0; // 0=Default, 1=Primary, 2=Secondary, 3=Success, 4=Warning, 5=Danger, 6=Info, 7=Ghost
     bool showHeader = true;
     bool showDivider = true;
@@ -15,22 +16,43 @@ struct CardDemoState {
 
 CardDemoState s_card;
 
-guikit::StateColor ResolveCardBg() noexcept {
-    return BgPresetToStateColor(s_card.bgIdx, true);
+constexpr keel::StaticArray<keel::StringRef, 4> kSurfaceRoleNames = {
+    "Flat", "Raised", "Sunken", "None"
+};
+
+guikit::SurfaceRole SurfaceRoleFromIdx(keel::usize idx) noexcept {
+    switch (idx) {
+        case 1:  return guikit::SurfaceRole::Raised;
+        case 2:  return guikit::SurfaceRole::Sunken;
+        case 3:  return guikit::SurfaceRole::None;
+        default: return guikit::SurfaceRole::Flat;
+    }
 }
 
-keel::StringRef CardBgCodeName() noexcept {
-    switch (s_card.bgIdx) {
-        case 0: return "guikit::StateColor::None()";
-        case 2: return "guikit::StateColor::Primary()";
-        case 3: return "guikit::StateColor::Secondary()";
-        case 4: return "guikit::StateColor::Success()";
-        case 5: return "guikit::StateColor::Warning()";
-        case 6: return "guikit::StateColor::Danger()";
-        case 7: return "guikit::StateColor::Info()";
-        case 8: return "guikit::StateColor::Ghost()";
-        default: return "guikit::StateColor::Surface()";
+keel::usize SurfaceRoleToIdx(guikit::SurfaceRole r) noexcept {
+    switch (r) {
+        case guikit::SurfaceRole::Raised: return 1u;
+        case guikit::SurfaceRole::Sunken: return 2u;
+        case guikit::SurfaceRole::None:   return 3u;
+        default:                          return 0u;
     }
+}
+
+constexpr keel::StringRef SurfaceRoleCodeName(guikit::SurfaceRole r) noexcept {
+    switch (r) {
+        case guikit::SurfaceRole::Raised: return "Raised";
+        case guikit::SurfaceRole::Sunken: return "Sunken";
+        case guikit::SurfaceRole::None:   return "None";
+        default:                          return "Flat";
+    }
+}
+
+guikit::StateColor ResolveCardBg() noexcept {
+    return BgPresetToStateColor(s_card.bgIdx);
+}
+
+keel::String CardBgCodeName() {
+    return BgPresetToCode(s_card.bgIdx);
 }
 
 guikit::StateColor ResolveCardBorderColor() noexcept {
@@ -62,6 +84,13 @@ keel::StringRef CardBorderCodeName() noexcept {
 } // namespace
 
 void RenderCardInspector(guikit::Context& ui, DemoContext& ctx) {
+    keel::usize roleIdx = SurfaceRoleToIdx(s_card.surface);
+    if (auto el = guikit::Element(ui, {.label = "Surface Role"})) {
+        if (guikit::Segmented(ui, roleIdx, kSurfaceRoleNames).changed) {
+            s_card.surface = SurfaceRoleFromIdx(roleIdx);
+            ui.InvalidateAll();
+        }
+    }
     if (auto el = guikit::Element(ui, {.label = "Corner Radius"})) {
         static constexpr keel::StaticArray<keel::StringRef, 2> kRadiusVariants = {{"Auto", "%.0f px"}};
         if (guikit::Slider(ui, ctx.cardRadius, -1.0f, 24.0f, {
@@ -132,7 +161,8 @@ void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
             .width = ctx.cardBorderWidth,
             .radius = (ctx.cardRadius >= 0.0f) ? keel::Optional<keel::f32>(ctx.cardRadius) : keel::kNullOpt,
             .color = ResolveCardBorderColor()
-        }
+        },
+        .surface = s_card.surface
     })) {
         if (s_card.showHeader) {
             guikit::Heading(ui, {
@@ -166,7 +196,8 @@ keel::String GenerateCardCode(const DemoContext& ctx) {
         "    .gap = {:.1f}f,\n"
         "    .padding = guikit::Padding::All({:.1f}f),\n"
         "    .background = {},\n"
-        "    .border = {}\n"
+        "    .border = {},\n"
+        "    .surface = guikit::SurfaceRole::{}\n"
         "}})) {{\n"
         "    guikit::Heading(ui, {{\n"
         "        .label = \"Card Container\",\n"
@@ -182,6 +213,7 @@ keel::String GenerateCardCode(const DemoContext& ctx) {
         ctx.cardPadding,
         CardBgCodeName(),
         borderCode,
+        SurfaceRoleCodeName(s_card.surface),
         s_card.showDivider ? "guikit::HeadingSeparator::Bottom" : "guikit::HeadingSeparator::None"
     );
 }

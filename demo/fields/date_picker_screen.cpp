@@ -63,7 +63,8 @@ void RenderDatePickerStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.status = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
+        opts.style = ctx.ctrlFieldStyle;
+        opts.status = ctx.ctrlFieldStatus;
         opts.background = ctx.GetControlBackground(navCat);
         opts.border = ctx.GetCtrlBorder();
         (void)guikit::DatePicker(ui, s_state.value, opts);
@@ -78,7 +79,7 @@ keel::String GenerateDatePickerCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.DatePicker(dateTimeValue, {{\n"
+        "guikit::DatePicker(ui, dateTimeValue, {{\n"
         "    .mode = guikit::DatePickerMode::{},\n"
         "    .showSeconds = {},\n"
         "    .showTodayButton = {},\n"
@@ -87,6 +88,7 @@ keel::String GenerateDatePickerCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
         "    .status = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
@@ -99,7 +101,8 @@ keel::String GenerateDatePickerCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
-        VariantName((ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant),
+        FieldStyleEnumName(ctx.ctrlFieldStyle),
+        VariantName(ctx.ctrlFieldStatus),
         ctx.FormatControlBackgroundCode(navCat),
         ctx.FormatCtrlBorderCode()
     );

@@ -202,7 +202,7 @@ keel::String GenerateProgressBarCode(const DemoContext& ctx) {
         : keel::FixedString<64>{};
 
     const keel::String ctrl = keel::format(
-        "ui.ProgressBar(progressValue, 0.0, 100.0, {{\n"
+        "guikit::ProgressBar(ui, progressValue, 0.0, 100.0, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .textLeft = \"{}\",\n"
         "    .textRight = \"{}\",\n"

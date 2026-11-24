@@ -434,7 +434,7 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
 
     keel::format_into(
         out,
-        "if (auto tree = ui.TreeView({{\n"
+        "if (auto tree = guikit::TreeView(ui, {{\n"
         "    .title = \"SCENE & ASSET HIERARCHY\",\n"
     );
     if (useCols) {
@@ -482,7 +482,7 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
                               bool defaultOpen,
                               keel::StringRef checkedVar,
                               keel::StringRef indVar) {
-        keel::format_into(out, "{}if (auto {} = ui.TreeItem({{\n", indent, varName);
+        keel::format_into(out, "{}if (auto {} = guikit::TreeItem(ui, {{\n", indent, varName);
         keel::format_into(out, "{}    .label = \"{}\",\n", indent, label);
         if (s_tree.showDescriptions && !desc.empty()) {
             keel::format_into(out, "{}    .description = \"{}\",\n", indent, desc);
@@ -519,11 +519,11 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
                    "        }\n");
     }
     if (useCols) {
-        out.append("        ui.Text(\"Viewport\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "        ui.Element({.badge = {\"5 nodes\", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});\n");
+        out.append("        guikit::Text(ui, \"Viewport\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "        guikit::Element(ui, {.badge = {\"5 nodes\", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
-        out.append("        ui.Switch(sceneActive);\n");
+        out.append("        guikit::Switch(ui, sceneActive);\n");
     }
     out.append("\n");
 
@@ -539,13 +539,13 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
                    "            }\n");
     }
     if (useCols) {
-        out.append("            ui.Text(\"PBR Group\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "            ui.Element({.badge = {\"2 passes\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
+        out.append("            guikit::Text(ui, \"PBR Group\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "            guikit::Element(ui, {.badge = {\"2 passes\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
         out.append(useCols
-            ? "            ui.Slider(envExposure, 0.0f, 2.5f, {.valueFormat = \"%.2f EV\"});\n"
-            : "            ui.Slider(envExposure, 0.0f, 2.5f, {.valueFormat = \"%.2f EV\", .width = 128.0f});\n");
+            ? "            guikit::Slider(ui, envExposure, 0.0f, 2.5f, {.valueFormat = \"%.2f EV\"});\n"
+            : "            guikit::Slider(ui, envExposure, 0.0f, 2.5f, {.valueFormat = \"%.2f EV\", .width = 128.0f});\n");
     }
     out.append("\n");
 
@@ -556,11 +556,11 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Eye()", false, "chkSun", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"6500K\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"HDR\", guikit::UiVariant::Warning}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"6500K\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"HDR\", guikit::UiVariant::Warning}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
-        out.append("                ui.Switch(sunEnabled);\n");
+        out.append("                guikit::Switch(ui, sunEnabled);\n");
     }
     out.append("            }\n\n");
 
@@ -570,13 +570,13 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Eye()", false, "chkFog", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"Raymarched\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"Froxel\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"Raymarched\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"Froxel\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
         out.append(useCols
-            ? "                ui.Slider(fogDensity, 0.0f, 100.0f, {.valueFormat = \"%.0f%%\"});\n"
-            : "                ui.Slider(fogDensity, 0.0f, 100.0f, {.valueFormat = \"%.0f%%\", .width = 110.0f});\n");
+            ? "                guikit::Slider(ui, fogDensity, 0.0f, 100.0f, {.valueFormat = \"%.0f%%\"});\n"
+            : "                guikit::Slider(ui, fogDensity, 0.0f, 100.0f, {.valueFormat = \"%.0f%%\", .width = 110.0f});\n");
     }
     out.append("            }\n");
     out.append("        }\n\n");
@@ -594,8 +594,8 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
                    "            }\n");
     }
     if (useCols) {
-        out.append("            ui.Text(\"DSP Bus\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "            ui.Element({.badge = {\"3 ch\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
+        out.append("            guikit::Text(ui, \"DSP Bus\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "            guikit::Element(ui, {.badge = {\"3 ch\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
     }
 
     appendItemOpts(
@@ -604,13 +604,13 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Play()", false, "chkSonar", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"750 kHz\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"128-Beam\", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"750 kHz\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"128-Beam\", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
         out.append(useCols
-            ? "                ui.Select(sonarModeIdx, kSonarModes);\n"
-            : "                ui.Select(sonarModeIdx, kSonarModes, {.width = 100.0f});\n");
+            ? "                guikit::Select(ui, sonarModeIdx, kSonarModes);\n"
+            : "                guikit::Select(ui, sonarModeIdx, kSonarModes, {.width = 100.0f});\n");
     }
     out.append("            }\n\n");
 
@@ -621,14 +621,14 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Play()", false, "chkWaterfall", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"2.4 GHz\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"LIVE\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"2.4 GHz\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"LIVE\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
         out.append("                // Multi-widget cell: Switch + Button inside a single column cell\n"
                    "                if (auto cell = wfItem.Cell()) {\n"
-                   "                    ui.Switch(wfTracking);\n"
-                   "                    if (ui.Button({.text = \"Calibrate\", .color = guikit::StateColor::Secondary()})) {\n"
+                   "                    guikit::Switch(ui, wfTracking);\n"
+                   "                    if (guikit::Button(ui, {.text = \"Calibrate\", .variant = guikit::UiVariant::Secondary})) {\n"
                    "                        ++calibrateCount;\n"
                    "                    }\n"
                    "                }\n");
@@ -641,11 +641,11 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Settings()", false, "chkImu", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"400 Hz\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"6-DOF\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"400 Hz\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"6-DOF\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
-        out.append("                ui.Switch(imuEnabled);\n");
+        out.append("                guikit::Switch(ui, imuEnabled);\n");
     }
     out.append("            }\n");
     out.append("        }\n");
@@ -663,8 +663,8 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
                    "        }\n");
     }
     if (useCols) {
-        out.append("        ui.Text(\"14.2 MB\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "        ui.Element({.badge = {\"Bundle\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
+        out.append("        guikit::Text(ui, \"14.2 MB\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "        guikit::Element(ui, {.badge = {\"Bundle\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
     }
 
     appendItemOpts(
@@ -679,8 +679,8 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
                    "            }\n");
     }
     if (useCols) {
-        out.append("            ui.Text(\"GLSL 330\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "            ui.Element({.badge = {\"2 files\", guikit::UiVariant::Secondary}, .width = guikit::SizeMode::Fit});\n");
+        out.append("            guikit::Text(ui, \"GLSL 330\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "            guikit::Element(ui, {.badge = {\"2 files\", guikit::UiVariant::Secondary}, .width = guikit::SizeMode::Fit});\n");
     }
 
     appendItemOpts(
@@ -689,8 +689,8 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Edit()", false, "chkShaderSonar", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"4.8 KB\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"OK\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"4.8 KB\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"OK\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
     }
     out.append("            }\n\n");
 
@@ -700,8 +700,8 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Edit()", false, "chkShaderWaterfall", ""
     );
     if (useCols) {
-        out.append("                ui.Text(\"6.1 KB\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                ui.Element({.badge = {\"OK\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"6.1 KB\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"OK\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
     }
     out.append("            }\n");
     out.append("        }\n\n");
@@ -712,8 +712,8 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
         "guikit::Icon::Settings()", false, "chkThemeJson", ""
     );
     if (useCols) {
-        out.append("            ui.Text(\"2.1 KB\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "            ui.Element({.badge = {\"JSON\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
+        out.append("            guikit::Text(ui, \"2.1 KB\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "            guikit::Element(ui, {.badge = {\"JSON\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
     }
     out.append("        }\n");
     out.append("    }\n");

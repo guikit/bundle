@@ -61,7 +61,7 @@ void DemoWindow::OnInit() {
     m_demoCtx.shellTheme = GetShellTheme();
     m_demoCtx.shellLightMode = IsShellLightMode();
     m_demoCtx.shellFloating = IsShellFloating();
-    SyncPreviewThemeFromStudio(m_demoCtx);
+    m_demoCtx.RebuildPreviewTheme();
 }
 
 void DemoWindow::OnResize(keel::i32 /*width*/, keel::i32 /*height*/) {
@@ -365,7 +365,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight),
             guikit::ThemePresetName(guikit::ThemePreset::Windows98)
         }};
-        keel::usize previewPresetIdx = keel::as<keel::usize>(GetStudioPreset());
+        keel::usize previewPresetIdx = keel::as<keel::usize>(m_demoCtx.studio.preset);
         if (previewPresetIdx >= guikit::kThemePresetCount) {
             previewPresetIdx = 0u;
         }
@@ -374,7 +374,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             .size = guikit::UiSize::Sm,
             .width = 140.0f
         }).changed) {
-            SelectStudioPreset(m_demoCtx, keel::from_underlying<guikit::ThemePreset>(previewPresetIdx));
+            m_demoCtx.SelectPreviewPreset(keel::from_underlying<guikit::ThemePreset>(previewPresetIdx));
             ui.InvalidateAll();
         }
 
@@ -384,13 +384,13 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
             guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist)
         }};
-        keel::usize previewChromeIdx = keel::as<keel::usize>(GetStudioChrome());
+        keel::usize previewChromeIdx = keel::as<keel::usize>(m_demoCtx.studio.chrome);
         if (guikit::Select(ui, previewChromeIdx, kPreviewChromeLabels, {
             .tooltip = "Preview Structural Chrome Style (synced with Theme Studio)",
             .size = guikit::UiSize::Sm,
             .width = 104.0f
         }).changed) {
-            SelectStudioChrome(m_demoCtx, keel::from_underlying<guikit::ChromeStyle>(previewChromeIdx));
+            m_demoCtx.SelectPreviewChrome(keel::from_underlying<guikit::ChromeStyle>(previewChromeIdx));
             ui.InvalidateAll();
         }
 
@@ -399,13 +399,13 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::FillStyleName(guikit::FillStyle::Soft),
             guikit::FillStyleName(guikit::FillStyle::Outline)
         }};
-        keel::usize previewFillIdx = keel::as<keel::usize>(GetStudioFillStyle());
+        keel::usize previewFillIdx = keel::as<keel::usize>(m_demoCtx.studio.fillStyle);
         if (guikit::Select(ui, previewFillIdx, kPreviewFillLabels, {
             .tooltip = "Preview Control Fill Style (synced with Theme Studio)",
             .size = guikit::UiSize::Sm,
             .width = 86.0f
         }).changed) {
-            SelectStudioFillStyle(m_demoCtx, keel::from_underlying<guikit::FillStyle>(previewFillIdx));
+            m_demoCtx.SelectPreviewFillStyle(keel::from_underlying<guikit::FillStyle>(previewFillIdx));
             ui.InvalidateAll();
         }
 
@@ -576,7 +576,7 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
                 case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::DisplayLevelMeter; break;
                 case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::ViewTable; break;
                 case 13:
-                    ToggleStudioDarkLight(m_demoCtx);
+                    m_demoCtx.TogglePreviewDarkLight();
                     break;
                 case 14:
                     m_demoCtx.previewShowCode = !m_demoCtx.previewShowCode;

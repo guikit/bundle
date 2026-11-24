@@ -46,7 +46,7 @@ keel::String GenerateCheckboxCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.Checkbox(checkState, {{\n"
+        "guikit::Checkbox(ui, checkState, {{\n"
         "    .indeterminate = {},\n"
         "    .disabled = {},\n"
         "{}"

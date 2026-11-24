@@ -106,7 +106,8 @@ void RenderSpinBoxStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.status = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
+        opts.style = ctx.ctrlFieldStyle;
+        opts.status = ctx.ctrlFieldStatus;
         opts.background = ctx.GetControlBackground(NavCategory::FieldSpinBox);
         opts.border = ctx.GetCtrlBorder();
         guikit::SpinBox(ui, s_state.val, opts);
@@ -126,7 +127,7 @@ keel::String GenerateSpinBoxCode(const DemoContext& ctx) {
         : keel::FixedString<64>{};
 
     const keel::String ctrl = keel::format(
-        "ui.SpinBox(centerFreqMhz, {{\n"
+        "guikit::SpinBox(ui, centerFreqMhz, {{\n"
         "    .prefix = \"{}\",\n"
         "    .suffix = \"{}\",\n"
         "    .valueFormat = \"%.1f\",\n"
@@ -143,6 +144,7 @@ keel::String GenerateSpinBoxCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
         "    .status = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
@@ -162,7 +164,8 @@ keel::String GenerateSpinBoxCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatControlWidthCode(),
         ctx.FormatControlHeightCode(),
-        VariantName((ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant),
+        FieldStyleEnumName(ctx.ctrlFieldStyle),
+        VariantName(ctx.ctrlFieldStatus),
         ctx.FormatControlBackgroundCode(NavCategory::FieldSpinBox),
         ctx.FormatCtrlBorderCode()
     );

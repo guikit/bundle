@@ -110,7 +110,7 @@ keel::String GenerateImageCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.Image(\"{}\", {{\n"
+        "guikit::Image(ui, \"{}\", {{\n"
         "    .alt = \"{}\",\n"
         "    .fit = guikit::ObjectFit::{},\n"
         "    .alignX = guikit::Align::{},\n"

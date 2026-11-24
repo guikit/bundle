@@ -2,6 +2,7 @@
 
 #include "guikit/guikit.hpp"
 #include "keel/keel.h"
+#include "style/theme_studio_state.hpp"
 
 namespace guikit::demo {
 
@@ -83,6 +84,21 @@ constexpr bool IsControlCategory(NavCategory cat) noexcept {
         case NavCategory::DisplayLevelMeter:
         case NavCategory::DisplayReadout:
         case NavCategory::DisplayImage:
+            return true;
+        default:
+            return false;
+    }
+}
+
+constexpr bool IsFieldCategory(NavCategory cat) noexcept {
+    switch (cat) {
+        case NavCategory::FieldInputField:
+        case NavCategory::FieldTextArea:
+        case NavCategory::FieldSelect:
+        case NavCategory::FieldSpinBox:
+        case NavCategory::FieldDatePicker:
+        case NavCategory::FieldTagInput:
+        case NavCategory::FieldColorPicker:
             return true;
         default:
             return false;
@@ -223,6 +239,32 @@ constexpr keel::StringRef CategoryControlName(NavCategory cat) noexcept {
 }
 
 inline constexpr keel::StaticArray<keel::StringRef, 3> kLabelAlignNames = {"Start", "Center", "End"};
+
+inline constexpr keel::StaticArray<keel::StringRef, 3> kFieldStyleNames = {
+    "Default", "Filled", "Borderless"
+};
+
+inline constexpr keel::StaticArray<keel::StringRef, 6> kFieldStatusNames = {
+    "Default", "Primary", "Success", "Warning", "Danger", "Info"
+};
+
+inline constexpr keel::StaticArray<guikit::UiVariant, 6> kFieldStatusValues = {
+    guikit::UiVariant::Default,
+    guikit::UiVariant::Primary,
+    guikit::UiVariant::Success,
+    guikit::UiVariant::Warning,
+    guikit::UiVariant::Danger,
+    guikit::UiVariant::Info
+};
+
+constexpr keel::StringRef FieldStyleEnumName(guikit::FieldStyle s) noexcept {
+    switch (s) {
+        case guikit::FieldStyle::Default:    return "Default";
+        case guikit::FieldStyle::Filled:     return "Filled";
+        case guikit::FieldStyle::Borderless: return "Borderless";
+    }
+    return "Default";
+}
 
 inline constexpr keel::StaticArray<keel::StringRef, 8> kUiVariantNames = {
     "Default", "Primary", "Secondary", "Success", "Warning", "Danger", "Info", "Ghost"
@@ -365,30 +407,30 @@ inline void AppendIndentedLines(keel::String& out, keel::StringRef block, keel::
     }
 }
 
-inline constexpr keel::StaticArray<keel::StringRef, 9> kBgPresetNames = {
-    "None / Off", "Surface", "Primary", "Secondary", "Success", "Warning", "Danger", "Info", "Ghost"
+inline constexpr keel::StaticArray<keel::StringRef, 10> kBgPresetNames = {
+    "Default (Theme)", "None / Transparent", "Surface", "Primary", "Secondary", "Success", "Warning", "Danger", "Info", "Ghost"
 };
 
 constexpr guikit::StateColor BgPresetToStateColor(
     keel::usize idx,
-    bool defaultEnabled,
     keel::f32 tint = 1.0f,
     keel::f32 alpha = 1.0f
 ) noexcept {
     guikit::StateColor res{};
     switch (idx) {
-        case 0:  return defaultEnabled ? guikit::StateColor::None() : guikit::StateColor::Default();
-        case 1:  res = guikit::StateColor::Surface(); break;
-        case 2:  res = guikit::StateColor::Primary(); break;
-        case 3:  res = guikit::StateColor::Secondary(); break;
-        case 4:  res = guikit::StateColor::Success(); break;
-        case 5:  res = guikit::StateColor::Warning(); break;
-        case 6:  res = guikit::StateColor::Danger(); break;
-        case 7:  res = guikit::StateColor::Info(); break;
-        case 8:  res = guikit::StateColor::Ghost(); break;
-        default: return defaultEnabled ? guikit::StateColor::Surface() : guikit::StateColor::Default();
+        case 0:  return guikit::StateColor{};
+        case 1:  return guikit::StateColor::None();
+        case 2:  res = guikit::StateColor::Surface(); break;
+        case 3:  res = guikit::StateColor::Primary(); break;
+        case 4:  res = guikit::StateColor::Secondary(); break;
+        case 5:  res = guikit::StateColor::Success(); break;
+        case 6:  res = guikit::StateColor::Warning(); break;
+        case 7:  res = guikit::StateColor::Danger(); break;
+        case 8:  res = guikit::StateColor::Info(); break;
+        case 9:  res = guikit::StateColor::Ghost(); break;
+        default: return guikit::StateColor{};
     }
-    if (idx >= 2 && idx <= 7 && tint < 0.995f) {
+    if (idx >= 3 && idx <= 8 && tint < 0.995f) {
         res = res.Tinted(tint);
     }
     if (alpha < 0.995f) {
@@ -397,39 +439,26 @@ constexpr guikit::StateColor BgPresetToStateColor(
     return res;
 }
 
-constexpr guikit::StateColor BgPresetToTrackColor(keel::usize idx) noexcept {
-    switch (idx) {
-        case 2:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Primary);
-        case 3:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Secondary);
-        case 4:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Success);
-        case 5:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Warning);
-        case 6:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Danger);
-        case 7:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Info);
-        case 8:  return guikit::StateColor::FromTextVariant(guikit::UiVariant::Ghost);
-        default: return {};
-    }
-}
-
 inline keel::String BgPresetToCode(
     keel::usize idx,
-    bool defaultEnabled,
     keel::f32 tint = 1.0f,
     keel::f32 alpha = 1.0f
 ) {
     keel::String code;
     switch (idx) {
-        case 0:  return keel::String::from(defaultEnabled ? "guikit::StateColor::None()" : "guikit::StateColor::Default()");
-        case 1:  code = keel::String::from("guikit::StateColor::Surface()"); break;
-        case 2:  code = keel::String::from("guikit::StateColor::Primary()"); break;
-        case 3:  code = keel::String::from("guikit::StateColor::Secondary()"); break;
-        case 4:  code = keel::String::from("guikit::StateColor::Success()"); break;
-        case 5:  code = keel::String::from("guikit::StateColor::Warning()"); break;
-        case 6:  code = keel::String::from("guikit::StateColor::Danger()"); break;
-        case 7:  code = keel::String::from("guikit::StateColor::Info()"); break;
-        case 8:  code = keel::String::from("guikit::StateColor::Ghost()"); break;
-        default: return keel::String::from(defaultEnabled ? "guikit::StateColor::Surface()" : "guikit::StateColor::Default()");
+        case 0:  return keel::String::from("guikit::StateColor{}");
+        case 1:  return keel::String::from("guikit::StateColor::None()");
+        case 2:  code = keel::String::from("guikit::StateColor::Surface()"); break;
+        case 3:  code = keel::String::from("guikit::StateColor::Primary()"); break;
+        case 4:  code = keel::String::from("guikit::StateColor::Secondary()"); break;
+        case 5:  code = keel::String::from("guikit::StateColor::Success()"); break;
+        case 6:  code = keel::String::from("guikit::StateColor::Warning()"); break;
+        case 7:  code = keel::String::from("guikit::StateColor::Danger()"); break;
+        case 8:  code = keel::String::from("guikit::StateColor::Info()"); break;
+        case 9:  code = keel::String::from("guikit::StateColor::Ghost()"); break;
+        default: return keel::String::from("guikit::StateColor{}");
     }
-    if (idx >= 2 && idx <= 7 && tint < 0.995f) {
+    if (idx >= 3 && idx <= 8 && tint < 0.995f) {
         keel::format_into(code, ".Tinted({:.2f}f)", tint);
     }
     if (alpha < 0.995f) {
@@ -461,10 +490,37 @@ struct DemoContext {
     keel::f32 previewWindowDragStartW = 0.0f;
     keel::f32 previewWindowDragStartH = 0.0f;
 
+    ThemeStudioState studio{};
     guikit::UiTheme shellTheme = guikit::UiTheme::Dark();
     guikit::UiTheme previewTheme = guikit::UiTheme::Dark();
     keel::Optional<guikit::UiTheme> pendingShellTheme = keel::kNullOpt;
     keel::f32 previewDensity = 1.0f;
+
+    void RebuildPreviewTheme() noexcept {
+        previewTheme = studio.BuildEffectiveTheme();
+        previewLightMode = (previewTheme.mode == guikit::ThemeMode::Light);
+        previewDarkMode = !previewLightMode;
+    }
+
+    void SelectPreviewPreset(guikit::ThemePreset preset) noexcept {
+        studio.SelectBasePreset(preset);
+        RebuildPreviewTheme();
+    }
+
+    void SelectPreviewChrome(guikit::ChromeStyle chrome) noexcept {
+        studio.chrome = chrome;
+        RebuildPreviewTheme();
+    }
+
+    void SelectPreviewFillStyle(guikit::FillStyle fill) noexcept {
+        studio.fillStyle = fill;
+        RebuildPreviewTheme();
+    }
+
+    void TogglePreviewDarkLight() noexcept {
+        const bool nextLight = (previewTheme.mode == guikit::ThemeMode::Dark);
+        SelectPreviewPreset(nextLight ? guikit::ThemePreset::Light : guikit::ThemePreset::Dark);
+    }
 
     // Semantic Element form-field wrapper state (shared across ELEMENTS screens, excluding ElemHeading)
     guikit::UiSize elemSize = guikit::UiSize::Md;
@@ -486,6 +542,8 @@ struct DemoContext {
     bool ctrlLayoutOpen = false;
     guikit::UiSize controlsSize = guikit::UiSize::Md;
     guikit::UiVariant btnVariant = guikit::UiVariant::Primary;
+    guikit::FieldStyle ctrlFieldStyle = guikit::FieldStyle::Default;
+    guikit::UiVariant ctrlFieldStatus = guikit::UiVariant::Default;
     keel::usize ctrlWidthModeIdx = 0;   // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
     keel::f32 ctrlWidthDp = 220.0f;         // 80..480 dp
     keel::usize ctrlHeightModeIdx = 0;  // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
@@ -494,15 +552,7 @@ struct DemoContext {
     keel::f32 knobDiameterDp = 64.0f;       // 28..140 dp
     guikit::Align ctrlAlign = guikit::Align::Center;      // Capsule content alignment for Button
     guikit::Align ctrlSelectAlign = guikit::Align::Start; // Content alignment for Select
-    static constexpr keel::StaticArray<keel::usize, kNavCategoryCount> MakeDefaultCtrlBgTable() noexcept {
-        keel::StaticArray<keel::usize, kNavCategoryCount> table{};
-        for (keel::usize i = 0; i < kNavCategoryCount; ++i) {
-            const auto cat = keel::from_underlying<NavCategory>(i);
-            table[i] = IsCtrlBgDefaultEnabled(cat) ? 1u : 0u;
-        }
-        return table;
-    }
-    keel::StaticArray<keel::usize, kNavCategoryCount> ctrlBgIdxByCat = MakeDefaultCtrlBgTable();
+    keel::StaticArray<keel::usize, kNavCategoryCount> ctrlBgIdxByCat{}; // 0 = Default (Theme) for all controls
     keel::f32 ctrlBgTint = 1.0f;
     keel::f32 ctrlBgAlpha = 1.0f;
     keel::f32 ctrlBorderWidth = 0.0f;
@@ -549,17 +599,6 @@ struct DemoContext {
                cat == NavCategory::FieldColorPicker ||
                cat == NavCategory::FieldDatePicker ||
                cat == NavCategory::DisplayImage;
-    }
-
-    static constexpr bool IsCtrlBgDefaultEnabled(NavCategory cat) noexcept {
-        return cat == NavCategory::ActionButton ||
-               cat == NavCategory::ActionSegmented ||
-               cat == NavCategory::FieldSpinBox ||
-               cat == NavCategory::FieldInputField ||
-               cat == NavCategory::FieldTagInput ||
-               cat == NavCategory::FieldSelect ||
-               cat == NavCategory::FieldColorPicker ||
-               cat == NavCategory::FieldDatePicker;
     }
 
     static constexpr guikit::ElementLayout DefaultElemLayout(NavCategory cat) noexcept {
@@ -674,14 +713,14 @@ struct DemoContext {
 
     guikit::StateColor GetControlBackground(NavCategory cat) const noexcept {
         const keel::usize idx = keel::as<keel::usize>(cat);
-        const keel::usize bgIdx = (idx < ctrlBgIdxByCat.size()) ? ctrlBgIdxByCat[idx] : 0;
-        return BgPresetToStateColor(bgIdx, IsCtrlBgDefaultEnabled(cat), ctrlBgTint, ctrlBgAlpha);
+        const keel::usize bgIdx = (idx < ctrlBgIdxByCat.size()) ? ctrlBgIdxByCat[idx] : 0u;
+        return BgPresetToStateColor(bgIdx, ctrlBgTint, ctrlBgAlpha);
     }
 
     keel::String FormatControlBackgroundCode(NavCategory cat) const {
         const keel::usize idx = keel::as<keel::usize>(cat);
-        const keel::usize bgIdx = (idx < ctrlBgIdxByCat.size()) ? ctrlBgIdxByCat[idx] : 0;
-        return BgPresetToCode(bgIdx, IsCtrlBgDefaultEnabled(cat), ctrlBgTint, ctrlBgAlpha);
+        const keel::usize bgIdx = (idx < ctrlBgIdxByCat.size()) ? ctrlBgIdxByCat[idx] : 0u;
+        return BgPresetToCode(bgIdx, ctrlBgTint, ctrlBgAlpha);
     }
 
     guikit::StateColor GetCtrlBorderColor() const noexcept {
@@ -776,7 +815,7 @@ struct DemoContext {
 
     keel::String FormatElementOpenCode(keel::Optional<keel::StringRef> customLabelOverride = keel::kNullOpt) const {
         keel::String out = keel::format(
-            "if (auto el = ui.Element({{\n"
+            "if (auto el = guikit::Element(ui, {{\n"
             "    .label = {}",
             FormatElementLabelCode(customLabelOverride)
         );
@@ -1101,6 +1140,27 @@ struct DemoContext {
         }
     }
 
+    void RenderFieldStyleControls(guikit::Context& ui) {
+        if (auto el = guikit::Element(ui, {.label = "Field Style"})) {
+            if (guikit::Segmented(ui, ctrlFieldStyle, kFieldStyleNames).changed) {
+                ui.InvalidateAll();
+            }
+        }
+        keel::usize statusIdx = 0u;
+        for (keel::usize i = 0u; i < kFieldStatusValues.size(); ++i) {
+            if (kFieldStatusValues[i] == ctrlFieldStatus) {
+                statusIdx = i;
+                break;
+            }
+        }
+        if (auto el = guikit::Element(ui, {.label = "Field Status"})) {
+            if (guikit::Select(ui, statusIdx, kFieldStatusNames).changed) {
+                ctrlFieldStatus = kFieldStatusValues[statusIdx];
+                ui.InvalidateAll();
+            }
+        }
+    }
+
     void RenderControlStyleSection(guikit::Context& ui, NavCategory cat) {
         if (auto el = guikit::Element(ui, {.label = "Size"})) {
             if (guikit::StepSlider(ui, controlsSize, {.showTicks = true, .showLabels = true}).changed) {
@@ -1108,11 +1168,13 @@ struct DemoContext {
             }
         }
 
+        if (IsFieldCategory(cat)) {
+            RenderFieldStyleControls(ui);
+        }
+
         const bool hasControlVariant = (
             cat == NavCategory::ActionButton ||
             cat == NavCategory::ActionSegmented ||
-            cat == NavCategory::FieldSpinBox ||
-            cat == NavCategory::FieldDatePicker ||
             cat == NavCategory::ControlSlider ||
             cat == NavCategory::ControlKnob ||
             cat == NavCategory::ControlSwitch ||
@@ -1136,7 +1198,7 @@ struct DemoContext {
                     ui.InvalidateAll();
                 }
             }
-            const bool hasCtrlBgTint = (ctrlBgIdx >= 2 && ctrlBgIdx <= 7);
+            const bool hasCtrlBgTint = (ctrlBgIdx >= 3 && ctrlBgIdx <= 8);
             if (auto el = guikit::Element(ui, {.label = "Background Tint", .disabled = !hasCtrlBgTint})) {
                 if (guikit::Slider(ui, ctrlBgTint, 0.0f, 1.0f, {
                     .valueFormat = "%.2f",
@@ -1146,7 +1208,7 @@ struct DemoContext {
                     ui.InvalidateAll();
                 }
             }
-            const bool hasCtrlBgAlpha = (ctrlBgIdx >= 1);
+            const bool hasCtrlBgAlpha = (ctrlBgIdx >= 2);
             if (auto el = guikit::Element(ui, {.label = "Background Opacity", .disabled = !hasCtrlBgAlpha})) {
                 if (guikit::Slider(ui, ctrlBgAlpha, 0.0f, 1.0f, {
                     .valueFormat = "%.2f",
@@ -1259,15 +1321,6 @@ keel::String GenerateHeadingCode(const DemoContext& ctx);
 void RenderElementInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderElementStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateElementCode(const DemoContext& ctx);
-
-void SyncPreviewThemeFromStudio(DemoContext& ctx) noexcept;
-void SelectStudioPreset(DemoContext& ctx, guikit::ThemePreset preset) noexcept;
-void SelectStudioChrome(DemoContext& ctx, guikit::ChromeStyle chrome) noexcept;
-void SelectStudioFillStyle(DemoContext& ctx, guikit::FillStyle fill) noexcept;
-void ToggleStudioDarkLight(DemoContext& ctx) noexcept;
-[[nodiscard]] guikit::ThemePreset GetStudioPreset() noexcept;
-[[nodiscard]] guikit::ChromeStyle GetStudioChrome() noexcept;
-[[nodiscard]] guikit::FillStyle GetStudioFillStyle() noexcept;
 
 void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx);

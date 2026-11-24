@@ -89,6 +89,8 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
+        opts.style = ctx.ctrlFieldStyle;
+        opts.status = ctx.ctrlFieldStatus;
         opts.background = ctx.GetControlBackground(NavCategory::FieldSelect);
         opts.border = ctx.GetCtrlBorder();
 
@@ -124,10 +126,10 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateSelectCode(const DemoContext& ctx) {
     const keel::StringRef widgetCall = (s_state.mode == 0)
-        ? "Select(presetIndex"
+        ? "Select(ui, presetIndex"
         : ((s_state.mode == 1)
-            ? "ComboBox(presetIndex"
-            : ((s_state.mode == 2) ? "Autocomplete(customText" : "MultiSelect(selectedIndices"));
+            ? "ComboBox(ui, presetIndex"
+            : ((s_state.mode == 2) ? "Autocomplete(ui, customText" : "MultiSelect(ui, selectedIndices"));
     const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::FieldSelect);
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize
@@ -135,7 +137,7 @@ keel::String GenerateSelectCode(const DemoContext& ctx) {
         : keel::FixedString<64>{};
 
     const keel::String ctrl = keel::format(
-        "ui.{}, itemsList, {{\n"
+        "guikit::{}, itemsList, {{\n"
         "    .placeholder = \"{}\",\n"
         "    .prefix = {},\n"
         "    .maxVisibleItems = {},\n"
@@ -145,6 +147,8 @@ keel::String GenerateSelectCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
+        "    .status = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
         "}});",
@@ -158,6 +162,8 @@ keel::String GenerateSelectCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
+        FieldStyleEnumName(ctx.ctrlFieldStyle),
+        VariantName(ctx.ctrlFieldStatus),
         ctx.FormatControlBackgroundCode(NavCategory::FieldSelect),
         ctx.FormatCtrlBorderCode()
     );

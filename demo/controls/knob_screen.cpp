@@ -235,7 +235,7 @@ keel::String GenerateKnobCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "ui.Knob(rotaryGain, {}, {}, {{\n"
+        "guikit::Knob(ui, rotaryGain, {}, {}, {{\n"
         "    .valueFormat = \"{}\",\n"
         "    .step = {},\n"
         "    .defaultValue = {},\n"

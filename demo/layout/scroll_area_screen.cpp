@@ -63,7 +63,7 @@ void RenderScrollAreaInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {.label = "Item Gap"})) {
+    if (auto el = guikit::Element(ui, {.label = "Gap"})) {
         if (guikit::Slider(ui, s_scroll.gap, 0.0f, 24.0f, {.valueFormat = "%.0f px", .step = 2.0f}).changed) {
             ui.InvalidateAll();
         }
@@ -107,9 +107,12 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
             for (keel::u32 i = 0; i < count; ++i) {
                 auto scope = ui.IdScope(keel::as<keel::u64>(i));
                 const guikit::UiVariant var = kRowVariants[i % kRowVariants.size()];
+                const guikit::StateColor tint = guikit::StateColor::FromVariant(var).Tinted(0.10f);
                 if (auto card = guikit::Card(ui, {
                     .width = guikit::SizeMode::Stretch,
-                    .padding = guikit::Padding::Symmetric(14.0f, 10.0f)
+                    .padding = guikit::Padding::Symmetric(14.0f, 10.0f),
+                    .background = tint,
+                    .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(var).WithAlphaF(0.42f)}
                 })) {
                     guikit::Heading(ui, {
                         .label = ui.Format("Item {:02u}", i + 1u),
@@ -127,7 +130,7 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
                 const guikit::StateColor tint = guikit::StateColor::FromVariant(var).Tinted(0.12f);
                 if (auto card = guikit::Card(ui, {
                     .width = 192.0f,
-                    .height = 200.0f,
+                    .height = 180.0f,
                     .gap = 8.0f,
                     .padding = guikit::Padding::All(14.0f),
                     .background = tint,
@@ -138,10 +141,6 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
                         .description = "Horizontal strip item",
                         .badge = {ui.Format("#{:02u}", i + 1u), guikit::StateColor::FromVariant(var)},
                         .level = guikit::HeadingLevel::H5
-                    });
-                    guikit::Text(ui, "Use horizontal scrollbar or Shift + MouseWheel to pan.", {
-                        .role = guikit::TextRole::BodySmall,
-                        .variant = guikit::UiVariant::Muted
                     });
                 }
             }
@@ -238,7 +237,7 @@ keel::String GenerateScrollAreaCode(const DemoContext&) {
         s_scroll.padding,
         SizeName(s_scroll.scrollbarSize),
         s_scroll.orientationIdx == 0u ? (s_scroll.overflowContent ? 24 : 3) : (s_scroll.overflowContent ? 16 : 2),
-        s_scroll.orientationIdx == 0u ? ".width = guikit::SizeMode::Stretch" : ".width = 192.0f, .height = 200.0f"
+        s_scroll.orientationIdx == 0u ? ".width = guikit::SizeMode::Stretch" : ".width = 192.0f, .height = 180.0f"
     );
 }
 

@@ -144,7 +144,12 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceSidebar),     {.text = "Sidebar",      .icon = guikit::Icon::Folder()});
 
             menu.Section("OVERLAYS");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayOverlays),    {.text = "Overlays",     .icon = guikit::Icon::Flash()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayModal),          {.text = "Modal",          .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayPopover),        {.text = "Popover",        .icon = guikit::Icon::Flash()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayContextMenu),    {.text = "ContextMenu",    .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayToast),          {.text = "Toast",          .icon = guikit::Icon::Info()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayCommandPalette), {.text = "CommandPalette", .icon = guikit::Icon::Search()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayTooltip),        {.text = "Tooltip",        .icon = guikit::Icon::Eye()});
 
             menu.Section("ACTIONS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionButton),       {.text = "Button",       .icon = guikit::Icon::Play()});
@@ -527,11 +532,16 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
         sb.Spacer();
 
-        static const keel::StaticArray<guikit::CommandPaletteItem, 16> kGlobalCommands = {{
+        static const keel::StaticArray<guikit::CommandPaletteItem, 21> kGlobalCommands = {{
             {.label = "Go to Theme Studio (Palette × Chrome × Fill)", .category = "Style",    .description = "Presets, ChromeStyle, FillStyle, WCAG & JSON", .icon = guikit::Icon::Eye()},
             {.label = "Go to Element Form-Field Wrapper",             .category = "Layout",   .description = "5 ElementLayout modes & composite slots",      .icon = guikit::Icon::Settings()},
             {.label = "Go to SplitView Resizable Panes",              .category = "Layout",   .description = "Horizontal & Vertical splitters",              .icon = guikit::Icon::Copy()},
-            {.label = "Go to Overlays (Modal / Toast / Cmd)",         .category = "Overlays", .description = "Modals, context menus & palettes",             .icon = guikit::Icon::Flash()},
+            {.label = "Go to Modal Dialogs",                          .category = "Overlays", .description = "Backdrops, confirmation & form modals",        .icon = guikit::Icon::Copy()},
+            {.label = "Go to Popover Floating Card",                  .category = "Overlays", .description = "Anchored non-modal card & placements",         .icon = guikit::Icon::Flash()},
+            {.label = "Go to ContextMenu",                            .category = "Overlays", .description = "Right-click & button-anchored menus",          .icon = guikit::Icon::Settings()},
+            {.label = "Go to Toast Notifications",                    .category = "Overlays", .description = "Stacked notifications, variants & timers",     .icon = guikit::Icon::Info()},
+            {.label = "Go to CommandPalette",                         .category = "Overlays", .description = "Fuzzy search launcher (Ctrl+K)",               .icon = guikit::Icon::Search()},
+            {.label = "Go to Tooltip Hover Hints",                    .category = "Overlays", .description = "Declarative, rich text & cursor-tracking",     .icon = guikit::Icon::Eye()},
             {.label = "Go to Breadcrumb Path Navigation",             .category = "Actions",  .description = "Hierarchical path trail & collapse",           .icon = guikit::Icon::Folder()},
             {.label = "Go to Pagination Control",                     .category = "Actions",  .description = "Page numbers & smart ellipsis jump",           .icon = guikit::Icon::ArrowRight()},
             {.label = "Go to Select / MultiSelect / ComboBox",        .category = "Fields",   .description = "Dropdown, live filter & tag chips",            .icon = guikit::Icon::Plus()},
@@ -565,23 +575,28 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
                 case 0:  m_selectedExtension = -1; m_selectedCategory = NavCategory::StyleThemeStudio; break;
                 case 1:  m_selectedExtension = -1; m_selectedCategory = NavCategory::LayoutElement; break;
                 case 2:  m_selectedExtension = -1; m_selectedCategory = NavCategory::LayoutSplitView; break;
-                case 3:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayOverlays; break;
-                case 4:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionBreadcrumb; break;
-                case 5:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionPagination; break;
-                case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSelect; break;
-                case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldDatePicker; break;
-                case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSpinBox; break;
-                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldTagInput; break;
-                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldColorPicker; break;
-                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::DisplayLevelMeter; break;
-                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::ViewTable; break;
-                case 13:
+                case 3:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayModal; break;
+                case 4:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayPopover; break;
+                case 5:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayContextMenu; break;
+                case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayToast; break;
+                case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayCommandPalette; break;
+                case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayTooltip; break;
+                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionBreadcrumb; break;
+                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionPagination; break;
+                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSelect; break;
+                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldDatePicker; break;
+                case 13: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSpinBox; break;
+                case 14: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldTagInput; break;
+                case 15: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldColorPicker; break;
+                case 16: m_selectedExtension = -1; m_selectedCategory = NavCategory::DisplayLevelMeter; break;
+                case 17: m_selectedExtension = -1; m_selectedCategory = NavCategory::ViewTable; break;
+                case 18:
                     m_demoCtx.TogglePreviewDarkLight();
                     break;
-                case 14:
+                case 19:
                     m_demoCtx.previewShowCode = !m_demoCtx.previewShowCode;
                     break;
-                case 15:
+                case 20:
                     SetShellFloating(!IsShellFloating());
                     break;
                 default: break;
@@ -605,7 +620,12 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderToolbarInspector,
         &RenderSidebarInspector,
         // 4. OVERLAYS
-        &RenderOverlaysInspector,
+        &RenderModalInspector,
+        &RenderPopoverInspector,
+        &RenderContextMenuInspector,
+        &RenderToastInspector,
+        &RenderCommandPaletteInspector,
+        &RenderTooltipInspector,
         // 5. ACTIONS
         &RenderButtonInspector,
         &RenderSegmentedInspector,
@@ -662,7 +682,12 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderToolbarStage,
         &RenderSidebarStage,
         // 4. OVERLAYS
-        &RenderOverlaysStage,
+        &RenderModalStage,
+        &RenderPopoverStage,
+        &RenderContextMenuStage,
+        &RenderToastStage,
+        &RenderCommandPaletteStage,
+        &RenderTooltipStage,
         // 5. ACTIONS
         &RenderButtonStage,
         &RenderSegmentedStage,
@@ -719,7 +744,12 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateToolbarCode,
         &GenerateSidebarCode,
         // 4. OVERLAYS
-        &GenerateOverlaysCode,
+        &GenerateModalCode,
+        &GeneratePopoverCode,
+        &GenerateContextMenuCode,
+        &GenerateToastCode,
+        &GenerateCommandPaletteCode,
+        &GenerateTooltipCode,
         // 5. ACTIONS
         &GenerateButtonCode,
         &GenerateSegmentedCode,

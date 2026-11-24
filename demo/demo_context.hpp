@@ -21,7 +21,12 @@ enum class NavCategory : keel::u8 {
     SurfaceSidebar,
 
     // 4. OVERLAYS (Transient Floating Layers)
-    OverlayOverlays,
+    OverlayModal,
+    OverlayPopover,
+    OverlayContextMenu,
+    OverlayToast,
+    OverlayCommandPalette,
+    OverlayTooltip,
 
     // 5. ACTIONS (Buttons & Navigation Triggers)
     ActionButton,
@@ -172,7 +177,12 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::SurfaceToolbar:     return "Toolbar — Command Strip & Tool Palettes";
         case NavCategory::SurfaceSidebar:     return "Sidebar — Application Workbench Shell";
         // 4. OVERLAYS
-        case NavCategory::OverlayOverlays:    return "Overlays — Modal, Popover, Toast & CommandPalette";
+        case NavCategory::OverlayModal:          return "Modal — Dialogs, Backdrops & Focus Trap";
+        case NavCategory::OverlayPopover:        return "Popover — Anchored Non-Modal Floating Card";
+        case NavCategory::OverlayContextMenu:    return "ContextMenu — Right-Click & Action Menus";
+        case NavCategory::OverlayToast:          return "Toast — Stacked Notifications & Timers";
+        case NavCategory::OverlayCommandPalette: return "CommandPalette — Fuzzy Search Command Launcher";
+        case NavCategory::OverlayTooltip:        return "Tooltip — Hover Hints, Rich Text & Cursor Tracking";
         // 5. ACTIONS
         case NavCategory::ActionButton:       return "Button — Interactive Push Control";
         case NavCategory::ActionSegmented:    return "Segmented — Mutually Exclusive Pill Bar";
@@ -1429,9 +1439,29 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderTableStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateTableCode(const DemoContext& ctx);
 
-void RenderOverlaysInspector(guikit::Context& ui, DemoContext& ctx);
-void RenderOverlaysStage(guikit::Context& ui, DemoContext& ctx);
-keel::String GenerateOverlaysCode(const DemoContext& ctx);
+void RenderModalInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderModalStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateModalCode(const DemoContext& ctx);
+
+void RenderPopoverInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderPopoverStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GeneratePopoverCode(const DemoContext& ctx);
+
+void RenderContextMenuInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderContextMenuStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateContextMenuCode(const DemoContext& ctx);
+
+void RenderToastInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderToastStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateToastCode(const DemoContext& ctx);
+
+void RenderCommandPaletteInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderCommandPaletteStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateCommandPaletteCode(const DemoContext& ctx);
+
+void RenderTooltipInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateTooltipCode(const DemoContext& ctx);
 
 void RenderMenuBarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx);

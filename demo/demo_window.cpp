@@ -298,12 +298,15 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
 
 void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
     if (auto previewTb = guikit::Toolbar(ui)) {
+        constexpr keel::f32 kSelectCompactW = 96.0f;
+        constexpr keel::f32 kSelectWideW = 160.0f;
+
         guikit::Text(ui, "PREVIEW", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
 
         if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {
             .tooltip = "Preview Viewport Form Factor & Orientation",
             .size = guikit::UiSize::Sm,
-            .width = 156.0f
+            .width = kSelectWideW
         }).changed) {
             const PreviewFormFactor ff = keel::from_underlying<PreviewFormFactor>(
                 keel::min<keel::usize>(m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames.size() - 1u)
@@ -322,7 +325,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         guikit::SelectOptions zoomSelectOpts{
             .tooltip = "Preview Zoom / Scale (Fit, Real 1:1 physical mm, or Ctrl + MouseWheel)",
             .size = guikit::UiSize::Sm,
-            .width = 116.0f
+            .width = kSelectCompactW
         };
         if (m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Fit) ||
             m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Real1To1)) {
@@ -371,7 +374,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         if (guikit::Select(ui, previewPresetIdx, kPreviewPresetLabels, {
             .tooltip = "Preview Theme Palette Preset (synced with Theme Studio)",
             .size = guikit::UiSize::Sm,
-            .width = 140.0f
+            .width = kSelectWideW
         }).changed) {
             m_demoCtx.SelectPreviewPreset(keel::from_underlying<guikit::ThemePreset>(previewPresetIdx));
             ui.InvalidateAll();
@@ -387,7 +390,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         if (guikit::Select(ui, previewChromeIdx, kPreviewChromeLabels, {
             .tooltip = "Preview Structural Chrome Style (synced with Theme Studio)",
             .size = guikit::UiSize::Sm,
-            .width = 104.0f
+            .width = kSelectCompactW
         }).changed) {
             m_demoCtx.SelectPreviewChrome(keel::from_underlying<guikit::ChromeStyle>(previewChromeIdx));
             ui.InvalidateAll();
@@ -402,7 +405,7 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         if (guikit::Select(ui, previewFillIdx, kPreviewFillLabels, {
             .tooltip = "Preview Control Fill Style (synced with Theme Studio)",
             .size = guikit::UiSize::Sm,
-            .width = 86.0f
+            .width = kSelectCompactW
         }).changed) {
             m_demoCtx.SelectPreviewFillStyle(keel::from_underlying<guikit::FillStyle>(previewFillIdx));
             ui.InvalidateAll();

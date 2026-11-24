@@ -258,7 +258,7 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                     const keel::i32 prevIdx = s_state.menuIdx;
                     if (auto menu = guikit::SidebarMenu(ui, {
                         .style = s_state.menuStyle,
-                        .color = ctx.ResolveControlColor(),
+                        .variant = ctx.btnVariant,
                         .size = ctx.controlsSize
                     })) {
                         static constexpr keel::StaticArray<keel::StringRef, 3> actHeaders = {
@@ -451,9 +451,9 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
         "    .allowCollapse = {},\n"
         "    .scrollable = true\n"
         "}})) {{\n"
-        "    if (auto menu = ui.SidebarMenu({{\n"
+        "    if (auto menu = guikit::SidebarMenu(ui, {{\n"
         "        .style = guikit::SidebarMenuStyle::{},\n"
-        "        .color = guikit::StateColor::{}(){}\n"
+        "        .variant = guikit::UiVariant::{}{}\n"
         "    }})) {{\n"
         "        menu.Section(\"WORKSPACE\");\n"
         "        menu.Item(selected, 0, {{.text = \"Overview\", .icon = guikit::Icon::Folder(){}}});\n"

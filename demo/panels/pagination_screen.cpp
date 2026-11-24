@@ -81,7 +81,6 @@ void RenderPaginationInspector(guikit::Context& ui, DemoContext& ctx) {
 }
 
 void RenderPaginationStage(guikit::Context& ui, DemoContext& ctx) {
-    const guikit::StateColor activeCol = guikit::StateColor::FromVariant(ctx.btnVariant);
     const keel::usize totalPages = keel::as<keel::usize>(keel::max(1, s_pg.totalPages));
     if (s_pg.currentPage >= totalPages) {
         s_pg.currentPage = totalPages - 1;
@@ -96,7 +95,7 @@ void RenderPaginationStage(guikit::Context& ui, DemoContext& ctx) {
             .interactiveEllipsis = s_pg.interactiveEllipsis,
             .disabled = ctx.elemDisabled,
             .size = ctx.controlsSize,
-            .color = activeCol
+            .variant = ctx.btnVariant
         });
     };
 
@@ -122,17 +121,17 @@ keel::String GeneratePaginationCode(const DemoContext& ctx) {
     const keel::FixedString<64> sizeLineTop = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
-    const keel::FixedString<64> colorCode = keel::format_fixed<64>("guikit::StateColor::{}()", VariantName(ctx.btnVariant));
+    const keel::FixedString<64> variantCode = keel::format_fixed<64>("guikit::UiVariant::{}", VariantName(ctx.btnVariant));
 
     if (s_pg.showSurfaceBox) {
         return keel::format(
-            "if (auto well = ui.Box({{\n"
+            "if (auto well = guikit::Box(ui, {{\n"
             "    .width = guikit::SizeMode::Fit,\n"
             "    .padding = guikit::Padding::Symmetric(10.0f, 6.0f),\n"
             "    .background = guikit::StateColor::Surface(),\n"
             "    .border = {{.width = 1.0f, .radius = 8.0f}}\n"
             "}})) {{\n"
-            "    ui.Pagination(currentPage, {}, {{\n"
+            "    guikit::Pagination(ui, currentPage, {}, {{\n"
             "        .siblingCount = {},\n"
             "        .showFirstLast = {},\n"
             "        .showPrevNext = {},\n"
@@ -140,7 +139,7 @@ keel::String GeneratePaginationCode(const DemoContext& ctx) {
             "        .interactiveEllipsis = {},\n"
             "        .disabled = {},\n"
             "{}"
-            "        .color = {}\n"
+            "        .variant = {}\n"
             "    }});\n"
             "}}",
             s_pg.totalPages,
@@ -151,12 +150,12 @@ keel::String GeneratePaginationCode(const DemoContext& ctx) {
             s_pg.interactiveEllipsis ? "true" : "false",
             ctx.elemDisabled ? "true" : "false",
             sizeLineIndented,
-            colorCode
+            variantCode
         );
     }
 
     return keel::format(
-        "ui.Pagination(currentPage, {}, {{\n"
+        "guikit::Pagination(ui, currentPage, {}, {{\n"
         "    .siblingCount = {},\n"
         "    .showFirstLast = {},\n"
         "    .showPrevNext = {},\n"
@@ -164,7 +163,7 @@ keel::String GeneratePaginationCode(const DemoContext& ctx) {
         "    .interactiveEllipsis = {},\n"
         "    .disabled = {},\n"
         "{}"
-        "    .color = {}\n"
+        "    .variant = {}\n"
         "}});",
         s_pg.totalPages,
         s_pg.siblingCount,
@@ -174,7 +173,7 @@ keel::String GeneratePaginationCode(const DemoContext& ctx) {
         s_pg.interactiveEllipsis ? "true" : "false",
         ctx.elemDisabled ? "true" : "false",
         sizeLineTop,
-        colorCode
+        variantCode
     );
 }
 

@@ -13,7 +13,6 @@ struct HeadingStudioState {
     keel::f32 widthDp = 360.0f;
     bool showSubtitle = true;
     bool showIconAndBadge = true;
-    bool wrapInCard = true;
     bool disabled = false;
 };
 
@@ -132,12 +131,6 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {.label = "Preview on Surface Card"})) {
-        if (guikit::Switch(ui, s_state.wrapInCard).changed) {
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
         if (guikit::Switch(ui, s_state.disabled).changed) {
             ui.InvalidateAll();
@@ -146,19 +139,7 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderHeadingStage(guikit::Context& ui, DemoContext&) {
-    const guikit::HeadingOptions opts = BuildHeadingOptions();
-    if (s_state.wrapInCard) {
-        if (auto card = guikit::Card(ui, {
-            .minWidth = 340.0f,
-            .maxWidth = 560.0f,
-            .gap = 14.0f,
-            .padding = guikit::Padding::All(18.0f)
-        })) {
-            guikit::Heading(ui, opts);
-        }
-    } else {
-        guikit::Heading(ui, opts);
-    }
+    guikit::Heading(ui, BuildHeadingOptions());
 }
 
 keel::String GenerateHeadingCode(const DemoContext&) {
@@ -204,17 +185,7 @@ keel::String GenerateHeadingCode(const DemoContext&) {
         stmt.append(",\n    .disabled = true");
     }
     stmt.append("\n});");
-
-    if (!s_state.wrapInCard) {
-        return stmt;
-    }
-
-    keel::String out = keel::String::from(
-        "if (auto card = guikit::Card(ui, {.minWidth = 340.0f, .maxWidth = 560.0f, .gap = 14.0f, .padding = guikit::Padding::All(18.0f)})) {\n"
-    );
-    AppendIndentedLines(out, stmt.as_ref(), "    ");
-    out.push_back('}');
-    return out;
+    return stmt;
 }
 
 } // namespace guikit::demo

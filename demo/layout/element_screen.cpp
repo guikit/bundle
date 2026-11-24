@@ -20,7 +20,6 @@ struct ElementStudioState {
     keel::f32 widthDp = 380.0f;
     bool showDescription = true;
     bool showIconAndBadge = true;
-    bool wrapInCard = true;
     bool disabled = false;
 
     // Interactive slot state
@@ -206,12 +205,6 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {.label = "Preview on Surface Card"})) {
-        if (guikit::Switch(ui, s_state.wrapInCard).changed) {
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
         if (guikit::Switch(ui, s_state.disabled).changed) {
             ui.InvalidateAll();
@@ -220,26 +213,11 @@ void RenderElementInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderElementStage(guikit::Context& ui, DemoContext&) {
-    auto renderContent = [&]() {
-        const guikit::ElementOptions opts = BuildElementOptions();
-        if (s_state.slotPreset == ElementSlotPreset::Standalone) {
-            guikit::Element(ui, opts);
-        } else if (auto el = guikit::Element(ui, opts)) {
-            RenderSlotControl(ui, s_state.slotPreset);
-        }
-    };
-
-    if (s_state.wrapInCard) {
-        if (auto card = guikit::Card(ui, {
-            .minWidth = 340.0f,
-            .maxWidth = 560.0f,
-            .gap = 14.0f,
-            .padding = guikit::Padding::All(18.0f)
-        })) {
-            renderContent();
-        }
-    } else {
-        renderContent();
+    const guikit::ElementOptions opts = BuildElementOptions();
+    if (s_state.slotPreset == ElementSlotPreset::Standalone) {
+        guikit::Element(ui, opts);
+    } else if (auto el = guikit::Element(ui, opts)) {
+        RenderSlotControl(ui, s_state.slotPreset);
     }
 }
 
@@ -282,28 +260,15 @@ keel::String GenerateElementCode(const DemoContext&) {
         elemOpen.append(",\n    .disabled = true");
     }
 
-    keel::String stmt;
     if (s_state.slotPreset == ElementSlotPreset::Standalone) {
         elemOpen.append("\n});");
-        stmt = static_cast<keel::String&&>(elemOpen);
-    } else {
-        elemOpen.append("\n})) {\n");
-        const keel::String slotCode = FormatSlotControlCode(s_state.slotPreset);
-        AppendIndentedLines(elemOpen, slotCode.as_ref(), "    ");
-        elemOpen.push_back('}');
-        stmt = static_cast<keel::String&&>(elemOpen);
+        return elemOpen;
     }
-
-    if (!s_state.wrapInCard) {
-        return stmt;
-    }
-
-    keel::String out = keel::String::from(
-        "if (auto card = guikit::Card(ui, {.minWidth = 340.0f, .maxWidth = 560.0f, .gap = 14.0f, .padding = guikit::Padding::All(18.0f)})) {\n"
-    );
-    AppendIndentedLines(out, stmt.as_ref(), "    ");
-    out.push_back('}');
-    return out;
+    elemOpen.append("\n})) {\n");
+    const keel::String slotCode = FormatSlotControlCode(s_state.slotPreset);
+    AppendIndentedLines(elemOpen, slotCode.as_ref(), "    ");
+    elemOpen.push_back('}');
+    return elemOpen;
 }
 
 } // namespace guikit::demo

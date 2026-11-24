@@ -228,7 +228,7 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
                 guikit::ReadoutOptions ro{};
                 ro.size = effSize;
                 ro.minWidth = 204.0f;
-                ro.elevated = s_state.elevated;
+                ro.surface = s_state.elevated ? guikit::SurfaceRole::Raised : guikit::SurfaceRole::Flat;
                 ro.disabled = ctx.elemDisabled;
                 ro.maxPrecision = s_state.maxPrecision;
                 ro.allowChannelMenu = s_state.allowChannelMenu;
@@ -276,16 +276,16 @@ keel::String GenerateReadoutCode(const DemoContext& ctx) {
         "      .value = voltageV, .units = kVoltageUnits,\n"
         "      .defaultUnitIndex = 1, .defaultPrecision = 2}}\n"
         "}};\n\n"
-        "auto resp = ui.Readout(slotState, channels, {{\n"
+        "auto resp = guikit::Readout(ui, slotState, channels, {{\n"
         "    .size = guikit::UiSize::{},\n"
         "    .minWidth = 204.0f,\n"
-        "    .elevated = {},\n"
+        "    .surface = guikit::SurfaceRole::{},\n"
         "    .maxPrecision = {},\n"
         "    .showPlusSign = {}\n"
         "}});\n"
         "if (resp.actionClicked) {{ ZeroChannel(slotState.channelIndex); }}",
         SizeName(effSize),
-        s_state.elevated ? "true" : "false",
+        s_state.elevated ? "Raised" : "Flat",
         s_state.maxPrecision,
         s_state.showPlusSign ? "true" : "false"
     );

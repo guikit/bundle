@@ -8,6 +8,8 @@ struct InputState {
     keel::SmallString<128> placeholder{"Enter domain..."};
     keel::SmallString<64> prefix{"https://"};
     keel::SmallString<64> suffix{":443"};
+    guikit::FieldStyle fieldStyle = guikit::FieldStyle::Default;
+    guikit::UiVariant status = guikit::UiVariant::Default;
     guikit::CursorBlinkMode cursorMode = guikit::CursorBlinkMode::Blinking;
     bool password = false;
     bool clearable = true;
@@ -16,9 +18,39 @@ struct InputState {
     keel::i32 connectCount = 0;
 };
 InputState s_state;
+
+constexpr keel::StringRef FieldStyleName(guikit::FieldStyle s) noexcept {
+    switch (s) {
+        case guikit::FieldStyle::Default:    return "Default";
+        case guikit::FieldStyle::Filled:     return "Filled";
+        case guikit::FieldStyle::Borderless: return "Borderless";
+    }
+    return "Default";
+}
 } // namespace
 
 void RenderInputInspector(guikit::Context& ui, DemoContext&) {
+    static constexpr keel::StaticArray<keel::StringRef, 3> kFieldStyleNames = {"Default", "Filled", "Borderless"};
+    if (auto el = guikit::Element(ui, {.label = "Field Style"})) {
+        if (guikit::Segmented(ui, s_state.fieldStyle, kFieldStyleNames).changed) {
+            ui.InvalidateAll();
+        }
+    }
+    static constexpr keel::StaticArray<keel::StringRef, 5> kStatusNames = {"Default", "Success", "Warning", "Danger", "Info"};
+    static constexpr keel::StaticArray<guikit::UiVariant, 5> kStatusVals = {
+        guikit::UiVariant::Default, guikit::UiVariant::Success, guikit::UiVariant::Warning,
+        guikit::UiVariant::Danger, guikit::UiVariant::Info
+    };
+    keel::usize statusIdx = 0;
+    for (keel::usize i = 0; i < kStatusVals.size(); ++i) {
+        if (kStatusVals[i] == s_state.status) { statusIdx = i; break; }
+    }
+    if (auto el = guikit::Element(ui, {.label = "Validation Status"})) {
+        if (guikit::Select(ui, statusIdx, kStatusNames).changed) {
+            s_state.status = kStatusVals[statusIdx];
+            ui.InvalidateAll();
+        }
+    }
     if (auto el = guikit::Element(ui, {
         .label = "Multi-Control Slot (Input + Button)",
         .description = "Place InputField + Button inside a single ui.Element"
@@ -79,6 +111,8 @@ void RenderInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
+        opts.style = s_state.fieldStyle;
+        opts.status = s_state.status;
         opts.background = ctx.GetControlBackground(NavCategory::ElemInputField);
         opts.border = ctx.GetCtrlBorder();
         guikit::InputField(ui, s_state.text, opts);
@@ -113,7 +147,7 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
         : keel::FixedString<64>{};
 
     keel::String ctrl = keel::format(
-        "ui.InputField(serverEndpoint, {{\n"
+        "guikit::InputField(ui, serverEndpoint, {{\n"
         "    .placeholder = \"{}\",\n"
         "    .prefix = \"{}\",\n"
         "    .suffix = \"{}\",\n"
@@ -126,6 +160,8 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
+        "    .status = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
         "}});",
@@ -140,6 +176,8 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
+        FieldStyleName(s_state.fieldStyle),
+        VariantName(s_state.status),
         ctx.FormatControlBackgroundCode(NavCategory::ElemInputField),
         ctx.FormatCtrlBorderCode()
     );
@@ -147,11 +185,11 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
     if (s_state.companionButton) {
         keel::format_into(
             ctrl,
-            "\nif (ui.Button({{.text = \"Connect\", .icon = guikit::Icon::Play(), {}.color = {}}})) {{\n"
+            "\nif (guikit::Button(ui, {{.text = \"Connect\", .icon = guikit::Icon::Play(), {}.variant = guikit::UiVariant::{}}})) {{\n"
             "    // Trigger endpoint action\n"
             "}}",
             sizeInline,
-            ctx.FormatControlColorCode()
+            VariantName(ctx.btnVariant)
         );
     }
 

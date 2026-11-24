@@ -63,7 +63,7 @@ void RenderDatePickerStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.color = ctx.GetControlColor();
+        opts.status = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
         opts.background = ctx.GetControlBackground(navCat);
         opts.border = ctx.GetCtrlBorder();
         (void)guikit::DatePicker(ui, s_state.value, opts);
@@ -87,7 +87,7 @@ keel::String GenerateDatePickerCode(const DemoContext& ctx) {
         "{}"
         "    .width = {},\n"
         "    .height = {},\n"
-        "    .color = {},\n"
+        "    .status = guikit::UiVariant::{},\n"
         "    .background = {},\n"
         "    .border = {}\n"
         "}});",
@@ -99,7 +99,7 @@ keel::String GenerateDatePickerCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
-        ctx.FormatControlColorCode(),
+        VariantName((ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant),
         ctx.FormatControlBackgroundCode(navCat),
         ctx.FormatCtrlBorderCode()
     );

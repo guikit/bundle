@@ -5,9 +5,10 @@ namespace guikit::demo {
 namespace {
 
 struct ThemeStudioState {
-    // Base Preset & Style
+    // Base Preset & Orthogonal Design-System Axes (Palette x Chrome x Fill)
     guikit::ThemePreset preset = guikit::ThemePreset::Windows98;
-    guikit::SurfaceStyle surfaceStyle = guikit::SurfaceStyle::Bevel;
+    guikit::ChromeStyle chrome = guikit::ChromeStyle::Classic3D;
+    guikit::FillStyle fillStyle = guikit::FillStyle::Solid;
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
     // Scrollbar Customization
@@ -83,7 +84,8 @@ ThemeStudioState s_studio;
 
 void ResetToDefaults() noexcept {
     s_studio.preset = guikit::ThemePreset::Windows98;
-    s_studio.surfaceStyle = guikit::SurfaceStyle::Bevel;
+    s_studio.chrome = guikit::ChromeStyle::Classic3D;
+    s_studio.fillStyle = guikit::FillStyle::Solid;
     s_studio.syntaxPreset = guikit::SyntaxPreset::Auto;
     s_studio.scrollbarPreset = guikit::ScrollbarPreset::Auto;
     s_studio.overrideScrollbarWidth = false;
@@ -121,7 +123,9 @@ void ResetToDefaults() noexcept {
 
 void SelectBasePreset(guikit::ThemePreset preset) noexcept {
     s_studio.preset = preset;
-    s_studio.surfaceStyle = guikit::UiTheme::FromPreset(preset).surfaceStyle;
+    const guikit::UiTheme def = guikit::UiTheme::FromPreset(preset);
+    s_studio.chrome = def.chromeStyle;
+    s_studio.fillStyle = def.fillStyle;
     s_studio.overrideAccent = false;
     s_studio.overrideNeutral = false;
     s_studio.overrideBackground = false;
@@ -137,7 +141,9 @@ void SelectBasePreset(guikit::ThemePreset preset) noexcept {
 void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
     ResetToDefaults();
     s_studio.preset = spec.base;
-    s_studio.surfaceStyle = spec.surfaceStyle.value_or(guikit::UiTheme::FromPreset(spec.base).surfaceStyle);
+    const guikit::UiTheme def = guikit::UiTheme::FromPreset(spec.base);
+    s_studio.chrome = spec.chrome.value_or(def.chromeStyle);
+    s_studio.fillStyle = spec.fillStyle.value_or(def.fillStyle);
     s_studio.syntaxPreset = spec.syntaxPreset;
     s_studio.scrollbarPreset = spec.scrollbarPreset.value_or(guikit::ScrollbarPreset::Auto);
     if (spec.scrollbarWidth.has_value()) {
@@ -170,7 +176,8 @@ void ApplySpecToStudioState(const guikit::ThemeSpec& spec) noexcept {
 [[nodiscard]] guikit::ThemeSpec BuildCurrentSpec() noexcept {
     guikit::ThemeSpec spec{};
     spec.base = s_studio.preset;
-    spec.surfaceStyle = s_studio.surfaceStyle;
+    spec.chrome = s_studio.chrome;
+    spec.fillStyle = s_studio.fillStyle;
     spec.syntaxPreset = s_studio.syntaxPreset;
     if (s_studio.scrollbarPreset != guikit::ScrollbarPreset::Auto) {
         spec.scrollbarPreset = s_studio.scrollbarPreset;
@@ -225,7 +232,8 @@ void RandomizeHarmonicTheme() noexcept {
 
     ResetToDefaults();
     s_studio.preset = isLight ? guikit::ThemePreset::Light : guikit::ThemePreset::Dark;
-    s_studio.surfaceStyle = keel::from_underlying<guikit::SurfaceStyle>(styleIdx);
+    s_studio.chrome = guikit::ChromeStyle::Modern;
+    s_studio.fillStyle = keel::from_underlying<guikit::FillStyle>(styleIdx);
     s_studio.overrideAccent = true;
     s_studio.accentColor = guikit::Color::FromHsl(hue, isLight ? 0.72f : 0.78f, isLight ? 0.42f : 0.58f);
     s_studio.overrideNeutral = true;
@@ -250,13 +258,21 @@ void RandomizeHarmonicTheme() noexcept {
     return "Dark";
 }
 
-[[nodiscard]] constexpr keel::StringRef SurfaceStyleEnumIdentifier(guikit::SurfaceStyle s) noexcept {
+[[nodiscard]] constexpr keel::StringRef ChromeStyleEnumIdentifier(guikit::ChromeStyle s) noexcept {
     switch (s) {
-        case guikit::SurfaceStyle::Solid:     return "Solid";
-        case guikit::SurfaceStyle::Soft:      return "Soft";
-        case guikit::SurfaceStyle::Outline:   return "Outline";
-        case guikit::SurfaceStyle::Brutalist: return "Brutalist";
-        case guikit::SurfaceStyle::Bevel:     return "Bevel";
+        case guikit::ChromeStyle::Modern:    return "Modern";
+        case guikit::ChromeStyle::Fluent:    return "Fluent";
+        case guikit::ChromeStyle::Classic3D: return "Classic3D";
+        case guikit::ChromeStyle::Brutalist: return "Brutalist";
+    }
+    return "Modern";
+}
+
+[[nodiscard]] constexpr keel::StringRef FillStyleEnumIdentifier(guikit::FillStyle s) noexcept {
+    switch (s) {
+        case guikit::FillStyle::Solid:   return "Solid";
+        case guikit::FillStyle::Soft:    return "Soft";
+        case guikit::FillStyle::Outline: return "Outline";
     }
     return "Solid";
 }
@@ -375,12 +391,17 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         guikit::ThemePresetName(guikit::ThemePreset::Windows98)
     }};
 
-    static constexpr keel::StaticArray<keel::StringRef, guikit::kSurfaceStyleCount> kSurfaceNames = {{
-        guikit::SurfaceStyleName(guikit::SurfaceStyle::Solid),
-        guikit::SurfaceStyleName(guikit::SurfaceStyle::Soft),
-        guikit::SurfaceStyleName(guikit::SurfaceStyle::Outline),
-        guikit::SurfaceStyleName(guikit::SurfaceStyle::Brutalist),
-        guikit::SurfaceStyleName(guikit::SurfaceStyle::Bevel)
+    static constexpr keel::StaticArray<keel::StringRef, guikit::kChromeStyleCount> kChromeNames = {{
+        guikit::ChromeStyleName(guikit::ChromeStyle::Modern),
+        guikit::ChromeStyleName(guikit::ChromeStyle::Fluent),
+        guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
+        guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist)
+    }};
+
+    static constexpr keel::StaticArray<keel::StringRef, guikit::kFillStyleCount> kFillNames = {{
+        guikit::FillStyleName(guikit::FillStyle::Solid),
+        guikit::FillStyleName(guikit::FillStyle::Soft),
+        guikit::FillStyleName(guikit::FillStyle::Outline)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kSyntaxPresetCount> kSyntaxNames = {{
@@ -443,10 +464,18 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     // 2. APPEARANCE & PALETTE
     const guikit::UiTheme baseRef = guikit::UiTheme::FromPreset(s_studio.preset);
     if (auto acc = guikit::Accordion(ui, {.label = "APPEARANCE & PALETTE", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
-        keel::usize surfIdx = keel::as<keel::usize>(s_studio.surfaceStyle);
-        if (auto el = guikit::Element(ui, {.label = "Surface Style", .description = "Global button & control treatment"})) {
-            if (guikit::Select(ui, surfIdx, kSurfaceNames, {.size = guikit::UiSize::Sm}).changed) {
-                s_studio.surfaceStyle = keel::from_underlying<guikit::SurfaceStyle>(surfIdx);
+        keel::usize chromeIdx = keel::as<keel::usize>(s_studio.chrome);
+        if (auto el = guikit::Element(ui, {.label = "Chrome Style", .description = "Structural look-and-feel (color-independent)"})) {
+            if (guikit::Select(ui, chromeIdx, kChromeNames, {.size = guikit::UiSize::Sm}).changed) {
+                s_studio.chrome = keel::from_underlying<guikit::ChromeStyle>(chromeIdx);
+                ui.InvalidateAll();
+            }
+        }
+
+        keel::usize fillIdx = keel::as<keel::usize>(s_studio.fillStyle);
+        if (auto el = guikit::Element(ui, {.label = "Fill Style", .description = "Semantic emphasis fill (Solid / Soft / Outline)"})) {
+            if (guikit::Select(ui, fillIdx, kFillNames, {.size = guikit::UiSize::Sm}).changed) {
+                s_studio.fillStyle = keel::from_underlying<guikit::FillStyle>(fillIdx);
                 ui.InvalidateAll();
             }
         }
@@ -494,12 +523,12 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         if (auto el = guikit::Element(ui, {.label = "Scrollbar Preset", .description = "Windows 1988–2012 or Modern"})) {
             if (guikit::Select(ui, sbPresetIdx, kScrollbarPresetNames, {.size = guikit::UiSize::Sm}).changed) {
                 s_studio.scrollbarPreset = keel::from_underlying<guikit::ScrollbarPreset>(sbPresetIdx);
-                const auto effectivePreset = (s_studio.scrollbarPreset == guikit::ScrollbarPreset::Auto)
-                    ? (s_studio.surfaceStyle == guikit::SurfaceStyle::Bevel
-                        ? guikit::ScrollbarPreset::Windows98
-                        : guikit::ScrollbarPreset::Modern)
-                    : s_studio.scrollbarPreset;
-                s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::FromPreset(effectivePreset);
+                if (s_studio.scrollbarPreset == guikit::ScrollbarPreset::Auto) {
+                    const auto chromeTok = guikit::ChromeTokens::FromStyle(s_studio.chrome);
+                    s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(chromeTok.scrollbar);
+                } else {
+                    s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::FromPreset(s_studio.scrollbarPreset);
+                }
                 s_studio.customizeScrollbarTokens = false;
                 ui.InvalidateAll();
             }
@@ -790,13 +819,23 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     }
                 }
 
-                if (auto surfMenu = mb.Menu("Surface", dropOpts)) {
-                    surfMenu.Section("SURFACE STYLE");
-                    keel::i32 surfIdx = keel::as<keel::i32>(s_studio.surfaceStyle);
-                    for (keel::i32 si = 0; si < keel::as<keel::i32>(guikit::kSurfaceStyleCount); ++si) {
-                        const auto ss = keel::from_underlying<guikit::SurfaceStyle>(si);
-                        if (surfMenu.Radio(guikit::SurfaceStyleName(ss), surfIdx, si)) {
-                            s_studio.surfaceStyle = ss;
+                if (auto surfMenu = mb.Menu("Chrome", dropOpts)) {
+                    surfMenu.Section("CHROME STYLE");
+                    keel::i32 chrIdx = keel::as<keel::i32>(s_studio.chrome);
+                    for (keel::i32 ci = 0; ci < keel::as<keel::i32>(guikit::kChromeStyleCount); ++ci) {
+                        const auto cs = keel::from_underlying<guikit::ChromeStyle>(ci);
+                        if (surfMenu.Radio(guikit::ChromeStyleName(cs), chrIdx, ci)) {
+                            s_studio.chrome = cs;
+                            ui.InvalidateAll();
+                        }
+                    }
+                    surfMenu.Separator();
+                    surfMenu.Section("FILL STYLE");
+                    keel::i32 fIdx = keel::as<keel::i32>(s_studio.fillStyle);
+                    for (keel::i32 fi = 0; fi < keel::as<keel::i32>(guikit::kFillStyleCount); ++fi) {
+                        const auto fs = keel::from_underlying<guikit::FillStyle>(fi);
+                        if (surfMenu.Radio(guikit::FillStyleName(fs), fIdx, fi)) {
+                            s_studio.fillStyle = fs;
                             ui.InvalidateAll();
                         }
                     }
@@ -851,15 +890,26 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
 
                 tb.Separator();
 
-                keel::i32 surfTool = keel::as<keel::i32>(s_studio.surfaceStyle);
-                bool surfChanged = false;
-                surfChanged |= tb.Item(surfTool, 0, {.text = "Solid"}).changed;
-                surfChanged |= tb.Item(surfTool, 1, {.text = "Soft"}).changed;
-                surfChanged |= tb.Item(surfTool, 2, {.text = "Outline"}).changed;
-                surfChanged |= tb.Item(surfTool, 3, {.text = "Brutalist"}).changed;
-                surfChanged |= tb.Item(surfTool, 4, {.text = "Classic 3D"}).changed;
-                if (surfChanged) {
-                    s_studio.surfaceStyle = keel::from_underlying<guikit::SurfaceStyle>(surfTool);
+                keel::i32 chrTool = keel::as<keel::i32>(s_studio.chrome);
+                bool chrChanged = false;
+                chrChanged |= tb.Item(chrTool, 0, {.text = "Modern"}).changed;
+                chrChanged |= tb.Item(chrTool, 1, {.text = "Fluent"}).changed;
+                chrChanged |= tb.Item(chrTool, 2, {.text = "Classic 3D"}).changed;
+                chrChanged |= tb.Item(chrTool, 3, {.text = "Brutalist"}).changed;
+                if (chrChanged) {
+                    s_studio.chrome = keel::from_underlying<guikit::ChromeStyle>(chrTool);
+                    ui.InvalidateAll();
+                }
+
+                tb.Separator();
+
+                keel::i32 fillTool = keel::as<keel::i32>(s_studio.fillStyle);
+                bool fillChanged = false;
+                fillChanged |= tb.Item(fillTool, 0, {.text = "Solid"}).changed;
+                fillChanged |= tb.Item(fillTool, 1, {.text = "Soft"}).changed;
+                fillChanged |= tb.Item(fillTool, 2, {.text = "Outline"}).changed;
+                if (fillChanged) {
+                    s_studio.fillStyle = keel::from_underlying<guikit::FillStyle>(fillTool);
                     ui.InvalidateAll();
                 }
 
@@ -917,9 +967,10 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
 
                     guikit::Heading(ui, {
                         .label = titleText,
-                        .description = ui.Format("{} · {} · Focus {:.1f}dp · Motion {:.1f}x",
+                        .description = ui.Format("{} · {} · {} · Focus {:.1f}dp · Motion {:.1f}x",
                             built.mode == guikit::ThemeMode::Dark ? "Dark" : "Light",
-                            guikit::SurfaceStyleName(built.surfaceStyle),
+                            guikit::ChromeStyleName(built.chromeStyle),
+                            guikit::FillStyleName(built.fillStyle),
                             built.focusRingWidth,
                             built.animationScale),
                         .badge = {
@@ -1020,8 +1071,10 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                             .elevated = true
                         })) {
                             guikit::Heading(ui, {
-                                .label = ui.Format("Controls & States — {}", guikit::SurfaceStyleName(built.surfaceStyle)),
-                                .description = "Active vs Disabled rows verify SurfaceStyle, Disabled Opacity & Focus Ring",
+                                .label = ui.Format("Controls & States — {} / {}",
+                                    guikit::ChromeStyleName(built.chromeStyle),
+                                    guikit::FillStyleName(built.fillStyle)),
+                                .description = "Active vs Disabled rows verify ChromeStyle, FillStyle, Disabled Opacity & Focus Ring",
                                 .level = guikit::HeadingLevel::H5
                             });
 
@@ -1124,14 +1177,14 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     if (showAll || s_studio.activeStageTab == 3u) {
                         if (auto zoneRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
                             if (auto z1 = ui.Zone({
-                                .surfaceStyle = guikit::SurfaceStyle::Soft,
-                                .accent = guikit::Color::Hex(0xF59E0BFF),
-                                .radiusScale = 1.4f
+                                .chrome = guikit::ChromeStyle::Fluent,
+                                .fillStyle = guikit::FillStyle::Soft,
+                                .accent = guikit::Color::Hex(0xF59E0BFF)
                             })) {
                                 if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
                                     guikit::Heading(ui, {
-                                        .label = "Zone: Soft Amber",
-                                        .description = ".surfaceStyle = Soft, .accent = Amber",
+                                        .label = "Zone: Fluent Soft Amber",
+                                        .description = ".chrome = Fluent, .fillStyle = Soft",
                                         .level = guikit::HeadingLevel::H6
                                     });
                                     if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
@@ -1142,14 +1195,14 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                             }
 
                             if (auto z2 = ui.Zone({
-                                .surfaceStyle = guikit::SurfaceStyle::Outline,
-                                .accent = guikit::Color::Hex(0x10B981FF),
-                                .radiusScale = 0.0f
+                                .chrome = guikit::ChromeStyle::Classic3D,
+                                .fillStyle = guikit::FillStyle::Outline,
+                                .accent = guikit::Color::Hex(0x10B981FF)
                             })) {
                                 if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
                                     guikit::Heading(ui, {
-                                        .label = "Zone: Sharp Outline",
-                                        .description = ".surfaceStyle = Outline, .radiusScale = 0",
+                                        .label = "Zone: Classic 3D Outline",
+                                        .description = ".chrome = Classic3D, .fillStyle = Outline",
                                         .level = guikit::HeadingLevel::H6
                                     });
                                     if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
@@ -1182,7 +1235,8 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                             "// Live SyntaxPalette (synced with ThemePreset or custom SyntaxPreset)\n"
                             "guikit::ThemeSpec spec{\n"
                             "    .base = guikit::ThemePreset::Nord,\n"
-                            "    .surfaceStyle = guikit::SurfaceStyle::Soft,\n"
+                            "    .chrome = guikit::ChromeStyle::Classic3D,\n"
+                            "    .fillStyle = guikit::FillStyle::Soft,\n"
                             "    .surfaceContrast = 1.15f,\n"
                             "    .radiusScale = 0.85f\n"
                             "};\n"
@@ -1218,10 +1272,14 @@ keel::String GenerateThemeStudioCode(const DemoContext&) {
         keel::format_into(out, ",\n    .mode = guikit::ThemeMode::{}",
             (*spec.mode == guikit::ThemeMode::Light) ? "Light" : "Dark");
     }
-    const guikit::SurfaceStyle presetDefaultSurface = guikit::UiTheme::FromPreset(spec.base).surfaceStyle;
-    if (spec.surfaceStyle.has_value() && *spec.surfaceStyle != presetDefaultSurface) {
-        keel::format_into(out, ",\n    .surfaceStyle = guikit::SurfaceStyle::{}",
-            SurfaceStyleEnumIdentifier(*spec.surfaceStyle));
+    const guikit::UiTheme presetDefault = guikit::UiTheme::FromPreset(spec.base);
+    if (spec.chrome.has_value() && *spec.chrome != presetDefault.chromeStyle) {
+        keel::format_into(out, ",\n    .chrome = guikit::ChromeStyle::{}",
+            ChromeStyleEnumIdentifier(*spec.chrome));
+    }
+    if (spec.fillStyle.has_value() && *spec.fillStyle != presetDefault.fillStyle) {
+        keel::format_into(out, ",\n    .fillStyle = guikit::FillStyle::{}",
+            FillStyleEnumIdentifier(*spec.fillStyle));
     }
     if (spec.syntaxPreset != guikit::SyntaxPreset::Auto) {
         keel::format_into(out, ",\n    .syntaxPreset = guikit::SyntaxPreset::{}",

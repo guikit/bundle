@@ -11,6 +11,10 @@ enum class NavCategory : keel::u8 {
     StyleThemeStudio = 0,
 
     // 2. LAYOUT (Geometry & Slot Framing)
+    LayoutFlex,
+    LayoutWrap,
+    LayoutGrid,
+    LayoutScrollArea,
     LayoutSplitView,
     LayoutElement,
 
@@ -120,6 +124,10 @@ constexpr bool IsSandboxCategory(NavCategory cat) noexcept {
 
 constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
     return cat == NavCategory::StyleThemeStudio ||
+           cat == NavCategory::LayoutFlex ||
+           cat == NavCategory::LayoutWrap ||
+           cat == NavCategory::LayoutGrid ||
+           cat == NavCategory::LayoutScrollArea ||
            cat == NavCategory::LayoutSplitView ||
            cat == NavCategory::SurfaceSidebar ||
            cat == NavCategory::SurfaceMenuBar ||
@@ -177,6 +185,10 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         // 1. STYLE
         case NavCategory::StyleThemeStudio:   return "Theme Studio — Palette × Chrome × Fill & Tokens";
         // 2. LAYOUT
+        case NavCategory::LayoutFlex:         return "Row & Column — Flex Layout & Elastic Spacer";
+        case NavCategory::LayoutWrap:         return "Wrap — Responsive Flow-Wrapping Layout";
+        case NavCategory::LayoutGrid:         return "Grid — 12-Column Responsive Track Grid";
+        case NavCategory::LayoutScrollArea:   return "ScrollArea — 1D & 2D Scrollable Viewport";
         case NavCategory::LayoutSplitView:    return "SplitView — Resizable Dual-Pane Sash";
         case NavCategory::LayoutElement:      return "Element — Form-Field Wrapper & Slot Anatomy";
         // 3. SURFACES
@@ -601,6 +613,8 @@ struct DemoContext {
     keel::f32 rowGap = 8.0f;
 
     static keel::ArrayRef<keel::StringRef> DemoVariantsFor(NavCategory cat) noexcept {
+        static constexpr keel::StaticArray<keel::StringRef, 3> kFlex = {"Row", "Column", "Row + Spacer"};
+        static constexpr keel::StaticArray<keel::StringRef, 2> kGrid = {"12-Col Bento", "Equal Columns"};
         static constexpr keel::StaticArray<keel::StringRef, 2> kSplitView = {"3-Pane Nested", "2-Pane Single"};
         static constexpr keel::StaticArray<keel::StringRef, 4> kElement = {
             "InputField (Stretch)", "Switch (Compact)", "Composite Row", "Standalone (No Slot)"
@@ -633,6 +647,8 @@ struct DemoContext {
             "16-bit Monochrome", "RGB Multi-Channel"
         };
         switch (cat) {
+            case NavCategory::LayoutFlex:        return kFlex;
+            case NavCategory::LayoutGrid:        return kGrid;
             case NavCategory::LayoutSplitView:   return kSplitView;
             case NavCategory::LayoutElement:     return kElement;
             case NavCategory::OverlayTooltip:    return kTooltip;
@@ -1521,6 +1537,22 @@ keel::String GenerateRadioCode(const DemoContext& ctx);
 void RenderCardInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderCardStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateCardCode(const DemoContext& ctx);
+
+void RenderFlexInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderFlexStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateFlexCode(const DemoContext& ctx);
+
+void RenderWrapInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderWrapStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateWrapCode(const DemoContext& ctx);
+
+void RenderGridInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderGridStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateGridCode(const DemoContext& ctx);
+
+void RenderScrollAreaInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderScrollAreaStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateScrollAreaCode(const DemoContext& ctx);
 
 void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx);

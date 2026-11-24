@@ -100,6 +100,10 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         # 1. STYLE
         demo/style/theme_studio_screen.cpp
         # 2. LAYOUT
+        demo/layout/flex_screen.cpp
+        demo/layout/wrap_screen.cpp
+        demo/layout/grid_screen.cpp
+        demo/layout/scroll_area_screen.cpp
         demo/layout/split_view_screen.cpp
         demo/layout/element_screen.cpp
         # 3. SURFACES

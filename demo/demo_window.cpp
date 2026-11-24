@@ -131,6 +131,10 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::StyleThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
 
             menu.Section("LAYOUT");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutFlex),         {.text = "Row & Column", .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutWrap),         {.text = "Wrap",         .icon = guikit::Icon::Refresh()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutGrid),         {.text = "Grid",         .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutScrollArea),   {.text = "ScrollArea",   .icon = guikit::Icon::ChevronDown()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutSplitView),    {.text = "SplitView",    .icon = guikit::Icon::Copy()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutElement),      {.text = "Element",      .icon = guikit::Icon::Settings()});
 
@@ -610,6 +614,10 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         // 1. STYLE
         &RenderThemeStudioInspector,
         // 2. LAYOUT
+        &RenderFlexInspector,
+        &RenderWrapInspector,
+        &RenderGridInspector,
+        &RenderScrollAreaInspector,
         &RenderSplitViewInspector,
         &RenderElementInspector,
         // 3. SURFACES
@@ -674,6 +682,10 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         // 1. STYLE
         &RenderThemeStudioStage,
         // 2. LAYOUT
+        &RenderFlexStage,
+        &RenderWrapStage,
+        &RenderGridStage,
+        &RenderScrollAreaStage,
         &RenderSplitViewStage,
         &RenderElementStage,
         // 3. SURFACES
@@ -738,6 +750,10 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         // 1. STYLE
         &GenerateThemeStudioCode,
         // 2. LAYOUT
+        &GenerateFlexCode,
+        &GenerateWrapCode,
+        &GenerateGridCode,
+        &GenerateScrollAreaCode,
         &GenerateSplitViewCode,
         &GenerateElementCode,
         // 3. SURFACES

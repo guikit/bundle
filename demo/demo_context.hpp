@@ -30,6 +30,8 @@ enum class NavCategory : keel::u8 {
 
     // 5. ACTIONS (Buttons & Navigation Triggers)
     ActionButton,
+    ActionMenuButton,
+    ActionSplitButton,
     ActionSegmented,
     ActionTabBar,
     ActionBreadcrumb,
@@ -72,6 +74,8 @@ inline constexpr keel::usize kNavCategoryCount = keel::as<keel::usize>(NavCatego
 constexpr bool IsControlCategory(NavCategory cat) noexcept {
     switch (cat) {
         case NavCategory::ActionButton:
+        case NavCategory::ActionMenuButton:
+        case NavCategory::ActionSplitButton:
         case NavCategory::ActionSegmented:
         case NavCategory::FieldInputField:
         case NavCategory::FieldSelect:
@@ -185,6 +189,8 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::OverlayTooltip:        return "Tooltip — Hover Hints, Rich Text & Cursor Tracking";
         // 5. ACTIONS
         case NavCategory::ActionButton:       return "Button — Interactive Push Control";
+        case NavCategory::ActionMenuButton:   return "MenuButton — Autonomous Dropdown Action Button";
+        case NavCategory::ActionSplitButton:  return "SplitButton — Primary Action + Dropdown Menu";
         case NavCategory::ActionSegmented:    return "Segmented — Mutually Exclusive Pill Bar";
         case NavCategory::ActionTabBar:       return "TabBar — Scrollable & Closable Tabs";
         case NavCategory::ActionBreadcrumb:   return "Breadcrumb — Hierarchical Path Trail";
@@ -1339,6 +1345,14 @@ keel::String GenerateThemeStudioCode(const DemoContext& ctx);
 void RenderButtonInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderButtonStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateButtonCode(const DemoContext& ctx);
+
+void RenderMenuButtonInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderMenuButtonStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateMenuButtonCode(const DemoContext& ctx);
+
+void RenderSplitButtonInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderSplitButtonStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateSplitButtonCode(const DemoContext& ctx);
 
 void RenderSliderInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderSliderStage(guikit::Context& ui, DemoContext& ctx);

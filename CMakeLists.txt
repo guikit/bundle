@@ -116,6 +116,8 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/overlays/tooltip_screen.cpp
         # 5. ACTIONS
         demo/actions/button_screen.cpp
+        demo/actions/menu_button_screen.cpp
+        demo/actions/split_button_screen.cpp
         demo/actions/segmented_screen.cpp
         demo/actions/tab_bar_screen.cpp
         demo/actions/breadcrumb_screen.cpp

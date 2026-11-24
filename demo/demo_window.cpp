@@ -153,6 +153,8 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
 
             menu.Section("ACTIONS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionButton),       {.text = "Button",       .icon = guikit::Icon::Play()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionMenuButton),   {.text = "MenuButton",   .icon = guikit::Icon::ChevronDown()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionSplitButton),  {.text = "SplitButton",  .icon = guikit::Icon::Play()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionSegmented),    {.text = "Segmented",    .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionTabBar),       {.text = "TabBar",       .icon = guikit::Icon::Folder()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionBreadcrumb),   {.text = "Breadcrumb",   .icon = guikit::Icon::Folder()});
@@ -532,16 +534,18 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
         sb.Spacer();
 
-        static const keel::StaticArray<guikit::CommandPaletteItem, 21> kGlobalCommands = {{
+        static const keel::StaticArray<guikit::CommandPaletteItem, 23> kGlobalCommands = {{
             {.label = "Go to Theme Studio (Palette × Chrome × Fill)", .category = "Style",    .description = "Presets, ChromeStyle, FillStyle, WCAG & JSON", .icon = guikit::Icon::Eye()},
             {.label = "Go to Element Form-Field Wrapper",             .category = "Layout",   .description = "5 ElementLayout modes & composite slots",      .icon = guikit::Icon::Settings()},
             {.label = "Go to SplitView Resizable Panes",              .category = "Layout",   .description = "Horizontal & Vertical splitters",              .icon = guikit::Icon::Copy()},
             {.label = "Go to Modal Dialogs",                          .category = "Overlays", .description = "Backdrops, confirmation & form modals",        .icon = guikit::Icon::Copy()},
             {.label = "Go to Popover Floating Card",                  .category = "Overlays", .description = "Anchored non-modal card & placements",         .icon = guikit::Icon::Flash()},
-            {.label = "Go to ContextMenu",                            .category = "Overlays", .description = "Right-click & button-anchored menus",          .icon = guikit::Icon::Settings()},
+            {.label = "Go to ContextMenu",                            .category = "Overlays", .description = "Right-click & cursor-anchored menus",          .icon = guikit::Icon::Settings()},
             {.label = "Go to Toast Notifications",                    .category = "Overlays", .description = "Stacked notifications, variants & timers",     .icon = guikit::Icon::Info()},
             {.label = "Go to CommandPalette",                         .category = "Overlays", .description = "Fuzzy search launcher (Ctrl+K)",               .icon = guikit::Icon::Search()},
             {.label = "Go to Tooltip Hover Hints",                    .category = "Overlays", .description = "Declarative, rich text & cursor-tracking",     .icon = guikit::Icon::Eye()},
+            {.label = "Go to MenuButton Dropdown Trigger",            .category = "Actions",  .description = "Autonomous MenuScope & item-array button",     .icon = guikit::Icon::ChevronDown()},
+            {.label = "Go to SplitButton Primary + Menu",             .category = "Actions",  .description = "Dual-zone primary action & dropdown chevron",  .icon = guikit::Icon::Play()},
             {.label = "Go to Breadcrumb Path Navigation",             .category = "Actions",  .description = "Hierarchical path trail & collapse",           .icon = guikit::Icon::Folder()},
             {.label = "Go to Pagination Control",                     .category = "Actions",  .description = "Page numbers & smart ellipsis jump",           .icon = guikit::Icon::ArrowRight()},
             {.label = "Go to Select / MultiSelect / ComboBox",        .category = "Fields",   .description = "Dropdown, live filter & tag chips",            .icon = guikit::Icon::Plus()},
@@ -581,22 +585,24 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
                 case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayToast; break;
                 case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayCommandPalette; break;
                 case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayTooltip; break;
-                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionBreadcrumb; break;
-                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionPagination; break;
-                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSelect; break;
-                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldDatePicker; break;
-                case 13: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSpinBox; break;
-                case 14: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldTagInput; break;
-                case 15: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldColorPicker; break;
-                case 16: m_selectedExtension = -1; m_selectedCategory = NavCategory::DisplayLevelMeter; break;
-                case 17: m_selectedExtension = -1; m_selectedCategory = NavCategory::ViewTable; break;
-                case 18:
+                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionMenuButton; break;
+                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionSplitButton; break;
+                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionBreadcrumb; break;
+                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionPagination; break;
+                case 13: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSelect; break;
+                case 14: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldDatePicker; break;
+                case 15: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSpinBox; break;
+                case 16: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldTagInput; break;
+                case 17: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldColorPicker; break;
+                case 18: m_selectedExtension = -1; m_selectedCategory = NavCategory::DisplayLevelMeter; break;
+                case 19: m_selectedExtension = -1; m_selectedCategory = NavCategory::ViewTable; break;
+                case 20:
                     m_demoCtx.TogglePreviewDarkLight();
                     break;
-                case 19:
+                case 21:
                     m_demoCtx.previewShowCode = !m_demoCtx.previewShowCode;
                     break;
-                case 20:
+                case 22:
                     SetShellFloating(!IsShellFloating());
                     break;
                 default: break;
@@ -628,6 +634,8 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderTooltipInspector,
         // 5. ACTIONS
         &RenderButtonInspector,
+        &RenderMenuButtonInspector,
+        &RenderSplitButtonInspector,
         &RenderSegmentedInspector,
         &RenderTabBarInspector,
         &RenderBreadcrumbInspector,
@@ -690,6 +698,8 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderTooltipStage,
         // 5. ACTIONS
         &RenderButtonStage,
+        &RenderMenuButtonStage,
+        &RenderSplitButtonStage,
         &RenderSegmentedStage,
         &RenderTabBarStage,
         &RenderBreadcrumbStage,
@@ -752,6 +762,8 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateTooltipCode,
         // 5. ACTIONS
         &GenerateButtonCode,
+        &GenerateMenuButtonCode,
+        &GenerateSplitButtonCode,
         &GenerateSegmentedCode,
         &GenerateTabBarCode,
         &GenerateBreadcrumbCode,

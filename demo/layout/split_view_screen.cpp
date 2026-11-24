@@ -84,12 +84,6 @@ void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {.label = "Sash Thickness"})) {
-        if (guikit::Slider(ui, s_split.sashSize, 4.0f, 14.0f, {.valueFormat = "%.0f dp", .step = 1.0f}).changed) {
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {.label = "Ratio Bounds"})) {
         if (guikit::RangeSlider(ui, s_split.minRatio, s_split.maxRatio, 0.05f, 0.95f, {
             .valueFormat = "%.2f",
@@ -102,6 +96,12 @@ void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
 
     if (auto el = guikit::Element(ui, {.label = "Min Pane Size"})) {
         if (guikit::Slider(ui, s_split.minPaneSize, 24.0f, 140.0f, {.valueFormat = "%.0f dp", .step = 4.0f}).changed) {
+            ui.InvalidateAll();
+        }
+    }
+
+    if (auto el = guikit::Element(ui, {.label = "Sash Thickness"})) {
+        if (guikit::Slider(ui, s_split.sashSize, 4.0f, 14.0f, {.valueFormat = "%.0f dp", .step = 1.0f}).changed) {
             ui.InvalidateAll();
         }
     }

@@ -102,9 +102,6 @@ void DemoWindow::RenderTopToolbar(guikit::Context& ui) {
 
         m_shellControls.RenderThemeControls(*this, tb);
         m_shellControls.RenderDebugControls(*this, tb);
-
-        tb.Separator();
-
         m_shellControls.RenderEngineControls(*this, tb);
 
         tb.Spacer();

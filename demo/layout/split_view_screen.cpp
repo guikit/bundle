@@ -91,7 +91,11 @@ void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
     }
 
     if (auto el = guikit::Element(ui, {.label = "Ratio Bounds"})) {
-        if (guikit::RangeSlider(ui, s_split.minRatio, s_split.maxRatio, 0.05f, 0.95f, {.valueFormat = "%.2f", .step = 0.05f}).changed) {
+        if (guikit::RangeSlider(ui, s_split.minRatio, s_split.maxRatio, 0.05f, 0.95f, {
+            .valueFormat = "%.2f",
+            .step = 0.05f,
+            .minSpan = 0.05
+        }).changed) {
             ui.InvalidateAll();
         }
     }
@@ -235,7 +239,8 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
     const keel::StringRef orientName = kOrientations[s_split.orientationIdx];
     if (s_split.layoutModeIdx == 1) {
         return keel::format(
-            "if (auto split = guikit::SplitView(ui, ratio, {{\n"
+            "float primaryRatio = {:.2f}f;\n\n"
+            "if (auto split = guikit::SplitView(ui, primaryRatio, {{\n"
             "    .orientation = guikit::Orientation::{},\n"
             "    .defaultRatio = 0.35f,\n"
             "    .minRatio = {:.2f}f,\n"
@@ -253,6 +258,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
             "        // Second pane content\n"
             "    }}\n"
             "}}",
+            s_split.primaryRatio,
             orientName,
             s_split.minRatio,
             s_split.maxRatio,
@@ -266,9 +272,15 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
 
     const keel::StringRef nestedOrientName = (s_split.orientationIdx == 0) ? "Vertical" : "Horizontal";
     return keel::format(
+        "float primaryRatio = {:.2f}f;\n"
+        "float secondaryRatio = {:.2f}f;\n\n"
         "if (auto split = guikit::SplitView(ui, primaryRatio, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .defaultRatio = 0.35f,\n"
+        "    .minRatio = {:.2f}f,\n"
+        "    .maxRatio = {:.2f}f,\n"
+        "    .minFirstSize = {:.0f}f,\n"
+        "    .minSecondSize = {:.0f}f,\n"
         "    .sashSize = {:.0f}f,\n"
         "    .showGrip = {},\n"
         "    .collapsible = {}\n"
@@ -278,19 +290,37 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
         "        if (auto inner = guikit::SplitView(ui, secondaryRatio, {{\n"
         "            .orientation = guikit::Orientation::{},\n"
         "            .defaultRatio = 0.55f,\n"
-        "            .sashSize = {:.0f}f\n"
+        "            .minRatio = {:.2f}f,\n"
+        "            .maxRatio = {:.2f}f,\n"
+        "            .minFirstSize = {:.0f}f,\n"
+        "            .minSecondSize = {:.0f}f,\n"
+        "            .sashSize = {:.0f}f,\n"
+        "            .showGrip = {},\n"
+        "            .collapsible = {}\n"
         "        }})) {{\n"
         "            if (auto paneA = inner.First())  {{ /* Pane 2A */ }}\n"
         "            if (auto paneB = inner.Second()) {{ /* Pane 2B */ }}\n"
         "        }}\n"
         "    }}\n"
         "}}",
+        s_split.primaryRatio,
+        s_split.secondaryRatio,
         orientName,
+        s_split.minRatio,
+        s_split.maxRatio,
+        s_split.minPaneSize,
+        s_split.minPaneSize,
         s_split.sashSize,
         s_split.showGrip ? "true" : "false",
         s_split.collapsible ? "true" : "false",
         nestedOrientName,
-        s_split.sashSize
+        s_split.minRatio,
+        s_split.maxRatio,
+        s_split.minPaneSize,
+        s_split.minPaneSize,
+        s_split.sashSize,
+        s_split.showGrip ? "true" : "false",
+        s_split.collapsible ? "true" : "false"
     );
 }
 

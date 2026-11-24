@@ -63,7 +63,13 @@ keel::StringRef CardBorderCodeName() noexcept {
 
 void RenderCardInspector(guikit::Context& ui, DemoContext& ctx) {
     if (auto el = guikit::Element(ui, {.label = "Corner Radius"})) {
-        if (guikit::Slider(ui, ctx.cardRadius, 0.0f, 24.0f, {.valueFormat = "%.0f px"}).changed) {
+        static constexpr keel::StaticArray<keel::StringRef, 2> kRadiusVariants = {{"Auto", "%.0f px"}};
+        if (guikit::Slider(ui, ctx.cardRadius, -1.0f, 24.0f, {
+            .valueFormat = (ctx.cardRadius < 0.0f)
+                ? guikit::UiText{"Auto", kRadiusVariants}
+                : guikit::UiText{"%.0f px", kRadiusVariants},
+            .step = 1.0f
+        }).changed) {
             ui.InvalidateAll();
         }
     }
@@ -124,7 +130,7 @@ void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
         .background = ResolveCardBg(),
         .border = {
             .width = ctx.cardBorderWidth,
-            .radius = ctx.cardRadius,
+            .radius = (ctx.cardRadius >= 0.0f) ? keel::Optional<keel::f32>(ctx.cardRadius) : keel::kNullOpt,
             .color = ResolveCardBorderColor()
         }
     })) {
@@ -150,31 +156,32 @@ void RenderCardStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateCardCode(const DemoContext& ctx) {
+    const keel::String borderCode = (ctx.cardRadius < 0.0f)
+        ? keel::format("{{.width = {:.1f}f, .color = {}}}", ctx.cardBorderWidth, CardBorderCodeName())
+        : keel::format("{{.width = {:.1f}f, .radius = {:.1f}f, .color = {}}}", ctx.cardBorderWidth, ctx.cardRadius, CardBorderCodeName());
     return keel::format(
-        "if (auto card = ui.Card({{\n"
+        "if (auto card = guikit::Card(ui, {{\n"
         "    .minWidth = {:.1f}f,\n"
         "    .width = guikit::SizeMode::{},\n"
         "    .gap = {:.1f}f,\n"
         "    .padding = guikit::Padding::All({:.1f}f),\n"
         "    .background = {},\n"
-        "    .border = {{.width = {:.1f}f, .radius = {:.1f}f, .color = {}}}\n"
+        "    .border = {}\n"
         "}})) {{\n"
-        "    ui.Heading({{\n"
+        "    guikit::Heading(ui, {{\n"
         "        .label = \"Card Container\",\n"
         "        .description = \"Elevated surface with padding, gap, and border\",\n"
         "        .separator = {}\n"
         "    }});\n"
-        "    ui.Text(\"First content row inside the card container.\");\n"
-        "    ui.Text(\"Second content row spaced by the card's gap property.\");\n"
+        "    guikit::Text(ui, \"First content row inside the card container.\");\n"
+        "    guikit::Text(ui, \"Second content row spaced by the card's gap property.\");\n"
         "}}",
         s_card.fullWidth ? 0.0f : s_card.minWidth,
         s_card.fullWidth ? "Stretch" : "Fit",
         ctx.cardGap,
         ctx.cardPadding,
         CardBgCodeName(),
-        ctx.cardBorderWidth,
-        ctx.cardRadius,
-        CardBorderCodeName(),
+        borderCode,
         s_card.showDivider ? "guikit::HeadingSeparator::Bottom" : "guikit::HeadingSeparator::None"
     );
 }

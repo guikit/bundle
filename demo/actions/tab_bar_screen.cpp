@@ -74,7 +74,7 @@ void RenderTabBarStage(guikit::Context& ui, DemoContext& ctx) {
         .background = s_state.hasBg ? guikit::StateColor{th.palette.surfaceElevated} : guikit::StateColor::None(),
         .border = {
             .width = s_state.hasBg ? s_state.borderWidth : 0.0f,
-            .radius = s_state.hasBg ? s_state.radius : 0.0f,
+            .radius = s_state.hasBg ? keel::Optional<keel::f32>(s_state.radius) : keel::kNullOpt,
             .color = s_state.hasBg ? guikit::StateColor{th.palette.borderSubtle} : guikit::StateColor{}
         }
     });

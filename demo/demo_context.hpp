@@ -507,10 +507,10 @@ struct DemoContext {
     keel::f32 ctrlBgAlpha = 1.0f;
     keel::f32 ctrlBorderWidth = 0.0f;
     guikit::UiVariant ctrlBorderVariant = guikit::UiVariant::Default;
-    keel::f32 ctrlBorderRadius = 6.0f;
+    keel::f32 ctrlBorderRadius = -1.0f; // < 0 = Auto (inherit active theme & chrome radius)
 
     // Shared assembly & container layout tokens
-    keel::f32 cardRadius = 8.0f;
+    keel::f32 cardRadius = -1.0f; // < 0 = Auto (inherit active theme & chrome radius)
     keel::f32 cardPadding = 16.0f;
     keel::f32 cardGap = 8.0f;
     keel::f32 cardBorderWidth = 1.0f;
@@ -691,7 +691,7 @@ struct DemoContext {
     guikit::Border GetCtrlBorder() const noexcept {
         return guikit::Border{
             .width = ctrlBorderWidth,
-            .radius = ctrlBorderRadius,
+            .radius = (ctrlBorderRadius >= 0.0f) ? keel::Optional<keel::f32>(ctrlBorderRadius) : keel::kNullOpt,
             .color = GetCtrlBorderColor()
         };
     }
@@ -759,6 +759,13 @@ struct DemoContext {
     }
 
     keel::String FormatCtrlBorderCode() const {
+        if (ctrlBorderRadius < 0.0f) {
+            return keel::format(
+                "{{.width = {:.1f}f, .color = {}}}",
+                ctrlBorderWidth,
+                FormatCtrlBorderColorCode()
+            );
+        }
         return keel::format(
             "{{.width = {:.1f}f, .radius = {:.1f}f, .color = {}}}",
             ctrlBorderWidth,
@@ -1183,8 +1190,11 @@ struct DemoContext {
             }
 
             if (auto el = guikit::Element(ui, {.label = "Corner Radius"})) {
-                if (guikit::Slider(ui, ctrlBorderRadius, 0.0f, 24.0f, {
-                    .valueFormat = "%.0f dp",
+                static constexpr keel::StaticArray<keel::StringRef, 2> kRadiusVariants = {{"Auto", "%.0f dp"}};
+                if (guikit::Slider(ui, ctrlBorderRadius, -1.0f, 24.0f, {
+                    .valueFormat = (ctrlBorderRadius < 0.0f)
+                        ? guikit::UiText{"Auto", kRadiusVariants}
+                        : guikit::UiText{"%.0f dp", kRadiusVariants},
                     .step = 1.0f
                 }).changed) {
                     ui.InvalidateAll();

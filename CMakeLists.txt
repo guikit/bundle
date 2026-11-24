@@ -87,6 +87,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         COMMENT "Embedding GuiKit Demo showcase assets into C++ binary"
         VERBATIM
     )
+    add_custom_target(guikit_demo_assets DEPENDS "${GUIKIT_DEMO_GENERATED_ASSETS_CPP}")
 
     set(GUIKIT_DEMO_SOURCES
         demo/main.cpp
@@ -139,6 +140,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
 
     if (TARGET guikit::backend_sdl3)
         add_executable(guikit_demo ${GUIKIT_DEMO_SOURCES})
+        add_dependencies(guikit_demo guikit_demo_assets)
         target_include_directories(guikit_demo PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}/demo"
         )
@@ -167,6 +169,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
 
     if (TARGET guikit::native)
         add_executable(guikit_demo_native ${GUIKIT_DEMO_SOURCES})
+        add_dependencies(guikit_demo_native guikit_demo_assets)
         target_include_directories(guikit_demo_native PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}/demo"
         )

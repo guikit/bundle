@@ -376,7 +376,7 @@ void LoadWaterfallScenario(WaterfallDemoState& st, keel::i32 scenarioIdx) {
         keel::f32* dstRow = st.initialHistoryMatrix.data() + keel::as<keel::usize>(age) * st.numBins;
         SynthesizeSliceAtTime(st, tRow, 1000u - age, dstRow);
     }
-    std::memcpy(st.currentSliceDb.data(), st.initialHistoryMatrix.data(), st.numBins * sizeof(keel::f32));
+    keel::mem_copy(st.currentSliceDb.data(), st.initialHistoryMatrix.data(), st.numBins * sizeof(keel::f32));
     RebuildTracksAtTime(st, st.simTimeSec);
 
     st.requestClearHistory = true;

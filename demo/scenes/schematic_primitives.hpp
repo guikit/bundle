@@ -1,6 +1,6 @@
 #pragma once
 
-#include "guikit/panels/scene.hpp"
+#include "guikit/views/scene.hpp"
 #include "keel/keel.h"
 #include "keel/math.h"
 

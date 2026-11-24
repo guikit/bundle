@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/widgets/tag.hpp"
+#include "guikit/display/tag.hpp"
 
 namespace guikit::demo {
 

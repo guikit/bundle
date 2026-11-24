@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/widgets/readout.hpp"
+#include "guikit/display/readout.hpp"
 #include "keel/math.h"
 
 namespace guikit::demo {

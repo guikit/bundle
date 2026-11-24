@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/widgets/date_picker.hpp"
+#include "guikit/fields/date_picker.hpp"
 
 namespace guikit::demo {
 

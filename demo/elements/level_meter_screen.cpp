@@ -1,6 +1,6 @@
 #include "keel/math.h"
 #include "../demo_context.hpp"
-#include "guikit/widgets/level_meter.hpp"
+#include "guikit/display/level_meter.hpp"
 
 namespace guikit::demo {
 

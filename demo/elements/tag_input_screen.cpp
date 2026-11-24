@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/widgets/tag_input.hpp"
+#include "guikit/fields/tag_input.hpp"
 
 namespace guikit::demo {
 

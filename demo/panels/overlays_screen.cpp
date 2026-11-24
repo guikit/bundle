@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/panels/command_palette.hpp"
+#include "guikit/overlays/command_palette.hpp"
 
 namespace guikit::demo {
 

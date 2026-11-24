@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/panels/split_view.hpp"
+#include "guikit/layout/split_view.hpp"
 
 namespace guikit::demo {
 

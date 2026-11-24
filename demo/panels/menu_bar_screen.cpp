@@ -1,5 +1,5 @@
 #include "../demo_context.hpp"
-#include "guikit/panels/menu_bar.hpp"
+#include "guikit/surfaces/menu_bar.hpp"
 
 namespace guikit::demo {
 

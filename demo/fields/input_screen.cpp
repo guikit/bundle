@@ -113,7 +113,7 @@ void RenderInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.height = ctx.ResolveCtrlHeight();
         opts.style = s_state.fieldStyle;
         opts.status = s_state.status;
-        opts.background = ctx.GetControlBackground(NavCategory::ElemInputField);
+        opts.background = ctx.GetControlBackground(NavCategory::FieldInputField);
         opts.border = ctx.GetCtrlBorder();
         guikit::InputField(ui, s_state.text, opts);
 
@@ -178,7 +178,7 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
         ctx.FormatCtrlHeightCode(),
         FieldStyleName(s_state.fieldStyle),
         VariantName(s_state.status),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemInputField),
+        ctx.FormatControlBackgroundCode(NavCategory::FieldInputField),
         ctx.FormatCtrlBorderCode()
     );
 

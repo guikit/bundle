@@ -83,13 +83,13 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
         opts.placeholder = s_state.placeholder;
         opts.prefix = s_state.hasPrefix ? guikit::Icon::Search() : guikit::Icon{};
         opts.maxVisibleItems = s_state.maxItems;
-        opts.align = ctx.GetCtrlAlign(NavCategory::ElemSelect);
+        opts.align = ctx.GetCtrlAlign(NavCategory::FieldSelect);
         opts.clearable = s_state.clearable;
         opts.disabled = ctx.elemDisabled;
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.background = ctx.GetControlBackground(NavCategory::ElemSelect);
+        opts.background = ctx.GetControlBackground(NavCategory::FieldSelect);
         opts.border = ctx.GetCtrlBorder();
 
         const auto richList = BuildRichSelectItems();
@@ -128,7 +128,7 @@ keel::String GenerateSelectCode(const DemoContext& ctx) {
         : ((s_state.mode == 1)
             ? "ComboBox(presetIndex"
             : ((s_state.mode == 2) ? "Autocomplete(customText" : "MultiSelect(selectedIndices"));
-    const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::ElemSelect);
+    const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::FieldSelect);
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
@@ -158,7 +158,7 @@ keel::String GenerateSelectCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemSelect),
+        ctx.FormatControlBackgroundCode(NavCategory::FieldSelect),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

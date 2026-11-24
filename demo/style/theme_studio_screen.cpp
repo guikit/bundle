@@ -6,17 +6,17 @@ namespace {
 
 struct ThemeStudioState {
     // Base Preset & Orthogonal Design-System Axes (Palette x Chrome x Fill)
-    guikit::ThemePreset preset = guikit::ThemePreset::Windows98;
-    guikit::ChromeStyle chrome = guikit::ChromeStyle::Classic3D;
+    guikit::ThemePreset preset = guikit::ThemePreset::Dark;
+    guikit::ChromeStyle chrome = guikit::ChromeStyle::Modern;
     guikit::FillStyle fillStyle = guikit::FillStyle::Solid;
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
     // Scrollbar Customization
     guikit::ScrollbarPreset scrollbarPreset = guikit::ScrollbarPreset::Auto;
     bool overrideScrollbarWidth = false;
-    keel::f32 scrollbarWidth = 16.0f;
+    keel::f32 scrollbarWidth = 10.0f;
     bool customizeScrollbarTokens = false;
-    guikit::ScrollbarStyleTokens customScrollbarTokens = guikit::ScrollbarStyleTokens::Windows98();
+    guikit::ScrollbarStyleTokens customScrollbarTokens = guikit::ScrollbarStyleTokens::Modern();
 
     // Seed & Direct Color Overrides
     bool overrideAccent = false;
@@ -83,15 +83,15 @@ struct ThemeStudioState {
 ThemeStudioState s_studio;
 
 void ResetToDefaults() noexcept {
-    s_studio.preset = guikit::ThemePreset::Windows98;
-    s_studio.chrome = guikit::ChromeStyle::Classic3D;
+    s_studio.preset = guikit::ThemePreset::Dark;
+    s_studio.chrome = guikit::ChromeStyle::Modern;
     s_studio.fillStyle = guikit::FillStyle::Solid;
     s_studio.syntaxPreset = guikit::SyntaxPreset::Auto;
     s_studio.scrollbarPreset = guikit::ScrollbarPreset::Auto;
     s_studio.overrideScrollbarWidth = false;
-    s_studio.scrollbarWidth = 16.0f;
+    s_studio.scrollbarWidth = 10.0f;
     s_studio.customizeScrollbarTokens = false;
-    s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::Windows98();
+    s_studio.customScrollbarTokens = guikit::ScrollbarStyleTokens::Modern();
 
     s_studio.overrideAccent = false;
     s_studio.overrideNeutral = false;
@@ -375,6 +375,45 @@ void RenderColorOverrideRow(
 }
 
 } // namespace
+
+void SyncPreviewThemeFromStudio(DemoContext& ctx) noexcept {
+    ctx.previewTheme = BuildEffectiveTheme();
+    ctx.previewLightMode = (ctx.previewTheme.mode == guikit::ThemeMode::Light);
+    ctx.previewDarkMode = !ctx.previewLightMode;
+}
+
+void SelectStudioPreset(DemoContext& ctx, guikit::ThemePreset preset) noexcept {
+    SelectBasePreset(preset);
+    SyncPreviewThemeFromStudio(ctx);
+}
+
+void SelectStudioChrome(DemoContext& ctx, guikit::ChromeStyle chrome) noexcept {
+    s_studio.chrome = chrome;
+    SyncPreviewThemeFromStudio(ctx);
+}
+
+void SelectStudioFillStyle(DemoContext& ctx, guikit::FillStyle fill) noexcept {
+    s_studio.fillStyle = fill;
+    SyncPreviewThemeFromStudio(ctx);
+}
+
+void ToggleStudioDarkLight(DemoContext& ctx) noexcept {
+    const bool nextLight = (ctx.previewTheme.mode == guikit::ThemeMode::Dark);
+    SelectBasePreset(nextLight ? guikit::ThemePreset::Light : guikit::ThemePreset::Dark);
+    SyncPreviewThemeFromStudio(ctx);
+}
+
+guikit::ThemePreset GetStudioPreset() noexcept {
+    return s_studio.preset;
+}
+
+guikit::ChromeStyle GetStudioChrome() noexcept {
+    return s_studio.chrome;
+}
+
+guikit::FillStyle GetStudioFillStyle() noexcept {
+    return s_studio.fillStyle;
+}
 
 void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, guikit::kThemePresetCount> kPresetNames = {{
@@ -789,13 +828,15 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             .height = 132.0f
         });
     }
+
+    // Keep global Preview Zone theme continuously synchronized with Theme Studio
+    SyncPreviewThemeFromStudio(ctx);
 }
 
-void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
-    const guikit::UiTheme built = BuildEffectiveTheme();
+void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
+    const guikit::UiTheme& built = ctx.previewTheme;
 
-    if (auto zone = ui.Zone({.theme = built})) {
-        if (auto bg = guikit::Box(ui, {
+    if (auto bg = guikit::Box(ui, {
             .gap = 0.0f,
             .width = guikit::SizeMode::Stretch,
             .height = guikit::SizeMode::Stretch,
@@ -822,6 +863,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     file.Separator();
                     if (file.Item("Reset to Defaults", {.icon = guikit::Icon::Refresh(), .variant = guikit::UiVariant::Danger})) {
                         ResetToDefaults();
+                        SyncPreviewThemeFromStudio(ctx);
                         ui.InvalidateAll();
                     }
                 }
@@ -832,7 +874,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                         for (keel::usize pi = 0; pi < guikit::kThemePresetCount; ++pi) {
                             const auto p = keel::from_underlying<guikit::ThemePreset>(pi);
                             if (presetsSub.Radio(guikit::ThemePresetName(p), presetIdx, keel::as<keel::i32>(pi))) {
-                                SelectBasePreset(p);
+                                SelectStudioPreset(ctx, p);
                                 ui.InvalidateAll();
                             }
                         }
@@ -840,9 +882,11 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     themeMenu.Separator();
                     if (themeMenu.Item("Harmonic Randomize", {.icon = guikit::Icon::Flash()})) {
                         RandomizeHarmonicTheme();
+                        SyncPreviewThemeFromStudio(ctx);
                         ui.InvalidateAll();
                     }
                     if (themeMenu.Checkbox("Theme Morph (Lerp)", s_studio.enableLerp, {.keepOpen = true})) {
+                        SyncPreviewThemeFromStudio(ctx);
                         ui.InvalidateAll();
                     }
                 }
@@ -853,7 +897,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     for (keel::i32 ci = 0; ci < keel::as<keel::i32>(guikit::kChromeStyleCount); ++ci) {
                         const auto cs = keel::from_underlying<guikit::ChromeStyle>(ci);
                         if (surfMenu.Radio(guikit::ChromeStyleName(cs), chrIdx, ci)) {
-                            s_studio.chrome = cs;
+                            SelectStudioChrome(ctx, cs);
                             ui.InvalidateAll();
                         }
                     }
@@ -863,7 +907,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     for (keel::i32 fi = 0; fi < keel::as<keel::i32>(guikit::kFillStyleCount); ++fi) {
                         const auto fs = keel::from_underlying<guikit::FillStyle>(fi);
                         if (surfMenu.Radio(guikit::FillStyleName(fs), fIdx, fi)) {
-                            s_studio.fillStyle = fs;
+                            SelectStudioFillStyle(ctx, fs);
                             ui.InvalidateAll();
                         }
                     }
@@ -872,10 +916,12 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                     keel::i32 shellIdx = (s_studio.shellStyle == guikit::ShellStyle::Floating) ? 1 : 0;
                     if (surfMenu.Radio("Docked", shellIdx, 0)) {
                         s_studio.shellStyle = guikit::ShellStyle::Docked;
+                        SyncPreviewThemeFromStudio(ctx);
                         ui.InvalidateAll();
                     }
                     if (surfMenu.Radio("Floating", shellIdx, 1)) {
                         s_studio.shellStyle = guikit::ShellStyle::Floating;
+                        SyncPreviewThemeFromStudio(ctx);
                         ui.InvalidateAll();
                     }
                 }
@@ -1284,7 +1330,6 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext&) {
                 }
             }
         }
-    }
 }
 
 keel::String GenerateThemeStudioCode(const DemoContext&) {

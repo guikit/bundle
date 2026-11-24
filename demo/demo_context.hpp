@@ -6,70 +6,104 @@
 namespace guikit::demo {
 
 enum class NavCategory : keel::u8 {
-    // 1. ELEMENTS (Atomic Controls)
-    ElemHeading = 0,
-    ElemElement,
-    ElemThemeStudio,
-    ElemButton,
-    ElemSlider,
-    ElemProgressBar,
-    ElemLevelMeter,
-    ElemReadout,
-    ElemKnob,
-    ElemSpinBox,
-    ElemInputField,
-    ElemTag,
-    ElemTagInput,
-    ElemSelect,
-    ElemSegmented,
-    ElemColorPicker,
-    ElemDatePicker,
-    ElemSwitch,
-    ElemCheckbox,
-    ElemRadio,
-    ElemImage,
+    // 1. STYLE (Design System)
+    StyleThemeStudio = 0,
 
-    // 2. PANELS & NAV (Containers & Navigation)
-    PanelCard,
-    PanelSplitView,
-    PanelTabBar,
-    PanelBreadcrumb,
-    PanelPagination,
-    PanelMenuBar,
-    PanelToolbar,
-    PanelSidebar,
-    PanelTreeView,
-    PanelTable,
-    PanelOverlays,
+    // 2. LAYOUT (Geometry & Slot Framing)
+    LayoutSplitView,
+    LayoutElement,
 
-    // 3. CONTENT & MEDIA (Documents, Editors, Graphics)
-    ContentMarkdown,
-    ContentCodeEditor,
+    // 3. SURFACES (Containers & Application Shell)
+    SurfaceCard,
+    SurfaceMenuBar,
+    SurfaceToolbar,
+    SurfaceSidebar,
 
-    // 4. 2D SCENES (Interactive Vector Viewports)
-    SceneSchematic2D,
-    SceneImageView
+    // 4. OVERLAYS (Transient Floating Layers)
+    OverlayOverlays,
+
+    // 5. ACTIONS (Buttons & Navigation Triggers)
+    ActionButton,
+    ActionSegmented,
+    ActionTabBar,
+    ActionBreadcrumb,
+    ActionPagination,
+
+    // 6. FIELDS (Unified Editable Fields on FieldFrame)
+    FieldInputField,
+    FieldTextArea,
+    FieldSelect,
+    FieldSpinBox,
+    FieldDatePicker,
+    FieldTagInput,
+    FieldColorPicker,
+
+    // 7. CONTROLS (Direct Value Controls)
+    ControlCheckbox,
+    ControlRadio,
+    ControlSwitch,
+    ControlSlider,
+    ControlKnob,
+
+    // 8. DISPLAY (Typography, Indicators & Media)
+    DisplayHeading,
+    DisplayTag,
+    DisplayProgressBar,
+    DisplayLevelMeter,
+    DisplayReadout,
+    DisplayImage,
+
+    // 9. VIEWS (Rich Data & Vector Viewports)
+    ViewTable,
+    ViewTreeView,
+    ViewMarkdown,
+    ViewImageView,
+    ViewSchematic2D
 };
 
+inline constexpr keel::usize kNavCategoryCount = keel::as<keel::usize>(NavCategory::ViewSchematic2D) + 1u;
+
 constexpr bool IsControlCategory(NavCategory cat) noexcept {
-    return cat >= NavCategory::ElemButton && cat <= NavCategory::ElemImage;
+    switch (cat) {
+        case NavCategory::ActionButton:
+        case NavCategory::ActionSegmented:
+        case NavCategory::FieldInputField:
+        case NavCategory::FieldSelect:
+        case NavCategory::FieldSpinBox:
+        case NavCategory::FieldDatePicker:
+        case NavCategory::FieldTagInput:
+        case NavCategory::FieldColorPicker:
+        case NavCategory::ControlCheckbox:
+        case NavCategory::ControlRadio:
+        case NavCategory::ControlSwitch:
+        case NavCategory::ControlSlider:
+        case NavCategory::ControlKnob:
+        case NavCategory::DisplayTag:
+        case NavCategory::DisplayProgressBar:
+        case NavCategory::DisplayLevelMeter:
+        case NavCategory::DisplayReadout:
+        case NavCategory::DisplayImage:
+            return true;
+        default:
+            return false;
+    }
 }
 
 constexpr bool IsSandboxCategory(NavCategory cat) noexcept {
-    return cat <= NavCategory::SceneImageView;
+    return keel::as<keel::usize>(cat) < kNavCategoryCount;
 }
 
 constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
-    return cat == NavCategory::ElemThemeStudio ||
-           cat == NavCategory::PanelSplitView ||
-           cat == NavCategory::PanelSidebar ||
-           cat == NavCategory::PanelMenuBar ||
-           cat == NavCategory::PanelTreeView ||
-           cat == NavCategory::PanelTable ||
-           cat == NavCategory::ContentMarkdown ||
-           cat == NavCategory::ContentCodeEditor ||
-           cat == NavCategory::SceneSchematic2D ||
-           cat == NavCategory::SceneImageView;
+    return cat == NavCategory::StyleThemeStudio ||
+           cat == NavCategory::LayoutSplitView ||
+           cat == NavCategory::SurfaceSidebar ||
+           cat == NavCategory::SurfaceMenuBar ||
+           cat == NavCategory::FieldTextArea ||
+           cat == NavCategory::ViewTable ||
+           cat == NavCategory::ViewTreeView ||
+           cat == NavCategory::ViewMarkdown ||
+           cat == NavCategory::ViewImageView ||
+           cat == NavCategory::ViewSchematic2D;
 }
 
 enum class PreviewFormFactor : keel::u8 {
@@ -111,68 +145,80 @@ inline constexpr keel::StaticArray<keel::StringRef, 8> kPreviewZoomPresetNames =
 
 constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
     switch (cat) {
-        case NavCategory::ElemHeading:       return "Heading — Section & Title Typography";
-        case NavCategory::ElemElement:       return "Element — Form-Field Wrapper & Slot Anatomy";
-        case NavCategory::ElemThemeStudio:   return "Theme Studio — Design Tokens, Presets & WCAG";
-        case NavCategory::ElemButton:        return "Button — Interactive Push Control";
-        case NavCategory::ElemSlider:        return "Slider & StepSlider — Continuous, Discrete & Range";
-        case NavCategory::ElemProgressBar:   return "ProgressBar — Smooth, Segmented & Indeterminate";
-        case NavCategory::ElemLevelMeter:    return "LevelMeter — Segmented Audio/DSP VU Meter";
-        case NavCategory::ElemReadout:       return "Readout — Interactive Telemetry Channel Display";
-        case NavCategory::ElemKnob:          return "Knob — Rotary Parameter Control";
-        case NavCategory::ElemSpinBox:       return "SpinBox — Precision Numeric Stepper";
-        case NavCategory::ElemInputField:    return "InputField — Text & Validated Input";
-        case NavCategory::ElemTag:           return "Tag — Status Badges & Clickable Chips";
-        case NavCategory::ElemTagInput:      return "TagInput — Editable Multi-Tag Chips";
-        case NavCategory::ElemSelect:        return "Select & MultiSelect — Dropdown & ComboBox";
-        case NavCategory::ElemSegmented:     return "Segmented — Mutually Exclusive Pill Bar";
-        case NavCategory::ElemColorPicker:   return "ColorPicker — 2D HSV Canvas & HEX/RGBA";
-        case NavCategory::ElemDatePicker:    return "DatePicker — Calendar Grid & Time Stepper";
-        case NavCategory::ElemSwitch:        return "Switch — Toggle & Symmetric Dual-Label";
-        case NavCategory::ElemCheckbox:      return "Checkbox — Tri-State Boolean Control";
-        case NavCategory::ElemRadio:         return "Radio — Exclusive Option Group";
-        case NavCategory::ElemImage:         return "Image — Vector SVG & Raster Display";
-        case NavCategory::PanelCard:         return "Card — Surface Container & Elevation";
-        case NavCategory::PanelSplitView:    return "SplitView — Resizable Dual-Pane Sash";
-        case NavCategory::PanelTabBar:       return "TabBar — Scrollable & Closable Tabs";
-        case NavCategory::PanelBreadcrumb:   return "Breadcrumb — Hierarchical Path Trail";
-        case NavCategory::PanelPagination:   return "Pagination — Page Navigation & Ellipsis";
-        case NavCategory::PanelMenuBar:      return "MenuBar — Desktop Menu Bar & Cascading Submenus";
-        case NavCategory::PanelToolbar:      return "Toolbar — Command Strip & Tool Palettes";
-        case NavCategory::PanelSidebar:      return "Sidebar — Application Workbench Shell";
-        case NavCategory::PanelTreeView:     return "TreeView — Hierarchical Node Explorer";
-        case NavCategory::PanelTable:        return "Table — 100k Virtualized Data Grid";
-        case NavCategory::PanelOverlays:     return "Overlays — Modal, Toast & CommandPalette";
-        case NavCategory::ContentMarkdown:   return "Markdown — Rich Document Renderer";
-        case NavCategory::ContentCodeEditor: return "Code Editor — Syntax Highlighting & Minimap";
-        case NavCategory::SceneSchematic2D:  return "Schematic 2D — Node Graph Canvas";
-        case NavCategory::SceneImageView:    return "Image View — 16-bit Scientific Inspector";
+        // 1. STYLE
+        case NavCategory::StyleThemeStudio:   return "Theme Studio — Palette × Chrome × Fill & Tokens";
+        // 2. LAYOUT
+        case NavCategory::LayoutSplitView:    return "SplitView — Resizable Dual-Pane Sash";
+        case NavCategory::LayoutElement:      return "Element — Form-Field Wrapper & Slot Anatomy";
+        // 3. SURFACES
+        case NavCategory::SurfaceCard:        return "Card — Surface Container & Elevation";
+        case NavCategory::SurfaceMenuBar:     return "MenuBar — Desktop Menu Bar & Cascading Submenus";
+        case NavCategory::SurfaceToolbar:     return "Toolbar — Command Strip & Tool Palettes";
+        case NavCategory::SurfaceSidebar:     return "Sidebar — Application Workbench Shell";
+        // 4. OVERLAYS
+        case NavCategory::OverlayOverlays:    return "Overlays — Modal, Popover, Toast & CommandPalette";
+        // 5. ACTIONS
+        case NavCategory::ActionButton:       return "Button — Interactive Push Control";
+        case NavCategory::ActionSegmented:    return "Segmented — Mutually Exclusive Pill Bar";
+        case NavCategory::ActionTabBar:       return "TabBar — Scrollable & Closable Tabs";
+        case NavCategory::ActionBreadcrumb:   return "Breadcrumb — Hierarchical Path Trail";
+        case NavCategory::ActionPagination:   return "Pagination — Page Navigation & Ellipsis";
+        // 6. FIELDS
+        case NavCategory::FieldInputField:    return "InputField — Text & Validated Input";
+        case NavCategory::FieldTextArea:      return "TextArea — Code Editor, Syntax Highlighting & Minimap";
+        case NavCategory::FieldSelect:        return "Select & MultiSelect — Dropdown & ComboBox";
+        case NavCategory::FieldSpinBox:       return "SpinBox — Precision Numeric Stepper";
+        case NavCategory::FieldDatePicker:    return "DatePicker — Calendar Grid & Time Stepper";
+        case NavCategory::FieldTagInput:      return "TagInput — Editable Multi-Tag Chips";
+        case NavCategory::FieldColorPicker:   return "ColorPicker — 2D HSV Canvas & HEX/RGBA";
+        // 7. CONTROLS
+        case NavCategory::ControlCheckbox:    return "Checkbox — Tri-State Boolean Control";
+        case NavCategory::ControlRadio:       return "Radio — Exclusive Option Group";
+        case NavCategory::ControlSwitch:      return "Switch — Toggle & Symmetric Dual-Label";
+        case NavCategory::ControlSlider:      return "Slider & StepSlider — Continuous, Discrete & Range";
+        case NavCategory::ControlKnob:        return "Knob — Rotary Parameter Control";
+        // 8. DISPLAY
+        case NavCategory::DisplayHeading:     return "Heading — Section & Title Typography";
+        case NavCategory::DisplayTag:         return "Tag — Status Badges & Clickable Chips";
+        case NavCategory::DisplayProgressBar: return "ProgressBar — Smooth, Segmented & Indeterminate";
+        case NavCategory::DisplayLevelMeter:  return "LevelMeter — Segmented Audio/DSP VU Meter";
+        case NavCategory::DisplayReadout:     return "Readout — Interactive Telemetry Channel Display";
+        case NavCategory::DisplayImage:       return "Image — Vector SVG & Raster Display";
+        // 9. VIEWS
+        case NavCategory::ViewTable:          return "Table — 100k Virtualized Data Grid";
+        case NavCategory::ViewTreeView:       return "TreeView — Hierarchical Node Explorer";
+        case NavCategory::ViewMarkdown:       return "Markdown — Rich Document Renderer";
+        case NavCategory::ViewImageView:      return "Image View — 16-bit Scientific Inspector";
+        case NavCategory::ViewSchematic2D:    return "Schematic 2D — Node Graph Canvas";
     }
     return "GuiKit Preview";
 }
 
 constexpr keel::StringRef CategoryControlName(NavCategory cat) noexcept {
     switch (cat) {
-        case NavCategory::ElemHeading:       return "Heading";
-        case NavCategory::ElemElement:       return "Element";
-        case NavCategory::ElemThemeStudio:   return "Theme Studio";
-        case NavCategory::ElemButton:        return "Button";
-        case NavCategory::ElemSlider:        return "Slider";
-        case NavCategory::ElemProgressBar:   return "ProgressBar";
-        case NavCategory::ElemLevelMeter:    return "LevelMeter";
-        case NavCategory::ElemKnob:          return "Knob";
-        case NavCategory::ElemSpinBox:       return "SpinBox";
-        case NavCategory::ElemInputField:    return "InputField";
-        case NavCategory::ElemTagInput:      return "TagInput";
-        case NavCategory::ElemSelect:        return "Select";
-        case NavCategory::ElemSegmented:     return "Segmented";
-        case NavCategory::ElemColorPicker:   return "ColorPicker";
-        case NavCategory::ElemDatePicker:    return "DatePicker";
-        case NavCategory::ElemSwitch:        return "Switch";
-        case NavCategory::ElemCheckbox:      return "Checkbox";
-        case NavCategory::ElemRadio:         return "Radio";
-        case NavCategory::ElemImage:         return "Image";
-        default:                             return "Control";
+        case NavCategory::StyleThemeStudio:   return "Theme Studio";
+        case NavCategory::LayoutElement:      return "Element";
+        case NavCategory::ActionButton:       return "Button";
+        case NavCategory::ActionSegmented:    return "Segmented";
+        case NavCategory::FieldInputField:    return "InputField";
+        case NavCategory::FieldTextArea:      return "TextArea";
+        case NavCategory::FieldSelect:        return "Select";
+        case NavCategory::FieldSpinBox:       return "SpinBox";
+        case NavCategory::FieldDatePicker:    return "DatePicker";
+        case NavCategory::FieldTagInput:      return "TagInput";
+        case NavCategory::FieldColorPicker:   return "ColorPicker";
+        case NavCategory::ControlCheckbox:    return "Checkbox";
+        case NavCategory::ControlRadio:       return "Radio";
+        case NavCategory::ControlSwitch:      return "Switch";
+        case NavCategory::ControlSlider:      return "Slider";
+        case NavCategory::ControlKnob:        return "Knob";
+        case NavCategory::DisplayHeading:     return "Heading";
+        case NavCategory::DisplayTag:         return "Tag";
+        case NavCategory::DisplayProgressBar: return "ProgressBar";
+        case NavCategory::DisplayLevelMeter:  return "LevelMeter";
+        case NavCategory::DisplayReadout:     return "Readout";
+        case NavCategory::DisplayImage:       return "Image";
+        default:                              return "Control";
     }
 }
 
@@ -448,7 +494,15 @@ struct DemoContext {
     keel::f32 knobDiameterDp = 64.0f;       // 28..140 dp
     guikit::Align ctrlAlign = guikit::Align::Center;      // Capsule content alignment for Button
     guikit::Align ctrlSelectAlign = guikit::Align::Start; // Content alignment for Select
-    keel::StaticArray<keel::usize, 17> ctrlBgIdxByCat = {0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+    static constexpr keel::StaticArray<keel::usize, kNavCategoryCount> MakeDefaultCtrlBgTable() noexcept {
+        keel::StaticArray<keel::usize, kNavCategoryCount> table{};
+        for (keel::usize i = 0; i < kNavCategoryCount; ++i) {
+            const auto cat = keel::from_underlying<NavCategory>(i);
+            table[i] = IsCtrlBgDefaultEnabled(cat) ? 1u : 0u;
+        }
+        return table;
+    }
+    keel::StaticArray<keel::usize, kNavCategoryCount> ctrlBgIdxByCat = MakeDefaultCtrlBgTable();
     keel::f32 ctrlBgTint = 1.0f;
     keel::f32 ctrlBgAlpha = 1.0f;
     keel::f32 ctrlBorderWidth = 0.0f;
@@ -467,12 +521,12 @@ struct DemoContext {
 
     static constexpr guikit::SizeMode DefaultCtrlWidthMode(NavCategory cat) noexcept {
         switch (cat) {
-            case NavCategory::ElemButton:
-            case NavCategory::ElemKnob:
-            case NavCategory::ElemSwitch:
-            case NavCategory::ElemCheckbox:
-            case NavCategory::ElemRadio:
-            case NavCategory::ElemImage:
+            case NavCategory::ActionButton:
+            case NavCategory::ControlKnob:
+            case NavCategory::ControlSwitch:
+            case NavCategory::ControlCheckbox:
+            case NavCategory::ControlRadio:
+            case NavCategory::DisplayImage:
                 return guikit::SizeMode::Fit;
             default:
                 return guikit::SizeMode::Stretch;
@@ -480,41 +534,41 @@ struct DemoContext {
     }
 
     static constexpr bool HasCtrlLayoutCategory(NavCategory cat) noexcept {
-        return cat != NavCategory::ElemSwitch &&
-               cat != NavCategory::ElemCheckbox &&
-               cat != NavCategory::ElemRadio;
+        return cat != NavCategory::ControlSwitch &&
+               cat != NavCategory::ControlCheckbox &&
+               cat != NavCategory::ControlRadio;
     }
 
     static constexpr bool IsCtrlBoxedCategory(NavCategory cat) noexcept {
-        return cat == NavCategory::ElemButton ||
-               cat == NavCategory::ElemSpinBox ||
-               cat == NavCategory::ElemInputField ||
-               cat == NavCategory::ElemTagInput ||
-               cat == NavCategory::ElemSelect ||
-               cat == NavCategory::ElemSegmented ||
-               cat == NavCategory::ElemColorPicker ||
-               cat == NavCategory::ElemDatePicker ||
-               cat == NavCategory::ElemImage;
+        return cat == NavCategory::ActionButton ||
+               cat == NavCategory::ActionSegmented ||
+               cat == NavCategory::FieldSpinBox ||
+               cat == NavCategory::FieldInputField ||
+               cat == NavCategory::FieldTagInput ||
+               cat == NavCategory::FieldSelect ||
+               cat == NavCategory::FieldColorPicker ||
+               cat == NavCategory::FieldDatePicker ||
+               cat == NavCategory::DisplayImage;
     }
 
     static constexpr bool IsCtrlBgDefaultEnabled(NavCategory cat) noexcept {
-        return cat == NavCategory::ElemButton ||
-               cat == NavCategory::ElemSpinBox ||
-               cat == NavCategory::ElemInputField ||
-               cat == NavCategory::ElemTagInput ||
-               cat == NavCategory::ElemSelect ||
-               cat == NavCategory::ElemSegmented ||
-               cat == NavCategory::ElemColorPicker ||
-               cat == NavCategory::ElemDatePicker;
+        return cat == NavCategory::ActionButton ||
+               cat == NavCategory::ActionSegmented ||
+               cat == NavCategory::FieldSpinBox ||
+               cat == NavCategory::FieldInputField ||
+               cat == NavCategory::FieldTagInput ||
+               cat == NavCategory::FieldSelect ||
+               cat == NavCategory::FieldColorPicker ||
+               cat == NavCategory::FieldDatePicker;
     }
 
     static constexpr guikit::ElementLayout DefaultElemLayout(NavCategory cat) noexcept {
         switch (cat) {
-            case NavCategory::ElemSwitch:
-            case NavCategory::ElemCheckbox:
-            case NavCategory::ElemRadio:
+            case NavCategory::ControlSwitch:
+            case NavCategory::ControlCheckbox:
+            case NavCategory::ControlRadio:
                 return guikit::ElementLayout::Trailing;
-            case NavCategory::ElemKnob:
+            case NavCategory::ControlKnob:
                 return guikit::ElementLayout::Leading;
             default:
                 return guikit::ElementLayout::Stacked;
@@ -534,7 +588,7 @@ struct DemoContext {
     }
 
     constexpr guikit::Align GetCtrlAlign(NavCategory cat) const noexcept {
-        return (cat == NavCategory::ElemSelect) ? ctrlSelectAlign : ctrlAlign;
+        return (cat == NavCategory::FieldSelect) ? ctrlSelectAlign : ctrlAlign;
     }
 
     guikit::UiText GetElementLabel() const noexcept {
@@ -946,7 +1000,7 @@ struct DemoContext {
             return;
         }
 
-        if (cat == NavCategory::ElemKnob) {
+        if (cat == NavCategory::ControlKnob) {
             if (auto el = guikit::Element(ui, {
                 .label = "Custom Diameter",
                 .badge = {
@@ -1024,8 +1078,8 @@ struct DemoContext {
             }
         }
 
-        if (cat == NavCategory::ElemButton || cat == NavCategory::ElemSelect) {
-            guikit::Align& targetAlign = (cat == NavCategory::ElemSelect) ? ctrlSelectAlign : ctrlAlign;
+        if (cat == NavCategory::ActionButton || cat == NavCategory::FieldSelect) {
+            guikit::Align& targetAlign = (cat == NavCategory::FieldSelect) ? ctrlSelectAlign : ctrlAlign;
             keel::usize alignIdx = (targetAlign == guikit::Align::Start)
                 ? 0
                 : ((targetAlign == guikit::Align::End) ? 2 : 1);
@@ -1048,17 +1102,17 @@ struct DemoContext {
         }
 
         const bool hasControlVariant = (
-            cat == NavCategory::ElemButton ||
-            cat == NavCategory::ElemSlider ||
-            cat == NavCategory::ElemProgressBar ||
-            cat == NavCategory::ElemLevelMeter ||
-            cat == NavCategory::ElemKnob ||
-            cat == NavCategory::ElemSpinBox ||
-            cat == NavCategory::ElemSegmented ||
-            cat == NavCategory::ElemDatePicker ||
-            cat == NavCategory::ElemSwitch ||
-            cat == NavCategory::ElemCheckbox ||
-            cat == NavCategory::ElemRadio
+            cat == NavCategory::ActionButton ||
+            cat == NavCategory::ActionSegmented ||
+            cat == NavCategory::FieldSpinBox ||
+            cat == NavCategory::FieldDatePicker ||
+            cat == NavCategory::ControlSlider ||
+            cat == NavCategory::ControlKnob ||
+            cat == NavCategory::ControlSwitch ||
+            cat == NavCategory::ControlCheckbox ||
+            cat == NavCategory::ControlRadio ||
+            cat == NavCategory::DisplayProgressBar ||
+            cat == NavCategory::DisplayLevelMeter
         );
         if (hasControlVariant) {
             if (auto el = guikit::Element(ui, {.label = "Color"})) {
@@ -1096,7 +1150,7 @@ struct DemoContext {
                 }
             }
 
-            const bool hasIntrinsicBorder = (cat != NavCategory::ElemImage && cat != NavCategory::ElemTagInput);
+            const bool hasIntrinsicBorder = (cat != NavCategory::DisplayImage && cat != NavCategory::FieldTagInput);
             if (auto el = guikit::Element(ui, {.label = "Border Width"})) {
                 static constexpr keel::StaticArray<keel::StringRef, 2> kBorderVariants = {{"Default", "%.1f dp"}};
                 if (guikit::Slider(ui, ctrlBorderWidth, 0.0f, 4.0f, {
@@ -1111,14 +1165,14 @@ struct DemoContext {
 
             const bool hasVisibleCtrlBorder =
                 (ctrlBorderWidth > 0.0f) ||
-                (cat == NavCategory::ElemSpinBox) ||
-                (cat == NavCategory::ElemInputField) ||
-                (cat == NavCategory::ElemTagInput) ||
-                (cat == NavCategory::ElemSelect) ||
-                (cat == NavCategory::ElemSegmented) ||
-                (cat == NavCategory::ElemColorPicker) ||
-                (cat == NavCategory::ElemDatePicker) ||
-                (cat == NavCategory::ElemButton &&
+                (cat == NavCategory::FieldSpinBox) ||
+                (cat == NavCategory::FieldInputField) ||
+                (cat == NavCategory::FieldTagInput) ||
+                (cat == NavCategory::FieldSelect) ||
+                (cat == NavCategory::ActionSegmented) ||
+                (cat == NavCategory::FieldColorPicker) ||
+                (cat == NavCategory::FieldDatePicker) ||
+                (cat == NavCategory::ActionButton &&
                     (btnVariant == guikit::UiVariant::Default || btnVariant == guikit::UiVariant::Secondary));
             if (auto el = guikit::Element(ui, {.label = "Border Color", .disabled = !hasVisibleCtrlBorder})) {
                 if (guikit::Select(ui, ctrlBorderVariant, kUiVariantNames, {
@@ -1195,6 +1249,15 @@ keel::String GenerateHeadingCode(const DemoContext& ctx);
 void RenderElementInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderElementStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateElementCode(const DemoContext& ctx);
+
+void SyncPreviewThemeFromStudio(DemoContext& ctx) noexcept;
+void SelectStudioPreset(DemoContext& ctx, guikit::ThemePreset preset) noexcept;
+void SelectStudioChrome(DemoContext& ctx, guikit::ChromeStyle chrome) noexcept;
+void SelectStudioFillStyle(DemoContext& ctx, guikit::FillStyle fill) noexcept;
+void ToggleStudioDarkLight(DemoContext& ctx) noexcept;
+[[nodiscard]] guikit::ThemePreset GetStudioPreset() noexcept;
+[[nodiscard]] guikit::ChromeStyle GetStudioChrome() noexcept;
+[[nodiscard]] guikit::FillStyle GetStudioFillStyle() noexcept;
 
 void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx);

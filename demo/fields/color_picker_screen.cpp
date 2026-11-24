@@ -55,7 +55,7 @@ void RenderColorPickerStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.background = ctx.GetControlBackground(NavCategory::ElemColorPicker);
+        opts.background = ctx.GetControlBackground(NavCategory::FieldColorPicker);
         opts.border = ctx.GetCtrlBorder();
         guikit::ColorPicker(ui, s_state.color, opts);
     });
@@ -87,7 +87,7 @@ keel::String GenerateColorPickerCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemColorPicker),
+        ctx.FormatControlBackgroundCode(NavCategory::FieldColorPicker),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

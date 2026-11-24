@@ -89,7 +89,7 @@ void RenderButtonStage(guikit::Context& ui, DemoContext& ctx) {
         opts.text = btnText;
         opts.icon = s_state.hasIcon ? guikit::Icon::Play() : guikit::Icon{};
         opts.iconPlacement = s_state.iconPlacement;
-        opts.align = ctx.GetCtrlAlign(NavCategory::ElemButton);
+        opts.align = ctx.GetCtrlAlign(NavCategory::ActionButton);
         opts.loading = s_state.loading;
         opts.square = s_state.square;
         opts.disabled = ctx.elemDisabled;
@@ -101,7 +101,7 @@ void RenderButtonStage(guikit::Context& ui, DemoContext& ctx) {
         if (ctx.btnVariant == guikit::UiVariant::Ghost && s_state.style == guikit::ButtonStyle::Default) {
             opts.style = guikit::ButtonStyle::Ghost;
         }
-        opts.background = ctx.GetControlBackground(NavCategory::ElemButton);
+        opts.background = ctx.GetControlBackground(NavCategory::ActionButton);
         opts.border = ctx.GetCtrlBorder();
 
         if (guikit::Button(ui, opts)) {
@@ -112,7 +112,7 @@ void RenderButtonStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateButtonCode(const DemoContext& ctx) {
-    const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::ElemButton);
+    const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::ActionButton);
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
@@ -154,7 +154,7 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
         ctx.FormatControlHeightCode(),
         ButtonStyleName(effStyle),
         VariantName(effVariant),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemButton),
+        ctx.FormatControlBackgroundCode(NavCategory::ActionButton),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrlCode);

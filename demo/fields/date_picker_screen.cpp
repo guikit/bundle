@@ -52,7 +52,7 @@ void RenderDatePickerInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderDatePickerStage(guikit::Context& ui, DemoContext& ctx) {
-    const NavCategory navCat = NavCategory::ElemDatePicker;
+    const NavCategory navCat = NavCategory::FieldDatePicker;
     ctx.RunElementStage(ui, [&]() {
         guikit::DatePickerOptions opts{};
         opts.mode = ActiveMode();
@@ -71,7 +71,7 @@ void RenderDatePickerStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateDatePickerCode(const DemoContext& ctx) {
-    const NavCategory navCat = NavCategory::ElemDatePicker;
+    const NavCategory navCat = NavCategory::FieldDatePicker;
     const guikit::DatePickerMode mode = ActiveMode();
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize

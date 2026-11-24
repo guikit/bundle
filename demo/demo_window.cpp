@@ -19,7 +19,7 @@ void ReleaseInactiveSceneBuffers(
             extensions[keel::as<keel::usize>(leavingExt)].releaseBuffers();
             releasedHeavyBuffers = true;
         }
-    } else if (leavingCat == NavCategory::SceneImageView) {
+    } else if (leavingCat == NavCategory::ViewImageView) {
         ReleaseImageViewDemoBuffers();
         releasedHeavyBuffers = true;
     }
@@ -61,6 +61,7 @@ void DemoWindow::OnInit() {
     m_demoCtx.shellTheme = GetShellTheme();
     m_demoCtx.shellLightMode = IsShellLightMode();
     m_demoCtx.shellFloating = IsShellFloating();
+    SyncPreviewThemeFromStudio(m_demoCtx);
 }
 
 void DemoWindow::OnResize(keel::i32 /*width*/, keel::i32 /*height*/) {
@@ -124,62 +125,64 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
         const NavCategory prevCat = m_selectedCategory;
         const keel::i32 prevExt = m_selectedExtension;
         if (auto menu = guikit::SidebarMenu(ui, {.size = guikit::UiSize::Sm})) {
-            constexpr keel::i32 kBaseCount = keel::as<keel::i32>(NavCategory::SceneImageView) + 1;
+            constexpr keel::i32 kBaseCount = keel::as<keel::i32>(kNavCategoryCount);
             keel::i32 activeIdx = (m_selectedExtension >= 0)
                 ? (kBaseCount + m_selectedExtension)
                 : keel::as<keel::i32>(m_selectedCategory);
 
-            menu.Section("THEME");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
+            menu.Section("STYLE");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::StyleThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
 
-            menu.Section("STRUCTURE");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemHeading),       {.text = "Heading",      .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemElement),       {.text = "Element",      .icon = guikit::Icon::Settings()});
+            menu.Section("LAYOUT");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutSplitView),    {.text = "SplitView",    .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutElement),      {.text = "Element",      .icon = guikit::Icon::Settings()});
+
+            menu.Section("SURFACES");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceCard),        {.text = "Card",         .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceMenuBar),     {.text = "MenuBar",      .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceToolbar),     {.text = "Toolbar",      .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceSidebar),     {.text = "Sidebar",      .icon = guikit::Icon::Folder()});
+
+            menu.Section("OVERLAYS");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayOverlays),    {.text = "Overlays",     .icon = guikit::Icon::Flash()});
+
+            menu.Section("ACTIONS");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionButton),       {.text = "Button",       .icon = guikit::Icon::Play()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionSegmented),    {.text = "Segmented",    .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionTabBar),       {.text = "TabBar",       .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionBreadcrumb),   {.text = "Breadcrumb",   .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionPagination),   {.text = "Pagination",   .icon = guikit::Icon::ArrowRight()});
+
+            menu.Section("FIELDS");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldInputField),    {.text = "InputField",   .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldTextArea),      {.text = "TextArea",     .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldDatePicker),    {.text = "DatePicker",   .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldColorPicker),   {.text = "ColorPicker",  .icon = guikit::Icon::Eye()});
 
             menu.Section("CONTROLS");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemButton),        {.text = "Button",       .icon = guikit::Icon::Play()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSlider),        {.text = "Slider",       .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemProgressBar),   {.text = "ProgressBar",  .icon = guikit::Icon::Flash()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemLevelMeter),    {.text = "LevelMeter",   .icon = guikit::Icon::Play()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemReadout),       {.text = "Readout",      .icon = guikit::Icon::Target()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemKnob),          {.text = "Knob",         .icon = guikit::Icon::Refresh()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemInputField),    {.text = "Input",        .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemTag),           {.text = "Tag",          .icon = guikit::Icon::Check()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSegmented),     {.text = "Segmented",    .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemColorPicker),   {.text = "ColorPicker",  .icon = guikit::Icon::Eye()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemDatePicker),    {.text = "DatePicker",   .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemSwitch),        {.text = "Switch",       .icon = guikit::Icon::Refresh()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemCheckbox),      {.text = "Checkbox",     .icon = guikit::Icon::Check()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemRadio),         {.text = "Radio",        .icon = guikit::Icon::Check()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ElemImage),         {.text = "Image",        .icon = guikit::Icon::Eye()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlCheckbox),    {.text = "Checkbox",     .icon = guikit::Icon::Check()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlRadio),       {.text = "Radio",        .icon = guikit::Icon::Check()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlSwitch),      {.text = "Switch",       .icon = guikit::Icon::Refresh()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlSlider),      {.text = "Slider",       .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlKnob),        {.text = "Knob",         .icon = guikit::Icon::Refresh()});
 
-            menu.Section("CONTAINERS & SHELL");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelCard),         {.text = "Card",         .icon = guikit::Icon::Copy()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelSplitView),    {.text = "SplitView",    .icon = guikit::Icon::Copy()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelSidebar),      {.text = "Sidebar",      .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelOverlays),     {.text = "Overlays",     .icon = guikit::Icon::Flash()});
+            menu.Section("DISPLAY");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::DisplayHeading),     {.text = "Heading",      .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::DisplayTag),         {.text = "Tag",          .icon = guikit::Icon::Check()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::DisplayProgressBar), {.text = "ProgressBar",  .icon = guikit::Icon::Flash()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::DisplayLevelMeter),  {.text = "LevelMeter",   .icon = guikit::Icon::Play()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::DisplayReadout),     {.text = "Readout",      .icon = guikit::Icon::Target()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::DisplayImage),       {.text = "Image",        .icon = guikit::Icon::Eye()});
 
-            menu.Section("NAVIGATION");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelTabBar),       {.text = "TabBar",       .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelBreadcrumb),   {.text = "Breadcrumb",   .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelPagination),   {.text = "Pagination",   .icon = guikit::Icon::ArrowRight()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelMenuBar),      {.text = "MenuBar",      .icon = guikit::Icon::Settings()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelToolbar),      {.text = "Toolbar",      .icon = guikit::Icon::Settings()});
-
-            menu.Section("DATA");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelTreeView),     {.text = "TreeView",     .icon = guikit::Icon::Folder()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::PanelTable),        {.text = "Table / Grid", .icon = guikit::Icon::Copy()});
-
-            menu.Section("CONTENT");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ContentMarkdown),   {.text = "Markdown",     .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ContentCodeEditor), {.text = "Code Editor",  .icon = guikit::Icon::Edit()});
-
-            menu.Section("2D SCENES");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SceneSchematic2D),  {.text = "Schematic 2D", .icon = guikit::Icon::Search()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SceneImageView),    {.text = "Image View",   .icon = guikit::Icon::Eye()});
+            menu.Section("VIEWS");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewTable),          {.text = "Table",        .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewTreeView),       {.text = "TreeView",     .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewMarkdown),       {.text = "Markdown",     .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewImageView),      {.text = "Image View",   .icon = guikit::Icon::Eye()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewSchematic2D),    {.text = "Schematic 2D", .icon = guikit::Icon::Search()});
 
             if (!m_extensions.empty()) {
                 menu.Section("MODULES");
@@ -362,20 +365,47 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight),
             guikit::ThemePresetName(guikit::ThemePreset::Windows98)
         }};
-        keel::usize previewPresetIdx = keel::as<keel::usize>(m_demoCtx.previewTheme.preset);
+        keel::usize previewPresetIdx = keel::as<keel::usize>(GetStudioPreset());
         if (previewPresetIdx >= guikit::kThemePresetCount) {
             previewPresetIdx = 0u;
         }
         if (guikit::Select(ui, previewPresetIdx, kPreviewPresetLabels, {
-            .tooltip = "Preview Stage Theme Preset",
+            .tooltip = "Preview Theme Palette Preset (synced with Theme Studio)",
             .size = guikit::UiSize::Sm,
-            .width = 152.0f
+            .width = 140.0f
         }).changed) {
-            const guikit::ShellStyle prevShell = m_demoCtx.previewTheme.shellStyle;
-            m_demoCtx.previewTheme = guikit::UiTheme::FromPreset(keel::from_underlying<guikit::ThemePreset>(previewPresetIdx));
-            m_demoCtx.previewTheme.SetShellStyle(prevShell);
-            m_demoCtx.previewLightMode = (m_demoCtx.previewTheme.mode == guikit::ThemeMode::Light);
-            m_demoCtx.previewDarkMode = !m_demoCtx.previewLightMode;
+            SelectStudioPreset(m_demoCtx, keel::from_underlying<guikit::ThemePreset>(previewPresetIdx));
+            ui.InvalidateAll();
+        }
+
+        static constexpr keel::StaticArray<keel::StringRef, guikit::kChromeStyleCount> kPreviewChromeLabels = {{
+            guikit::ChromeStyleName(guikit::ChromeStyle::Modern),
+            guikit::ChromeStyleName(guikit::ChromeStyle::Fluent),
+            guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
+            guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist)
+        }};
+        keel::usize previewChromeIdx = keel::as<keel::usize>(GetStudioChrome());
+        if (guikit::Select(ui, previewChromeIdx, kPreviewChromeLabels, {
+            .tooltip = "Preview Structural Chrome Style (synced with Theme Studio)",
+            .size = guikit::UiSize::Sm,
+            .width = 104.0f
+        }).changed) {
+            SelectStudioChrome(m_demoCtx, keel::from_underlying<guikit::ChromeStyle>(previewChromeIdx));
+            ui.InvalidateAll();
+        }
+
+        static constexpr keel::StaticArray<keel::StringRef, guikit::kFillStyleCount> kPreviewFillLabels = {{
+            guikit::FillStyleName(guikit::FillStyle::Solid),
+            guikit::FillStyleName(guikit::FillStyle::Soft),
+            guikit::FillStyleName(guikit::FillStyle::Outline)
+        }};
+        keel::usize previewFillIdx = keel::as<keel::usize>(GetStudioFillStyle());
+        if (guikit::Select(ui, previewFillIdx, kPreviewFillLabels, {
+            .tooltip = "Preview Control Fill Style (synced with Theme Studio)",
+            .size = guikit::UiSize::Sm,
+            .width = 86.0f
+        }).changed) {
+            SelectStudioFillStyle(m_demoCtx, keel::from_underlying<guikit::FillStyle>(previewFillIdx));
             ui.InvalidateAll();
         }
 
@@ -469,7 +499,7 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
             const bool extActive = (m_selectedExtension >= 0 && keel::as<keel::usize>(m_selectedExtension) < m_extensions.size());
             if (extActive || IsSandboxCategory(m_selectedCategory)) {
                 const bool isFullStage = extActive ? true : IsFullStageCategory(m_selectedCategory);
-                const bool isShellScreen = !extActive && (m_selectedCategory == NavCategory::PanelSidebar);
+                const bool isShellScreen = !extActive && (m_selectedCategory == NavCategory::SurfaceSidebar);
                 const keel::StringRef title = extActive
                     ? m_extensions[keel::as<keel::usize>(m_selectedExtension)].title
                     : CategoryDisplayTitle(m_selectedCategory);
@@ -498,22 +528,22 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
         sb.Spacer();
 
         static const keel::StaticArray<guikit::CommandPaletteItem, 16> kGlobalCommands = {{
-            {.label = "Go to Element Form-Field Wrapper",      .category = "Structure",  .description = "5 ElementLayout modes & composite slots", .icon = guikit::Icon::Settings()},
-            {.label = "Go to Theme Studio (Presets & Tokens)", .category = "Theme",      .description = "9 presets, WCAG audit, JSON & Zone overrides", .icon = guikit::Icon::Eye()},
-            {.label = "Go to LevelMeter / Segmented VU Meter", .category = "Controls",   .description = "LED dB meters, peak-hold & clip LED", .icon = guikit::Icon::Play()},
-            {.label = "Go to TagInput Editable Chips",         .category = "Controls",   .description = "Editable tag pills & delimiter split",.icon = guikit::Icon::Edit()},
-            {.label = "Go to Select / MultiSelect / ComboBox", .category = "Controls",   .description = "Dropdown, live filter & tag chips",   .icon = guikit::Icon::Plus()},
-            {.label = "Go to DatePicker & TimePicker",         .category = "Controls",   .description = "Calendar grid & time stepper",        .icon = guikit::Icon::Edit()},
-            {.label = "Go to SpinBox Numeric Stepper",         .category = "Controls",   .description = "Inline, Detached & Split steppers",   .icon = guikit::Icon::Plus()},
-            {.label = "Go to ColorPicker HSV/HEX",             .category = "Controls",   .description = "2D SV canvas, hue & alpha sliders",   .icon = guikit::Icon::Eye()},
-            {.label = "Go to SplitView Resizable Panes",       .category = "Containers", .description = "Horizontal & Vertical splitters",     .icon = guikit::Icon::Copy()},
-            {.label = "Go to Breadcrumb Path Navigation",      .category = "Navigation", .description = "Hierarchical path trail & collapse",  .icon = guikit::Icon::Folder()},
-            {.label = "Go to Pagination Control",              .category = "Navigation", .description = "Page numbers & smart ellipsis jump",  .icon = guikit::Icon::ArrowRight()},
-            {.label = "Go to Overlays (Modal / Toast / Cmd)",  .category = "Containers", .description = "Modals, context menus & palettes",    .icon = guikit::Icon::Flash()},
-            {.label = "Go to Table / Virtualized Grid",        .category = "Data",       .description = "100,000 rows virtualized data grid",  .icon = guikit::Icon::Copy()},
-            {.label = "Toggle Preview Dark / Light Theme",     .category = "Theme",      .description = "Switch stage palette mode",           .icon = guikit::Icon::Refresh()},
-            {.label = "Toggle Generated C++20 Code Panel",     .category = "View",       .description = "Show or hide bottom code generator",  .icon = guikit::Icon::Eye()},
-            {.label = "Toggle Docked / Floating Island Shell", .category = "View",       .description = "Switch between flush IDE & floating island frame", .icon = guikit::Icon::Copy()}
+            {.label = "Go to Theme Studio (Palette × Chrome × Fill)", .category = "Style",    .description = "Presets, ChromeStyle, FillStyle, WCAG & JSON", .icon = guikit::Icon::Eye()},
+            {.label = "Go to Element Form-Field Wrapper",             .category = "Layout",   .description = "5 ElementLayout modes & composite slots",      .icon = guikit::Icon::Settings()},
+            {.label = "Go to SplitView Resizable Panes",              .category = "Layout",   .description = "Horizontal & Vertical splitters",              .icon = guikit::Icon::Copy()},
+            {.label = "Go to Overlays (Modal / Toast / Cmd)",         .category = "Overlays", .description = "Modals, context menus & palettes",             .icon = guikit::Icon::Flash()},
+            {.label = "Go to Breadcrumb Path Navigation",             .category = "Actions",  .description = "Hierarchical path trail & collapse",           .icon = guikit::Icon::Folder()},
+            {.label = "Go to Pagination Control",                     .category = "Actions",  .description = "Page numbers & smart ellipsis jump",           .icon = guikit::Icon::ArrowRight()},
+            {.label = "Go to Select / MultiSelect / ComboBox",        .category = "Fields",   .description = "Dropdown, live filter & tag chips",            .icon = guikit::Icon::Plus()},
+            {.label = "Go to DatePicker & TimePicker",                .category = "Fields",   .description = "Calendar grid & time stepper",                 .icon = guikit::Icon::Edit()},
+            {.label = "Go to SpinBox Numeric Stepper",                .category = "Fields",   .description = "Inline, Detached & Split steppers",            .icon = guikit::Icon::Plus()},
+            {.label = "Go to TagInput Editable Chips",                .category = "Fields",   .description = "Editable tag pills & delimiter split",         .icon = guikit::Icon::Edit()},
+            {.label = "Go to ColorPicker HSV/HEX",                    .category = "Fields",   .description = "2D SV canvas, hue & alpha sliders",            .icon = guikit::Icon::Eye()},
+            {.label = "Go to LevelMeter / Segmented VU Meter",        .category = "Display",  .description = "LED dB meters, peak-hold & clip LED",          .icon = guikit::Icon::Play()},
+            {.label = "Go to Table / Virtualized Grid",               .category = "Views",    .description = "100,000 rows virtualized data grid",           .icon = guikit::Icon::Copy()},
+            {.label = "Toggle Preview Dark / Light Theme",            .category = "Style",    .description = "Switch stage palette mode (Theme Studio)",     .icon = guikit::Icon::Refresh()},
+            {.label = "Toggle Generated C++20 Code Panel",            .category = "View",     .description = "Show or hide bottom code generator",           .icon = guikit::Icon::Eye()},
+            {.label = "Toggle Docked / Floating Island Shell",        .category = "View",     .description = "Switch between flush IDE & floating island frame", .icon = guikit::Icon::Copy()}
         }};
 
         const auto cmdResp = m_shellControls.RenderCommandPalette(*this, sb, kGlobalCommands);
@@ -532,25 +562,21 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
         if (cmdResp.changed && cmdResp.selectedIndex >= 0) {
             switch (cmdResp.selectedIndex) {
-                case 0:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemElement; break;
-                case 1:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemThemeStudio; break;
-                case 2:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemLevelMeter; break;
-                case 3:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemTagInput; break;
-                case 4:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemSelect; break;
-                case 5:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemDatePicker; break;
-                case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemSpinBox; break;
-                case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ElemColorPicker; break;
-                case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelSplitView; break;
-                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelBreadcrumb; break;
-                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelPagination; break;
-                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelOverlays; break;
-                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::PanelTable; break;
+                case 0:  m_selectedExtension = -1; m_selectedCategory = NavCategory::StyleThemeStudio; break;
+                case 1:  m_selectedExtension = -1; m_selectedCategory = NavCategory::LayoutElement; break;
+                case 2:  m_selectedExtension = -1; m_selectedCategory = NavCategory::LayoutSplitView; break;
+                case 3:  m_selectedExtension = -1; m_selectedCategory = NavCategory::OverlayOverlays; break;
+                case 4:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionBreadcrumb; break;
+                case 5:  m_selectedExtension = -1; m_selectedCategory = NavCategory::ActionPagination; break;
+                case 6:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSelect; break;
+                case 7:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldDatePicker; break;
+                case 8:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldSpinBox; break;
+                case 9:  m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldTagInput; break;
+                case 10: m_selectedExtension = -1; m_selectedCategory = NavCategory::FieldColorPicker; break;
+                case 11: m_selectedExtension = -1; m_selectedCategory = NavCategory::DisplayLevelMeter; break;
+                case 12: m_selectedExtension = -1; m_selectedCategory = NavCategory::ViewTable; break;
                 case 13:
-                    m_demoCtx.previewLightMode = !m_demoCtx.previewLightMode;
-                    m_demoCtx.previewDarkMode = !m_demoCtx.previewLightMode;
-                    m_demoCtx.previewTheme.SetMode(m_demoCtx.previewDarkMode
-                        ? guikit::ThemeMode::Dark
-                        : guikit::ThemeMode::Light);
+                    ToggleStudioDarkLight(m_demoCtx);
                     break;
                 case 14:
                     m_demoCtx.previewShowCode = !m_demoCtx.previewShowCode;
@@ -567,52 +593,54 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
 
 void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using InspectorFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<InspectorFn, 36> kInspectors = {
-        // 1. ELEMENTS
-        &RenderHeadingInspector,
-        &RenderElementInspector,
+    static constexpr keel::StaticArray<InspectorFn, kNavCategoryCount> kInspectors = {
+        // 1. STYLE
         &RenderThemeStudioInspector,
-        &RenderButtonInspector,
-        &RenderSliderInspector,
-        &RenderProgressBarInspector,
-        &RenderLevelMeterInspector,
-        &RenderReadoutInspector,
-        &RenderKnobInspector,
-        &RenderSpinBoxInspector,
-        &RenderInputInspector,
-        &RenderTagInspector,
-        &RenderTagInputInspector,
-        &RenderSelectInspector,
-        &RenderSegmentedInspector,
-        &RenderColorPickerInspector,
-        &RenderDatePickerInspector,
-        &RenderSwitchInspector,
-        &RenderCheckboxInspector,
-        &RenderRadioInspector,
-        &RenderImageInspector,
-
-        // 2. PANELS & NAV
-        &RenderCardInspector,
+        // 2. LAYOUT
         &RenderSplitViewInspector,
-        &RenderTabBarInspector,
-        &RenderBreadcrumbInspector,
-        &RenderPaginationInspector,
+        &RenderElementInspector,
+        // 3. SURFACES
+        &RenderCardInspector,
         &RenderMenuBarInspector,
         &RenderToolbarInspector,
         &RenderSidebarInspector,
-        &RenderTreeViewInspector,
-        &RenderTableInspector,
+        // 4. OVERLAYS
         &RenderOverlaysInspector,
-
-        // 3. CONTENT & MEDIA
-        &RenderMarkdownInspector,
+        // 5. ACTIONS
+        &RenderButtonInspector,
+        &RenderSegmentedInspector,
+        &RenderTabBarInspector,
+        &RenderBreadcrumbInspector,
+        &RenderPaginationInspector,
+        // 6. FIELDS
+        &RenderInputInspector,
         &RenderCodeEditorInspector,
-
-        // 4. 2D SCENES
-        &RenderSchematicInspector,
+        &RenderSelectInspector,
+        &RenderSpinBoxInspector,
+        &RenderDatePickerInspector,
+        &RenderTagInputInspector,
+        &RenderColorPickerInspector,
+        // 7. CONTROLS
+        &RenderCheckboxInspector,
+        &RenderRadioInspector,
+        &RenderSwitchInspector,
+        &RenderSliderInspector,
+        &RenderKnobInspector,
+        // 8. DISPLAY
+        &RenderHeadingInspector,
+        &RenderTagInspector,
+        &RenderProgressBarInspector,
+        &RenderLevelMeterInspector,
+        &RenderReadoutInspector,
+        &RenderImageInspector,
+        // 9. VIEWS
+        &RenderTableInspector,
+        &RenderTreeViewInspector,
+        &RenderMarkdownInspector,
         &RenderImageViewInspector,
+        &RenderSchematicInspector,
     };
-    static_assert(kInspectors.size() == keel::as<keel::usize>(NavCategory::SceneImageView) + 1);
+    static_assert(kInspectors.size() == kNavCategoryCount);
 
     const keel::usize idx = keel::as<keel::usize>(cat);
     if (idx < kInspectors.size()) {
@@ -622,52 +650,54 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
 
 void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, DemoContext& ctx) {
     using StageFn = void (*)(guikit::Context&, DemoContext&);
-    static constexpr keel::StaticArray<StageFn, 36> kStages = {
-        // 1. ELEMENTS
-        &RenderHeadingStage,
-        &RenderElementStage,
+    static constexpr keel::StaticArray<StageFn, kNavCategoryCount> kStages = {
+        // 1. STYLE
         &RenderThemeStudioStage,
-        &RenderButtonStage,
-        &RenderSliderStage,
-        &RenderProgressBarStage,
-        &RenderLevelMeterStage,
-        &RenderReadoutStage,
-        &RenderKnobStage,
-        &RenderSpinBoxStage,
-        &RenderInputStage,
-        &RenderTagStage,
-        &RenderTagInputStage,
-        &RenderSelectStage,
-        &RenderSegmentedStage,
-        &RenderColorPickerStage,
-        &RenderDatePickerStage,
-        &RenderSwitchStage,
-        &RenderCheckboxStage,
-        &RenderRadioStage,
-        &RenderImageStage,
-
-        // 2. PANELS & NAV
-        &RenderCardStage,
+        // 2. LAYOUT
         &RenderSplitViewStage,
-        &RenderTabBarStage,
-        &RenderBreadcrumbStage,
-        &RenderPaginationStage,
+        &RenderElementStage,
+        // 3. SURFACES
+        &RenderCardStage,
         &RenderMenuBarStage,
         &RenderToolbarStage,
         &RenderSidebarStage,
-        &RenderTreeViewStage,
-        &RenderTableStage,
+        // 4. OVERLAYS
         &RenderOverlaysStage,
-
-        // 3. CONTENT & MEDIA
-        &RenderMarkdownStage,
+        // 5. ACTIONS
+        &RenderButtonStage,
+        &RenderSegmentedStage,
+        &RenderTabBarStage,
+        &RenderBreadcrumbStage,
+        &RenderPaginationStage,
+        // 6. FIELDS
+        &RenderInputStage,
         &RenderCodeEditorStage,
-
-        // 4. 2D SCENES
-        &RenderSchematicStage,
+        &RenderSelectStage,
+        &RenderSpinBoxStage,
+        &RenderDatePickerStage,
+        &RenderTagInputStage,
+        &RenderColorPickerStage,
+        // 7. CONTROLS
+        &RenderCheckboxStage,
+        &RenderRadioStage,
+        &RenderSwitchStage,
+        &RenderSliderStage,
+        &RenderKnobStage,
+        // 8. DISPLAY
+        &RenderHeadingStage,
+        &RenderTagStage,
+        &RenderProgressBarStage,
+        &RenderLevelMeterStage,
+        &RenderReadoutStage,
+        &RenderImageStage,
+        // 9. VIEWS
+        &RenderTableStage,
+        &RenderTreeViewStage,
+        &RenderMarkdownStage,
         &RenderImageViewStage,
+        &RenderSchematicStage,
     };
-    static_assert(kStages.size() == keel::as<keel::usize>(NavCategory::SceneImageView) + 1);
+    static_assert(kStages.size() == kNavCategoryCount);
 
     const keel::usize idx = keel::as<keel::usize>(cat);
     if (idx < kStages.size()) {
@@ -677,52 +707,54 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
 
 keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContext& ctx) {
     using CodeGenFn = keel::String (*)(const DemoContext&);
-    static constexpr keel::StaticArray<CodeGenFn, 36> kGenerators = {
-        // 1. ELEMENTS
-        &GenerateHeadingCode,
-        &GenerateElementCode,
+    static constexpr keel::StaticArray<CodeGenFn, kNavCategoryCount> kGenerators = {
+        // 1. STYLE
         &GenerateThemeStudioCode,
-        &GenerateButtonCode,
-        &GenerateSliderCode,
-        &GenerateProgressBarCode,
-        &GenerateLevelMeterCode,
-        &GenerateReadoutCode,
-        &GenerateKnobCode,
-        &GenerateSpinBoxCode,
-        &GenerateInputCode,
-        &GenerateTagCode,
-        &GenerateTagInputCode,
-        &GenerateSelectCode,
-        &GenerateSegmentedCode,
-        &GenerateColorPickerCode,
-        &GenerateDatePickerCode,
-        &GenerateSwitchCode,
-        &GenerateCheckboxCode,
-        &GenerateRadioCode,
-        &GenerateImageCode,
-
-        // 2. PANELS & NAV
-        &GenerateCardCode,
+        // 2. LAYOUT
         &GenerateSplitViewCode,
-        &GenerateTabBarCode,
-        &GenerateBreadcrumbCode,
-        &GeneratePaginationCode,
+        &GenerateElementCode,
+        // 3. SURFACES
+        &GenerateCardCode,
         &GenerateMenuBarCode,
         &GenerateToolbarCode,
         &GenerateSidebarCode,
-        &GenerateTreeViewCode,
-        &GenerateTableCode,
+        // 4. OVERLAYS
         &GenerateOverlaysCode,
-
-        // 3. CONTENT & MEDIA
-        &GenerateMarkdownCode,
+        // 5. ACTIONS
+        &GenerateButtonCode,
+        &GenerateSegmentedCode,
+        &GenerateTabBarCode,
+        &GenerateBreadcrumbCode,
+        &GeneratePaginationCode,
+        // 6. FIELDS
+        &GenerateInputCode,
         &GenerateCodeEditorCode,
-
-        // 4. 2D SCENES
-        &GenerateSchematicCode,
+        &GenerateSelectCode,
+        &GenerateSpinBoxCode,
+        &GenerateDatePickerCode,
+        &GenerateTagInputCode,
+        &GenerateColorPickerCode,
+        // 7. CONTROLS
+        &GenerateCheckboxCode,
+        &GenerateRadioCode,
+        &GenerateSwitchCode,
+        &GenerateSliderCode,
+        &GenerateKnobCode,
+        // 8. DISPLAY
+        &GenerateHeadingCode,
+        &GenerateTagCode,
+        &GenerateProgressBarCode,
+        &GenerateLevelMeterCode,
+        &GenerateReadoutCode,
+        &GenerateImageCode,
+        // 9. VIEWS
+        &GenerateTableCode,
+        &GenerateTreeViewCode,
+        &GenerateMarkdownCode,
         &GenerateImageViewCode,
+        &GenerateSchematicCode,
     };
-    static_assert(kGenerators.size() == keel::as<keel::usize>(NavCategory::SceneImageView) + 1);
+    static_assert(kGenerators.size() == kNavCategoryCount);
 
     const keel::usize idx = keel::as<keel::usize>(cat);
     if (idx < kGenerators.size()) {

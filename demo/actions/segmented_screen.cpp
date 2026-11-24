@@ -107,7 +107,7 @@ void RenderSegmentedStage(guikit::Context& ui, DemoContext& ctx) {
     segOpts.width = ctx.ResolveCtrlWidth();
     segOpts.height = ctx.ResolveCtrlHeight();
     segOpts.variant = ctx.btnVariant;
-    segOpts.background = ctx.GetControlBackground(NavCategory::ElemSegmented);
+    segOpts.background = ctx.GetControlBackground(NavCategory::ActionSegmented);
     segOpts.border = ctx.GetCtrlBorder();
 
     ctx.RunElementStage(ui, [&]() {
@@ -155,7 +155,7 @@ keel::String GenerateSegmentedCode(const DemoContext& ctx) {
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
         variantCode,
-        ctx.FormatControlBackgroundCode(NavCategory::ElemSegmented),
+        ctx.FormatControlBackgroundCode(NavCategory::ActionSegmented),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

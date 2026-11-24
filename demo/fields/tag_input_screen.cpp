@@ -144,7 +144,7 @@ void RenderTagInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.background = ctx.GetControlBackground(NavCategory::ElemTagInput);
+        opts.background = ctx.GetControlBackground(NavCategory::FieldTagInput);
         opts.border = ctx.GetCtrlBorder();
         guikit::TagInput(ui, s_state.tags, opts);
     });
@@ -188,7 +188,7 @@ keel::String GenerateTagInputCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemTagInput),
+        ctx.FormatControlBackgroundCode(NavCategory::FieldTagInput),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

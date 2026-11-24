@@ -107,7 +107,7 @@ void RenderSpinBoxStage(guikit::Context& ui, DemoContext& ctx) {
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
         opts.status = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
-        opts.background = ctx.GetControlBackground(NavCategory::ElemSpinBox);
+        opts.background = ctx.GetControlBackground(NavCategory::FieldSpinBox);
         opts.border = ctx.GetCtrlBorder();
         guikit::SpinBox(ui, s_state.val, opts);
     });
@@ -163,7 +163,7 @@ keel::String GenerateSpinBoxCode(const DemoContext& ctx) {
         ctx.FormatControlWidthCode(),
         ctx.FormatControlHeightCode(),
         VariantName((ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemSpinBox),
+        ctx.FormatControlBackgroundCode(NavCategory::FieldSpinBox),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

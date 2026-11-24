@@ -97,7 +97,7 @@ void RenderImageStage(guikit::Context& ui, DemoContext& ctx) {
         opts.size = ctx.controlsSize;
         opts.width = ctx.ResolveCtrlWidth();
         opts.height = ctx.ResolveCtrlHeight();
-        opts.background = ctx.GetControlBackground(NavCategory::ElemImage);
+        opts.background = ctx.GetControlBackground(NavCategory::DisplayImage);
         opts.border = ctx.GetCtrlBorder();
         guikit::Image(ui, ImageState::sources[s_state.sourceIdx % ImageState::sources.size()], opts);
     });
@@ -135,7 +135,7 @@ keel::String GenerateImageCode(const DemoContext& ctx) {
         sizeLine,
         ctx.FormatCtrlWidthCode(),
         ctx.FormatCtrlHeightCode(),
-        ctx.FormatControlBackgroundCode(NavCategory::ElemImage),
+        ctx.FormatControlBackgroundCode(NavCategory::DisplayImage),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

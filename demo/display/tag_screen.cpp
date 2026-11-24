@@ -92,40 +92,23 @@ void RenderTagInspector(guikit::Context& ui, DemoContext&) {
 void RenderTagStage(guikit::Context& ui, DemoContext& ctx) {
     ctx.RunElementStage(ui, [&]() {
         const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
-        if (auto wrap = guikit::Wrap(ui, {.gap = 8.0f})) {
-            guikit::TagOptions opts{};
-            opts.variant = s_state.variant;
-            opts.style = s_state.style;
-            opts.size = effSize;
-            opts.pill = s_state.pill;
-            opts.clickable = s_state.clickable;
-            opts.closable = s_state.closable;
-            opts.disabled = ctx.elemDisabled;
-            if (s_state.showIcon) {
-                opts.icon = guikit::Icon::Check();
-            }
-            const auto r = guikit::Tag(ui, s_state.label.as_ref(), opts);
-            if (r.clicked) {
-                guikit::ShowToast(ui, {.title = "Tag clicked", .message = s_state.label.as_ref(), .variant = s_state.variant});
-            }
-            if (r.closed) {
-                guikit::ShowToast(ui, {.title = "Tag closed", .message = s_state.label.as_ref(), .variant = guikit::UiVariant::Warning});
-            }
-
-            // Companion semantic chips mirroring current style/size/pill settings
-            struct SampleChip { keel::StringRef text; guikit::UiVariant var; };
-            static constexpr keel::StaticArray<SampleChip, 4> kSamples = {{
-                {"# cpp20",   guikit::UiVariant::Default},
-                {"Stable",    guikit::UiVariant::Info},
-                {"Beta",      guikit::UiVariant::Warning},
-                {"Breaking",  guikit::UiVariant::Danger}
-            }};
-            for (const auto& chip : kSamples) {
-                guikit::TagOptions sampleOpts = opts;
-                sampleOpts.variant = chip.var;
-                sampleOpts.icon = {};
-                (void)guikit::Tag(ui, chip.text, sampleOpts);
-            }
+        guikit::TagOptions opts{};
+        opts.variant = s_state.variant;
+        opts.style = s_state.style;
+        opts.size = effSize;
+        opts.pill = s_state.pill;
+        opts.clickable = s_state.clickable;
+        opts.closable = s_state.closable;
+        opts.disabled = ctx.elemDisabled;
+        if (s_state.showIcon) {
+            opts.icon = guikit::Icon::Check();
+        }
+        const auto r = guikit::Tag(ui, s_state.label.as_ref(), opts);
+        if (r.clicked) {
+            guikit::ShowToast(ui, {.title = "Tag clicked", .message = s_state.label.as_ref(), .variant = s_state.variant});
+        }
+        if (r.closed) {
+            guikit::ShowToast(ui, {.title = "Tag closed", .message = s_state.label.as_ref(), .variant = guikit::UiVariant::Warning});
         }
     });
 }

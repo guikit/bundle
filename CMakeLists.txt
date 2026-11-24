@@ -92,49 +92,59 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
     set(GUIKIT_DEMO_SOURCES
         demo/main.cpp
         demo/demo_window.cpp
-        demo/elements/heading_screen.cpp
-        demo/elements/element_screen.cpp
-        demo/elements/theme_studio_screen.cpp
-        demo/elements/button_screen.cpp
-        demo/elements/slider_screen.cpp
-        demo/elements/progress_bar_screen.cpp
-        demo/elements/knob_screen.cpp
-        demo/elements/spin_box_screen.cpp
-        demo/elements/input_screen.cpp
-        demo/elements/select_screen.cpp
-        demo/elements/segmented_screen.cpp
-        demo/elements/color_picker_screen.cpp
-        demo/elements/date_picker_screen.cpp
-        demo/elements/level_meter_screen.cpp
-        demo/elements/readout_screen.cpp
-        demo/elements/tag_screen.cpp
-        demo/elements/tag_input_screen.cpp
-        demo/elements/switch_screen.cpp
-        demo/elements/checkbox_screen.cpp
-        demo/elements/radio_screen.cpp
-        demo/elements/image_screen.cpp
-        demo/panels/card_screen.cpp
-        demo/panels/split_view_screen.cpp
-        demo/panels/tab_bar_screen.cpp
-        demo/panels/breadcrumb_screen.cpp
-        demo/panels/pagination_screen.cpp
-        demo/panels/menu_bar_screen.cpp
-        demo/panels/toolbar_screen.cpp
-        demo/panels/sidebar_screen.cpp
-        demo/panels/tree_view_screen.cpp
-        demo/panels/table_screen.cpp
-        demo/panels/overlays_screen.cpp
-        demo/content/markdown_screen.cpp
-        demo/content/code_editor_screen.cpp
-        demo/scenes/schematic_screen.cpp
-        demo/scenes/image_view_screen.cpp
-        demo/scenes/osm_map_screen.cpp
-        demo/scenes/signal_screen.cpp
-        demo/scenes/sonar_screen.cpp
-        demo/scenes/waterfall_screen.cpp
-        demo/scenes/attitude_screen.cpp
-        demo/scenes/car_dashboard_screen.cpp
-        demo/scenes/bpmn_screen.cpp
+        # 1. STYLE
+        demo/style/theme_studio_screen.cpp
+        # 2. LAYOUT
+        demo/layout/split_view_screen.cpp
+        demo/layout/element_screen.cpp
+        # 3. SURFACES
+        demo/surfaces/card_screen.cpp
+        demo/surfaces/menu_bar_screen.cpp
+        demo/surfaces/toolbar_screen.cpp
+        demo/surfaces/sidebar_screen.cpp
+        # 4. OVERLAYS
+        demo/overlays/overlays_screen.cpp
+        # 5. ACTIONS
+        demo/actions/button_screen.cpp
+        demo/actions/segmented_screen.cpp
+        demo/actions/tab_bar_screen.cpp
+        demo/actions/breadcrumb_screen.cpp
+        demo/actions/pagination_screen.cpp
+        # 6. FIELDS
+        demo/fields/input_screen.cpp
+        demo/fields/code_editor_screen.cpp
+        demo/fields/select_screen.cpp
+        demo/fields/spin_box_screen.cpp
+        demo/fields/date_picker_screen.cpp
+        demo/fields/tag_input_screen.cpp
+        demo/fields/color_picker_screen.cpp
+        # 7. CONTROLS
+        demo/controls/checkbox_screen.cpp
+        demo/controls/radio_screen.cpp
+        demo/controls/switch_screen.cpp
+        demo/controls/slider_screen.cpp
+        demo/controls/knob_screen.cpp
+        # 8. DISPLAY
+        demo/display/heading_screen.cpp
+        demo/display/tag_screen.cpp
+        demo/display/progress_bar_screen.cpp
+        demo/display/level_meter_screen.cpp
+        demo/display/readout_screen.cpp
+        demo/display/image_screen.cpp
+        # 9. VIEWS
+        demo/views/table_screen.cpp
+        demo/views/tree_view_screen.cpp
+        demo/views/markdown_screen.cpp
+        demo/views/image_view_screen.cpp
+        demo/views/schematic_screen.cpp
+        # 10. MODULES
+        demo/modules/osm_map_screen.cpp
+        demo/modules/signal_screen.cpp
+        demo/modules/sonar_screen.cpp
+        demo/modules/waterfall_screen.cpp
+        demo/modules/attitude_screen.cpp
+        demo/modules/car_dashboard_screen.cpp
+        demo/modules/bpmn_screen.cpp
         "${GUIKIT_DEMO_GENERATED_ASSETS_CPP}"
     )
 

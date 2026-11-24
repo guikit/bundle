@@ -16,12 +16,8 @@ struct ReadoutDemoState {
     bool allowUnitMenu = true;
     keel::i32 maxPrecision = 5;
 
-    // 3 bench instrument telemetry slots
-    guikit::ReadoutState slots[3] = {
-        {.channelIndex = 0, .unitIndex = 1, .precision = 2}, // VOLTAGE (V)
-        {.channelIndex = 1, .unitIndex = 1, .precision = 3}, // CURRENT (A)
-        {.channelIndex = 4, .unitIndex = 0, .precision = 1}  // TEMPERATURE (C)
-    };
+    // Single bench instrument telemetry readout slot (all 6 channels switchable via its Channel menu)
+    guikit::ReadoutState slot{.channelIndex = 0, .unitIndex = 1, .precision = 2};
 
     // Per-channel relative zero offsets
     keel::f64 voltageZeroV = 0.0;
@@ -100,7 +96,7 @@ void RenderReadoutInspector(guikit::Context& ui, DemoContext&) {
         .text = "Clear All Zero Offsets",
         .icon = guikit::Icon::Refresh(),
         .width = guikit::SizeMode::Stretch,
-        .background = guikit::StateColor::Secondary()
+        .variant = guikit::UiVariant::Secondary
     }).clicked) {
         s_state.voltageZeroV = 0.0;
         s_state.currentZeroA = 0.0;
@@ -223,42 +219,40 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Md : ctx.controlsSize;
 
     ctx.RunElementStage(ui, [&]() {
-        if (auto bar = guikit::Wrap(ui, {.gap = 10.0f})) {
-            for (keel::usize i = 0; i < 3; ++i) {
-                guikit::ReadoutOptions ro{};
-                ro.size = effSize;
-                ro.minWidth = 204.0f;
-                ro.surface = s_state.elevated ? guikit::SurfaceRole::Raised : guikit::SurfaceRole::Flat;
-                ro.disabled = ctx.elemDisabled;
-                ro.maxPrecision = s_state.maxPrecision;
-                ro.allowChannelMenu = s_state.allowChannelMenu;
-                ro.allowPrecisionMenu = s_state.allowPrecisionMenu;
-                ro.allowUnitMenu = s_state.allowUnitMenu;
-                ro.showPlusSign = s_state.showPlusSign;
-                ro.channelMenuTitle = "CHANNEL";
-                ro.precisionMenuTitle = "PRECISION";
-                ro.unitMenuTitle = "UNITS";
+        guikit::ReadoutOptions ro{};
+        ro.size = effSize;
+        ro.width = ctx.ResolveCtrlWidth();
+        ro.height = ctx.ResolveCtrlHeight();
+        ro.minWidth = 204.0f;
+        ro.surface = s_state.elevated ? guikit::SurfaceRole::Raised : guikit::SurfaceRole::Flat;
+        ro.disabled = ctx.elemDisabled;
+        ro.maxPrecision = s_state.maxPrecision;
+        ro.allowChannelMenu = s_state.allowChannelMenu;
+        ro.allowPrecisionMenu = s_state.allowPrecisionMenu;
+        ro.allowUnitMenu = s_state.allowUnitMenu;
+        ro.showPlusSign = s_state.showPlusSign;
+        ro.channelMenuTitle = "CHANNEL";
+        ro.precisionMenuTitle = "PRECISION";
+        ro.unitMenuTitle = "UNITS";
 
-                const auto resp = guikit::Readout(ui, s_state.slots[i], channels, ro);
-                if (resp.actionClicked) {
-                    const keel::i32 ch = s_state.slots[i].channelIndex;
-                    if (ch == 0) {
-                        s_state.voltageZeroV = (keel::abs(s_state.voltageZeroV) > 1e-4) ? 0.0 : rawVoltageV;
-                    } else if (ch == 1) {
-                        s_state.currentZeroA = (keel::abs(s_state.currentZeroA) > 1e-4) ? 0.0 : rawCurrentA;
-                    } else if (ch == 2) {
-                        s_state.powerZeroW = (keel::abs(s_state.powerZeroW) > 1e-4) ? 0.0 : rawPowerW;
-                    } else if (ch == 4) {
-                        s_state.tempZeroC = (keel::abs(s_state.tempZeroC) > 1e-4) ? 0.0 : rawTempC;
-                    }
-                    guikit::ShowToast(ui, {
-                        .title = "Relative Zero Updated",
-                        .message = channels[keel::as<keel::usize>(ch)].label,
-                        .variant = guikit::UiVariant::Success
-                    });
-                    ui.InvalidateAll();
-                }
+        const auto resp = guikit::Readout(ui, s_state.slot, channels, ro);
+        if (resp.actionClicked) {
+            const keel::i32 ch = s_state.slot.channelIndex;
+            if (ch == 0) {
+                s_state.voltageZeroV = (keel::abs(s_state.voltageZeroV) > 1e-4) ? 0.0 : rawVoltageV;
+            } else if (ch == 1) {
+                s_state.currentZeroA = (keel::abs(s_state.currentZeroA) > 1e-4) ? 0.0 : rawCurrentA;
+            } else if (ch == 2) {
+                s_state.powerZeroW = (keel::abs(s_state.powerZeroW) > 1e-4) ? 0.0 : rawPowerW;
+            } else if (ch == 4) {
+                s_state.tempZeroC = (keel::abs(s_state.tempZeroC) > 1e-4) ? 0.0 : rawTempC;
             }
+            guikit::ShowToast(ui, {
+                .title = "Relative Zero Updated",
+                .message = channels[keel::as<keel::usize>(ch)].label,
+                .variant = guikit::UiVariant::Success
+            });
+            ui.InvalidateAll();
         }
     });
 }

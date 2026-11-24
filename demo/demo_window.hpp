@@ -48,11 +48,11 @@ private:
     guikit::ShellControls m_shellControls;
     guikit::SidebarMode m_navSidebarMode = guikit::SidebarMode::Expanded;
     guikit::SidebarMode m_inspectorSidebarMode = guikit::SidebarMode::Expanded;
-    NavCategory m_selectedCategory = NavCategory::ElemThemeStudio;
+    NavCategory m_selectedCategory = NavCategory::StyleThemeStudio;
     keel::i32 m_selectedExtension = -1;
-    NavCategory m_prevRenderedCategory = NavCategory::ElemHeading;
+    NavCategory m_prevRenderedCategory = NavCategory::StyleThemeStudio;
     keel::i32 m_prevRenderedExtension = -1;
-    NavCategory m_cachedCodeCategory = NavCategory::ElemHeading;
+    NavCategory m_cachedCodeCategory = NavCategory::DisplayHeading;
     keel::i32 m_cachedCodeExtension = -1;
     keel::String m_cachedCodeSnippet;
     keel::Array<DemoExtensionScreen> m_extensions;

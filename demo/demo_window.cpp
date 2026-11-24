@@ -94,17 +94,17 @@ void DemoWindow::OnRender(guikit::Context& ui) {
 
 void DemoWindow::RenderTopToolbar(guikit::Context& ui) {
     if (auto tb = guikit::Toolbar(ui)) {
-        RenderSidebarCycleButton(tb, m_navSidebarMode, "Nav", "Navigation Sidebar", guikit::Icon::Folder());
-        RenderSidebarToggle(tb, m_inspectorSidebarMode, "Inspector", "Inspector Sidebar", guikit::Icon::Settings());
+        m_shellControls.RenderSidebarCycleButton(*this, tb, m_navSidebarMode, "Nav", "Navigation Sidebar", guikit::Icon::Folder());
+        m_shellControls.RenderSidebarToggle(*this, tb, m_inspectorSidebarMode, "Inspector", "Inspector Sidebar", guikit::Icon::Settings());
 
         tb.Separator();
 
-        RenderThemeControls(tb);
-        RenderDebugControls(tb);
+        m_shellControls.RenderThemeControls(*this, tb);
+        m_shellControls.RenderDebugControls(*this, tb);
 
         tb.Separator();
 
-        RenderEngineControls(tb);
+        m_shellControls.RenderEngineControls(*this, tb);
 
         tb.Spacer();
         if (guikit::Text(ui, "https://github.com/guikit/", {.role = guikit::TextRole::TitleMedium, .variant = guikit::UiVariant::Info})) {
@@ -493,7 +493,7 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
         const bool isGpuScene = (m_selectedExtension >= 0 &&
                                  keel::as<keel::usize>(m_selectedExtension) < m_extensions.size() &&
                                  m_extensions[keel::as<keel::usize>(m_selectedExtension)].isGpuScene);
-        RenderTelemetryStatus(sb, isGpuScene);
+        m_shellControls.RenderTelemetryStatus(*this, sb, isGpuScene);
 
         sb.Spacer();
 
@@ -516,7 +516,7 @@ void DemoWindow::RenderBottomStatusBar(guikit::Context& ui) {
             {.label = "Toggle Docked / Floating Island Shell", .category = "View",       .description = "Switch between flush IDE & floating island frame", .icon = guikit::Icon::Copy()}
         }};
 
-        const auto cmdResp = RenderCommandPalette(sb, kGlobalCommands);
+        const auto cmdResp = m_shellControls.RenderCommandPalette(*this, sb, kGlobalCommands);
 
         if (m_selectedExtension >= 0 || IsSandboxCategory(m_selectedCategory)) {
             if (sb.Action({

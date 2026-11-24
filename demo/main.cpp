@@ -12,7 +12,7 @@ void RegisterDemoEmbeddedAssets() noexcept;
 
 int main(int /*argc*/, char* /*argv*/[]) {
 #if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
-    guikit::native::RegisterNativeWindowBackend();
+    guikit::native::RegisterNativePlatform();
 #endif
     guikit::demo::RegisterDemoEmbeddedAssets();
     guikit::demo::DemoWindow demo;

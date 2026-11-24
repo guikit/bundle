@@ -45,6 +45,7 @@ private:
     static void DispatchSandboxStage(guikit::Context& ui, NavCategory cat, DemoContext& ctx);
     static keel::String DispatchCodeGenerator(NavCategory cat, const DemoContext& ctx);
 
+    guikit::ShellControls m_shellControls;
     guikit::SidebarMode m_navSidebarMode = guikit::SidebarMode::Expanded;
     guikit::SidebarMode m_inspectorSidebarMode = guikit::SidebarMode::Expanded;
     NavCategory m_selectedCategory = NavCategory::ElemThemeStudio;

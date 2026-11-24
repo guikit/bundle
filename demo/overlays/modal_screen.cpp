@@ -5,8 +5,7 @@ namespace guikit::demo {
 namespace {
 
 struct ModalDemoState {
-    bool customModalOpen = false;
-    bool confirmDeleteModalOpen = false;
+    bool modalOpen = false;
     keel::f32 modalWidth = 440.0f;
     keel::f32 backdropOpacity = 0.55f;
     bool closeOnBackdrop = true;
@@ -57,22 +56,12 @@ void RenderModalStage(guikit::Context& ui, DemoContext&) {
         .align = guikit::Alignment::Center,
         .justify = guikit::Justify::Center
     })) {
-        if (auto btnRow = guikit::Row(ui, {.gap = 10.0f, .align = guikit::Alignment::Center})) {
-            if (guikit::Button(ui, {
-                .text = "Open Modal Dialog...",
-                .icon = guikit::Icon::Settings(),
-                .variant = guikit::UiVariant::Primary
-            }).clicked) {
-                s_modal.customModalOpen = true;
-            }
-
-            if (guikit::Button(ui, {
-                .text = "Confirm Delete Modal...",
-                .icon = guikit::Icon::Trash(),
-                .variant = guikit::UiVariant::Danger
-            }).clicked) {
-                s_modal.confirmDeleteModalOpen = true;
-            }
+        if (guikit::Button(ui, {
+            .text = "Open Modal Dialog...",
+            .icon = guikit::Icon::Settings(),
+            .variant = guikit::UiVariant::Primary
+        }).clicked) {
+            s_modal.modalOpen = true;
         }
         guikit::Text(ui, s_modal.lastStatus.as_ref(), {
             .role = guikit::TextRole::BodySmall,
@@ -80,7 +69,7 @@ void RenderModalStage(guikit::Context& ui, DemoContext&) {
         });
     }
 
-    if (auto modal = guikit::Modal(ui, s_modal.customModalOpen, {
+    if (auto modal = guikit::Modal(ui, s_modal.modalOpen, {
         .backdropOpacity = s_modal.backdropOpacity,
         .closeOnBackdrop = s_modal.closeOnBackdrop,
         .closeOnEscape = s_modal.closeOnEscape,
@@ -138,47 +127,6 @@ void RenderModalStage(guikit::Context& ui, DemoContext&) {
         }
     } else if (modal.closedByUser) {
         s_modal.lastStatus = "Dismissed via Backdrop / Esc";
-    }
-
-    if (auto modal = guikit::Modal(ui, s_modal.confirmDeleteModalOpen, {
-        .backdropOpacity = s_modal.backdropOpacity,
-        .closeOnBackdrop = s_modal.closeOnBackdrop,
-        .closeOnEscape = s_modal.closeOnEscape,
-        .confineToParent = s_modal.confineToStage,
-        .padding = guikit::Padding::All(16.0f)
-    })) {
-        if (auto card = guikit::Card(ui, {
-            .width = 380.0f,
-            .gap = 12.0f,
-            .padding = guikit::Padding::All(18.0f),
-            .surface = guikit::SurfaceRole::Raised
-        })) {
-            guikit::Heading(ui, {
-                .label = "Delete Station Node?",
-                .description = "This action permanently removes the node.",
-                .icon = guikit::Icon::Warning(),
-                .level = guikit::HeadingLevel::H4,
-                .separator = s_modal.showHeaderDivider ? guikit::HeadingSeparator::Bottom : guikit::HeadingSeparator::None
-            });
-            if (auto footer = guikit::Row(ui, {
-                .gap = 10.0f,
-                .align = guikit::Alignment::Center,
-                .justify = guikit::Justify::End
-            })) {
-                if (guikit::Button(ui, {.text = "Cancel", .variant = guikit::UiVariant::Secondary}).clicked) {
-                    s_modal.lastStatus = "Cancelled Delete";
-                    modal.Close();
-                }
-                if (guikit::Button(ui, {
-                    .text = "Delete",
-                    .icon = guikit::Icon::Trash(),
-                    .variant = guikit::UiVariant::Danger
-                }).clicked) {
-                    s_modal.lastStatus = "Confirmed Delete";
-                    modal.Close();
-                }
-            }
-        }
     }
 }
 

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Builds the GuiKit WebAssembly showcase demo and publishes it to GitHub Pages (guikit/demo).
 
@@ -58,7 +58,7 @@ if (-not $SkipBuild) {
     }
 
     Write-Host "    Building target $TargetName (Release)..." -ForegroundColor Gray
-    cmake --build $BuildDir --config Release --target $TargetName
+    cmake --build $BuildDir --config Release --target $TargetName --parallel
     if ($LASTEXITCODE -ne 0) { throw "WASM build failed with exit code $LASTEXITCODE" }
 } else {
     Write-Host "    Skipping build (-SkipBuild specified)." -ForegroundColor Yellow

@@ -8,6 +8,11 @@ if (PROJECT_IS_TOP_LEVEL)
     if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
     endif()
+
+    if (MSVC)
+        # Enable multi-processor translation-unit compilation across all bundle targets & submodules
+        add_compile_options(/MP)
+    endif()
 endif()
 
 option(GUIKIT_BUNDLE_BUILD_TEXT "Build standalone GuiKit FreeType text engine (guikit::text)" ON)

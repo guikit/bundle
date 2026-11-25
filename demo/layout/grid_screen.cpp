@@ -22,39 +22,18 @@ constexpr keel::StaticArray<keel::StringRef, 4> kAlignNames = {
     "Start", "Center", "End", "Stretch"
 };
 
-constexpr keel::StaticArray<guikit::UiVariant, 6> kCellVariants = {
-    guikit::UiVariant::Primary,
-    guikit::UiVariant::Info,
-    guikit::UiVariant::Success,
-    guikit::UiVariant::Warning,
-    guikit::UiVariant::Danger,
-    guikit::UiVariant::Secondary
-};
-
 void RenderGridCard(
     guikit::Context& ui,
     keel::StringRef title,
-    keel::StringRef desc,
-    keel::StringRef badge,
-    guikit::UiVariant variant,
     keel::f32 minHeight
 ) {
-    const guikit::StateColor tint = guikit::StateColor::FromVariant(variant).Tinted(0.12f);
     if (auto card = guikit::Card(ui, {
         .width = guikit::SizeMode::Stretch,
         .height = guikit::SizeMode::Stretch,
         .minHeight = minHeight,
-        .gap = 6.0f,
-        .padding = guikit::Padding::All(14.0f),
-        .background = tint,
-        .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(variant).WithAlphaF(0.45f)}
+        .padding = guikit::Padding::All(14.0f)
     })) {
-        guikit::Heading(ui, {
-            .label = title,
-            .description = desc,
-            .badge = {badge, guikit::StateColor::FromVariant(variant)},
-            .level = guikit::HeadingLevel::H5
-        });
+        guikit::Text(ui, title);
     }
 }
 
@@ -136,25 +115,25 @@ void RenderGridStage(guikit::Context& ui, DemoContext& ctx) {
                 .align = align
             })) {
                 if (auto c = grid.Cell8()) {
-                    RenderGridCard(ui, "Item 1", "8 of 12 columns", "Cell8", guikit::UiVariant::Primary, 112.0f);
+                    RenderGridCard(ui, "Item 1 (8/12)", 112.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Item 2", "4 of 12 columns", "Cell4", guikit::UiVariant::Info, 84.0f);
+                    RenderGridCard(ui, "Item 2 (4/12)", 84.0f);
                 }
                 if (auto c = grid.Cell6()) {
-                    RenderGridCard(ui, "Item 3", "6 of 12 columns", "Cell6", guikit::UiVariant::Success, 92.0f);
+                    RenderGridCard(ui, "Item 3 (6/12)", 92.0f);
                 }
                 if (auto c = grid.Cell6()) {
-                    RenderGridCard(ui, "Item 4", "6 of 12 columns", "Cell6", guikit::UiVariant::Warning, 72.0f);
+                    RenderGridCard(ui, "Item 4 (6/12)", 72.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Item 5", "4 of 12 columns", "Cell4", guikit::UiVariant::Secondary, 76.0f);
+                    RenderGridCard(ui, "Item 5 (4/12)", 76.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Item 6", "4 of 12 columns", "Cell4", guikit::UiVariant::Success, 96.0f);
+                    RenderGridCard(ui, "Item 6 (4/12)", 96.0f);
                 }
                 if (auto c = grid.Cell4()) {
-                    RenderGridCard(ui, "Item 7", "4 of 12 columns", "Cell4", guikit::UiVariant::Danger, 76.0f);
+                    RenderGridCard(ui, "Item 7 (4/12)", 76.0f);
                 }
             }
         } else {
@@ -168,17 +147,9 @@ void RenderGridStage(guikit::Context& ui, DemoContext& ctx) {
             })) {
                 for (keel::u32 i = 0; i < s_grid.equalItemCount; ++i) {
                     auto scope = ui.IdScope(keel::as<keel::u64>(i));
-                    const guikit::UiVariant var = kCellVariants[i % kCellVariants.size()];
                     const keel::f32 minH = (i % 2u == 0u) ? 88.0f : 68.0f;
                     if (auto c = grid.Cell(1)) {
-                        RenderGridCard(
-                            ui,
-                            ui.Format("Item {:02u}", i + 1u),
-                            "Equal-width track",
-                            ui.Format("1/{}", s_grid.equalColumns),
-                            var,
-                            minH
-                        );
+                        RenderGridCard(ui, ui.Format("Item {:02u}", i + 1u), minH);
                     }
                 }
             }
@@ -200,13 +171,41 @@ keel::String GenerateGridCode(const DemoContext& ctx) {
             "    .padding = guikit::Padding::All({:.0f}.0f),\n"
             "    .align = guikit::Alignment::{}\n"
             "}})) {{\n"
-            "    if (auto c = grid.Cell8()) {{ /* Item 1 */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Item 2 */ }}\n"
-            "    if (auto c = grid.Cell6()) {{ /* Item 3 */ }}\n"
-            "    if (auto c = grid.Cell6()) {{ /* Item 4 */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Item 5 */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Item 6 */ }}\n"
-            "    if (auto c = grid.Cell4()) {{ /* Item 7 */ }}\n"
+            "    if (auto c = grid.Cell8()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 1 (8/12)\");\n"
+            "        }}\n"
+            "    }}\n"
+            "    if (auto c = grid.Cell4()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 2 (4/12)\");\n"
+            "        }}\n"
+            "    }}\n"
+            "    if (auto c = grid.Cell6()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 3 (6/12)\");\n"
+            "        }}\n"
+            "    }}\n"
+            "    if (auto c = grid.Cell6()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 4 (6/12)\");\n"
+            "        }}\n"
+            "    }}\n"
+            "    if (auto c = grid.Cell4()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 5 (4/12)\");\n"
+            "        }}\n"
+            "    }}\n"
+            "    if (auto c = grid.Cell4()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 6 (4/12)\");\n"
+            "        }}\n"
+            "    }}\n"
+            "    if (auto c = grid.Cell4()) {{\n"
+            "        if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
+            "            guikit::Text(ui, \"Item 7 (4/12)\");\n"
+            "        }}\n"
+            "    }}\n"
             "}}",
             s_grid.minColWidth,
             s_grid.gap,
@@ -228,7 +227,7 @@ keel::String GenerateGridCode(const DemoContext& ctx) {
         "    for (int i = 0; i < {}; ++i) {{\n"
         "        auto scope = ui.IdScope(i);\n"
         "        if (auto cell = grid.Cell(1)) {{\n"
-        "            if (auto card = guikit::Card(ui)) {{\n"
+        "            if (auto card = guikit::Card(ui, {{.height = guikit::SizeMode::Stretch}})) {{\n"
         "                guikit::Text(ui, ui.Format(\"Item {{:02d}}\", i + 1));\n"
         "            }}\n"
         "        }}\n"

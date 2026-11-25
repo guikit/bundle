@@ -31,37 +31,18 @@ constexpr keel::StaticArray<keel::StringRef, 4> kJustifyNames = {
     "Start", "Center", "End", "SpaceBetween"
 };
 
-constexpr keel::StaticArray<guikit::UiVariant, 6> kTileVariants = {
-    guikit::UiVariant::Primary,
-    guikit::UiVariant::Info,
-    guikit::UiVariant::Success,
-    guikit::UiVariant::Warning,
-    guikit::UiVariant::Danger,
-    guikit::UiVariant::Secondary
-};
-
 void RenderFlexTile(
     guikit::Context& ui,
     keel::StringRef title,
-    keel::StringRef subtitle,
-    guikit::UiVariant variant,
     guikit::AxisSize width,
     guikit::AxisSize height
 ) {
-    const guikit::StateColor tint = guikit::StateColor::FromVariant(variant).Tinted(0.14f);
     if (auto card = guikit::Card(ui, {
         .width = width,
         .height = height,
-        .gap = 4.0f,
-        .padding = guikit::Padding::All(12.0f),
-        .background = tint,
-        .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(variant).WithAlphaF(0.45f)}
+        .padding = guikit::Padding::All(12.0f)
     })) {
-        guikit::Heading(ui, {
-            .label = title,
-            .badge = {subtitle, guikit::StateColor::FromVariant(variant)},
-            .level = guikit::HeadingLevel::H5
-        });
+        guikit::Text(ui, title);
     }
 }
 
@@ -171,10 +152,7 @@ void RenderFlexStage(guikit::Context& ui, DemoContext& ctx) {
                     const guikit::AxisSize itemH = (align == guikit::Alignment::Stretch)
                         ? guikit::AxisSize(guikit::SizeMode::Stretch)
                         : guikit::AxisSize::Fixed(s_flex.varySizes ? kRowH[i] : 96.0f);
-                    const keel::StringRef dimText = (align == guikit::Alignment::Stretch)
-                        ? keel::StringRef("Stretch")
-                        : ui.Format("{:.0f} px", itemH.Dp());
-                    RenderFlexTile(ui, ui.Format("Item {}", i + 1), dimText, kTileVariants[i], itemW, itemH);
+                    RenderFlexTile(ui, ui.Format("Item {}", i + 1), itemW, itemH);
                 }
             }
         } else if (variant == 1u) {
@@ -196,10 +174,7 @@ void RenderFlexStage(guikit::Context& ui, DemoContext& ctx) {
                         ? guikit::AxisSize(guikit::SizeMode::Stretch)
                         : guikit::AxisSize::Fixed(s_flex.varySizes ? kColW[i] : 260.0f);
                     const guikit::AxisSize itemH = guikit::AxisSize::Fixed(s_flex.varySizes ? kColH[i] : 64.0f);
-                    const keel::StringRef dimText = (align == guikit::Alignment::Stretch)
-                        ? keel::StringRef("Stretch")
-                        : ui.Format("{:.0f} px", itemW.Dp());
-                    RenderFlexTile(ui, ui.Format("Item {}", i + 1), dimText, kTileVariants[i], itemW, itemH);
+                    RenderFlexTile(ui, ui.Format("Item {}", i + 1), itemW, itemH);
                 }
             }
         } else {
@@ -215,13 +190,13 @@ void RenderFlexStage(guikit::Context& ui, DemoContext& ctx) {
                     ? guikit::AxisSize(guikit::SizeMode::Stretch)
                     : guikit::AxisSize::Fixed(80.0f);
 
-                RenderFlexTile(ui, "Item 1", "Leading", guikit::UiVariant::Primary, guikit::AxisSize::Fixed(132.0f), h);
-                RenderFlexTile(ui, "Item 2", "Leading", guikit::UiVariant::Info, guikit::AxisSize::Fixed(132.0f), h);
+                RenderFlexTile(ui, "Item 1", guikit::AxisSize::Fixed(132.0f), h);
+                RenderFlexTile(ui, "Item 2", guikit::AxisSize::Fixed(132.0f), h);
 
                 guikit::Spacer(ui);
 
-                RenderFlexTile(ui, "Item 3", "Trailing", guikit::UiVariant::Success, guikit::AxisSize::Fixed(132.0f), h);
-                RenderFlexTile(ui, "Item 4", "Trailing", guikit::UiVariant::Warning, guikit::AxisSize::Fixed(132.0f), h);
+                RenderFlexTile(ui, "Item 3", guikit::AxisSize::Fixed(132.0f), h);
+                RenderFlexTile(ui, "Item 4", guikit::AxisSize::Fixed(132.0f), h);
             }
         }
     }
@@ -286,6 +261,7 @@ keel::String GenerateFlexCode(const DemoContext& ctx) {
         );
     }
 
+    const keel::StringRef spacerCardH = (s_flex.alignIdx == 3u) ? "guikit::SizeMode::Stretch" : "80.0f";
     return keel::format(
         "if (auto row = guikit::Row(ui, {{\n"
         "    .gap = {:.0f}.0f,\n"
@@ -294,13 +270,27 @@ keel::String GenerateFlexCode(const DemoContext& ctx) {
         "    .width = guikit::SizeMode::Stretch,\n"
         "    .height = guikit::SizeMode::Stretch\n"
         "}})) {{\n"
-        "    if (auto left = guikit::Card(ui, {{.width = 132.0f}})) {{ /* Leading */ }}\n"
-        "    guikit::Spacer(ui); // Elastic space pushes trailing items to the far edge\n"
-        "    if (auto right = guikit::Card(ui, {{.width = 128.0f}})) {{ /* Trailing */ }}\n"
+        "    if (auto card = guikit::Card(ui, {{.width = 132.0f, .height = {}}})) {{\n"
+        "        guikit::Text(ui, \"Item 1\");\n"
+        "    }}\n"
+        "    if (auto card = guikit::Card(ui, {{.width = 132.0f, .height = {}}})) {{\n"
+        "        guikit::Text(ui, \"Item 2\");\n"
+        "    }}\n"
+        "    guikit::Spacer(ui);\n"
+        "    if (auto card = guikit::Card(ui, {{.width = 132.0f, .height = {}}})) {{\n"
+        "        guikit::Text(ui, \"Item 3\");\n"
+        "    }}\n"
+        "    if (auto card = guikit::Card(ui, {{.width = 132.0f, .height = {}}})) {{\n"
+        "        guikit::Text(ui, \"Item 4\");\n"
+        "    }}\n"
         "}}",
         s_flex.gap,
         s_flex.padding,
-        alignName
+        alignName,
+        spacerCardH,
+        spacerCardH,
+        spacerCardH,
+        spacerCardH
     );
 }
 

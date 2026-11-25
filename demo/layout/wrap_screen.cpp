@@ -30,30 +30,29 @@ constexpr keel::StaticArray<keel::StringRef, 4> kJustifyNames = {
 };
 
 struct WrapSampleItem {
-    guikit::UiVariant variant;
     keel::f32 width;
     keel::f32 height;
 };
 
 constexpr keel::StaticArray<WrapSampleItem, 18> kWrapItems = {{
-    {guikit::UiVariant::Primary,   156.0f, 52.0f},
-    {guikit::UiVariant::Success,   112.0f, 44.0f},
-    {guikit::UiVariant::Info,      168.0f, 64.0f},
-    {guikit::UiVariant::Warning,   128.0f, 48.0f},
-    {guikit::UiVariant::Primary,   164.0f, 56.0f},
-    {guikit::UiVariant::Success,   108.0f, 44.0f},
-    {guikit::UiVariant::Info,      176.0f, 60.0f},
-    {guikit::UiVariant::Secondary, 162.0f, 48.0f},
-    {guikit::UiVariant::Success,   158.0f, 52.0f},
-    {guikit::UiVariant::Warning,   164.0f, 44.0f},
-    {guikit::UiVariant::Danger,    142.0f, 60.0f},
-    {guikit::UiVariant::Primary,   146.0f, 48.0f},
-    {guikit::UiVariant::Info,      154.0f, 56.0f},
-    {guikit::UiVariant::Secondary, 152.0f, 44.0f},
-    {guikit::UiVariant::Info,      132.0f, 52.0f},
-    {guikit::UiVariant::Success,   144.0f, 48.0f},
-    {guikit::UiVariant::Warning,   148.0f, 60.0f},
-    {guikit::UiVariant::Primary,   140.0f, 44.0f}
+    {156.0f, 52.0f},
+    {112.0f, 44.0f},
+    {168.0f, 64.0f},
+    {128.0f, 48.0f},
+    {164.0f, 56.0f},
+    {108.0f, 44.0f},
+    {176.0f, 60.0f},
+    {162.0f, 48.0f},
+    {158.0f, 52.0f},
+    {164.0f, 44.0f},
+    {142.0f, 60.0f},
+    {146.0f, 48.0f},
+    {154.0f, 56.0f},
+    {152.0f, 44.0f},
+    {132.0f, 52.0f},
+    {144.0f, 48.0f},
+    {148.0f, 60.0f},
+    {140.0f, 44.0f}
 }};
 
 } // namespace
@@ -145,20 +144,12 @@ void RenderWrapStage(guikit::Context& ui, DemoContext&) {
                 const guikit::AxisSize itemH = (align == guikit::Alignment::Stretch)
                     ? guikit::AxisSize(guikit::SizeMode::Stretch)
                     : guikit::AxisSize::Fixed(s_wrap.varyHeights ? it.height : 48.0f);
-                const guikit::StateColor tint = guikit::StateColor::FromVariant(it.variant).Tinted(0.14f);
                 if (auto card = guikit::Card(ui, {
                     .width = guikit::AxisSize::Fixed(it.width),
                     .height = itemH,
-                    .gap = 4.0f,
-                    .padding = guikit::Padding::Symmetric(12.0f, 8.0f),
-                    .background = tint,
-                    .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(it.variant).WithAlphaF(0.45f)}
+                    .padding = guikit::Padding::Symmetric(12.0f, 8.0f)
                 })) {
-                    guikit::Heading(ui, {
-                        .label = ui.Format("Item {:02u}", i + 1u),
-                        .badge = {ui.Format("{:.0f} px", it.width), guikit::StateColor::FromVariant(it.variant)},
-                        .level = guikit::HeadingLevel::H6
-                    });
+                    guikit::Text(ui, ui.Format("Item {:02u}", i + 1u));
                 }
             }
         }

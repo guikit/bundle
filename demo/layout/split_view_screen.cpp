@@ -27,26 +27,15 @@ constexpr keel::StaticArray<keel::StringRef, 2> kOrientations = {
 void RenderPanePlaceholder(
     guikit::Context& ui,
     keel::StringRef title,
-    keel::f32 ratioPct,
-    guikit::UiVariant badgeVariant
+    keel::f32 ratioPct
 ) {
     if (auto col = guikit::Column(ui, {
-        .gap = 6.0f,
         .align = guikit::Alignment::Center,
         .justify = guikit::Justify::Center,
         .width = guikit::SizeMode::Stretch,
         .height = guikit::SizeMode::Stretch
     })) {
-        guikit::Heading(ui, {
-            .label = title,
-            .badge = {ui.Format("{:.0f}%", ratioPct), guikit::StateColor::FromVariant(badgeVariant)},
-            .align = guikit::Align::Center,
-            .width = guikit::SizeMode::Fit
-        });
-        guikit::Text(ui, "Drag sash to resize • Double-click sash to reset", {
-            .role = guikit::TextRole::LabelSmall,
-            .variant = guikit::UiVariant::Muted
-        });
+        guikit::Text(ui, ui.Format("{} ({:.0f}%)", title, ratioPct));
     }
 }
 
@@ -165,7 +154,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
             .background = {pal.surface},
             .clipChildren = true
         })) {
-            RenderPanePlaceholder(ui, "Pane 1", outerSplit.Ratio() * 100.0f, guikit::UiVariant::Primary);
+            RenderPanePlaceholder(ui, "Pane 1", outerSplit.Ratio() * 100.0f);
         }
 
         if (auto pane2 = outerSplit.Second({
@@ -197,7 +186,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
                         .background = {pal.background.WithAlphaF(0.55f)},
                         .clipChildren = true
                     })) {
-                        RenderPanePlaceholder(ui, "Pane 2A", innerSplit.Ratio() * 100.0f, guikit::UiVariant::Info);
+                        RenderPanePlaceholder(ui, "Pane 2A", innerSplit.Ratio() * 100.0f);
                     }
 
                     if (auto bottomPane = innerSplit.Second({
@@ -207,7 +196,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
                         .background = {pal.surface},
                         .clipChildren = true
                     })) {
-                        RenderPanePlaceholder(ui, "Pane 2B", (1.0f - innerSplit.Ratio()) * 100.0f, guikit::UiVariant::Success);
+                        RenderPanePlaceholder(ui, "Pane 2B", (1.0f - innerSplit.Ratio()) * 100.0f);
                     }
                 }
             } else {
@@ -218,7 +207,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
                     .background = {pal.background.WithAlphaF(0.55f)},
                     .clipChildren = true
                 })) {
-                    RenderPanePlaceholder(ui, "Pane 2", (1.0f - outerSplit.Ratio()) * 100.0f, guikit::UiVariant::Info);
+                    RenderPanePlaceholder(ui, "Pane 2", (1.0f - outerSplit.Ratio()) * 100.0f);
                 }
             }
         }
@@ -243,10 +232,10 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
             "    .collapsible = {}\n"
             "}})) {{\n"
             "    if (auto first = split.First()) {{\n"
-            "        // First pane content\n"
+            "        guikit::Text(ui, ui.Format(\"Pane 1 ({{:.0f}}%)\", split.Ratio() * 100.0f));\n"
             "    }}\n"
             "    if (auto second = split.Second()) {{\n"
-            "        // Second pane content\n"
+            "        guikit::Text(ui, ui.Format(\"Pane 2 ({{:.0f}}%)\", (1.0f - split.Ratio()) * 100.0f));\n"
             "    }}\n"
             "}}",
             s_split.primaryRatio,
@@ -276,7 +265,9 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
         "    .showGrip = {},\n"
         "    .collapsible = {}\n"
         "}})) {{\n"
-        "    if (auto first = split.First()) {{ /* Pane 1 */ }}\n"
+        "    if (auto first = split.First()) {{\n"
+        "        guikit::Text(ui, ui.Format(\"Pane 1 ({{:.0f}}%)\", split.Ratio() * 100.0f));\n"
+        "    }}\n"
         "    if (auto second = split.Second()) {{\n"
         "        if (auto inner = guikit::SplitView(ui, secondaryRatio, {{\n"
         "            .orientation = guikit::Orientation::{},\n"
@@ -289,8 +280,12 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
         "            .showGrip = {},\n"
         "            .collapsible = {}\n"
         "        }})) {{\n"
-        "            if (auto paneA = inner.First())  {{ /* Pane 2A */ }}\n"
-        "            if (auto paneB = inner.Second()) {{ /* Pane 2B */ }}\n"
+        "            if (auto paneA = inner.First()) {{\n"
+        "                guikit::Text(ui, ui.Format(\"Pane 2A ({{:.0f}}%)\", inner.Ratio() * 100.0f));\n"
+        "            }}\n"
+        "            if (auto paneB = inner.Second()) {{\n"
+        "                guikit::Text(ui, ui.Format(\"Pane 2B ({{:.0f}}%)\", (1.0f - inner.Ratio()) * 100.0f));\n"
+        "            }}\n"
         "        }}\n"
         "    }}\n"
         "}}",

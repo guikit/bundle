@@ -25,14 +25,6 @@ constexpr keel::StaticArray<keel::StringRef, 3> kPolicyNames = {
     "Auto", "Always", "Never"
 };
 
-constexpr keel::StaticArray<guikit::UiVariant, 5> kRowVariants = {
-    guikit::UiVariant::Primary,
-    guikit::UiVariant::Info,
-    guikit::UiVariant::Success,
-    guikit::UiVariant::Warning,
-    guikit::UiVariant::Secondary
-};
-
 } // namespace
 
 void RenderScrollAreaInspector(guikit::Context& ui, DemoContext&) {
@@ -106,42 +98,23 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
             const keel::u32 count = s_scroll.overflowContent ? 24u : 3u;
             for (keel::u32 i = 0; i < count; ++i) {
                 auto scope = ui.IdScope(keel::as<keel::u64>(i));
-                const guikit::UiVariant var = kRowVariants[i % kRowVariants.size()];
-                const guikit::StateColor tint = guikit::StateColor::FromVariant(var).Tinted(0.10f);
                 if (auto card = guikit::Card(ui, {
                     .width = guikit::SizeMode::Stretch,
-                    .padding = guikit::Padding::Symmetric(14.0f, 10.0f),
-                    .background = tint,
-                    .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(var).WithAlphaF(0.42f)}
+                    .padding = guikit::Padding::Symmetric(14.0f, 10.0f)
                 })) {
-                    guikit::Heading(ui, {
-                        .label = ui.Format("Item {:02u}", i + 1u),
-                        .description = "Scrollable list item",
-                        .badge = {ui.Format("#{:02u}", i + 1u), guikit::StateColor::FromVariant(var)},
-                        .level = guikit::HeadingLevel::H5
-                    });
+                    guikit::Text(ui, ui.Format("Item {:02u}", i + 1u));
                 }
             }
         } else if (orient == guikit::Orientation::Horizontal) {
             const keel::u32 count = s_scroll.overflowContent ? 16u : 2u;
             for (keel::u32 i = 0; i < count; ++i) {
                 auto scope = ui.IdScope(keel::as<keel::u64>(i));
-                const guikit::UiVariant var = kRowVariants[i % kRowVariants.size()];
-                const guikit::StateColor tint = guikit::StateColor::FromVariant(var).Tinted(0.12f);
                 if (auto card = guikit::Card(ui, {
                     .width = 192.0f,
                     .height = 180.0f,
-                    .gap = 8.0f,
-                    .padding = guikit::Padding::All(14.0f),
-                    .background = tint,
-                    .border = {.width = 1.0f, .radius = 8.0f, .color = guikit::StateColor::FromVariant(var).WithAlphaF(0.45f)}
+                    .padding = guikit::Padding::All(14.0f)
                 })) {
-                    guikit::Heading(ui, {
-                        .label = ui.Format("Item {:02u}", i + 1u),
-                        .description = "Horizontal strip item",
-                        .badge = {ui.Format("#{:02u}", i + 1u), guikit::StateColor::FromVariant(var)},
-                        .level = guikit::HeadingLevel::H5
-                    });
+                    guikit::Text(ui, ui.Format("Item {:02u}", i + 1u));
                 }
             }
         } else {
@@ -156,21 +129,12 @@ void RenderScrollAreaStage(guikit::Context& ui, DemoContext&) {
                 })) {
                     for (keel::u32 c = 0; c < cols; ++c) {
                         auto colScope = ui.IdScope(keel::as<keel::u64>(c));
-                        const guikit::UiVariant var = kRowVariants[(r + c) % kRowVariants.size()];
-                        const guikit::StateColor tint = guikit::StateColor::FromVariant(var).Tinted(0.10f);
                         if (auto cell = guikit::Card(ui, {
                             .width = 160.0f,
                             .height = 84.0f,
-                            .gap = 4.0f,
-                            .padding = guikit::Padding::All(10.0f),
-                            .background = tint,
-                            .border = {.width = 1.0f, .radius = 6.0f, .color = guikit::StateColor::FromVariant(var).WithAlphaF(0.40f)}
+                            .padding = guikit::Padding::All(10.0f)
                         })) {
-                            guikit::Heading(ui, {
-                                .label = ui.Format("R{:02u} · C{:02u}", r + 1u, c + 1u),
-                                .description = "2D grid cell",
-                                .level = guikit::HeadingLevel::H6
-                            });
+                            guikit::Text(ui, ui.Format("R{:02u} · C{:02u}", r + 1u, c + 1u));
                         }
                     }
                 }
@@ -200,7 +164,7 @@ keel::String GenerateScrollAreaCode(const DemoContext&) {
             "            for (int c = 0; c < 8; ++c) {{\n"
             "                auto colScope = ui.IdScope(c);\n"
             "                if (auto cell = guikit::Card(ui, {{.width = 160.0f, .height = 84.0f}})) {{\n"
-            "                    guikit::Text(ui, ui.Format(\"R{{}} C{{}}\", r + 1, c + 1));\n"
+            "                    guikit::Text(ui, ui.Format(\"R{{:02d}} · C{{:02d}}\", r + 1, c + 1));\n"
             "                }}\n"
             "            }}\n"
             "        }}\n"
@@ -227,7 +191,7 @@ keel::String GenerateScrollAreaCode(const DemoContext&) {
         "    for (int i = 0; i < {}; ++i) {{\n"
         "        auto scope = ui.IdScope(i);\n"
         "        if (auto card = guikit::Card(ui, {{{}}})) {{\n"
-        "            guikit::Text(ui, ui.Format(\"Item {{}}\", i + 1));\n"
+        "            guikit::Text(ui, ui.Format(\"Item {{:02d}}\", i + 1));\n"
         "        }}\n"
         "    }}\n"
         "}}",

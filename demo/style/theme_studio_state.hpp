@@ -13,12 +13,13 @@ struct ThemeStudioState {
     guikit::FillStyle fillStyle = guikit::FillStyle::Solid;
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
-    // Scrollbar Customization
+    // Scrollbar & Slider Customization
     keel::Optional<guikit::ScrollbarChromeStyle> scrollbarChrome = keel::kNullOpt;
     bool overrideScrollbarWidth = false;
     keel::f32 scrollbarWidth = 10.0f;
     bool customizeScrollbarTokens = false;
     guikit::ScrollbarStyleTokens customScrollbarTokens = guikit::ScrollbarStyleTokens::Modern();
+    keel::Optional<guikit::SliderThumbShape> sliderThumb = keel::kNullOpt;
 
     // Seed & Direct Color Overrides
     bool overrideAccent = false;
@@ -91,6 +92,7 @@ struct ThemeStudioState {
         scrollbarWidth = 10.0f;
         customizeScrollbarTokens = false;
         customScrollbarTokens = guikit::ScrollbarStyleTokens::Modern();
+        sliderThumb = keel::kNullOpt;
 
         overrideAccent = false;
         overrideNeutral = false;
@@ -145,6 +147,7 @@ struct ThemeStudioState {
         fillStyle = spec.fillStyle.value_or(def.fillStyle);
         syntaxPreset = spec.syntaxPreset;
         scrollbarChrome = spec.scrollbarChrome;
+        sliderThumb = spec.sliderThumb;
         if (spec.scrollbarWidth.has_value()) {
             overrideScrollbarWidth = true;
             scrollbarWidth = *spec.scrollbarWidth;
@@ -200,6 +203,9 @@ struct ThemeStudioState {
         }
         if (overrideScrollbarWidth) {
             spec.scrollbarWidth = scrollbarWidth;
+        }
+        if (sliderThumb.has_value()) {
+            spec.sliderThumb = sliderThumb;
         }
         if (overrideAccent)     spec.accent = accentColor;
         if (overrideNeutral)    spec.neutral = neutralColor;

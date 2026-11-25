@@ -64,6 +64,17 @@ namespace {
     return "Modern";
 }
 
+[[nodiscard]] constexpr keel::StringRef SliderThumbEnumIdentifier(guikit::SliderThumbShape s) noexcept {
+    switch (s) {
+        case guikit::SliderThumbShape::Circle:    return "Circle";
+        case guikit::SliderThumbShape::Ring:      return "Ring";
+        case guikit::SliderThumbShape::Square:    return "Square";
+        case guikit::SliderThumbShape::Pointer3D: return "Pointer3D";
+        case guikit::SliderThumbShape::Bar:       return "Bar";
+    }
+    return "Circle";
+}
+
 [[nodiscard]] keel::FixedString<16> FormatHexLiteral(guikit::Color c) noexcept {
     return keel::format_fixed<16>("0x{:02X}{:02X}{:02X}{:02X}", c.r, c.g, c.b, c.a);
 }
@@ -221,6 +232,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 st.chrome = c;
                 st.fillStyle = f;
                 st.scrollbarChrome = keel::kNullOpt;
+                st.sliderThumb = keel::kNullOpt;
                 const auto tok = guikit::ChromeTokens::FromStyle(c);
                 st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
                 dirty = true;
@@ -257,6 +269,26 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         if (auto el = guikit::Element(ui, {.label = "Fill Style", .description = "Semantic emphasis fill (Solid / Soft / Outline)"})) {
             if (guikit::Select(ui, fillIdx, kFillNames, {.size = guikit::UiSize::Sm}).changed) {
                 st.fillStyle = keel::from_underlying<guikit::FillStyle>(fillIdx);
+                dirty = true;
+            }
+        }
+
+        static constexpr keel::StaticArray<keel::StringRef, 6> kSliderThumbNames = {
+            "Auto (Match Chrome)",
+            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Circle),
+            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Ring),
+            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Square),
+            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Pointer3D),
+            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Bar)
+        };
+        keel::usize sliderThumbIdx = st.sliderThumb.has_value()
+            ? (keel::as<keel::usize>(*st.sliderThumb) + 1u)
+            : 0u;
+        if (auto el = guikit::Element(ui, {.label = "Slider Thumb", .description = "Circle, Ring (Fluent), Square, Pointer 3D, or Bar"})) {
+            if (guikit::Select(ui, sliderThumbIdx, kSliderThumbNames, {.size = guikit::UiSize::Sm}).changed) {
+                st.sliderThumb = (sliderThumbIdx == 0u)
+                    ? keel::Optional<guikit::SliderThumbShape>(keel::kNullOpt)
+                    : keel::Optional<guikit::SliderThumbShape>(keel::from_underlying<guikit::SliderThumbShape>(sliderThumbIdx - 1u));
                 dirty = true;
             }
         }
@@ -1071,6 +1103,10 @@ keel::String GenerateThemeStudioCode(const DemoContext& ctx) {
     }
     if (spec.scrollbarWidth.has_value()) {
         keel::format_into(out, ",\n    .scrollbarWidth = {:.1f}f", *spec.scrollbarWidth);
+    }
+    if (spec.sliderThumb.has_value()) {
+        keel::format_into(out, ",\n    .sliderThumb = guikit::SliderThumbShape::{}",
+            SliderThumbEnumIdentifier(*spec.sliderThumb));
     }
     if (spec.accent.has_value())      keel::format_into(out, ",\n    .accent = guikit::Color::Hex({})", FormatHexLiteral(*spec.accent));
     if (spec.neutral.has_value())     keel::format_into(out, ",\n    .neutral = guikit::Color::Hex({})", FormatHexLiteral(*spec.neutral));

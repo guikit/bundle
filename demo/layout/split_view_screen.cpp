@@ -141,7 +141,7 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
         .height = guikit::SizeMode::Stretch,
         .background = {pal.surface},
         .border = s_split.showOuterBorder
-            ? guikit::Border{.width = 1.0f, .radius = 8.0f, .color = {pal.borderSubtle}}
+            ? guikit::Border{.width = 1.0f, .radius = ui.GetTheme().GetRadius(guikit::UiSize::Md), .color = {pal.borderSubtle}}
             : guikit::Border::None(),
         .clipChildren = true
     };

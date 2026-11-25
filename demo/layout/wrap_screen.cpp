@@ -127,7 +127,7 @@ void RenderWrapStage(guikit::Context& ui, DemoContext&) {
         .width = guikit::SizeMode::Stretch,
         .height = guikit::SizeMode::Stretch,
         .background = {pal.background.WithAlphaF(0.45f)},
-        .border = {.width = 1.0f, .radius = 8.0f, .color = {pal.borderSubtle}}
+        .border = {.width = 1.0f, .radius = ui.GetTheme().GetRadius(guikit::UiSize::Md), .color = {pal.borderSubtle}}
     })) {
         if (auto wrap = guikit::Wrap(ui, {
             .gap = s_wrap.gap,

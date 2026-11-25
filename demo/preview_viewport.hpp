@@ -47,9 +47,6 @@ inline void RenderDotGridBackdrop(const guikit::Node* n, guikit::ICanvas& canvas
 }
 
 inline void RenderBackdropHudBadge(const guikit::Node* n, guikit::ICanvas& canvas, const guikit::UiTheme& theme) noexcept {
-    if (n->type == guikit::NodeType::ScrollArea) {
-        guikit::RenderScrollbar(n, canvas, theme);
-    }
     if (n->text.empty()) return;
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 160.0f || r.h <= 60.0f) return;

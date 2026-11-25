@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 cd /d "%~dp0..\.."
 
 set "ROOT_DIR=%CD%"
@@ -15,7 +15,7 @@ if not exist "%EXE_PATH%" (
     call "%~dp0native-build.cmd" "%CONFIG%"
     if errorlevel 1 exit /b 1
     set "EXE_PATH=%BUILD_DIR%\%CONFIG%\guikit_demo_native.exe"
-    if not exist "%EXE_PATH%" if exist "%BUILD_DIR%\guikit_demo_native.exe" set "EXE_PATH=%BUILD_DIR%\guikit_demo_native.exe"
+    if not exist "!EXE_PATH!" if exist "%BUILD_DIR%\guikit_demo_native.exe" set "EXE_PATH=%BUILD_DIR%\guikit_demo_native.exe"
 )
 
 if not exist "%EXE_PATH%" (
@@ -24,5 +24,6 @@ if not exist "%EXE_PATH%" (
 )
 
 echo [guikit] Launching Native Desktop Demo ^(zero SDL3 / zero ThorVG^): "%EXE_PATH%"
-start "" /D "%ROOT_DIR%" "%EXE_PATH%"
-endlocal
+"%EXE_PATH%"
+set "EXIT_CODE=%ERRORLEVEL%"
+endlocal & exit /b %EXIT_CODE%

@@ -54,10 +54,11 @@ namespace {
     return "Auto";
 }
 
-[[nodiscard]] constexpr keel::StringRef ScrollbarChromeLabel(guikit::ScrollbarChromeStyle c) noexcept {
+[[nodiscard]] constexpr keel::StringRef ScrollbarChromeEnumIdentifier(guikit::ScrollbarChromeStyle c) noexcept {
     switch (c) {
         case guikit::ScrollbarChromeStyle::Modern:       return "Modern";
-        case guikit::ScrollbarChromeStyle::ClassicBevel: return "Classic 3D";
+        case guikit::ScrollbarChromeStyle::Flat:         return "Flat";
+        case guikit::ScrollbarChromeStyle::ClassicBevel: return "ClassicBevel";
         case guikit::ScrollbarChromeStyle::Framed:       return "Framed";
     }
     return "Modern";
@@ -219,6 +220,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 st.SelectBasePreset(p);
                 st.chrome = c;
                 st.fillStyle = f;
+                st.scrollbarChrome = keel::kNullOpt;
                 const auto tok = guikit::ChromeTokens::FromStyle(c);
                 st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
                 dirty = true;
@@ -278,13 +280,37 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     }
 
     // 2b. SCROLLBAR CUSTOMIZATION
-    static constexpr keel::StaticArray<keel::StringRef, 3> kSbChromeNames = {
-        "Modern", "Classic 3D", "Framed"
+    static constexpr keel::StaticArray<keel::StringRef, 5> kSbOverrideNames = {
+        "Auto (Match Chrome)", "Modern", "Flat", "Classic 3D", "Framed"
+    };
+    static constexpr keel::StaticArray<keel::StringRef, guikit::kScrollbarChromeStyleCount> kSbChromeNames = {
+        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::Modern),
+        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::Flat),
+        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::ClassicBevel),
+        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::Framed)
     };
     static constexpr keel::StaticArray<keel::StringRef, 3> kSbArrowNames = {
         "None", "Triangle", "Chevron"
     };
     if (auto acc = guikit::Accordion(ui, {.label = "SCROLLBAR", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
+        keel::usize sbOverrideIdx = st.scrollbarChrome.has_value()
+            ? (keel::as<keel::usize>(*st.scrollbarChrome) + 1u)
+            : 0u;
+        if (auto el = guikit::Element(ui, {.label = "Scrollbar Style", .description = "Modern pill, Flat (Win10/IDE), Classic 3D, or Framed"})) {
+            if (guikit::Select(ui, sbOverrideIdx, kSbOverrideNames, {.size = guikit::UiSize::Sm}).changed) {
+                if (sbOverrideIdx == 0u) {
+                    st.scrollbarChrome = keel::kNullOpt;
+                    const auto tok = guikit::ChromeTokens::FromStyle(st.chrome);
+                    st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
+                } else {
+                    const auto sc = keel::from_underlying<guikit::ScrollbarChromeStyle>(sbOverrideIdx - 1u);
+                    st.scrollbarChrome = sc;
+                    st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(sc);
+                }
+                st.customizeScrollbarTokens = false;
+                dirty = true;
+            }
+        }
         if (auto el = guikit::Element(ui, {.label = "Custom Width", .layout = guikit::ElementLayout::Leading})) {
             if (guikit::Switch(ui, st.overrideScrollbarWidth, {.size = guikit::UiSize::Sm}).changed) {
                 if (st.overrideScrollbarWidth) {
@@ -900,7 +926,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                             // Interactive 2D Scrollbar Preview (Vertical + Horizontal + Corner Box)
                             if (auto sbEl = guikit::Element(ui, {
                                 .label = ui.Format("Scrollbar Preview — {} ({:.0f}dp)",
-                                    ScrollbarChromeLabel(built.scrollbarStyle.chrome),
+                                    guikit::ScrollbarChromeStyleName(built.scrollbarStyle.chrome),
                                     built.GetScrollbar(guikit::UiSize::Md).trackWidth),
                                 .description = "Test vertical/horizontal stepper arrows, thumb drag & corner box"
                             })) {
@@ -919,7 +945,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                                             "Row {:02d}  |  Theme: {}  |  Scrollbar: {}  |  Horizontal overflow sample column A · column B · column C · column D",
                                             row,
                                             guikit::ChromeStyleName(built.chromeStyle),
-                                            ScrollbarChromeLabel(built.scrollbarStyle.chrome)
+                                            guikit::ScrollbarChromeStyleName(built.scrollbarStyle.chrome)
                                         ), {.role = guikit::TextRole::CodeSmall});
                                     }
                                 }
@@ -1038,6 +1064,10 @@ keel::String GenerateThemeStudioCode(const DemoContext& ctx) {
     if (spec.syntaxPreset != guikit::SyntaxPreset::Auto) {
         keel::format_into(out, ",\n    .syntaxPreset = guikit::SyntaxPreset::{}",
             SyntaxPresetEnumIdentifier(spec.syntaxPreset));
+    }
+    if (spec.scrollbarChrome.has_value()) {
+        keel::format_into(out, ",\n    .scrollbarChrome = guikit::ScrollbarChromeStyle::{}",
+            ScrollbarChromeEnumIdentifier(*spec.scrollbarChrome));
     }
     if (spec.scrollbarWidth.has_value()) {
         keel::format_into(out, ",\n    .scrollbarWidth = {:.1f}f", *spec.scrollbarWidth);

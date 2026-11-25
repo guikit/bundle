@@ -68,29 +68,27 @@ void RenderSplitButtonStage(guikit::Context& ui, DemoContext& ctx) {
     guikit::ContextMenuOptions menuOpts{};
     menuOpts.minWidth = s_sb.menuMinWidth;
 
-    ctx.RunElementStage(ui, [&]() {
-        bool primaryClicked = false;
-        if (auto menu = guikit::SplitButton(ui, primaryClicked, opts, menuOpts)) {
-            if (menu.Item("Build Debug", {.shortcut = "F7", .icon = guikit::Icon::Play()})) {
-                s_sb.lastAction = "Build Debug";
-            }
-            if (menu.Item("Build Release", {.shortcut = "Ctrl+F7", .icon = guikit::Icon::Flash()})) {
-                s_sb.lastAction = "Build Release";
-            }
-            menu.Separator();
-            if (menu.Checkbox("Clean Before Build", s_sb.cleanFirst, {.keepOpen = true})) {
-                s_sb.lastAction = keel::format_fixed<128>("Clean Before Build = {}", s_sb.cleanFirst ? "ON" : "OFF");
-            }
-            menu.Separator();
-            if (menu.Item("Clear Build Cache", {.icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger})) {
-                s_sb.lastAction = "Clear Build Cache";
-            }
+    bool primaryClicked = false;
+    if (auto menu = guikit::SplitButton(ui, primaryClicked, opts, menuOpts)) {
+        if (menu.Item("Build Debug", {.shortcut = "F7", .icon = guikit::Icon::Play()})) {
+            s_sb.lastAction = "Build Debug";
         }
-        if (primaryClicked) {
-            ++s_sb.primaryCount;
-            s_sb.lastAction = keel::format_fixed<128>("Primary action triggered #{}", s_sb.primaryCount);
+        if (menu.Item("Build Release", {.shortcut = "Ctrl+F7", .icon = guikit::Icon::Flash()})) {
+            s_sb.lastAction = "Build Release";
         }
-    });
+        menu.Separator();
+        if (menu.Checkbox("Clean Before Build", s_sb.cleanFirst, {.keepOpen = true})) {
+            s_sb.lastAction = keel::format_fixed<128>("Clean Before Build = {}", s_sb.cleanFirst ? "ON" : "OFF");
+        }
+        menu.Separator();
+        if (menu.Item("Clear Build Cache", {.icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger})) {
+            s_sb.lastAction = "Clear Build Cache";
+        }
+    }
+    if (primaryClicked) {
+        ++s_sb.primaryCount;
+        s_sb.lastAction = keel::format_fixed<128>("Primary action triggered #{}", s_sb.primaryCount);
+    }
 
     guikit::Text(ui, s_sb.lastAction.as_ref(), {
         .role = guikit::TextRole::BodySmall,
@@ -104,7 +102,7 @@ keel::String GenerateSplitButtonCode(const DemoContext& ctx) {
         ? keel::format("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::String{};
 
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "bool runPrimary = false;\n"
         "if (auto menu = guikit::SplitButton(ui, runPrimary, {{\n"
         "    .text = \"{}\",\n"
@@ -136,7 +134,6 @@ keel::String GenerateSplitButtonCode(const DemoContext& ctx) {
         VariantName(effVar),
         s_sb.menuMinWidth
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

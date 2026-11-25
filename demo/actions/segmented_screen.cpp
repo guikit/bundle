@@ -110,13 +110,11 @@ void RenderSegmentedStage(guikit::Context& ui, DemoContext& ctx) {
     segOpts.background = ctx.GetControlBackground(NavCategory::ActionSegmented);
     segOpts.border = ctx.GetCtrlBorder();
 
-    ctx.RunElementStage(ui, [&]() {
-        if (s_state.multiSelect) {
-            guikit::SegmentedMask(ui, s_state.selectedMask, items, segOpts);
-        } else {
-            guikit::Segmented(ui, s_state.selectedIdx, items, segOpts);
-        }
-    });
+    if (s_state.multiSelect) {
+        guikit::SegmentedMask(ui, s_state.selectedMask, items, segOpts);
+    } else {
+        guikit::Segmented(ui, s_state.selectedIdx, items, segOpts);
+    }
 }
 
 keel::String GenerateSegmentedCode(const DemoContext& ctx) {
@@ -128,7 +126,7 @@ keel::String GenerateSegmentedCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
 
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "guikit::{}(ui, {}, {{\n"
         "    {{.text = \"Sine\", .icon = guikit::Icon::Refresh()}},\n"
         "    {{.text = \"Square\", .icon = guikit::Icon::Settings()}},\n"
@@ -158,7 +156,6 @@ keel::String GenerateSegmentedCode(const DemoContext& ctx) {
         ctx.FormatControlBackgroundCode(NavCategory::ActionSegmented),
         ctx.FormatCtrlBorderCode()
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

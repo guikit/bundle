@@ -73,31 +73,29 @@ void RenderButtonStage(guikit::Context& ui, DemoContext& ctx) {
         ? ui.Format("{} ({}x)", s_state.text, s_state.clicks)
         : s_state.text.as_ref();
 
-    ctx.RunElementStage(ui, [&]() {
-        guikit::ButtonOptions opts{};
-        opts.text = btnText;
-        opts.icon = s_state.hasIcon ? guikit::Icon::Play() : guikit::Icon{};
-        opts.iconPlacement = s_state.iconPlacement;
-        opts.align = ctx.GetCtrlAlign(NavCategory::ActionButton);
-        opts.loading = s_state.loading;
-        opts.square = s_state.square;
-        opts.disabled = ctx.elemDisabled;
-        opts.size = ctx.controlsSize;
-        opts.width = ctx.ResolveCtrlWidth();
-        opts.height = ctx.ResolveCtrlHeight();
-        opts.style = s_state.style;
-        opts.variant = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
-        if (ctx.btnVariant == guikit::UiVariant::Ghost && s_state.style == guikit::ButtonStyle::Default) {
-            opts.style = guikit::ButtonStyle::Ghost;
-        }
-        opts.background = ctx.GetControlBackground(NavCategory::ActionButton);
-        opts.border = ctx.GetCtrlBorder();
+    guikit::ButtonOptions opts{};
+    opts.text = btnText;
+    opts.icon = s_state.hasIcon ? guikit::Icon::Play() : guikit::Icon{};
+    opts.iconPlacement = s_state.iconPlacement;
+    opts.align = ctx.GetCtrlAlign(NavCategory::ActionButton);
+    opts.loading = s_state.loading;
+    opts.square = s_state.square;
+    opts.disabled = ctx.elemDisabled;
+    opts.size = ctx.controlsSize;
+    opts.width = ctx.ResolveCtrlWidth();
+    opts.height = ctx.ResolveCtrlHeight();
+    opts.style = s_state.style;
+    opts.variant = (ctx.btnVariant == guikit::UiVariant::Ghost) ? guikit::UiVariant::Default : ctx.btnVariant;
+    if (ctx.btnVariant == guikit::UiVariant::Ghost && s_state.style == guikit::ButtonStyle::Default) {
+        opts.style = guikit::ButtonStyle::Ghost;
+    }
+    opts.background = ctx.GetControlBackground(NavCategory::ActionButton);
+    opts.border = ctx.GetCtrlBorder();
 
-        if (guikit::Button(ui, opts)) {
-            ++s_state.clicks;
-            ui.InvalidateAll();
-        }
-    });
+    if (guikit::Button(ui, opts)) {
+        ++s_state.clicks;
+        ui.InvalidateAll();
+    }
 }
 
 keel::String GenerateButtonCode(const DemoContext& ctx) {
@@ -112,7 +110,7 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
     const guikit::UiVariant effVariant = (ctx.btnVariant == guikit::UiVariant::Ghost)
         ? guikit::UiVariant::Default
         : ctx.btnVariant;
-    const keel::String ctrlCode = keel::format(
+    return keel::format(
         "if (guikit::Button(ui, {{\n"
         "    .text = \"{}\",\n"
         "    .icon = {},\n"
@@ -146,7 +144,6 @@ keel::String GenerateButtonCode(const DemoContext& ctx) {
         ctx.FormatControlBackgroundCode(NavCategory::ActionButton),
         ctx.FormatCtrlBorderCode()
     );
-    return ctx.WrapInElementCode(ctrlCode);
 }
 
 } // namespace guikit::demo

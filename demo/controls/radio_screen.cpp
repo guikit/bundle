@@ -4,14 +4,21 @@ namespace guikit::demo {
 
 namespace {
 struct RadioState {
+    keel::usize modeIdx = 0; // 0 = 3-Option Group, 1 = Single Radio
     keel::i32 selectedIdx = 0;
     bool singleChecked = true;
 };
 RadioState s_state;
 } // namespace
 
-void RenderRadioInspector(guikit::Context& ui, DemoContext& ctx) {
-    const bool groupDemo = (ctx.GetDemoVariant(NavCategory::ControlRadio) == 0u);
+void RenderRadioInspector(guikit::Context& ui, DemoContext&) {
+    static constexpr keel::StaticArray<keel::StringRef, 2> kModeNames = {"3-Option Group", "Single Radio"};
+    if (auto el = guikit::Element(ui, {.label = "Mode"})) {
+        if (guikit::Segmented(ui, s_state.modeIdx, kModeNames).changed) {
+            ui.InvalidateAll();
+        }
+    }
+    const bool groupDemo = (s_state.modeIdx == 0u);
     if (groupDemo) {
         static constexpr keel::StaticArray<keel::StringRef, 3> optNames = {"Option A", "Option B", "Option C"};
         keel::usize idx = keel::as<keel::usize>(keel::clamp(s_state.selectedIdx, 0, 2));
@@ -31,7 +38,7 @@ void RenderRadioInspector(guikit::Context& ui, DemoContext& ctx) {
 }
 
 void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
-    const bool groupDemo = (ctx.GetDemoVariant(NavCategory::ControlRadio) == 0u);
+    const bool groupDemo = (s_state.modeIdx == 0u);
     guikit::RadioOptions ctrlOpts{};
     ctrlOpts.disabled = ctx.elemDisabled;
     ctrlOpts.size = ctx.controlsSize;
@@ -39,25 +46,15 @@ void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
 
     if (groupDemo) {
         if (auto col = guikit::Column(ui, {.gap = 14.0f})) {
-            const guikit::UiText lblA{
-                ctx.elemLabel.empty()
-                    ? keel::StringRef("Option A — Automatic Gain (AGC)")
-                    : ctx.elemLabel.as_ref(),
-                ctx.elemLabelVariant
-            };
-            if (auto el = guikit::Element(ui, ctx.MakeElementOptions(lblA))) {
+            ctx.RunElementStage(ui, "Option A", [&]() {
                 guikit::Radio(ui, s_state.selectedIdx, 0, ctrlOpts);
-            }
-            if (auto el = guikit::Element(ui, ctx.MakeElementOptions(
-                guikit::UiText{"Option B — Manual Fixed Gain", ctx.elemLabelVariant}
-            ))) {
+            });
+            ctx.RunElementStage(ui, "Option B", [&]() {
                 guikit::Radio(ui, s_state.selectedIdx, 1, ctrlOpts);
-            }
-            if (auto el = guikit::Element(ui, ctx.MakeElementOptions(
-                guikit::UiText{"Option C — External Hardware Trigger", ctx.elemLabelVariant}
-            ))) {
+            });
+            ctx.RunElementStage(ui, "Option C", [&]() {
                 guikit::Radio(ui, s_state.selectedIdx, 2, ctrlOpts);
-            }
+            });
         }
     } else {
         ctx.RunElementStage(ui, [&]() {
@@ -67,7 +64,7 @@ void RenderRadioStage(guikit::Context& ui, DemoContext& ctx) {
 }
 
 keel::String GenerateRadioCode(const DemoContext& ctx) {
-    const bool groupDemo = (ctx.GetDemoVariant(NavCategory::ControlRadio) == 0u);
+    const bool groupDemo = (s_state.modeIdx == 0u);
     const keel::StringRef callHead = groupDemo
         ? "Radio(ui, selectedMode, 0"
         : "Radio(ui, radioSelected";

@@ -12,12 +12,16 @@ struct InputState {
     bool password = false;
     bool clearable = true;
     bool readOnly = false;
+    bool withActionButton = false;
     keel::i32 connectCount = 0;
 };
 InputState s_state;
 } // namespace
 
 void RenderInputInspector(guikit::Context& ui, DemoContext&) {
+    if (auto el = guikit::Element(ui, {.label = "Action Button"})) {
+        if (guikit::Switch(ui, s_state.withActionButton).changed) ui.InvalidateAll();
+    }
     if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
         if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "No placeholder...",
@@ -76,7 +80,7 @@ void RenderInputStage(guikit::Context& ui, DemoContext& ctx) {
         opts.border = ctx.GetCtrlBorder();
         guikit::InputField(ui, s_state.text, opts);
 
-        if (ctx.GetDemoVariant(NavCategory::FieldInputField) == 1u) {
+        if (s_state.withActionButton) {
             const keel::StringRef btnLbl = (s_state.connectCount > 0)
                 ? ui.Format("Connect ({})", s_state.connectCount)
                 : keel::StringRef("Connect");
@@ -141,7 +145,7 @@ keel::String GenerateInputCode(const DemoContext& ctx) {
         ctx.FormatCtrlBorderCode()
     );
 
-    if (ctx.GetDemoVariant(NavCategory::FieldInputField) == 1u) {
+    if (s_state.withActionButton) {
         keel::format_into(
             ctrl,
             "\nif (guikit::Button(ui, {{.text = \"Connect\", .icon = guikit::Icon::Play(), {}.variant = guikit::UiVariant::{}}})) {{\n"

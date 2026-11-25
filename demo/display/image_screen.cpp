@@ -85,22 +85,20 @@ void RenderImageInspector(guikit::Context& ui, DemoContext&) {
 
 void RenderImageStage(guikit::Context& ui, DemoContext& ctx) {
     const keel::u8 alpha = keel::as<keel::u8>(keel::clamp(keel::round_i32(s_state.opacityPct * 2.55f), 0, 255));
-    ctx.RunElementStage(ui, [&]() {
-        guikit::ImageOptions opts{};
-        opts.alt = s_state.altText;
-        opts.fit = s_state.fit;
-        opts.alignX = s_state.alignX;
-        opts.alignY = s_state.alignY;
-        opts.checkerboard = s_state.checkerboard;
-        opts.opacity = alpha;
-        opts.disabled = ctx.elemDisabled;
-        opts.size = ctx.controlsSize;
-        opts.width = ctx.ResolveCtrlWidth();
-        opts.height = ctx.ResolveCtrlHeight();
-        opts.background = ctx.GetControlBackground(NavCategory::DisplayImage);
-        opts.border = ctx.GetCtrlBorder();
-        guikit::Image(ui, ImageState::sources[s_state.sourceIdx % ImageState::sources.size()], opts);
-    });
+    guikit::ImageOptions opts{};
+    opts.alt = s_state.altText;
+    opts.fit = s_state.fit;
+    opts.alignX = s_state.alignX;
+    opts.alignY = s_state.alignY;
+    opts.checkerboard = s_state.checkerboard;
+    opts.opacity = alpha;
+    opts.disabled = ctx.elemDisabled;
+    opts.size = ctx.controlsSize;
+    opts.width = ctx.ResolveCtrlWidth();
+    opts.height = ctx.ResolveCtrlHeight();
+    opts.background = ctx.GetControlBackground(NavCategory::DisplayImage);
+    opts.border = ctx.GetCtrlBorder();
+    guikit::Image(ui, ImageState::sources[s_state.sourceIdx % ImageState::sources.size()], opts);
 }
 
 keel::String GenerateImageCode(const DemoContext& ctx) {
@@ -109,7 +107,7 @@ keel::String GenerateImageCode(const DemoContext& ctx) {
     const keel::FixedString<64> sizeLine = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "guikit::Image(ui, \"{}\", {{\n"
         "    .alt = \"{}\",\n"
         "    .fit = guikit::ObjectFit::{},\n"
@@ -138,7 +136,6 @@ keel::String GenerateImageCode(const DemoContext& ctx) {
         ctx.FormatControlBackgroundCode(NavCategory::DisplayImage),
         ctx.FormatCtrlBorderCode()
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

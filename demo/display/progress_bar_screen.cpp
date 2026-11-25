@@ -166,28 +166,26 @@ void RenderProgressBarStage(guikit::Context& ui, DemoContext& ctx) {
             ? guikit::AxisSize(guikit::SizeMode::Fit)
             : ctx.ResolveCtrlHeight();
 
-    ctx.RunElementStage(ui, [&]() {
-        guikit::ProgressBarOptions opts{};
-        opts.orientation = s_state.orientation;
-        opts.textLeft = s_state.textLeft;
-        opts.textRight = s_state.textRight;
-        opts.valueFormat = "%.1f %%";
-        opts.peakHoldValue = (s_state.showPeak && !s_state.indeterminate)
-            ? keel::Optional<keel::f64>(s_state.peakVal)
-            : keel::kNullOpt;
-        opts.segments = s_state.segmented ? s_state.segments : 0u;
-        opts.trackHeight = s_state.barHeight;
-        opts.showValue = s_state.showValue && !s_state.indeterminate;
-        opts.indeterminate = s_state.indeterminate;
-        opts.valuePlacement = s_state.valuePlacement;
-        opts.multiZoneColor = s_state.multiZone;
-        opts.disabled = ctx.elemDisabled;
-        opts.size = ctx.controlsSize;
-        opts.width = wSize;
-        opts.height = hSize;
-        opts.color = ctx.GetControlColor();
-        guikit::ProgressBar(ui, s_state.val, 0.0, 100.0, opts);
-    });
+    guikit::ProgressBarOptions opts{};
+    opts.orientation = s_state.orientation;
+    opts.textLeft = s_state.textLeft;
+    opts.textRight = s_state.textRight;
+    opts.valueFormat = "%.1f %%";
+    opts.peakHoldValue = (s_state.showPeak && !s_state.indeterminate)
+        ? keel::Optional<keel::f64>(s_state.peakVal)
+        : keel::kNullOpt;
+    opts.segments = s_state.segmented ? s_state.segments : 0u;
+    opts.trackHeight = s_state.barHeight;
+    opts.showValue = s_state.showValue && !s_state.indeterminate;
+    opts.indeterminate = s_state.indeterminate;
+    opts.valuePlacement = s_state.valuePlacement;
+    opts.multiZoneColor = s_state.multiZone;
+    opts.disabled = ctx.elemDisabled;
+    opts.size = ctx.controlsSize;
+    opts.width = wSize;
+    opts.height = hSize;
+    opts.color = ctx.GetControlColor();
+    guikit::ProgressBar(ui, s_state.val, 0.0, 100.0, opts);
 }
 
 keel::String GenerateProgressBarCode(const DemoContext& ctx) {
@@ -201,7 +199,7 @@ keel::String GenerateProgressBarCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
 
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "guikit::ProgressBar(ui, progressValue, 0.0, 100.0, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .textLeft = \"{}\",\n"
@@ -238,7 +236,6 @@ keel::String GenerateProgressBarCode(const DemoContext& ctx) {
         heightCode,
         ctx.FormatControlColorCode()
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

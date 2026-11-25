@@ -546,7 +546,7 @@ void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
     if (auto el = guikit::Element(ui, {
         .label = s_state.showLabel ? "Code Editor & Debugger" : "",
         .description = s_state.showDesc ? s_state.lastDebugEvent.as_ref() : keel::StringRef{},
-        .size = ctx.elemSize
+        .size = ctx.controlsSize
     })) {
         resp = guikit::TextArea(ui, s_state.editorBuffer, {
             .autoHeight = false,

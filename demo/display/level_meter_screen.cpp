@@ -181,14 +181,12 @@ void RenderLevelMeterStage(guikit::Context& ui, DemoContext& ctx) {
         : ctx.ResolveCtrlHeight();
     opts.color = ctx.GetControlColor();
 
-    ctx.RunElementStage(ui, [&]() {
-        if (stereo) {
-            const keel::StaticArray<keel::f32, 2> stereoVals = {chLeft, chRight};
-            guikit::LevelMeter(ui, stereoVals, -60.0f, 0.0f, opts);
-        } else {
-            guikit::LevelMeter(ui, keel::as<keel::f64>(chLeft), -60.0, 0.0, opts);
-        }
-    });
+    if (stereo) {
+        const keel::StaticArray<keel::f32, 2> stereoVals = {chLeft, chRight};
+        guikit::LevelMeter(ui, stereoVals, -60.0f, 0.0f, opts);
+    } else {
+        guikit::LevelMeter(ui, keel::as<keel::f64>(chLeft), -60.0, 0.0, opts);
+    }
 }
 
 keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
@@ -244,11 +242,11 @@ keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
             s_state.levelDb,
             keel::clamp(s_state.levelDb - s_state.stereoSpreadDb, -60.0f, 0.0f)
         );
-        out.append(ctx.WrapInElementCode(ctrl));
+        out.append(ctrl);
         return out;
     }
 
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "guikit::LevelMeter(ui, signalDb, -60.0, 0.0, {{\n"
         "    .orientation = guikit::Orientation::{},\n"
         "    .segments = {}u,\n"
@@ -279,7 +277,6 @@ keel::String GenerateLevelMeterCode(const DemoContext& ctx) {
         heightCode,
         ctx.FormatControlColorCode()
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

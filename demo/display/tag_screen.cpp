@@ -90,39 +90,38 @@ void RenderTagInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderTagStage(guikit::Context& ui, DemoContext& ctx) {
-    ctx.RunElementStage(ui, [&]() {
-        const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
-        guikit::TagOptions opts{};
-        opts.variant = s_state.variant;
-        opts.style = s_state.style;
-        opts.size = effSize;
-        opts.pill = s_state.pill;
-        opts.clickable = s_state.clickable;
-        opts.closable = s_state.closable;
-        opts.disabled = ctx.elemDisabled;
-        if (s_state.showIcon) {
-            opts.icon = guikit::Icon::Check();
-        }
-        const auto r = guikit::Tag(ui, s_state.label.as_ref(), opts);
-        if (r.clicked) {
-            guikit::ShowToast(ui, {.title = "Tag clicked", .message = s_state.label.as_ref(), .variant = s_state.variant});
-        }
-        if (r.closed) {
-            guikit::ShowToast(ui, {.title = "Tag closed", .message = s_state.label.as_ref(), .variant = guikit::UiVariant::Warning});
-        }
-    });
+    const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
+    guikit::TagOptions opts{};
+    opts.variant = s_state.variant;
+    opts.style = s_state.style;
+    opts.size = effSize;
+    opts.pill = s_state.pill;
+    opts.clickable = s_state.clickable;
+    opts.closable = s_state.closable;
+    opts.disabled = ctx.elemDisabled;
+    if (s_state.showIcon) {
+        opts.icon = guikit::Icon::Check();
+    }
+    const auto r = guikit::Tag(ui, s_state.label.as_ref(), opts);
+    if (r.clicked) {
+        guikit::ShowToast(ui, {.title = "Tag clicked", .message = s_state.label.as_ref(), .variant = s_state.variant});
+    }
+    if (r.closed) {
+        guikit::ShowToast(ui, {.title = "Tag closed", .message = s_state.label.as_ref(), .variant = guikit::UiVariant::Warning});
+    }
 }
 
 keel::String GenerateTagCode(const DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "if (auto r = guikit::Tag(ui, \"{}\", {{\n"
         "    .variant = guikit::UiVariant::{},\n"
         "    .style = guikit::TagStyle::{},\n"
         "    .size = guikit::UiSize::{},\n"
         "    .pill = {},\n"
         "    .clickable = {},\n"
-        "    .closable = {}\n"
+        "    .closable = {},\n"
+        "    .disabled = {}\n"
         "}}); r.clicked) {{\n"
         "    // Handle click\n"
         "}}",
@@ -132,9 +131,9 @@ keel::String GenerateTagCode(const DemoContext& ctx) {
         SizeName(effSize),
         s_state.pill ? "true" : "false",
         s_state.clickable ? "true" : "false",
-        s_state.closable ? "true" : "false"
+        s_state.closable ? "true" : "false",
+        ctx.elemDisabled ? "true" : "false"
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

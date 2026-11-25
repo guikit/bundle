@@ -43,8 +43,8 @@ enum class NavCategory : keel::u8 {
 
     // 6. FIELDS (Unified Editable Fields on FieldFrame)
     FieldInputField,
-    FieldTextArea,
     FieldSelect,
+    FieldMultiSelect,
     FieldSpinBox,
     FieldDatePicker,
     FieldTagInput,
@@ -55,6 +55,8 @@ enum class NavCategory : keel::u8 {
     ControlRadio,
     ControlSwitch,
     ControlSlider,
+    ControlStepSlider,
+    ControlRangeSlider,
     ControlKnob,
 
     // 8. DISPLAY (Typography, Indicators & Media)
@@ -69,6 +71,7 @@ enum class NavCategory : keel::u8 {
     ViewTable,
     ViewTreeView,
     ViewMarkdown,
+    ViewCodeEditor,
     ViewImageView,
     ViewSchematic2D
 };
@@ -83,6 +86,7 @@ constexpr bool IsControlCategory(NavCategory cat) noexcept {
         case NavCategory::ActionSegmented:
         case NavCategory::FieldInputField:
         case NavCategory::FieldSelect:
+        case NavCategory::FieldMultiSelect:
         case NavCategory::FieldSpinBox:
         case NavCategory::FieldDatePicker:
         case NavCategory::FieldTagInput:
@@ -91,6 +95,8 @@ constexpr bool IsControlCategory(NavCategory cat) noexcept {
         case NavCategory::ControlRadio:
         case NavCategory::ControlSwitch:
         case NavCategory::ControlSlider:
+        case NavCategory::ControlStepSlider:
+        case NavCategory::ControlRangeSlider:
         case NavCategory::ControlKnob:
         case NavCategory::DisplayTag:
         case NavCategory::DisplayProgressBar:
@@ -106,8 +112,8 @@ constexpr bool IsControlCategory(NavCategory cat) noexcept {
 constexpr bool IsFieldCategory(NavCategory cat) noexcept {
     switch (cat) {
         case NavCategory::FieldInputField:
-        case NavCategory::FieldTextArea:
         case NavCategory::FieldSelect:
+        case NavCategory::FieldMultiSelect:
         case NavCategory::FieldSpinBox:
         case NavCategory::FieldDatePicker:
         case NavCategory::FieldTagInput:
@@ -117,6 +123,46 @@ constexpr bool IsFieldCategory(NavCategory cat) noexcept {
             return false;
     }
 }
+
+constexpr bool HasElementWrapperCategory(NavCategory cat) noexcept {
+    switch (cat) {
+        case NavCategory::FieldInputField:
+        case NavCategory::FieldSelect:
+        case NavCategory::FieldMultiSelect:
+        case NavCategory::FieldSpinBox:
+        case NavCategory::FieldDatePicker:
+        case NavCategory::FieldTagInput:
+        case NavCategory::FieldColorPicker:
+        case NavCategory::ControlCheckbox:
+        case NavCategory::ControlRadio:
+        case NavCategory::ControlSwitch:
+        case NavCategory::ControlSlider:
+        case NavCategory::ControlStepSlider:
+        case NavCategory::ControlRangeSlider:
+        case NavCategory::ControlKnob:
+            return true;
+        default:
+            return false;
+    }
+}
+
+enum class ElementWrapperPreset : keel::u8 {
+    None = 0,            ///< Standalone control without guikit::Element wrapper
+    LabelOnly,           ///< Minimal form field: .label only
+    LabelAndDescription, ///< Standard setting row: .label + .description
+    Full,                ///< Rich field: .icon + .label + .badge + .description
+    InlineLeading,       ///< Horizontal row: label leading, control trailing
+    InlineTrailing       ///< Horizontal row: control leading, label trailing
+};
+
+inline constexpr keel::StaticArray<keel::StringRef, 6> kElementWrapperPresetNames = {
+    "None (Standalone)",
+    "Label Only",
+    "Label + Description",
+    "Full (Icon + Badge)",
+    "Inline (Leading)",
+    "Inline (Trailing)"
+};
 
 constexpr bool IsSandboxCategory(NavCategory cat) noexcept {
     return keel::as<keel::usize>(cat) < kNavCategoryCount;
@@ -131,10 +177,10 @@ constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
            cat == NavCategory::LayoutSplitView ||
            cat == NavCategory::SurfaceSidebar ||
            cat == NavCategory::SurfaceMenuBar ||
-           cat == NavCategory::FieldTextArea ||
            cat == NavCategory::ViewTable ||
            cat == NavCategory::ViewTreeView ||
            cat == NavCategory::ViewMarkdown ||
+           cat == NavCategory::ViewCodeEditor ||
            cat == NavCategory::ViewImageView ||
            cat == NavCategory::ViewSchematic2D;
 }
@@ -213,8 +259,8 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::ActionPagination:   return "Pagination — Page Navigation & Ellipsis";
         // 6. FIELDS
         case NavCategory::FieldInputField:    return "InputField — Text & Validated Input";
-        case NavCategory::FieldTextArea:      return "TextArea — Code Editor, Syntax Highlighting & Minimap";
-        case NavCategory::FieldSelect:        return "Select & MultiSelect — Dropdown & ComboBox";
+        case NavCategory::FieldSelect:        return "Select — Dropdown, ComboBox & Autocomplete";
+        case NavCategory::FieldMultiSelect:   return "MultiSelect — Multi-Chip Tag Dropdown";
         case NavCategory::FieldSpinBox:       return "SpinBox — Precision Numeric Stepper";
         case NavCategory::FieldDatePicker:    return "DatePicker — Calendar Grid & Time Stepper";
         case NavCategory::FieldTagInput:      return "TagInput — Editable Multi-Tag Chips";
@@ -223,7 +269,9 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::ControlCheckbox:    return "Checkbox — Tri-State Boolean Control";
         case NavCategory::ControlRadio:       return "Radio — Exclusive Option Group";
         case NavCategory::ControlSwitch:      return "Switch — Toggle & Symmetric Dual-Label";
-        case NavCategory::ControlSlider:      return "Slider & StepSlider — Continuous, Discrete & Range";
+        case NavCategory::ControlSlider:      return "Slider — Continuous Numeric Track";
+        case NavCategory::ControlStepSlider:  return "StepSlider — Discrete Labeled Steps";
+        case NavCategory::ControlRangeSlider: return "RangeSlider — Dual-Thumb Min/Max Interval";
         case NavCategory::ControlKnob:        return "Knob — Rotary Parameter Control";
         // 8. DISPLAY
         case NavCategory::DisplayHeading:     return "Heading — Section & Title Typography";
@@ -236,6 +284,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::ViewTable:          return "Table — 100k Virtualized Data Grid";
         case NavCategory::ViewTreeView:       return "TreeView — Hierarchical Node Explorer";
         case NavCategory::ViewMarkdown:       return "Markdown — Rich Document Renderer";
+        case NavCategory::ViewCodeEditor:     return "Code Editor (TextArea) — Syntax Highlighting, Minimap & Debugger";
         case NavCategory::ViewImageView:      return "Image View — 16-bit Scientific Inspector";
         case NavCategory::ViewSchematic2D:    return "Schematic 2D — Node Graph Canvas";
     }
@@ -249,16 +298,19 @@ constexpr keel::StringRef CategoryControlName(NavCategory cat) noexcept {
         case NavCategory::ActionButton:       return "Button";
         case NavCategory::ActionSegmented:    return "Segmented";
         case NavCategory::FieldInputField:    return "InputField";
-        case NavCategory::FieldTextArea:      return "TextArea";
         case NavCategory::FieldSelect:        return "Select";
+        case NavCategory::FieldMultiSelect:   return "MultiSelect";
         case NavCategory::FieldSpinBox:       return "SpinBox";
         case NavCategory::FieldDatePicker:    return "DatePicker";
         case NavCategory::FieldTagInput:      return "TagInput";
         case NavCategory::FieldColorPicker:   return "ColorPicker";
+        case NavCategory::ViewCodeEditor:     return "Code Editor";
         case NavCategory::ControlCheckbox:    return "Checkbox";
         case NavCategory::ControlRadio:       return "Radio";
         case NavCategory::ControlSwitch:      return "Switch";
         case NavCategory::ControlSlider:      return "Slider";
+        case NavCategory::ControlStepSlider:  return "StepSlider";
+        case NavCategory::ControlRangeSlider: return "RangeSlider";
         case NavCategory::ControlKnob:        return "Knob";
         case NavCategory::DisplayHeading:     return "Heading";
         case NavCategory::DisplayTag:         return "Tag";
@@ -565,19 +617,8 @@ struct DemoContext {
     }
 
     // Semantic Element form-field wrapper state (shared across ELEMENTS screens, excluding ElemHeading)
-    guikit::UiSize elemSize = guikit::UiSize::Md;
-    keel::SmallString<128> elemLabel{"Element Label"};
-    guikit::UiVariant elemLabelVariant = guikit::UiVariant::Default;
-    keel::SmallString<128> elemDesc{"Secondary description text"};
-    guikit::UiVariant elemDescVariant = guikit::UiVariant::Muted;
-    bool elemWordWrap = true;
-    bool elemShowIcon = false;
-    keel::SmallString<128> elemBadge{""};
-    guikit::UiVariant elemBadgeVariant = guikit::UiVariant::Info;
-    keel::usize elemLayoutIdx = 0;      // 0 = Auto (kNullOpt), 1 = Stacked, 2 = Top, 3 = Bottom, 4 = Leading, 5 = Trailing
-    guikit::Align elemAlign = guikit::Align::Start;
-    keel::usize elemWidthModeIdx = 0;   // 0 = Auto, 1 = Fit, 2 = Stretch, 3 = Fixed
-    keel::f32 elemWidthDp = 280.0f;         // 120..520 dp
+    // Shared Element wrapper preset (Fields & Controls) + Control disabled state
+    ElementWrapperPreset elemPreset = ElementWrapperPreset::LabelOnly;
     bool elemDisabled = false;
 
     // Shared Control state
@@ -622,21 +663,6 @@ struct DemoContext {
         static constexpr keel::StaticArray<keel::StringRef, 3> kTooltip = {
             "Widget (.tooltip)", "Anchored (Rect)", "Follow Cursor"
         };
-        static constexpr keel::StaticArray<keel::StringRef, 2> kInputField = {
-            "Single Field", "Field + Action Button"
-        };
-        static constexpr keel::StaticArray<keel::StringRef, 4> kSelect = {
-            "Select", "ComboBox", "Autocomplete", "MultiSelect"
-        };
-        static constexpr keel::StaticArray<keel::StringRef, 2> kRadio = {
-            "3-Option Group", "Single Radio"
-        };
-        static constexpr keel::StaticArray<keel::StringRef, 3> kSlider = {
-            "Slider", "StepSlider", "RangeSlider"
-        };
-        static constexpr keel::StaticArray<keel::StringRef, 2> kKnob = {
-            "Single Knob", "4-Knob Channel Strip"
-        };
         static constexpr keel::StaticArray<keel::StringRef, 2> kLevelMeter = {
             "Stereo (L/R)", "Mono (1ch)"
         };
@@ -652,11 +678,6 @@ struct DemoContext {
             case NavCategory::LayoutSplitView:   return kSplitView;
             case NavCategory::LayoutElement:     return kElement;
             case NavCategory::OverlayTooltip:    return kTooltip;
-            case NavCategory::FieldInputField:   return kInputField;
-            case NavCategory::FieldSelect:       return kSelect;
-            case NavCategory::ControlRadio:      return kRadio;
-            case NavCategory::ControlSlider:     return kSlider;
-            case NavCategory::ControlKnob:       return kKnob;
             case NavCategory::DisplayLevelMeter: return kLevelMeter;
             case NavCategory::ViewTable:         return kTable;
             case NavCategory::ViewImageView:     return kImageView;
@@ -695,6 +716,24 @@ struct DemoContext {
         return changed;
     }
 
+    bool RenderElementPresetSelector(guikit::Context& ui, NavCategory cat) {
+        if (!HasElementWrapperCategory(cat)) {
+            return false;
+        }
+        bool changed = false;
+        if (auto el = guikit::Element(ui, {
+            .label = "Element",
+            .layout = guikit::ElementLayout::Top
+        })) {
+            if (guikit::Select(ui, elemPreset, kElementWrapperPresetNames).changed) {
+                changed = true;
+                ui.InvalidateAll();
+            }
+        }
+        guikit::Separator(ui);
+        return changed;
+    }
+
     static constexpr guikit::SizeMode DefaultCtrlWidthMode(NavCategory cat) noexcept {
         switch (cat) {
             case NavCategory::ActionButton:
@@ -722,6 +761,7 @@ struct DemoContext {
                cat == NavCategory::FieldInputField ||
                cat == NavCategory::FieldTagInput ||
                cat == NavCategory::FieldSelect ||
+               cat == NavCategory::FieldMultiSelect ||
                cat == NavCategory::FieldColorPicker ||
                cat == NavCategory::FieldDatePicker ||
                cat == NavCategory::DisplayImage;
@@ -740,8 +780,8 @@ struct DemoContext {
         }
     }
 
-    bool HasElementExternal() const noexcept {
-        return !elemLabel.empty() || !elemDesc.empty() || elemShowIcon || !elemBadge.empty();
+    constexpr bool HasElementWrapper() const noexcept {
+        return elemPreset != ElementWrapperPreset::None;
     }
 
     constexpr guikit::StateColor ResolveControlColor() const noexcept {
@@ -753,40 +793,9 @@ struct DemoContext {
     }
 
     constexpr guikit::Align GetCtrlAlign(NavCategory cat) const noexcept {
-        return (cat == NavCategory::FieldSelect) ? ctrlSelectAlign : ctrlAlign;
-    }
-
-    guikit::UiText GetElementLabel() const noexcept {
-        return guikit::UiText{elemLabel, elemLabelVariant};
-    }
-
-    guikit::UiText GetElementDescription() const noexcept {
-        if (elemDesc.empty()) return {};
-        return guikit::UiText{
-            elemDesc,
-            elemDescVariant,
-            elemWordWrap ? guikit::TextWrap::Word() : guikit::TextWrap::SingleLine()
-        };
-    }
-
-    guikit::Icon GetElementIcon() const noexcept {
-        return elemShowIcon ? guikit::Icon::Edit() : guikit::Icon{};
-    }
-
-    guikit::UiText GetElementBadge() const noexcept {
-        if (elemBadge.empty()) return {};
-        return guikit::UiText{elemBadge, elemBadgeVariant};
-    }
-
-    constexpr keel::Optional<guikit::ElementLayout> ResolveElemLayout() const noexcept {
-        switch (elemLayoutIdx) {
-            case 1:  return guikit::ElementLayout::Stacked;
-            case 2:  return guikit::ElementLayout::Top;
-            case 3:  return guikit::ElementLayout::Bottom;
-            case 4:  return guikit::ElementLayout::Leading;
-            case 5:  return guikit::ElementLayout::Trailing;
-            default: return keel::kNullOpt;
-        }
+        return (cat == NavCategory::FieldSelect || cat == NavCategory::FieldMultiSelect)
+            ? ctrlSelectAlign
+            : ctrlAlign;
     }
 
     static constexpr guikit::AxisSize ResolveAxisSize(keel::usize modeIdx, keel::f32 dp) noexcept {
@@ -812,10 +821,6 @@ struct DemoContext {
             return keel::format_fixed<48>("{:.1f}f", sz.Dp());
         }
         return "guikit::AxisSize::Auto()";
-    }
-
-    constexpr guikit::AxisSize ResolveElemWidth() const noexcept {
-        return ResolveAxisSize(elemWidthModeIdx, elemWidthDp);
     }
 
     constexpr guikit::AxisSize ResolveCtrlWidth() const noexcept {
@@ -861,42 +866,55 @@ struct DemoContext {
         };
     }
 
+    static constexpr keel::StringRef kDefaultElementLabel = "Element Label";
+    static constexpr keel::StringRef kDefaultElementDesc  = "Helper description text";
+    static constexpr keel::StringRef kDefaultElementBadge = "Badge";
+
     guikit::ElementOptions MakeElementOptions(guikit::UiText customLabel) const noexcept {
-        return guikit::ElementOptions{
-            .label = customLabel,
-            .description = GetElementDescription(),
-            .icon = GetElementIcon(),
-            .badge = GetElementBadge(),
-            .layout = ResolveElemLayout(),
-            .align = elemAlign,
-            .width = ResolveElemWidth(),
-            .size = elemSize,
-            .disabled = elemDisabled
-        };
+        guikit::ElementOptions opts{};
+        opts.label = customLabel;
+        opts.disabled = elemDisabled;
+        switch (elemPreset) {
+            case ElementWrapperPreset::LabelAndDescription:
+                opts.description = guikit::UiText{kDefaultElementDesc, guikit::UiVariant::Muted, guikit::TextWrap::Word()};
+                break;
+            case ElementWrapperPreset::Full:
+                opts.description = guikit::UiText{kDefaultElementDesc, guikit::UiVariant::Muted, guikit::TextWrap::Word()};
+                opts.icon = guikit::Icon::Settings();
+                opts.badge = guikit::UiText{kDefaultElementBadge, guikit::UiVariant::Primary};
+                break;
+            case ElementWrapperPreset::InlineLeading:
+                opts.layout = guikit::ElementLayout::Leading;
+                break;
+            case ElementWrapperPreset::InlineTrailing:
+                opts.layout = guikit::ElementLayout::Trailing;
+                break;
+            case ElementWrapperPreset::None:
+            case ElementWrapperPreset::LabelOnly:
+            default:
+                break;
+        }
+        return opts;
     }
 
     guikit::ElementOptions MakeElementOptions() const noexcept {
-        return MakeElementOptions(GetElementLabel());
+        return MakeElementOptions(guikit::UiText{kDefaultElementLabel});
     }
 
     template <typename Fn>
-    void RunElementStage(guikit::Context& ui, Fn&& renderControls) const {
-        if (auto el = guikit::Element(ui, MakeElementOptions())) {
+    void RunElementStage(guikit::Context& ui, guikit::UiText customLabel, Fn&& renderControls) const {
+        if (!HasElementWrapper()) {
+            renderControls();
+            return;
+        }
+        if (auto el = guikit::Element(ui, MakeElementOptions(customLabel))) {
             renderControls();
         }
     }
 
-    keel::String FormatElementLabelCode(keel::Optional<keel::StringRef> customLabelOverride = keel::kNullOpt) const {
-        const keel::StringRef lbl = customLabelOverride.has_value() ? *customLabelOverride : elemLabel.as_ref();
-        if (lbl.empty()) return keel::String::from("\"\"");
-        if (elemLabelVariant == guikit::UiVariant::Default) {
-            return keel::format("\"{}\"", lbl);
-        }
-        return keel::format("{{\"{}\", guikit::StateColor::{}()}}", lbl, VariantName(elemLabelVariant));
-    }
-
-    keel::String FormatElementDescCode() const {
-        return FormatDesc(!elemDesc.empty(), elemDesc, elemDescVariant);
+    template <typename Fn>
+    void RunElementStage(guikit::Context& ui, Fn&& renderControls) const {
+        RunElementStage(ui, guikit::UiText{kDefaultElementLabel}, keel::forward<Fn>(renderControls));
     }
 
     keel::FixedString<48> FormatCtrlWidthCode() const noexcept {
@@ -940,36 +958,24 @@ struct DemoContext {
     }
 
     keel::String FormatElementOpenCode(keel::Optional<keel::StringRef> customLabelOverride = keel::kNullOpt) const {
+        const keel::StringRef lbl = customLabelOverride.has_value() ? *customLabelOverride : kDefaultElementLabel;
         keel::String out = keel::format(
             "if (auto el = guikit::Element(ui, {{\n"
-            "    .label = {}",
-            FormatElementLabelCode(customLabelOverride)
+            "    .label = \"{}\"",
+            lbl
         );
-        if (!elemDesc.empty()) {
-            keel::format_into(out, ",\n    .description = {}", FormatElementDescCode());
+        if (elemPreset == ElementWrapperPreset::LabelAndDescription ||
+            elemPreset == ElementWrapperPreset::Full) {
+            keel::format_into(out, ",\n    .description = \"{}\"", kDefaultElementDesc);
         }
-        if (elemShowIcon) {
-            out.append(",\n    .icon = guikit::Icon::Edit()");
+        if (elemPreset == ElementWrapperPreset::Full) {
+            out.append(",\n    .icon = guikit::Icon::Settings()");
+            keel::format_into(out, ",\n    .badge = {{\"{}\", guikit::StateColor::Primary()}}", kDefaultElementBadge);
         }
-        if (!elemBadge.empty()) {
-            keel::format_into(
-                out,
-                ",\n    .badge = {{\"{}\", guikit::StateColor::{}()}}",
-                elemBadge,
-                VariantName(elemBadgeVariant)
-            );
-        }
-        if (const auto layoutOpt = ResolveElemLayout(); layoutOpt.has_value()) {
-            keel::format_into(out, ",\n    .layout = guikit::ElementLayout::{}", ElementLayoutEnumName(*layoutOpt));
-        }
-        if (elemAlign != guikit::Align::Start) {
-            keel::format_into(out, ",\n    .align = guikit::Align::{}", LabelAlignEnumName(elemAlign));
-        }
-        if (const guikit::AxisSize elemW = ResolveElemWidth(); !elemW.IsAuto()) {
-            keel::format_into(out, ",\n    .width = {}", FormatAxisSizeCode(elemW));
-        }
-        if (elemSize != guikit::UiSize::None && elemSize != guikit::UiSize::Md) {
-            keel::format_into(out, ",\n    .size = guikit::UiSize::{}", SizeName(elemSize));
+        if (elemPreset == ElementWrapperPreset::InlineLeading) {
+            out.append(",\n    .layout = guikit::ElementLayout::Leading");
+        } else if (elemPreset == ElementWrapperPreset::InlineTrailing) {
+            out.append(",\n    .layout = guikit::ElementLayout::Trailing");
         }
         if (elemDisabled) {
             out.append(",\n    .disabled = true");
@@ -982,6 +988,9 @@ struct DemoContext {
         keel::StringRef controlCode,
         keel::Optional<keel::StringRef> customLabelOverride = keel::kNullOpt
     ) const {
+        if (!HasElementWrapper()) {
+            return keel::String::from(controlCode);
+        }
         keel::String out = FormatElementOpenCode(customLabelOverride);
         out.push_back('\n');
 
@@ -1054,126 +1063,13 @@ struct DemoContext {
         }
     }
 
-    void RenderElementSection(guikit::Context& ui) {
-        if (auto el = guikit::Element(ui, {.label = "Size"})) {
-            if (guikit::StepSlider(ui, elemSize, {.showTicks = true, .showLabels = true}).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = guikit::Element(ui, {.label = "Label"})) {
-            if (guikit::InputField(ui, elemLabel, {
-                .placeholder = "No label...",
-                .clearable = true
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-        const bool labelDisabled = (elemLabel.empty() && !elemShowIcon);
-        if (auto el = guikit::Element(ui, {.label = "Label Color", .disabled = labelDisabled})) {
-            if (guikit::Select(ui, elemLabelVariant, kUiVariantNames, {
-                .disabled = labelDisabled
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = guikit::Element(ui, {.label = "Description"})) {
-            if (guikit::InputField(ui, elemDesc, {
-                .placeholder = "No description...",
-                .clearable = true
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-        RenderDescVariantPicker(ui, elemDescVariant, !elemDesc.empty());
-        if (auto el = guikit::Element(ui, {.label = "Word Wrap", .disabled = elemDesc.empty()})) {
-            if (guikit::Switch(ui, elemWordWrap, {.disabled = elemDesc.empty()}).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = guikit::Element(ui, {.label = "Leading Icon"})) {
-            if (guikit::Switch(ui, elemShowIcon).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = guikit::Element(ui, {.label = "Badge"})) {
-            if (guikit::InputField(ui, elemBadge, {
-                .placeholder = "No badge (e.g. dB, Hz)...",
-                .clearable = true
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-        if (auto el = guikit::Element(ui, {.label = "Badge Variant", .disabled = elemBadge.empty()})) {
-            if (guikit::Select(ui, elemBadgeVariant, kUiVariantNames, {
-                .disabled = elemBadge.empty()
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
-            if (guikit::Switch(ui, elemDisabled).changed) {
-                ui.InvalidateAll();
-            }
-        }
-    }
-
-    void RenderElementLayoutSection(guikit::Context& ui, NavCategory /*cat*/) {
-        const bool hasExternal = HasElementExternal();
-        if (auto el = guikit::Element(ui, {
-            .label = "Layout",
-            .disabled = !hasExternal
-        })) {
-            if (guikit::Select(ui, elemLayoutIdx, kElemLayoutNames, {
-                .disabled = !hasExternal
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        keel::usize elemAlignIdx = keel::as<keel::usize>(elemAlign);
-        if (auto el = guikit::Element(ui, {.label = "Alignment"})) {
-            if (guikit::Segmented(ui, elemAlignIdx, kLabelAlignNames).changed) {
-                elemAlign = keel::from_underlying<guikit::Align>(elemAlignIdx);
-                ui.InvalidateAll();
-            }
-        }
-
-        if (auto el = guikit::Element(ui, {.label = "Width"})) {
-            if (guikit::Segmented(ui, elemWidthModeIdx, kAxisModeNames).changed) {
-                ui.InvalidateAll();
-            }
-        }
-
-        const bool elemFixedWidth = (elemWidthModeIdx == 3);
-        if (auto el = guikit::Element(ui, {.label = "Width (dp)", .disabled = !elemFixedWidth})) {
-            if (guikit::Slider(ui, elemWidthDp, 120.0f, 520.0f, {
-                .valueFormat = "%.0f dp",
-                .step = 10.0f,
-                .disabled = !elemFixedWidth
-            }).changed) {
-                ui.InvalidateAll();
-            }
-        }
-    }
-
     void RenderControlLayoutSection(guikit::Context& ui, NavCategory cat) {
         if (!HasCtrlLayoutCategory(cat)) {
             return;
         }
 
         if (cat == NavCategory::ControlKnob) {
-            if (auto el = guikit::Element(ui, {
-                .label = "Custom Diameter",
-                .badge = {
-                    knobCustomDiameter ? "Fixed" : "Auto",
-                    knobCustomDiameter ? guikit::UiVariant::Primary : guikit::UiVariant::Secondary
-                }
-            })) {
+            if (auto el = guikit::Element(ui, {.label = "Custom Diameter"})) {
                 if (guikit::Switch(ui, knobCustomDiameter).changed) {
                     ui.InvalidateAll();
                 }
@@ -1190,17 +1086,7 @@ struct DemoContext {
             return;
         }
 
-        const auto ctrlWidth = ResolveCtrlWidth();
-        const keel::StringRef ctrlWidthBadge = ctrlWidth.IsAuto()
-            ? SizeModeEnumName(DefaultCtrlWidthMode(cat))
-            : (ctrlWidth.IsFixed() ? "Fixed" : SizeModeEnumName(ctrlWidth.ResolveMode(guikit::SizeMode::Fit)));
-        if (auto el = guikit::Element(ui, {
-            .label = "Width",
-            .badge = {
-                ctrlWidthBadge,
-                ctrlWidth.IsAuto() ? guikit::UiVariant::Secondary : guikit::UiVariant::Primary
-            }
-        })) {
+        if (auto el = guikit::Element(ui, {.label = "Width"})) {
             if (guikit::Segmented(ui, ctrlWidthModeIdx, kAxisModeNames).changed) {
                 ui.InvalidateAll();
             }
@@ -1217,17 +1103,7 @@ struct DemoContext {
             }
         }
 
-        const auto ctrlHeight = ResolveCtrlHeight();
-        const keel::StringRef ctrlHeightBadge = ctrlHeight.IsAuto()
-            ? "Fit"
-            : (ctrlHeight.IsFixed() ? "Fixed" : SizeModeEnumName(ctrlHeight.ResolveMode(guikit::SizeMode::Fit)));
-        if (auto el = guikit::Element(ui, {
-            .label = "Height",
-            .badge = {
-                ctrlHeightBadge,
-                ctrlHeight.IsAuto() ? guikit::UiVariant::Secondary : guikit::UiVariant::Primary
-            }
-        })) {
+        if (auto el = guikit::Element(ui, {.label = "Height"})) {
             if (guikit::Segmented(ui, ctrlHeightModeIdx, kAxisModeNames).changed) {
                 ui.InvalidateAll();
             }
@@ -1247,8 +1123,11 @@ struct DemoContext {
         if (cat == NavCategory::ActionButton ||
             cat == NavCategory::ActionMenuButton ||
             cat == NavCategory::ActionSplitButton ||
-            cat == NavCategory::FieldSelect) {
-            guikit::Align& targetAlign = (cat == NavCategory::FieldSelect) ? ctrlSelectAlign : ctrlAlign;
+            cat == NavCategory::FieldSelect ||
+            cat == NavCategory::FieldMultiSelect) {
+            guikit::Align& targetAlign = (cat == NavCategory::FieldSelect || cat == NavCategory::FieldMultiSelect)
+                ? ctrlSelectAlign
+                : ctrlAlign;
             keel::usize alignIdx = (targetAlign == guikit::Align::Start)
                 ? 0
                 : ((targetAlign == guikit::Align::End) ? 2 : 1);
@@ -1291,6 +1170,12 @@ struct DemoContext {
             }
         }
 
+        if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
+            if (guikit::Switch(ui, elemDisabled).changed) {
+                ui.InvalidateAll();
+            }
+        }
+
         if (IsFieldCategory(cat)) {
             RenderFieldStyleControls(ui);
         }
@@ -1299,6 +1184,8 @@ struct DemoContext {
             cat == NavCategory::ActionButton ||
             cat == NavCategory::ActionSegmented ||
             cat == NavCategory::ControlSlider ||
+            cat == NavCategory::ControlStepSlider ||
+            cat == NavCategory::ControlRangeSlider ||
             cat == NavCategory::ControlKnob ||
             cat == NavCategory::ControlSwitch ||
             cat == NavCategory::ControlCheckbox ||
@@ -1361,6 +1248,7 @@ struct DemoContext {
                 (cat == NavCategory::FieldInputField) ||
                 (cat == NavCategory::FieldTagInput) ||
                 (cat == NavCategory::FieldSelect) ||
+                (cat == NavCategory::FieldMultiSelect) ||
                 (cat == NavCategory::ActionSegmented) ||
                 (cat == NavCategory::FieldColorPicker) ||
                 (cat == NavCategory::FieldDatePicker) ||
@@ -1465,6 +1353,14 @@ void RenderSliderInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderSliderStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateSliderCode(const DemoContext& ctx);
 
+void RenderStepSliderInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderStepSliderStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateStepSliderCode(const DemoContext& ctx);
+
+void RenderRangeSliderInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderRangeSliderStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateRangeSliderCode(const DemoContext& ctx);
+
 void RenderProgressBarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderProgressBarStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateProgressBarCode(const DemoContext& ctx);
@@ -1500,6 +1396,10 @@ keel::String GenerateTagInputCode(const DemoContext& ctx);
 void RenderSelectInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderSelectStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateSelectCode(const DemoContext& ctx);
+
+void RenderMultiSelectInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderMultiSelectStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateMultiSelectCode(const DemoContext& ctx);
 
 void RenderSegmentedInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderSegmentedStage(guikit::Context& ui, DemoContext& ctx);

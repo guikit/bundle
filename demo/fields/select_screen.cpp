@@ -3,6 +3,7 @@
 namespace guikit::demo {
 
 namespace {
+
 inline constexpr keel::StaticArray<keel::StringRef, 8> kPlainItems = {
     "Option Alpha",
     "Option Beta",
@@ -15,15 +16,18 @@ inline constexpr keel::StaticArray<keel::StringRef, 8> kPlainItems = {
 };
 
 struct SelectState {
+    keel::usize modeIdx = 0; // 0 = Select, 1 = ComboBox, 2 = Autocomplete
     keel::usize idx = 0;
     keel::SmallString<128> customText{"Option Alpha"};
     keel::SmallArray<keel::usize, 8> multiSelected = keel::SmallArray<keel::usize, 8>::from({0, 2, 5});
     keel::SmallString<128> placeholder{"Select or search..."};
     keel::u32 maxItems = 5;
+    bool multiSearchable = true;
     bool clearable = true;
     bool richItems = true;
     bool hasPrefix = false;
 };
+
 SelectState s_state;
 
 keel::StaticArray<guikit::SelectItem, 8> BuildRichSelectItems() {
@@ -38,9 +42,8 @@ keel::StaticArray<guikit::SelectItem, 8> BuildRichSelectItems() {
         {.text = "Waterfall Spectrum", .prefix = guikit::Icon::Check(),    .suffix = "RTSA"}
     }};
 }
-} // namespace
 
-void RenderSelectInspector(guikit::Context& ui, DemoContext&) {
+void RenderSharedSelectInspector(guikit::Context& ui) {
     if (auto el = guikit::Element(ui, {.label = "Placeholder"})) {
         if (guikit::InputField(ui, s_state.placeholder, {
             .placeholder = "Select...",
@@ -65,24 +68,46 @@ void RenderSelectInspector(guikit::Context& ui, DemoContext&) {
     }
 }
 
+guikit::SelectOptions BuildBaseSelectOptions(const DemoContext& ctx, NavCategory cat) noexcept {
+    guikit::SelectOptions opts{};
+    opts.placeholder = s_state.placeholder;
+    opts.prefix = s_state.hasPrefix ? guikit::Icon::Search() : guikit::Icon{};
+    opts.maxVisibleItems = s_state.maxItems;
+    opts.align = ctx.GetCtrlAlign(cat);
+    opts.clearable = s_state.clearable;
+    opts.disabled = ctx.elemDisabled;
+    opts.size = ctx.controlsSize;
+    opts.width = ctx.ResolveCtrlWidth();
+    opts.height = ctx.ResolveCtrlHeight();
+    opts.style = ctx.ctrlFieldStyle;
+    opts.status = ctx.ctrlFieldStatus;
+    opts.background = ctx.GetControlBackground(cat);
+    opts.border = ctx.GetCtrlBorder();
+    return opts;
+}
+
+} // namespace
+
+// ============================================================================
+// 1. Select / ComboBox / Autocomplete
+// ============================================================================
+
+void RenderSelectInspector(guikit::Context& ui, DemoContext&) {
+    static constexpr keel::StaticArray<keel::StringRef, 3> kModeNames = {
+        "Select", "ComboBox", "Autocomplete"
+    };
+    if (auto el = guikit::Element(ui, {.label = "Mode"})) {
+        if (guikit::Segmented(ui, s_state.modeIdx, kModeNames).changed) {
+            ui.InvalidateAll();
+        }
+    }
+    RenderSharedSelectInspector(ui);
+}
+
 void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
     ctx.RunElementStage(ui, [&]() {
-        guikit::SelectOptions opts{};
-        opts.placeholder = s_state.placeholder;
-        opts.prefix = s_state.hasPrefix ? guikit::Icon::Search() : guikit::Icon{};
-        opts.maxVisibleItems = s_state.maxItems;
-        opts.align = ctx.GetCtrlAlign(NavCategory::FieldSelect);
-        opts.clearable = s_state.clearable;
-        opts.disabled = ctx.elemDisabled;
-        opts.size = ctx.controlsSize;
-        opts.width = ctx.ResolveCtrlWidth();
-        opts.height = ctx.ResolveCtrlHeight();
-        opts.style = ctx.ctrlFieldStyle;
-        opts.status = ctx.ctrlFieldStatus;
-        opts.background = ctx.GetControlBackground(NavCategory::FieldSelect);
-        opts.border = ctx.GetCtrlBorder();
-
-        const keel::usize mode = ctx.GetDemoVariant(NavCategory::FieldSelect);
+        const guikit::SelectOptions opts = BuildBaseSelectOptions(ctx, NavCategory::FieldSelect);
+        const keel::usize mode = s_state.modeIdx;
         if (mode == 2u && s_state.customText.empty() && s_state.idx < kPlainItems.size()) {
             s_state.customText.assign(kPlainItems[s_state.idx]);
         }
@@ -99,30 +124,21 @@ void RenderSelectStage(guikit::Context& ui, DemoContext& ctx) {
             } else {
                 guikit::ComboBox(ui, s_state.idx, kPlainItems, opts);
             }
-        } else if (mode == 2u) {
+        } else {
             if (s_state.richItems) {
                 guikit::Autocomplete(ui, s_state.customText, richList, opts);
             } else {
                 guikit::Autocomplete(ui, s_state.customText, kPlainItems, opts);
-            }
-        } else {
-            opts.searchable = true;
-            if (s_state.richItems) {
-                guikit::MultiSelect(ui, s_state.multiSelected, richList, opts);
-            } else {
-                guikit::MultiSelect(ui, s_state.multiSelected, kPlainItems, opts);
             }
         }
     });
 }
 
 keel::String GenerateSelectCode(const DemoContext& ctx) {
-    const keel::usize mode = ctx.GetDemoVariant(NavCategory::FieldSelect);
+    const keel::usize mode = s_state.modeIdx;
     const keel::StringRef widgetCall = (mode == 0u)
         ? "Select(ui, presetIndex"
-        : ((mode == 1u)
-            ? "ComboBox(ui, presetIndex"
-            : ((mode == 2u) ? "Autocomplete(ui, customText" : "MultiSelect(ui, selectedIndices"));
+        : ((mode == 1u) ? "ComboBox(ui, presetIndex" : "Autocomplete(ui, customText");
     const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::FieldSelect);
     const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
     const keel::FixedString<64> sizeLine = hasCustomSize
@@ -158,6 +174,72 @@ keel::String GenerateSelectCode(const DemoContext& ctx) {
         FieldStyleEnumName(ctx.ctrlFieldStyle),
         VariantName(ctx.ctrlFieldStatus),
         ctx.FormatControlBackgroundCode(NavCategory::FieldSelect),
+        ctx.FormatCtrlBorderCode()
+    );
+    return ctx.WrapInElementCode(ctrl);
+}
+
+// ============================================================================
+// 2. MultiSelect
+// ============================================================================
+
+void RenderMultiSelectInspector(guikit::Context& ui, DemoContext&) {
+    if (auto el = guikit::Element(ui, {.label = "Searchable Filter"})) {
+        if (guikit::Switch(ui, s_state.multiSearchable).changed) ui.InvalidateAll();
+    }
+    RenderSharedSelectInspector(ui);
+}
+
+void RenderMultiSelectStage(guikit::Context& ui, DemoContext& ctx) {
+    ctx.RunElementStage(ui, [&]() {
+        guikit::SelectOptions opts = BuildBaseSelectOptions(ctx, NavCategory::FieldMultiSelect);
+        opts.searchable = s_state.multiSearchable;
+        const auto richList = BuildRichSelectItems();
+        if (s_state.richItems) {
+            guikit::MultiSelect(ui, s_state.multiSelected, richList, opts);
+        } else {
+            guikit::MultiSelect(ui, s_state.multiSelected, kPlainItems, opts);
+        }
+    });
+}
+
+keel::String GenerateMultiSelectCode(const DemoContext& ctx) {
+    const guikit::Align ctrlAlign = ctx.GetCtrlAlign(NavCategory::FieldMultiSelect);
+    const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
+    const keel::FixedString<64> sizeLine = hasCustomSize
+        ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
+        : keel::FixedString<64>{};
+
+    const keel::String ctrl = keel::format(
+        "guikit::MultiSelect(ui, selectedIndices, itemsList, {{\n"
+        "    .placeholder = \"{}\",\n"
+        "    .prefix = {},\n"
+        "    .maxVisibleItems = {},\n"
+        "    .align = guikit::Align::{},\n"
+        "    .searchable = {},\n"
+        "    .clearable = {},\n"
+        "    .disabled = {},\n"
+        "{}"
+        "    .width = {},\n"
+        "    .height = {},\n"
+        "    .style = guikit::FieldStyle::{},\n"
+        "    .status = guikit::UiVariant::{},\n"
+        "    .background = {},\n"
+        "    .border = {}\n"
+        "}});",
+        s_state.placeholder,
+        s_state.hasPrefix ? "guikit::Icon::Search()" : "{}",
+        s_state.maxItems,
+        AlignName(ctrlAlign),
+        s_state.multiSearchable ? "true" : "false",
+        s_state.clearable ? "true" : "false",
+        ctx.elemDisabled ? "true" : "false",
+        sizeLine,
+        ctx.FormatCtrlWidthCode(),
+        ctx.FormatCtrlHeightCode(),
+        FieldStyleEnumName(ctx.ctrlFieldStyle),
+        VariantName(ctx.ctrlFieldStatus),
+        ctx.FormatControlBackgroundCode(NavCategory::FieldMultiSelect),
         ctx.FormatCtrlBorderCode()
     );
     return ctx.WrapInElementCode(ctrl);

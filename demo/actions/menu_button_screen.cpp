@@ -73,33 +73,31 @@ void RenderMenuButtonStage(guikit::Context& ui, DemoContext& ctx) {
     guikit::ContextMenuOptions menuOpts{};
     menuOpts.minWidth = s_mb.menuMinWidth;
 
-    ctx.RunElementStage(ui, [&]() {
-        if (auto menu = guikit::MenuButton(ui, opts, menuOpts)) {
-            if (menu.Item("Export PNG", {.shortcut = "Ctrl+E", .icon = guikit::Icon::Save()})) {
-                s_mb.lastAction = "Export PNG";
-            }
-            if (menu.Item("Export SVG", {.shortcut = "Ctrl+Shift+E", .icon = guikit::Icon::Copy()})) {
-                s_mb.lastAction = "Export SVG";
-            }
-            if (s_mb.showSubmenu) {
-                if (auto sub = menu.SubMenu("Resolution", {.icon = guikit::Icon::Settings()})) {
-                    if (sub.Radio("1x (72 DPI)", s_mb.dpiIdx, 0, {.keepOpen = true})) s_mb.lastAction = "Resolution = 1x";
-                    if (sub.Radio("2x (Retina)", s_mb.dpiIdx, 1, {.keepOpen = true})) s_mb.lastAction = "Resolution = 2x";
-                    if (sub.Radio("4x (Print)",  s_mb.dpiIdx, 2, {.keepOpen = true})) s_mb.lastAction = "Resolution = 4x";
-                }
-            }
-            menu.Separator();
-            if (menu.Checkbox("Include Grid Overlay", s_mb.includeGrid, {.keepOpen = true})) {
-                s_mb.lastAction = keel::format_fixed<128>("Include Grid = {}", s_mb.includeGrid ? "ON" : "OFF");
-            }
-            menu.Separator();
-            if (menu.Item("Reset Export Presets", {.icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger})) {
-                s_mb.includeGrid = true;
-                s_mb.dpiIdx = 1;
-                s_mb.lastAction = "Reset Export Presets";
+    if (auto menu = guikit::MenuButton(ui, opts, menuOpts)) {
+        if (menu.Item("Export PNG", {.shortcut = "Ctrl+E", .icon = guikit::Icon::Save()})) {
+            s_mb.lastAction = "Export PNG";
+        }
+        if (menu.Item("Export SVG", {.shortcut = "Ctrl+Shift+E", .icon = guikit::Icon::Copy()})) {
+            s_mb.lastAction = "Export SVG";
+        }
+        if (s_mb.showSubmenu) {
+            if (auto sub = menu.SubMenu("Resolution", {.icon = guikit::Icon::Settings()})) {
+                if (sub.Radio("1x (72 DPI)", s_mb.dpiIdx, 0, {.keepOpen = true})) s_mb.lastAction = "Resolution = 1x";
+                if (sub.Radio("2x (Retina)", s_mb.dpiIdx, 1, {.keepOpen = true})) s_mb.lastAction = "Resolution = 2x";
+                if (sub.Radio("4x (Print)",  s_mb.dpiIdx, 2, {.keepOpen = true})) s_mb.lastAction = "Resolution = 4x";
             }
         }
-    });
+        menu.Separator();
+        if (menu.Checkbox("Include Grid Overlay", s_mb.includeGrid, {.keepOpen = true})) {
+            s_mb.lastAction = keel::format_fixed<128>("Include Grid = {}", s_mb.includeGrid ? "ON" : "OFF");
+        }
+        menu.Separator();
+        if (menu.Item("Reset Export Presets", {.icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger})) {
+            s_mb.includeGrid = true;
+            s_mb.dpiIdx = 1;
+            s_mb.lastAction = "Reset Export Presets";
+        }
+    }
 
     guikit::Text(ui, s_mb.lastAction.as_ref(), {
         .role = guikit::TextRole::BodySmall,
@@ -113,7 +111,7 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
         ? keel::format("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::String{};
 
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "if (auto menu = guikit::MenuButton(ui, {{\n"
         "    .text = \"{}\",\n"
         "    .icon = {},\n"
@@ -141,7 +139,6 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
         VariantName(effVar),
         s_mb.menuMinWidth
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

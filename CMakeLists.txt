@@ -128,7 +128,6 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/actions/pagination_screen.cpp
         # 6. FIELDS
         demo/fields/input_screen.cpp
-        demo/fields/code_editor_screen.cpp
         demo/fields/select_screen.cpp
         demo/fields/spin_box_screen.cpp
         demo/fields/date_picker_screen.cpp
@@ -151,6 +150,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/views/table_screen.cpp
         demo/views/tree_view_screen.cpp
         demo/views/markdown_screen.cpp
+        demo/views/code_editor_screen.cpp
         demo/views/image_view_screen.cpp
         demo/views/schematic_screen.cpp
         # 10. MODULES

@@ -4,6 +4,7 @@ namespace guikit::demo {
 
 namespace {
 struct KnobDemoState {
+    keel::usize modeIdx = 0; // 0 = Single Knob, 1 = 4-Knob Strip
     keel::f32 val = 65.0f;
     keel::f32 bipolarVal = 18.0f;
     bool bipolar = false;
@@ -24,6 +25,13 @@ KnobDemoState s_state;
 } // namespace
 
 void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
+    static constexpr keel::StaticArray<keel::StringRef, 2> kModeNames = {"Single Knob", "4-Knob Strip"};
+    if (auto el = guikit::Element(ui, {.label = "Mode"})) {
+        if (guikit::Segmented(ui, s_state.modeIdx, kModeNames).changed) {
+            ui.InvalidateAll();
+        }
+    }
+
     if (auto el = guikit::Element(ui, {
         .label = "Bipolar Center-Zero Sweep",
         .description = "Fill arc from 12 o'clock center (-50..+50)"
@@ -70,7 +78,7 @@ void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
-    const bool rackDemo = (ctx.GetDemoVariant(NavCategory::ControlKnob) == 1u);
+    const bool rackDemo = (s_state.modeIdx == 1u);
     const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
 
     if (rackDemo) {
@@ -97,7 +105,7 @@ void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
                     .layout = guikit::ElementLayout::Top,
                     .align = guikit::Align::Center,
                     .width = guikit::SizeMode::Fit,
-                    .size = ctx.elemSize,
+                    .size = ctx.controlsSize,
                     .disabled = ctx.elemDisabled
                 })) {
                     guikit::Knob(ui, s_state.rackGainDb, -24.0f, 24.0f, {
@@ -122,7 +130,7 @@ void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
                     .layout = guikit::ElementLayout::Top,
                     .align = guikit::Align::Center,
                     .width = guikit::SizeMode::Fit,
-                    .size = ctx.elemSize,
+                    .size = ctx.controlsSize,
                     .disabled = ctx.elemDisabled
                 })) {
                     guikit::Knob(ui, s_state.rackFreqHz, 80.0f, 8000.0f, {
@@ -147,7 +155,7 @@ void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
                     .layout = guikit::ElementLayout::Top,
                     .align = guikit::Align::Center,
                     .width = guikit::SizeMode::Fit,
-                    .size = ctx.elemSize,
+                    .size = ctx.controlsSize,
                     .disabled = ctx.elemDisabled
                 })) {
                     guikit::Knob(ui, s_state.rackResQ, 0.5f, 12.0f, {
@@ -172,7 +180,7 @@ void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
                     .layout = guikit::ElementLayout::Top,
                     .align = guikit::Align::Center,
                     .width = guikit::SizeMode::Fit,
-                    .size = ctx.elemSize,
+                    .size = ctx.controlsSize,
                     .disabled = ctx.elemDisabled
                 })) {
                     guikit::Knob(ui, s_state.rackPan, -50.0f, 50.0f, {

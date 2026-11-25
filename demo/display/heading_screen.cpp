@@ -99,10 +99,7 @@ void RenderHeadingInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {
-        .label = "Width",
-        .badge = {"Stretch", guikit::UiVariant::Secondary}
-    })) {
+    if (auto el = guikit::Element(ui, {.label = "Width"})) {
         if (guikit::Segmented(ui, s_state.widthModeIdx, kAxisModeNames).changed) {
             ui.InvalidateAll();
         }

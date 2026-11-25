@@ -218,48 +218,46 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
 
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Md : ctx.controlsSize;
 
-    ctx.RunElementStage(ui, [&]() {
-        guikit::ReadoutOptions ro{};
-        ro.size = effSize;
-        ro.width = ctx.ResolveCtrlWidth();
-        ro.height = ctx.ResolveCtrlHeight();
-        ro.minWidth = 204.0f;
-        ro.surface = s_state.elevated ? guikit::SurfaceRole::Raised : guikit::SurfaceRole::Flat;
-        ro.disabled = ctx.elemDisabled;
-        ro.maxPrecision = s_state.maxPrecision;
-        ro.allowChannelMenu = s_state.allowChannelMenu;
-        ro.allowPrecisionMenu = s_state.allowPrecisionMenu;
-        ro.allowUnitMenu = s_state.allowUnitMenu;
-        ro.showPlusSign = s_state.showPlusSign;
-        ro.channelMenuTitle = "CHANNEL";
-        ro.precisionMenuTitle = "PRECISION";
-        ro.unitMenuTitle = "UNITS";
+    guikit::ReadoutOptions ro{};
+    ro.size = effSize;
+    ro.width = ctx.ResolveCtrlWidth();
+    ro.height = ctx.ResolveCtrlHeight();
+    ro.minWidth = 204.0f;
+    ro.surface = s_state.elevated ? guikit::SurfaceRole::Raised : guikit::SurfaceRole::Flat;
+    ro.disabled = ctx.elemDisabled;
+    ro.maxPrecision = s_state.maxPrecision;
+    ro.allowChannelMenu = s_state.allowChannelMenu;
+    ro.allowPrecisionMenu = s_state.allowPrecisionMenu;
+    ro.allowUnitMenu = s_state.allowUnitMenu;
+    ro.showPlusSign = s_state.showPlusSign;
+    ro.channelMenuTitle = "CHANNEL";
+    ro.precisionMenuTitle = "PRECISION";
+    ro.unitMenuTitle = "UNITS";
 
-        const auto resp = guikit::Readout(ui, s_state.slot, channels, ro);
-        if (resp.actionClicked) {
-            const keel::i32 ch = s_state.slot.channelIndex;
-            if (ch == 0) {
-                s_state.voltageZeroV = (keel::abs(s_state.voltageZeroV) > 1e-4) ? 0.0 : rawVoltageV;
-            } else if (ch == 1) {
-                s_state.currentZeroA = (keel::abs(s_state.currentZeroA) > 1e-4) ? 0.0 : rawCurrentA;
-            } else if (ch == 2) {
-                s_state.powerZeroW = (keel::abs(s_state.powerZeroW) > 1e-4) ? 0.0 : rawPowerW;
-            } else if (ch == 4) {
-                s_state.tempZeroC = (keel::abs(s_state.tempZeroC) > 1e-4) ? 0.0 : rawTempC;
-            }
-            guikit::ShowToast(ui, {
-                .title = "Relative Zero Updated",
-                .message = channels[keel::as<keel::usize>(ch)].label,
-                .variant = guikit::UiVariant::Success
-            });
-            ui.InvalidateAll();
+    const auto resp = guikit::Readout(ui, s_state.slot, channels, ro);
+    if (resp.actionClicked) {
+        const keel::i32 ch = s_state.slot.channelIndex;
+        if (ch == 0) {
+            s_state.voltageZeroV = (keel::abs(s_state.voltageZeroV) > 1e-4) ? 0.0 : rawVoltageV;
+        } else if (ch == 1) {
+            s_state.currentZeroA = (keel::abs(s_state.currentZeroA) > 1e-4) ? 0.0 : rawCurrentA;
+        } else if (ch == 2) {
+            s_state.powerZeroW = (keel::abs(s_state.powerZeroW) > 1e-4) ? 0.0 : rawPowerW;
+        } else if (ch == 4) {
+            s_state.tempZeroC = (keel::abs(s_state.tempZeroC) > 1e-4) ? 0.0 : rawTempC;
         }
-    });
+        guikit::ShowToast(ui, {
+            .title = "Relative Zero Updated",
+            .message = channels[keel::as<keel::usize>(ch)].label,
+            .variant = guikit::UiVariant::Success
+        });
+        ui.InvalidateAll();
+    }
 }
 
 keel::String GenerateReadoutCode(const DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Md : ctx.controlsSize;
-    const keel::String ctrl = keel::format(
+    return keel::format(
         "static constexpr guikit::ReadoutUnit kVoltageUnits[] = {{\n"
         "    {{.label = \"mV\", .factor = 1000.0}},\n"
         "    {{.label = \"V\",  .factor = 1.0}},\n"
@@ -274,16 +272,17 @@ keel::String GenerateReadoutCode(const DemoContext& ctx) {
         "    .size = guikit::UiSize::{},\n"
         "    .minWidth = 204.0f,\n"
         "    .surface = guikit::SurfaceRole::{},\n"
+        "    .disabled = {},\n"
         "    .maxPrecision = {},\n"
         "    .showPlusSign = {}\n"
         "}});\n"
         "if (resp.actionClicked) {{ ZeroChannel(slotState.channelIndex); }}",
         SizeName(effSize),
         s_state.elevated ? "Raised" : "Flat",
+        ctx.elemDisabled ? "true" : "false",
         s_state.maxPrecision,
         s_state.showPlusSign ? "true" : "false"
     );
-    return ctx.WrapInElementCode(ctrl);
 }
 
 } // namespace guikit::demo

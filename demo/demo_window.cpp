@@ -163,8 +163,8 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
 
             menu.Section("FIELDS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldInputField),    {.text = "InputField",   .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldTextArea),      {.text = "TextArea",     .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldMultiSelect),   {.text = "MultiSelect",  .icon = guikit::Icon::Plus()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldDatePicker),    {.text = "DatePicker",   .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
@@ -175,6 +175,8 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlRadio),       {.text = "Radio",        .icon = guikit::Icon::Check()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlSwitch),      {.text = "Switch",       .icon = guikit::Icon::Refresh()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlSlider),      {.text = "Slider",       .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlStepSlider),  {.text = "StepSlider",   .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlRangeSlider), {.text = "RangeSlider",  .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlKnob),        {.text = "Knob",         .icon = guikit::Icon::Refresh()});
 
             menu.Section("DISPLAY");
@@ -189,6 +191,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewTable),          {.text = "Table",        .icon = guikit::Icon::Copy()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewTreeView),       {.text = "TreeView",     .icon = guikit::Icon::Folder()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewMarkdown),       {.text = "Markdown",     .icon = guikit::Icon::Edit()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewCodeEditor),     {.text = "Code Editor",  .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewImageView),      {.text = "Image View",   .icon = guikit::Icon::Eye()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ViewSchematic2D),    {.text = "Schematic 2D", .icon = guikit::Icon::Search()});
 
@@ -238,28 +241,13 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
             }
         } else {
             m_demoCtx.RenderDemoVariantSelector(ui, m_selectedCategory);
+            m_demoCtx.RenderElementPresetSelector(ui, m_selectedCategory);
 
             if (IsControlCategory(m_selectedCategory)) {
-                if (auto elemAcc = guikit::Accordion(ui, {
-                    .label = "ELEMENT",
-                    .defaultOpen = false,
-                    .size = guikit::UiSize::Sm
-                })) {
-                    m_demoCtx.RenderElementSection(ui);
-                }
-
-                if (auto elemLayoutAcc = guikit::Accordion(ui, {
-                    .label = "ELEMENT LAYOUT",
-                    .defaultOpen = false,
-                    .size = guikit::UiSize::Sm
-                })) {
-                    m_demoCtx.RenderElementLayoutSection(ui, m_selectedCategory);
-                }
-
                 const bool hasCtrlLayout = DemoContext::HasCtrlLayoutCategory(m_selectedCategory);
                 bool collapsedOpen = false;
                 guikit::AccordionOptions ctrlLayoutAccOpts{
-                    .label = "CONTROL LAYOUT",
+                    .label = "LAYOUT",
                     .defaultOpen = false,
                     .size = guikit::UiSize::Sm,
                     .disabled = !hasCtrlLayout
@@ -275,7 +263,7 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
                 }
 
                 if (auto ctrlStyleAcc = guikit::Accordion(ui, {
-                    .label = "CONTROL STYLE",
+                    .label = "STYLE",
                     .defaultOpen = false,
                     .size = guikit::UiSize::Sm
                 })) {
@@ -283,7 +271,7 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
                 }
 
                 if (auto specAcc = guikit::Accordion(ui, {
-                    .label = "CONTROL SPECIFIC",
+                    .label = "SPECIFIC",
                     .badge = {CategoryControlName(m_selectedCategory), guikit::UiVariant::Secondary},
                     .defaultOpen = true,
                     .size = guikit::UiSize::Sm
@@ -642,8 +630,8 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderPaginationInspector,
         // 6. FIELDS
         &RenderInputInspector,
-        &RenderCodeEditorInspector,
         &RenderSelectInspector,
+        &RenderMultiSelectInspector,
         &RenderSpinBoxInspector,
         &RenderDatePickerInspector,
         &RenderTagInputInspector,
@@ -653,6 +641,8 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderRadioInspector,
         &RenderSwitchInspector,
         &RenderSliderInspector,
+        &RenderStepSliderInspector,
+        &RenderRangeSliderInspector,
         &RenderKnobInspector,
         // 8. DISPLAY
         &RenderHeadingInspector,
@@ -665,6 +655,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderTableInspector,
         &RenderTreeViewInspector,
         &RenderMarkdownInspector,
+        &RenderCodeEditorInspector,
         &RenderImageViewInspector,
         &RenderSchematicInspector,
     };
@@ -710,8 +701,8 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderPaginationStage,
         // 6. FIELDS
         &RenderInputStage,
-        &RenderCodeEditorStage,
         &RenderSelectStage,
+        &RenderMultiSelectStage,
         &RenderSpinBoxStage,
         &RenderDatePickerStage,
         &RenderTagInputStage,
@@ -721,6 +712,8 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderRadioStage,
         &RenderSwitchStage,
         &RenderSliderStage,
+        &RenderStepSliderStage,
+        &RenderRangeSliderStage,
         &RenderKnobStage,
         // 8. DISPLAY
         &RenderHeadingStage,
@@ -733,6 +726,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderTableStage,
         &RenderTreeViewStage,
         &RenderMarkdownStage,
+        &RenderCodeEditorStage,
         &RenderImageViewStage,
         &RenderSchematicStage,
     };
@@ -778,8 +772,8 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GeneratePaginationCode,
         // 6. FIELDS
         &GenerateInputCode,
-        &GenerateCodeEditorCode,
         &GenerateSelectCode,
+        &GenerateMultiSelectCode,
         &GenerateSpinBoxCode,
         &GenerateDatePickerCode,
         &GenerateTagInputCode,
@@ -789,6 +783,8 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateRadioCode,
         &GenerateSwitchCode,
         &GenerateSliderCode,
+        &GenerateStepSliderCode,
+        &GenerateRangeSliderCode,
         &GenerateKnobCode,
         // 8. DISPLAY
         &GenerateHeadingCode,
@@ -801,6 +797,7 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateTableCode,
         &GenerateTreeViewCode,
         &GenerateMarkdownCode,
+        &GenerateCodeEditorCode,
         &GenerateImageViewCode,
         &GenerateSchematicCode,
     };

@@ -1122,16 +1122,10 @@ struct DemoContext {
         }
     }
 
-    void RenderElementLayoutSection(guikit::Context& ui, NavCategory cat) {
+    void RenderElementLayoutSection(guikit::Context& ui, NavCategory /*cat*/) {
         const bool hasExternal = HasElementExternal();
-        const auto explicitLayout = ResolveElemLayout();
-        const guikit::ElementLayout effLayout = explicitLayout.value_or(DefaultElemLayout(cat));
         if (auto el = guikit::Element(ui, {
             .label = "Layout",
-            .badge = {
-                ElementLayoutEnumName(effLayout),
-                explicitLayout.has_value() ? guikit::UiVariant::Primary : guikit::UiVariant::Secondary
-            },
             .disabled = !hasExternal
         })) {
             if (guikit::Select(ui, elemLayoutIdx, kElemLayoutNames, {

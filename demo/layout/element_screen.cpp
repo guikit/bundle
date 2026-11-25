@@ -22,25 +22,18 @@ struct ElementStudioState {
     bool disabled = false;
 
     // Interactive slot state
-    keel::SmallString<128> endpointHost{"192.168.10.42:5005"};
+    keel::SmallString<128> textValue{"Sample value"};
     bool switchEnabled = true;
-    keel::SmallString<128> searchQuery{"fft_window_kaiser"};
+    keel::SmallString<128> searchQuery{"Sample query"};
     keel::u32 triggerCount = 0;
 };
 
 ElementStudioState s_state;
 
-constexpr keel::StringRef kSampleLabel = "Signal Processing Stage";
+constexpr keel::StringRef kSampleLabel = "Element Label";
 constexpr keel::StringRef kSampleDesc =
-    "Attenuates high-frequency carrier harmonics above cutoff (-24 dB/oct)";
-constexpr keel::StringRef kSampleBadge = "DSP";
-
-constexpr guikit::ElementLayout DefaultSlotLayout(ElementSlotPreset preset) noexcept {
-    if (preset == ElementSlotPreset::Switch) {
-        return guikit::ElementLayout::Trailing;
-    }
-    return guikit::ElementLayout::Stacked;
-}
+    "Helper description explaining the control or setting";
+constexpr keel::StringRef kSampleBadge = "Badge";
 
 keel::Optional<guikit::ElementLayout> ResolveExplicitLayout() noexcept {
     switch (s_state.layoutIdx) {
@@ -63,7 +56,7 @@ guikit::ElementOptions BuildElementOptions() noexcept {
         .description = s_state.showDescription
             ? guikit::UiText{kSampleDesc, guikit::UiVariant::Muted, guikit::TextWrap::Word()}
             : guikit::UiText{},
-        .icon = s_state.showIconAndBadge ? guikit::Icon::Flash() : guikit::Icon{},
+        .icon = s_state.showIconAndBadge ? guikit::Icon::Settings() : guikit::Icon{},
         .badge = s_state.showIconAndBadge
             ? guikit::UiText{kSampleBadge, guikit::UiVariant::Primary}
             : guikit::UiText{},
@@ -78,8 +71,8 @@ guikit::ElementOptions BuildElementOptions() noexcept {
 void RenderSlotControl(guikit::Context& ui, ElementSlotPreset preset) {
     switch (preset) {
         case ElementSlotPreset::InputField: {
-            guikit::InputField(ui, s_state.endpointHost, {
-                .placeholder = "host:port",
+            guikit::InputField(ui, s_state.textValue, {
+                .placeholder = "Enter value...",
                 .clearable = true
             });
             break;
@@ -91,7 +84,7 @@ void RenderSlotControl(guikit::Context& ui, ElementSlotPreset preset) {
         case ElementSlotPreset::CompositeRow: {
             if (auto row = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {
                 guikit::InputField(ui, s_state.searchQuery, {
-                    .placeholder = "Filter symbol...",
+                    .placeholder = "Filter items...",
                     .prefix = {guikit::Icon::Search()},
                     .clearable = true
                 });
@@ -113,14 +106,14 @@ keel::String FormatSlotControlCode(ElementSlotPreset preset) {
     switch (preset) {
         case ElementSlotPreset::InputField:
             return keel::String::from(
-                "guikit::InputField(ui, endpointHost, {.placeholder = \"host:port\", .clearable = true});"
+                "guikit::InputField(ui, textValue, {.placeholder = \"Enter value...\", .clearable = true});"
             );
         case ElementSlotPreset::Switch:
             return keel::String::from("guikit::Switch(ui, enabled);");
         case ElementSlotPreset::CompositeRow:
             return keel::String::from(
                 "if (auto row = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {\n"
-                "    guikit::InputField(ui, searchQuery, {.placeholder = \"Filter symbol...\", .prefix = {guikit::Icon::Search()}, .clearable = true});\n"
+                "    guikit::InputField(ui, searchQuery, {.placeholder = \"Filter items...\", .prefix = {guikit::Icon::Search()}, .clearable = true});\n"
                 "    guikit::Button(ui, {.text = \"Apply\", .variant = guikit::UiVariant::Primary});\n"
                 "}"
             );
@@ -132,17 +125,8 @@ keel::String FormatSlotControlCode(ElementSlotPreset preset) {
 
 } // namespace
 
-void RenderElementInspector(guikit::Context& ui, DemoContext& ctx) {
-    const auto slotPreset = keel::from_underlying<ElementSlotPreset>(ctx.GetDemoVariant(NavCategory::LayoutElement));
-    const auto explicitLayout = ResolveExplicitLayout();
-    const guikit::ElementLayout effLayout = explicitLayout.value_or(DefaultSlotLayout(slotPreset));
-    if (auto el = guikit::Element(ui, {
-        .label = "Layout",
-        .badge = {
-            ElementLayoutEnumName(effLayout),
-            explicitLayout.has_value() ? guikit::UiVariant::Primary : guikit::UiVariant::Secondary
-        }
-    })) {
+void RenderElementInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
+    if (auto el = guikit::Element(ui, {.label = "Layout"})) {
         if (guikit::Select(ui, s_state.layoutIdx, kElemLayoutNames).changed) {
             ui.InvalidateAll();
         }
@@ -221,10 +205,10 @@ keel::String GenerateElementCode(const DemoContext& ctx) {
         keel::format_into(elemOpen, ",\n    .description = \"{}\"", kSampleDesc);
     }
     if (s_state.showIconAndBadge) {
-        elemOpen.append(",\n    .icon = guikit::Icon::Flash()");
+        elemOpen.append(",\n    .icon = guikit::Icon::Settings()");
         keel::format_into(
             elemOpen,
-            ",\n    .badge = {{\"{}\", guikit::StateColor::Primary()}}",
+            ",\n    .badge = {{\"{}\", guikit::UiVariant::Primary}}",
             kSampleBadge
         );
     }

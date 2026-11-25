@@ -11,10 +11,10 @@ struct PopoverDemoState {
     keel::f32 offset = 6.0f;
     bool closeOutside = true;
     bool closeEscape = true;
-    bool filterShowPeaks = true;
-    bool filterAutoScale = true;
-    keel::f32 filterGainDb = 12.0f;
-    keel::FixedString<128> lastStatus = "Click \"Stream Filters\" to open Popover";
+    bool showGrid = true;
+    bool autoFit = true;
+    keel::f32 opacityPct = 85.0f;
+    keel::FixedString<128> lastStatus = "Click \"Display Options\" to open Popover";
 };
 
 PopoverDemoState s_pop;
@@ -56,7 +56,7 @@ void RenderPopoverStage(guikit::Context& ui, DemoContext&) {
         .justify = guikit::Justify::Center
     })) {
         const auto popBtn = guikit::Button(ui, {
-            .text = "Stream Filters",
+            .text = "Display Options",
             .icon = guikit::Icon::ChevronDown(),
             .iconPlacement = guikit::Placement::Trailing,
             .active = s_pop.open,
@@ -80,20 +80,20 @@ void RenderPopoverStage(guikit::Context& ui, DemoContext&) {
                 .surface = guikit::SurfaceRole::Raised
             })) {
                 guikit::Heading(ui, {
-                    .label = "Stream Filters",
+                    .label = "Display Options",
                     .level = guikit::HeadingLevel::H5,
                     .separator = guikit::HeadingSeparator::Bottom
                 });
-                if (auto el = guikit::Element(ui, {.label = "Show Peak Markers"})) {
-                    guikit::Switch(ui, s_pop.filterShowPeaks, {.size = guikit::UiSize::Sm});
+                if (auto el = guikit::Element(ui, {.label = "Show Grid Lines"})) {
+                    guikit::Switch(ui, s_pop.showGrid, {.size = guikit::UiSize::Sm});
                 }
-                if (auto el = guikit::Element(ui, {.label = "Auto-Scale Y Axis"})) {
-                    guikit::Switch(ui, s_pop.filterAutoScale, {.size = guikit::UiSize::Sm});
+                if (auto el = guikit::Element(ui, {.label = "Auto-Fit Content"})) {
+                    guikit::Switch(ui, s_pop.autoFit, {.size = guikit::UiSize::Sm});
                 }
-                if (auto el = guikit::Element(ui, {.label = "Gain Offset"})) {
-                    guikit::Slider(ui, s_pop.filterGainDb, -12.0f, 24.0f, {
-                        .valueFormat = "%.1f dB",
-                        .step = 0.5f,
+                if (auto el = guikit::Element(ui, {.label = "Overlay Opacity"})) {
+                    guikit::Slider(ui, s_pop.opacityPct, 0.0f, 100.0f, {
+                        .valueFormat = "%.0f%%",
+                        .step = 5.0f,
                         .size = guikit::UiSize::Sm
                     });
                 }
@@ -103,9 +103,9 @@ void RenderPopoverStage(guikit::Context& ui, DemoContext&) {
                         .size = guikit::UiSize::Sm,
                         .style = guikit::ButtonStyle::Ghost
                     }).clicked) {
-                        s_pop.filterShowPeaks = true;
-                        s_pop.filterAutoScale = true;
-                        s_pop.filterGainDb = 12.0f;
+                        s_pop.showGrid = true;
+                        s_pop.autoFit = true;
+                        s_pop.opacityPct = 85.0f;
                     }
                     if (guikit::Button(ui, {
                         .text = "Done",
@@ -113,10 +113,10 @@ void RenderPopoverStage(guikit::Context& ui, DemoContext&) {
                         .variant = guikit::UiVariant::Primary
                     }).clicked) {
                         s_pop.lastStatus = keel::format_fixed<128>(
-                            "Peaks={} | AutoScale={} | Gain={:.1f} dB",
-                            s_pop.filterShowPeaks ? "On" : "Off",
-                            s_pop.filterAutoScale ? "On" : "Off",
-                            s_pop.filterGainDb
+                            "Grid={} | AutoFit={} | Opacity={:.0f}%",
+                            s_pop.showGrid ? "On" : "Off",
+                            s_pop.autoFit ? "On" : "Off",
+                            s_pop.opacityPct
                         );
                         pop.Close();
                     }
@@ -137,7 +137,7 @@ keel::String GeneratePopoverCode(const DemoContext&) {
     const keel::StringRef placeName = kPopoverPlacementNames[s_pop.placementIdx];
     return keel::format(
         "const auto popBtn = guikit::Button(ui, {{\n"
-        "    .text = \"Stream Filters\",\n"
+        "    .text = \"Display Options\",\n"
         "    .icon = guikit::Icon::ChevronDown(),\n"
         "    .iconPlacement = guikit::Placement::Trailing,\n"
         "    .active = popoverOpen,\n"
@@ -159,10 +159,10 @@ keel::String GeneratePopoverCode(const DemoContext&) {
         "        .padding = guikit::Padding::All(14.0f),\n"
         "        .surface = guikit::SurfaceRole::Raised\n"
         "    }})) {{\n"
-        "        guikit::Heading(ui, {{.label = \"Stream Filters\", .level = guikit::HeadingLevel::H5, .separator = guikit::HeadingSeparator::Bottom}});\n"
-        "        if (auto el = guikit::Element(ui, {{.label = \"Show Peak Markers\"}})) {{ guikit::Switch(ui, showPeaks, {{.size = guikit::UiSize::Sm}}); }}\n"
-        "        if (auto el = guikit::Element(ui, {{.label = \"Auto-Scale Y Axis\"}})) {{ guikit::Switch(ui, autoScale, {{.size = guikit::UiSize::Sm}}); }}\n"
-        "        if (auto el = guikit::Element(ui, {{.label = \"Gain Offset\"}})) {{ guikit::Slider(ui, gainDb, -12.0f, 24.0f, {{.valueFormat = \"%.1f dB\", .size = guikit::UiSize::Sm}}); }}\n"
+        "        guikit::Heading(ui, {{.label = \"Display Options\", .level = guikit::HeadingLevel::H5, .separator = guikit::HeadingSeparator::Bottom}});\n"
+        "        if (auto el = guikit::Element(ui, {{.label = \"Show Grid Lines\"}})) {{ guikit::Switch(ui, showGrid, {{.size = guikit::UiSize::Sm}}); }}\n"
+        "        if (auto el = guikit::Element(ui, {{.label = \"Auto-Fit Content\"}})) {{ guikit::Switch(ui, autoFit, {{.size = guikit::UiSize::Sm}}); }}\n"
+        "        if (auto el = guikit::Element(ui, {{.label = \"Overlay Opacity\"}})) {{ guikit::Slider(ui, opacityPct, 0.0f, 100.0f, {{.valueFormat = \"%.0f%%\", .size = guikit::UiSize::Sm}}); }}\n"
         "        if (guikit::Button(ui, {{.text = \"Done\", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary}}).clicked) {{\n"
         "            pop.Close();\n"
         "        }}\n"

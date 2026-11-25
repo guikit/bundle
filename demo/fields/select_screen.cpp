@@ -5,20 +5,20 @@ namespace guikit::demo {
 namespace {
 
 inline constexpr keel::StaticArray<keel::StringRef, 8> kPlainItems = {
-    "Option Alpha",
-    "Option Beta",
-    "Option Gamma",
-    "Option Delta",
-    "Option Epsilon",
-    "Signal Harmonic",
-    "Sonar Beamformer",
-    "Waterfall Spectrum"
+    "Dashboard",
+    "Projects",
+    "Documents",
+    "Analytics",
+    "Notifications",
+    "Integrations",
+    "Preferences",
+    "Security"
 };
 
 struct SelectState {
     keel::usize modeIdx = 0; // 0 = Select, 1 = ComboBox, 2 = Autocomplete
     keel::usize idx = 0;
-    keel::SmallString<128> customText{"Option Alpha"};
+    keel::SmallString<128> customText{"Dashboard"};
     keel::SmallArray<keel::usize, 8> multiSelected = keel::SmallArray<keel::usize, 8>::from({0, 2, 5});
     keel::SmallString<128> placeholder{"Select or search..."};
     keel::u32 maxItems = 5;
@@ -32,14 +32,14 @@ SelectState s_state;
 
 keel::StaticArray<guikit::SelectItem, 8> BuildRichSelectItems() {
     return {{
-        {.text = "Option Alpha",       .prefix = guikit::Icon::Play(),     .suffix = "100 Hz"},
-        {.text = "Option Beta",        .prefix = guikit::Icon::Settings(), .suffix = "250 Hz"},
-        {.text = "Option Gamma",       .prefix = guikit::Icon::Flash(),    .suffix = "500 Hz"},
-        {.text = "Option Delta",       .prefix = guikit::Icon::Search(),   .suffix = "1.0 kHz"},
-        {.text = "Option Epsilon",     .prefix = guikit::Icon::Eye(),      .suffix = "2.4 kHz"},
-        {.text = "Signal Harmonic",    .prefix = guikit::Icon::Refresh(),  .suffix = "DSP"},
-        {.text = "Sonar Beamformer",   .prefix = guikit::Icon::Folder(),   .suffix = "DDS"},
-        {.text = "Waterfall Spectrum", .prefix = guikit::Icon::Check(),    .suffix = "RTSA"}
+        {.text = "Dashboard",     .prefix = guikit::Icon::Play(),     .suffix = "Home"},
+        {.text = "Projects",      .prefix = guikit::Icon::Folder(),   .suffix = "12"},
+        {.text = "Documents",     .prefix = guikit::Icon::Edit(),     .suffix = "Docs"},
+        {.text = "Analytics",     .prefix = guikit::Icon::Search(),   .suffix = "Live"},
+        {.text = "Notifications", .prefix = guikit::Icon::Flash(),    .suffix = "3 new"},
+        {.text = "Integrations",  .prefix = guikit::Icon::Refresh(),  .suffix = "API"},
+        {.text = "Preferences",   .prefix = guikit::Icon::Settings(), .suffix = "App"},
+        {.text = "Security",      .prefix = guikit::Icon::Check(),    .suffix = "2FA"}
     }};
 }
 
@@ -60,7 +60,7 @@ void RenderSharedSelectInspector(guikit::Context& ui) {
     if (auto el = guikit::Element(ui, {.label = "Clearable (X Button)"})) {
         if (guikit::Switch(ui, s_state.clearable).changed) ui.InvalidateAll();
     }
-    if (auto el = guikit::Element(ui, {.label = "Rich Items (Icons & Units)"})) {
+    if (auto el = guikit::Element(ui, {.label = "Rich Items (Icons & Hints)"})) {
         if (guikit::Switch(ui, s_state.richItems).changed) ui.InvalidateAll();
     }
     if (auto el = guikit::Element(ui, {.label = "Default Prefix Icon"})) {

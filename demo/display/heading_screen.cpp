@@ -18,9 +18,9 @@ struct HeadingStudioState {
 
 HeadingStudioState s_state;
 
-constexpr keel::StringRef kSampleTitle = "Signal Processing Pipeline";
+constexpr keel::StringRef kSampleTitle = "Workspace Overview";
 constexpr keel::StringRef kSampleSubtitle =
-    "Real-time polyphase filterbank & quadrature demodulator";
+    "Manage layout regions, appearance tokens, and active modules";
 constexpr keel::StringRef kSampleBadge = "v3.2";
 
 constexpr keel::StringRef LevelCodeName(guikit::HeadingLevel lvl) noexcept {

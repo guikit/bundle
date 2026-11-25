@@ -330,11 +330,11 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                     })) {
                         bpTb.Item(s_state.bottomTabIdx, 0, {.text = "Output", .icon = guikit::Icon::Play()});
                         bpTb.Item(s_state.bottomTabIdx, 1, {
-                            .text = "Diagnostics",
+                            .text = "Problems",
                             .icon = guikit::Icon::Warning(),
                             .badge = s_state.showBadges ? "2" : ""
                         });
-                        bpTb.Item(s_state.bottomTabIdx, 2, {.text = "Cross-Section 2D", .icon = guikit::Icon::Eye()});
+                        bpTb.Item(s_state.bottomTabIdx, 2, {.text = "Preview", .icon = guikit::Icon::Eye()});
                         bpTb.Spacer();
                         guikit::Text(ui, ui.Format("H: {:.0f}px", bp.Height()), {
                             .role = guikit::TextRole::LabelSmall,
@@ -358,9 +358,9 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                         .padding = guikit::Padding::All(10.0f)
                     })) {
                         static constexpr keel::StaticArray<keel::StringRef, 3> tabContents = {
-                            "[CUDA Solver] Completed 2D acoustic ray trace (0.99 km, depth 24.5 m) in 14.2 ms.",
-                            "[Warn] 2 boundary reflections attenuated below -65 dB threshold.",
-                            "[Slice 2D] Drag the top border of this BottomPanel up/down to resize the cross-section viewport."
+                            "[Build] Workspace compiled cleanly (0 warnings, 0 errors) in 142 ms.",
+                            "[Warn] 2 layout rules adjusted to fit narrow viewport width.",
+                            "[Preview] Drag the top border of this BottomPanel up/down to resize the panel."
                         };
                         guikit::Text(ui, tabContents[keel::as<keel::usize>(keel::clamp(s_state.bottomTabIdx, 0, 2))], {
                             .role = guikit::TextRole::BodySmall,
@@ -485,7 +485,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
             "        tb.Spacer();\n"
             "        if (tb.Action({{.icon = guikit::Icon::Close(), .square = true}}).clicked) showBottomPanel = false;\n"
             "    }}\n"
-            "    // Bottom panel content (charts, logs, 2D slice view)\n"
+            "    // Bottom panel content (charts, logs, preview pane)\n"
             "}}",
             s_state.resizable ? "true" : "false",
             s_state.allowCollapse ? "true" : "false"

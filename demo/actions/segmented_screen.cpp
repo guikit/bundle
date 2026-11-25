@@ -73,28 +73,28 @@ void RenderSegmentedInspector(guikit::Context& ui, DemoContext&) {
 void RenderSegmentedStage(guikit::Context& ui, DemoContext& ctx) {
     const keel::StaticArray<guikit::SegmentedItem, 4> items = {{
         {
-            .text = s_state.showText ? "Sine" : "",
-            .icon = s_state.showIcons ? guikit::Icon::Refresh() : guikit::Icon{},
+            .text = s_state.showText ? "Overview" : "",
+            .icon = s_state.showIcons ? guikit::Icon::Eye() : guikit::Icon{},
             .iconPlacement = s_state.iconPlacement,
-            .tooltip = "Pure sinusoidal carrier"
+            .tooltip = "Summary overview layout"
         },
         {
-            .text = s_state.showText ? "Square" : "",
-            .icon = s_state.showIcons ? guikit::Icon::Settings() : guikit::Icon{},
+            .text = s_state.showText ? "Editor" : "",
+            .icon = s_state.showIcons ? guikit::Icon::Edit() : guikit::Icon{},
             .iconPlacement = s_state.iconPlacement,
-            .tooltip = "50% duty cycle pulse train"
+            .tooltip = "Interactive document editor"
         },
         {
-            .text = s_state.showText ? "Sawtooth" : "",
+            .text = s_state.showText ? "Preview" : "",
             .icon = s_state.showIcons ? guikit::Icon::Play() : guikit::Icon{},
             .iconPlacement = s_state.iconPlacement,
-            .tooltip = "Linear ramp waveform"
+            .tooltip = "Live rendered preview"
         },
         {
-            .text = s_state.showText ? "Noise" : "",
-            .icon = s_state.showIcons ? guikit::Icon::Warning() : guikit::Icon{},
+            .text = s_state.showText ? "Archive" : "",
+            .icon = s_state.showIcons ? guikit::Icon::Folder() : guikit::Icon{},
             .iconPlacement = s_state.iconPlacement,
-            .tooltip = "Wideband AWGN generator",
+            .tooltip = "Archived revisions",
             .disabled = s_state.disableLastSegment
         }
     }};
@@ -128,10 +128,10 @@ keel::String GenerateSegmentedCode(const DemoContext& ctx) {
 
     return keel::format(
         "guikit::{}(ui, {}, {{\n"
-        "    {{.text = \"Sine\", .icon = guikit::Icon::Refresh()}},\n"
-        "    {{.text = \"Square\", .icon = guikit::Icon::Settings()}},\n"
-        "    {{.text = \"Sawtooth\", .icon = guikit::Icon::Play()}},\n"
-        "    {{.text = \"Noise\", .icon = guikit::Icon::Warning(), .disabled = {}}}\n"
+        "    {{.text = \"Overview\", .icon = guikit::Icon::Eye()}},\n"
+        "    {{.text = \"Editor\", .icon = guikit::Icon::Edit()}},\n"
+        "    {{.text = \"Preview\", .icon = guikit::Icon::Play()}},\n"
+        "    {{.text = \"Archive\", .icon = guikit::Icon::Folder(), .disabled = {}}}\n"
         "}}, {{\n"
         "    .equalWidth = {},\n"
         "    .showDividers = {},\n"

@@ -4,7 +4,6 @@ namespace guikit::demo {
 
 namespace {
 struct KnobDemoState {
-    keel::usize modeIdx = 0; // 0 = Single Knob, 1 = 4-Knob Strip
     keel::f32 val = 65.0f;
     keel::f32 bipolarVal = 18.0f;
     bool bipolar = false;
@@ -14,24 +13,11 @@ struct KnobDemoState {
     keel::u32 tickCount = 11;
     bool showValue = true;
     guikit::Placement valuePlacement = guikit::Placement::Bottom;
-
-    // 4-Knob Rack Strip state
-    keel::f32 rackGainDb = 3.5f;
-    keel::f32 rackFreqHz = 1250.0f;
-    keel::f32 rackResQ = 2.4f;
-    keel::f32 rackPan = -15.0f;
 };
 KnobDemoState s_state;
 } // namespace
 
 void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
-    static constexpr keel::StaticArray<keel::StringRef, 2> kModeNames = {"Single Knob", "4-Knob Strip"};
-    if (auto el = guikit::Element(ui, {.label = "Mode"})) {
-        if (guikit::Segmented(ui, s_state.modeIdx, kModeNames).changed) {
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {
         .label = "Bipolar Center-Zero Sweep",
         .description = "Fill arc from 12 o'clock center (-50..+50)"
@@ -78,131 +64,7 @@ void RenderKnobInspector(guikit::Context& ui, DemoContext&) {
 }
 
 void RenderKnobStage(guikit::Context& ui, DemoContext& ctx) {
-    const bool rackDemo = (s_state.modeIdx == 1u);
     const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
-
-    if (rackDemo) {
-        if (auto card = guikit::Card(ui, {
-            .gap = 16.0f,
-            .padding = guikit::Padding::All(18.0f),
-            .border = {.width = 1.0f, .radius = 10.0f}
-        })) {
-            guikit::Heading(ui, {
-                .label = "PARAMETRIC CHANNEL STRIP — VFO / EQ",
-                .description = "Drag vertically/horizontally (Shift = fine, Wheel = step, Double-Click = reset)",
-                .badge = {"DSP", guikit::StateColor::Primary()},
-                .level = guikit::HeadingLevel::H5,
-                .separator = guikit::HeadingSeparator::Bottom
-            });
-            if (auto row = guikit::Row(ui, {
-                .gap = 24.0f,
-                .align = guikit::Alignment::Center,
-                .justify = guikit::Justify::SpaceBetween
-            })) {
-                if (auto el = guikit::Element(ui, {
-                    .label = "Input Gain",
-                    .description = "Preamp trim",
-                    .layout = guikit::ElementLayout::Top,
-                    .align = guikit::Align::Center,
-                    .width = guikit::SizeMode::Fit,
-                    .size = ctx.controlsSize,
-                    .disabled = ctx.elemDisabled
-                })) {
-                    guikit::Knob(ui, s_state.rackGainDb, -24.0f, 24.0f, {
-                        .valueFormat = "%+.1f dB",
-                        .step = 0.5,
-                        .defaultValue = 0.0,
-                        .tickCount = s_state.tickCount,
-                        .showValue = s_state.showValue,
-                        .showTicks = s_state.showTicks,
-                        .showArc = s_state.showArc,
-                        .bipolar = true,
-                        .valuePlacement = s_state.valuePlacement,
-                        .diameter = ctx.ResolveKnobDiameter(),
-                        .disabled = ctx.elemDisabled,
-                        .size = ctx.controlsSize,
-                        .color = guikit::StateColor::Primary()
-                    });
-                }
-                if (auto el = guikit::Element(ui, {
-                    .label = "Cutoff Freq",
-                    .description = "Low-pass filter",
-                    .layout = guikit::ElementLayout::Top,
-                    .align = guikit::Align::Center,
-                    .width = guikit::SizeMode::Fit,
-                    .size = ctx.controlsSize,
-                    .disabled = ctx.elemDisabled
-                })) {
-                    guikit::Knob(ui, s_state.rackFreqHz, 80.0f, 8000.0f, {
-                        .valueFormat = "%.0f Hz",
-                        .step = 20.0,
-                        .defaultValue = 1000.0,
-                        .tickCount = s_state.tickCount,
-                        .showValue = s_state.showValue,
-                        .showTicks = s_state.showTicks,
-                        .showArc = s_state.showArc,
-                        .bipolar = false,
-                        .valuePlacement = s_state.valuePlacement,
-                        .diameter = ctx.ResolveKnobDiameter(),
-                        .disabled = ctx.elemDisabled,
-                        .size = ctx.controlsSize,
-                        .color = guikit::StateColor::Info()
-                    });
-                }
-                if (auto el = guikit::Element(ui, {
-                    .label = "Resonance (Q)",
-                    .description = "Filter peak",
-                    .layout = guikit::ElementLayout::Top,
-                    .align = guikit::Align::Center,
-                    .width = guikit::SizeMode::Fit,
-                    .size = ctx.controlsSize,
-                    .disabled = ctx.elemDisabled
-                })) {
-                    guikit::Knob(ui, s_state.rackResQ, 0.5f, 12.0f, {
-                        .valueFormat = "%.1f Q",
-                        .step = 0.1,
-                        .defaultValue = 1.0,
-                        .tickCount = s_state.tickCount,
-                        .showValue = s_state.showValue,
-                        .showTicks = s_state.showTicks,
-                        .showArc = s_state.showArc,
-                        .bipolar = false,
-                        .valuePlacement = s_state.valuePlacement,
-                        .diameter = ctx.ResolveKnobDiameter(),
-                        .disabled = ctx.elemDisabled,
-                        .size = ctx.controlsSize,
-                        .color = guikit::StateColor::Success()
-                    });
-                }
-                if (auto el = guikit::Element(ui, {
-                    .label = "Azimuth Pan",
-                    .description = "L / R balance",
-                    .layout = guikit::ElementLayout::Top,
-                    .align = guikit::Align::Center,
-                    .width = guikit::SizeMode::Fit,
-                    .size = ctx.controlsSize,
-                    .disabled = ctx.elemDisabled
-                })) {
-                    guikit::Knob(ui, s_state.rackPan, -50.0f, 50.0f, {
-                        .valueFormat = "%+.0f %%",
-                        .step = 1.0,
-                        .defaultValue = 0.0,
-                        .tickCount = s_state.tickCount,
-                        .showValue = s_state.showValue,
-                        .showTicks = s_state.showTicks,
-                        .showArc = s_state.showArc,
-                        .bipolar = true,
-                        .valuePlacement = s_state.valuePlacement,
-                        .diameter = ctx.ResolveKnobDiameter(),
-                        .disabled = ctx.elemDisabled,
-                        .size = ctx.controlsSize,
-                        .color = guikit::StateColor::Warning()
-                    });
-                }
-            }
-        }
-        return;
-    }
 
     ctx.RunElementStage(ui, [&]() {
         guikit::KnobOptions opts{};
@@ -236,7 +98,7 @@ keel::String GenerateKnobCode(const DemoContext& ctx) {
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
     const keel::String ctrl = keel::format(
-        "guikit::Knob(ui, rotaryGain, {}, {}, {{\n"
+        "guikit::Knob(ui, knobValue, {}, {}, {{\n"
         "    .valueFormat = \"{}\",\n"
         "    .step = {},\n"
         "    .defaultValue = {},\n"

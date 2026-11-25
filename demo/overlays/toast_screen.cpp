@@ -79,8 +79,8 @@ void RenderToastStage(guikit::Context& ui, DemoContext&) {
             }).clicked) {
                 ++s_toast.counter;
                 guikit::ShowToast(ui, {
-                    .title = ui.Format("Telemetry Sync #{}", s_toast.counter),
-                    .message = "Connected to primary stream at 48.0 kHz.",
+                    .title = ui.Format("Sync Complete #{}", s_toast.counter),
+                    .message = "Workspace files are up to date.",
                     .variant = guikit::UiVariant::Info,
                     .duration = s_toast.duration,
                     .showProgress = s_toast.showProgress,
@@ -95,8 +95,8 @@ void RenderToastStage(guikit::Context& ui, DemoContext&) {
             }).clicked) {
                 ++s_toast.counter;
                 guikit::ShowToast(ui, {
-                    .title = "Configuration Saved",
-                    .message = "Profile committed to flash.",
+                    .title = "Settings Saved",
+                    .message = "Your preferences have been updated.",
                     .variant = guikit::UiVariant::Success,
                     .duration = s_toast.duration,
                     .showProgress = s_toast.showProgress,
@@ -111,8 +111,8 @@ void RenderToastStage(guikit::Context& ui, DemoContext&) {
             }).clicked) {
                 ++s_toast.counter;
                 guikit::ShowToast(ui, {
-                    .title = "High Buffer Latency",
-                    .message = "Jitter buffer exceeded 85% threshold.",
+                    .title = "Storage Almost Full",
+                    .message = "Workspace cache exceeded 85% of quota.",
                     .variant = guikit::UiVariant::Warning,
                     .duration = s_toast.duration,
                     .showProgress = s_toast.showProgress,
@@ -127,8 +127,8 @@ void RenderToastStage(guikit::Context& ui, DemoContext&) {
             }).clicked) {
                 ++s_toast.counter;
                 guikit::ShowToast(ui, {
-                    .title = "Carrier Lock Lost",
-                    .message = "Uplink timeout; retrying in 2.0s...",
+                    .title = "Connection Lost",
+                    .message = "Request timed out; retrying in 2.0s...",
                     .variant = guikit::UiVariant::Danger,
                     .duration = s_toast.duration,
                     .showProgress = s_toast.showProgress,
@@ -165,8 +165,8 @@ keel::String GenerateToastCode(const DemoContext&) {
     return keel::format(
         "if (guikit::Button(ui, {{.text = \"Success\", .icon = guikit::Icon::Check(), .variant = guikit::UiVariant::Success}}).clicked) {{\n"
         "    guikit::ShowToast(ui, {{\n"
-        "        .title = \"Configuration Saved\",\n"
-        "        .message = \"Profile committed to flash.\",\n"
+        "        .title = \"Settings Saved\",\n"
+        "        .message = \"Your preferences have been updated.\",\n"
         "        .variant = guikit::UiVariant::Success,\n"
         "        .duration = {:.1f}f,\n"
         "        .showProgress = {},\n"

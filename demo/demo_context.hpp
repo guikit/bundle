@@ -45,9 +45,9 @@ enum class NavCategory : keel::u8 {
     FieldInputField,
     FieldSelect,
     FieldMultiSelect,
+    FieldTagInput,
     FieldSpinBox,
     FieldDatePicker,
-    FieldTagInput,
     FieldColorPicker,
 
     // 7. CONTROLS (Direct Value Controls)

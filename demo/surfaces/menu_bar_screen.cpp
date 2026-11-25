@@ -100,9 +100,9 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
                     RecordAction(ui, "File -> Open Project...");
                 }
                 if (auto recent = file.SubMenu("Recent Projects")) {
-                    if (recent.Item("signal_analyzer.gk")) RecordAction(ui, "Opened signal_analyzer.gk");
-                    if (recent.Item("marine_chart.gk"))    RecordAction(ui, "Opened marine_chart.gk");
-                    if (recent.Item("flight_deck.gk"))     RecordAction(ui, "Opened flight_deck.gk");
+                    if (recent.Item("dashboard_app.gk")) RecordAction(ui, "Opened dashboard_app.gk");
+                    if (recent.Item("design_system.gk")) RecordAction(ui, "Opened design_system.gk");
+                    if (recent.Item("release_notes.gk")) RecordAction(ui, "Opened release_notes.gk");
                     recent.Separator();
                     if (recent.Item("Clear Recent", {.variant = guikit::UiVariant::Danger})) {
                         RecordAction(ui, "Cleared recent history", guikit::UiVariant::Warning);
@@ -224,10 +224,10 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
                 .maxHeight = s_mb.maxMenuHeight,
                 .size = effSize
             })) {
-                if (auto ins = ctxMenu.SubMenu("Insert Node", {.icon = guikit::Icon::Plus()})) {
-                    if (ins.Item("Signal Source")) RecordAction(ui, "Inserted Signal Source");
-                    if (ins.Item("FFT Analyzer"))  RecordAction(ui, "Inserted FFT Analyzer");
-                    if (ins.Item("Scope Sink"))    RecordAction(ui, "Inserted Scope Sink");
+                if (auto ins = ctxMenu.SubMenu("Insert Element", {.icon = guikit::Icon::Plus()})) {
+                    if (ins.Item("Text Block"))  RecordAction(ui, "Inserted Text Block");
+                    if (ins.Item("Image Frame")) RecordAction(ui, "Inserted Image Frame");
+                    if (ins.Item("Data Table"))  RecordAction(ui, "Inserted Data Table");
                 }
                 ctxMenu.Separator();
                 (void)ctxMenu.Checkbox("Show Grid", s_mb.showGrid, {.keepOpen = true});

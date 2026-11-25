@@ -26,11 +26,11 @@ struct TreeDemoState {
     // Checked states for tree items
     bool chkSun = true;
     bool chkFog = true;
-    bool chkSonar = true;
-    bool chkWaterfall = true;
-    bool chkImu = false;
-    bool chkShaderSonar = true;
-    bool chkShaderWaterfall = true;
+    bool chkAntiAlias = true;
+    bool chkBloom = true;
+    bool chkAo = false;
+    bool chkShaderTonemap = true;
+    bool chkShaderBloom = true;
     bool chkThemeJson = true;
 
     // Embedded control states inside TreeItem rows
@@ -38,10 +38,10 @@ struct TreeDemoState {
     keel::f32 envExposure = 1.15f;
     bool sunEnabled = true;
     keel::f32 fogDensity = 35.0f;
-    keel::usize sonarModeIdx = 0;
-    bool wfTracking = true;
-    bool imuEnabled = true;
-    keel::i32 calibrateCount = 0;
+    keel::usize aaModeIdx = 0;
+    bool bloomEnabled = true;
+    bool aoEnabled = true;
+    keel::i32 resetCount = 0;
 };
 
 TreeDemoState s_tree;
@@ -133,15 +133,15 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
     bool chkEnvAll = (envCheckedCount == 2);
     const bool indEnv = (envCheckedCount > 0 && envCheckedCount < 2);
 
-    const keel::i32 sensorCheckedCount = (s_tree.chkSonar ? 1 : 0) + (s_tree.chkWaterfall ? 1 : 0) + (s_tree.chkImu ? 1 : 0);
-    bool chkSensorsAll = (sensorCheckedCount == 3);
-    const bool indSensors = (sensorCheckedCount > 0 && sensorCheckedCount < 3);
+    const keel::i32 postCheckedCount = (s_tree.chkAntiAlias ? 1 : 0) + (s_tree.chkBloom ? 1 : 0) + (s_tree.chkAo ? 1 : 0);
+    bool chkPostAll = (postCheckedCount == 3);
+    const bool indPost = (postCheckedCount > 0 && postCheckedCount < 3);
 
-    const keel::i32 sceneCheckedCount = envCheckedCount + sensorCheckedCount;
+    const keel::i32 sceneCheckedCount = envCheckedCount + postCheckedCount;
     bool chkSceneAll = (sceneCheckedCount == 5);
     const bool indScene = (sceneCheckedCount > 0 && sceneCheckedCount < 5);
 
-    const keel::i32 shaderCheckedCount = (s_tree.chkShaderSonar ? 1 : 0) + (s_tree.chkShaderWaterfall ? 1 : 0);
+    const keel::i32 shaderCheckedCount = (s_tree.chkShaderTonemap ? 1 : 0) + (s_tree.chkShaderBloom ? 1 : 0);
     bool chkShadersAll = (shaderCheckedCount == 2);
     const bool indShaders = (shaderCheckedCount > 0 && shaderCheckedCount < 2);
 
@@ -187,7 +187,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
             .indeterminate = s_tree.showCheckboxes && indScene
         })) {
             if (sceneItem.checkChanged) {
-                s_tree.chkSun = s_tree.chkFog = s_tree.chkSonar = s_tree.chkWaterfall = s_tree.chkImu = chkSceneAll;
+                s_tree.chkSun = s_tree.chkFog = s_tree.chkAntiAlias = s_tree.chkBloom = s_tree.chkAo = chkSceneAll;
             }
             if (useCols) {
                 guikit::Text(ui, "Viewport", {.variant = guikit::UiVariant::Secondary});
@@ -257,82 +257,82 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 }
             }
 
-            // 1.2 Sensors & Telemetry
-            if (auto sensorsItem = guikit::TreeItem(ui, {
-                .label = "Sensors & Telemetry",
-                .description = s_tree.showDescriptions ? "Acoustic, RF spectrum, and inertial streams" : "",
-                .badge = inlineDecor ? guikit::UiText{"3 ch", guikit::StateColor::Info()} : guikit::UiText{},
+            // 1.2 Post-Processing
+            if (auto postItem = guikit::TreeItem(ui, {
+                .label = "Post-Processing",
+                .description = s_tree.showDescriptions ? "Anti-aliasing, HDR bloom, and ambient occlusion" : "",
+                .badge = inlineDecor ? guikit::UiText{"3 passes", guikit::StateColor::Info()} : guikit::UiText{},
                 .icon = guikit::Icon::Search(),
                 .defaultOpen = true,
-                .checked = s_tree.showCheckboxes ? &chkSensorsAll : nullptr,
-                .indeterminate = s_tree.showCheckboxes && indSensors
+                .checked = s_tree.showCheckboxes ? &chkPostAll : nullptr,
+                .indeterminate = s_tree.showCheckboxes && indPost
             })) {
-                if (sensorsItem.checkChanged) {
-                    s_tree.chkSonar = s_tree.chkWaterfall = s_tree.chkImu = chkSensorsAll;
+                if (postItem.checkChanged) {
+                    s_tree.chkAntiAlias = s_tree.chkBloom = s_tree.chkAo = chkPostAll;
                 }
                 if (useCols) {
-                    guikit::Text(ui, "DSP Bus", {.variant = guikit::UiVariant::Secondary});
-                    guikit::Element(ui, {.badge = {"3 ch", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
+                    guikit::Text(ui, "Render Graph", {.variant = guikit::UiVariant::Secondary});
+                    guikit::Element(ui, {.badge = {"3 passes", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});
                 }
 
-                static constexpr keel::StaticArray<keel::StringRef, 3> kSonarModes = {"Active", "Passive", "CW"};
-                if (auto sonarItem = guikit::TreeItem(ui, {
-                    .label = "Sonar Array PPI",
-                    .description = s_tree.showDescriptions ? "128-beam polar acoustic beamforming receiver" : "",
-                    .detail = inlineDecor ? "750 kHz" : "",
+                static constexpr keel::StaticArray<keel::StringRef, 3> kAaModes = {"FXAA", "TAA", "MSAA"};
+                if (auto aaItem = guikit::TreeItem(ui, {
+                    .label = "Anti-Aliasing",
+                    .description = s_tree.showDescriptions ? "Subpixel edge smoothing & temporal resolve" : "",
+                    .detail = inlineDecor ? "4x MSAA" : "",
                     .icon = guikit::Icon::Play(),
-                    .checked = s_tree.showCheckboxes ? &s_tree.chkSonar : nullptr
+                    .checked = s_tree.showCheckboxes ? &s_tree.chkAntiAlias : nullptr
                 })) {
                     if (useCols) {
-                        guikit::Text(ui, "750 kHz", {.variant = guikit::UiVariant::Secondary});
-                        guikit::Element(ui, {.badge = {"128-Beam", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "4x MSAA", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"Auto", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
-                        guikit::Select(ui, s_tree.sonarModeIdx, kSonarModes, {
+                        guikit::Select(ui, s_tree.aaModeIdx, kAaModes, {
                             .width = useCols ? guikit::AxisSize::Auto() : guikit::AxisSize::Fixed(100.0f)
                         });
                     }
                 }
 
-                if (auto wfItem = guikit::TreeItem(ui, {
-                    .label = "RTSA Waterfall",
-                    .description = s_tree.showDescriptions ? "Real-time FFT spectrum & DOA target tracker" : "",
-                    .detail = inlineDecor ? "2.4 GHz" : "",
-                    .badge = inlineDecor ? guikit::UiText{"LIVE", guikit::StateColor::Success()} : guikit::UiText{},
+                if (auto bloomItem = guikit::TreeItem(ui, {
+                    .label = "HDR Bloom & Glow",
+                    .description = s_tree.showDescriptions ? "Dual-kawase threshold blur & lens flare pass" : "",
+                    .detail = inlineDecor ? "Half-Res" : "",
+                    .badge = inlineDecor ? guikit::UiText{"ACTIVE", guikit::StateColor::Success()} : guikit::UiText{},
                     .icon = guikit::Icon::Play(),
-                    .checked = s_tree.showCheckboxes ? &s_tree.chkWaterfall : nullptr
+                    .checked = s_tree.showCheckboxes ? &s_tree.chkBloom : nullptr
                 })) {
                     if (useCols) {
-                        guikit::Text(ui, "2.4 GHz", {.variant = guikit::UiVariant::Secondary});
-                        guikit::Element(ui, {.badge = {"LIVE", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "Half-Res", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"ACTIVE", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
                         // Multi-widget cell: Switch + Button grouped inside a single column cell
-                        if (auto cell = wfItem.Cell()) {
-                            guikit::Switch(ui, s_tree.wfTracking);
+                        if (auto cell = bloomItem.Cell()) {
+                            guikit::Switch(ui, s_tree.bloomEnabled);
                             if (guikit::Button(ui, {
-                                .text = "Calibrate",
+                                .text = "Reset",
                                 .variant = guikit::UiVariant::Secondary
                             })) {
-                                ++s_tree.calibrateCount;
+                                ++s_tree.resetCount;
                             }
                         }
                     }
                 }
 
-                if (auto imuItem = guikit::TreeItem(ui, {
-                    .label = "Inertial Navigation (IMU)",
-                    .description = s_tree.showDescriptions ? "6-DOF strapdown attitude & heading reference" : "",
-                    .detail = inlineDecor ? "400 Hz" : "",
+                if (auto aoItem = guikit::TreeItem(ui, {
+                    .label = "Ambient Occlusion",
+                    .description = s_tree.showDescriptions ? "Screen-space contact shadows & bounce shading" : "",
+                    .detail = inlineDecor ? "SSAO" : "",
                     .icon = guikit::Icon::Settings(),
-                    .checked = s_tree.showCheckboxes ? &s_tree.chkImu : nullptr
+                    .checked = s_tree.showCheckboxes ? &s_tree.chkAo : nullptr
                 })) {
                     if (useCols) {
-                        guikit::Text(ui, "400 Hz", {.variant = guikit::UiVariant::Secondary});
-                        guikit::Element(ui, {.badge = {"6-DOF", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
+                        guikit::Text(ui, "SSAO", {.variant = guikit::UiVariant::Secondary});
+                        guikit::Element(ui, {.badge = {"Screen", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});
                     }
                     if (s_tree.showEmbeddedControls) {
-                        guikit::Switch(ui, s_tree.imuEnabled);
+                        guikit::Switch(ui, s_tree.aoEnabled);
                     }
                 }
             }
@@ -349,7 +349,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
             .indeterminate = s_tree.showCheckboxes && indAssets
         })) {
             if (assetsItem.checkChanged) {
-                s_tree.chkShaderSonar = s_tree.chkShaderWaterfall = s_tree.chkThemeJson = chkAssetsAll;
+                s_tree.chkShaderTonemap = s_tree.chkShaderBloom = s_tree.chkThemeJson = chkAssetsAll;
             }
             if (useCols) {
                 guikit::Text(ui, "14.2 MB", {.variant = guikit::UiVariant::Secondary});
@@ -358,7 +358,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
 
             if (auto shadersItem = guikit::TreeItem(ui, {
                 .label = "Shaders (GLSL 330)",
-                .description = s_tree.showDescriptions ? "Hardware-accelerated GPU underlay programs" : "",
+                .description = s_tree.showDescriptions ? "Hardware-accelerated GPU post-process programs" : "",
                 .badge = inlineDecor ? guikit::UiText{"2 files", guikit::StateColor::Muted()} : guikit::UiText{},
                 .icon = guikit::Icon::Folder(),
                 .defaultOpen = true,
@@ -366,7 +366,7 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 .indeterminate = s_tree.showCheckboxes && indShaders
             })) {
                 if (shadersItem.checkChanged) {
-                    s_tree.chkShaderSonar = s_tree.chkShaderWaterfall = chkShadersAll;
+                    s_tree.chkShaderTonemap = s_tree.chkShaderBloom = chkShadersAll;
                 }
                 if (useCols) {
                     guikit::Text(ui, "GLSL 330", {.variant = guikit::UiVariant::Secondary});
@@ -374,11 +374,11 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 }
 
                 if (auto s1 = guikit::TreeItem(ui, {
-                    .label = "sonar_ppi.frag",
+                    .label = "tonemap.frag",
                     .detail = inlineDecor ? "4.8 KB" : "",
                     .badge = inlineDecor ? guikit::UiText{"OK", guikit::StateColor::Success()} : guikit::UiText{},
                     .icon = guikit::Icon::Edit(),
-                    .checked = s_tree.showCheckboxes ? &s_tree.chkShaderSonar : nullptr
+                    .checked = s_tree.showCheckboxes ? &s_tree.chkShaderTonemap : nullptr
                 })) {
                     if (useCols) {
                         guikit::Text(ui, "4.8 KB", {.variant = guikit::UiVariant::Secondary});
@@ -387,11 +387,11 @@ void RenderTreeViewStage(guikit::Context& ui, DemoContext& ctx) {
                 }
 
                 if (auto s2 = guikit::TreeItem(ui, {
-                    .label = "waterfall_doa.frag",
+                    .label = "bloom_blur.frag",
                     .detail = inlineDecor ? "6.1 KB" : "",
                     .badge = inlineDecor ? guikit::UiText{"OK", guikit::StateColor::Success()} : guikit::UiText{},
                     .icon = guikit::Icon::Edit(),
-                    .checked = s_tree.showCheckboxes ? &s_tree.chkShaderWaterfall : nullptr
+                    .checked = s_tree.showCheckboxes ? &s_tree.chkShaderBloom : nullptr
                 })) {
                     if (useCols) {
                         guikit::Text(ui, "6.1 KB", {.variant = guikit::UiVariant::Secondary});
@@ -515,7 +515,7 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
     );
     if (s_tree.showCheckboxes) {
         out.append("        if (sceneItem.checkChanged) {\n"
-                   "            chkSun = chkFog = chkSonar = chkWaterfall = chkImu = chkSceneAll;\n"
+                   "            chkSun = chkFog = chkAntiAlias = chkBloom = chkAo = chkSceneAll;\n"
                    "        }\n");
     }
     if (useCols) {
@@ -581,71 +581,71 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
     out.append("            }\n");
     out.append("        }\n\n");
 
-    // 1.2 Sensors & Telemetry
+    // 1.2 Post-Processing
     appendItemOpts(
-        "        ", "sensorsItem", "Sensors & Telemetry",
-        "Acoustic, RF spectrum, and inertial streams", "",
-        "{\"3 ch\", guikit::StateColor::Info()}",
-        "guikit::Icon::Search()", true, "chkSensorsAll", "indSensors"
+        "        ", "postItem", "Post-Processing",
+        "Anti-aliasing, HDR bloom, and ambient occlusion", "",
+        "{\"3 passes\", guikit::StateColor::Info()}",
+        "guikit::Icon::Search()", true, "chkPostAll", "indPost"
     );
     if (s_tree.showCheckboxes) {
-        out.append("            if (sensorsItem.checkChanged) {\n"
-                   "                chkSonar = chkWaterfall = chkImu = chkSensorsAll;\n"
+        out.append("            if (postItem.checkChanged) {\n"
+                   "                chkAntiAlias = chkBloom = chkAo = chkPostAll;\n"
                    "            }\n");
     }
     if (useCols) {
-        out.append("            guikit::Text(ui, \"DSP Bus\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "            guikit::Element(ui, {.badge = {\"3 ch\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
+        out.append("            guikit::Text(ui, \"Render Graph\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "            guikit::Element(ui, {.badge = {\"3 passes\", guikit::UiVariant::Info}, .width = guikit::SizeMode::Fit});\n");
     }
 
     appendItemOpts(
-        "            ", "sonarItem", "Sonar Array PPI",
-        "128-beam polar acoustic beamforming receiver", "750 kHz", "",
-        "guikit::Icon::Play()", false, "chkSonar", ""
+        "            ", "aaItem", "Anti-Aliasing",
+        "Subpixel edge smoothing & temporal resolve", "4x MSAA", "",
+        "guikit::Icon::Play()", false, "chkAntiAlias", ""
     );
     if (useCols) {
-        out.append("                guikit::Text(ui, \"750 kHz\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                guikit::Element(ui, {.badge = {\"128-Beam\", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"4x MSAA\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"Auto\", guikit::UiVariant::Primary}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
         out.append(useCols
-            ? "                guikit::Select(ui, sonarModeIdx, kSonarModes);\n"
-            : "                guikit::Select(ui, sonarModeIdx, kSonarModes, {.width = 100.0f});\n");
+            ? "                guikit::Select(ui, aaModeIdx, kAaModes);\n"
+            : "                guikit::Select(ui, aaModeIdx, kAaModes, {.width = 100.0f});\n");
     }
     out.append("            }\n\n");
 
     appendItemOpts(
-        "            ", "wfItem", "RTSA Waterfall",
-        "Real-time FFT spectrum & DOA target tracker", "2.4 GHz",
-        "{\"LIVE\", guikit::StateColor::Success()}",
-        "guikit::Icon::Play()", false, "chkWaterfall", ""
+        "            ", "bloomItem", "HDR Bloom & Glow",
+        "Dual-kawase threshold blur & lens flare pass", "Half-Res",
+        "{\"ACTIVE\", guikit::StateColor::Success()}",
+        "guikit::Icon::Play()", false, "chkBloom", ""
     );
     if (useCols) {
-        out.append("                guikit::Text(ui, \"2.4 GHz\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                guikit::Element(ui, {.badge = {\"LIVE\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"Half-Res\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"ACTIVE\", guikit::UiVariant::Success}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
         out.append("                // Multi-widget cell: Switch + Button inside a single column cell\n"
-                   "                if (auto cell = wfItem.Cell()) {\n"
-                   "                    guikit::Switch(ui, wfTracking);\n"
-                   "                    if (guikit::Button(ui, {.text = \"Calibrate\", .variant = guikit::UiVariant::Secondary})) {\n"
-                   "                        ++calibrateCount;\n"
+                   "                if (auto cell = bloomItem.Cell()) {\n"
+                   "                    guikit::Switch(ui, bloomEnabled);\n"
+                   "                    if (guikit::Button(ui, {.text = \"Reset\", .variant = guikit::UiVariant::Secondary})) {\n"
+                   "                        ++resetCount;\n"
                    "                    }\n"
                    "                }\n");
     }
     out.append("            }\n\n");
 
     appendItemOpts(
-        "            ", "imuItem", "Inertial Navigation (IMU)",
-        "6-DOF strapdown attitude & heading reference", "400 Hz", "",
-        "guikit::Icon::Settings()", false, "chkImu", ""
+        "            ", "aoItem", "Ambient Occlusion",
+        "Screen-space contact shadows & bounce shading", "SSAO", "",
+        "guikit::Icon::Settings()", false, "chkAo", ""
     );
     if (useCols) {
-        out.append("                guikit::Text(ui, \"400 Hz\", {.variant = guikit::UiVariant::Secondary});\n"
-                   "                guikit::Element(ui, {.badge = {\"6-DOF\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
+        out.append("                guikit::Text(ui, \"SSAO\", {.variant = guikit::UiVariant::Secondary});\n"
+                   "                guikit::Element(ui, {.badge = {\"Screen\", guikit::UiVariant::Default}, .width = guikit::SizeMode::Fit});\n");
     }
     if (s_tree.showEmbeddedControls) {
-        out.append("                guikit::Switch(ui, imuEnabled);\n");
+        out.append("                guikit::Switch(ui, aoEnabled);\n");
     }
     out.append("            }\n");
     out.append("        }\n");
@@ -659,7 +659,7 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
     );
     if (s_tree.showCheckboxes) {
         out.append("        if (assetsItem.checkChanged) {\n"
-                   "            chkShaderSonar = chkShaderWaterfall = chkThemeJson = chkAssetsAll;\n"
+                   "            chkShaderTonemap = chkShaderBloom = chkThemeJson = chkAssetsAll;\n"
                    "        }\n");
     }
     if (useCols) {
@@ -669,13 +669,13 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
 
     appendItemOpts(
         "        ", "shadersItem", "Shaders (GLSL 330)",
-        "Hardware-accelerated GPU underlay programs", "",
+        "Hardware-accelerated GPU post-process programs", "",
         "{\"2 files\", guikit::StateColor::Muted()}",
         "guikit::Icon::Folder()", true, "chkShadersAll", "indShaders"
     );
     if (s_tree.showCheckboxes) {
         out.append("            if (shadersItem.checkChanged) {\n"
-                   "                chkShaderSonar = chkShaderWaterfall = chkShadersAll;\n"
+                   "                chkShaderTonemap = chkShaderBloom = chkShadersAll;\n"
                    "            }\n");
     }
     if (useCols) {
@@ -684,9 +684,9 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
     }
 
     appendItemOpts(
-        "            ", "s1", "sonar_ppi.frag",
+        "            ", "s1", "tonemap.frag",
         "", "4.8 KB", "{\"OK\", guikit::StateColor::Success()}",
-        "guikit::Icon::Edit()", false, "chkShaderSonar", ""
+        "guikit::Icon::Edit()", false, "chkShaderTonemap", ""
     );
     if (useCols) {
         out.append("                guikit::Text(ui, \"4.8 KB\", {.variant = guikit::UiVariant::Secondary});\n"
@@ -695,9 +695,9 @@ keel::String GenerateTreeViewCode(const DemoContext& ctx) {
     out.append("            }\n\n");
 
     appendItemOpts(
-        "            ", "s2", "waterfall_doa.frag",
+        "            ", "s2", "bloom_blur.frag",
         "", "6.1 KB", "{\"OK\", guikit::StateColor::Success()}",
-        "guikit::Icon::Edit()", false, "chkShaderWaterfall", ""
+        "guikit::Icon::Edit()", false, "chkShaderBloom", ""
     );
     if (useCols) {
         out.append("                guikit::Text(ui, \"6.1 KB\", {.variant = guikit::UiVariant::Secondary});\n"

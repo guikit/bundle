@@ -86,11 +86,11 @@ void RenderBreadcrumbStage(guikit::Context& ui, DemoContext& ctx) {
     const keel::u32 maxVis = (s_bc.maxVisibleItems >= 2) ? keel::as<keel::u32>(s_bc.maxVisibleItems) : 0u;
 
     const keel::StaticArray<guikit::BreadcrumbItem, 5> crumbs = {{
-        {.label = "Workspace",  .icon = s_bc.showCrumbIcons ? guikit::Icon::Folder()   : guikit::Icon{}},
-        {.label = "Clusters",   .icon = s_bc.showCrumbIcons ? guikit::Icon::Settings() : guikit::Icon{}, .badge = s_bc.showCrumbBadges ? "EU" : ""},
-        {.label = "Production", .icon = s_bc.showCrumbIcons ? guikit::Icon::Flash()    : guikit::Icon{}},
-        {.label = "Telemetry",  .icon = s_bc.showCrumbIcons ? guikit::Icon::Search()   : guikit::Icon{}, .badge = s_bc.showCrumbBadges ? "v2.4" : ""},
-        {.label = "LiveStream", .icon = s_bc.showCrumbIcons ? guikit::Icon::Play()     : guikit::Icon{}}
+        {.label = "Workspace", .icon = s_bc.showCrumbIcons ? guikit::Icon::Folder()   : guikit::Icon{}},
+        {.label = "Projects",  .icon = s_bc.showCrumbIcons ? guikit::Icon::Settings() : guikit::Icon{}, .badge = s_bc.showCrumbBadges ? "Team" : ""},
+        {.label = "WebApp",    .icon = s_bc.showCrumbIcons ? guikit::Icon::Flash()    : guikit::Icon{}},
+        {.label = "Releases",  .icon = s_bc.showCrumbIcons ? guikit::Icon::Search()   : guikit::Icon{}, .badge = s_bc.showCrumbBadges ? "v2.4" : ""},
+        {.label = "Overview",  .icon = s_bc.showCrumbIcons ? guikit::Icon::Play()     : guikit::Icon{}}
     }};
 
     auto renderTrail = [&]() {
@@ -130,11 +130,11 @@ keel::String GenerateBreadcrumbCode(const DemoContext& ctx) {
 
     const keel::String crumbsDecl = keel::String::from(
         "static const keel::StaticArray<guikit::BreadcrumbItem, 5> crumbs = {{\n"
-        "    {.label = \"Workspace\",  .icon = guikit::Icon::Folder()},\n"
-        "    {.label = \"Clusters\",   .icon = guikit::Icon::Settings(), .badge = \"EU\"},\n"
-        "    {.label = \"Production\", .icon = guikit::Icon::Flash()},\n"
-        "    {.label = \"Telemetry\",  .icon = guikit::Icon::Search(),   .badge = \"v2.4\"},\n"
-        "    {.label = \"LiveStream\", .icon = guikit::Icon::Play()}\n"
+        "    {.label = \"Workspace\", .icon = guikit::Icon::Folder()},\n"
+        "    {.label = \"Projects\",  .icon = guikit::Icon::Settings(), .badge = \"Team\"},\n"
+        "    {.label = \"WebApp\",    .icon = guikit::Icon::Flash()},\n"
+        "    {.label = \"Releases\",  .icon = guikit::Icon::Search(),   .badge = \"v2.4\"},\n"
+        "    {.label = \"Overview\",  .icon = guikit::Icon::Play()}\n"
         "}};\n"
     );
 

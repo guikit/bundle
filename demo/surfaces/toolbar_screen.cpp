@@ -11,9 +11,9 @@ struct ToolbarDemoState {
     bool squareIcons = false;
     keel::i32 activeTool = 0;
     bool snapToGrid = true;
-    bool liveCapture = false;
-    bool triggerArmed = true;
-    keel::i32 triggerMode = 0;
+    bool livePreview = false;
+    bool syncEnabled = true;
+    keel::i32 syncMode = 0;
 };
 ToolbarDemoState s_tb;
 
@@ -130,21 +130,21 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
             .variant = guikit::UiVariant::Info,
             .square = isSq
         });
-        tb.Toggle(s_tb.liveCapture, {
-            .text = s_tb.liveCapture ? "Recording" : "Capture",
-            .tooltip = "Toggle Live Capture",
-            .icon = s_tb.liveCapture ? guikit::Icon::Pause() : guikit::Icon::Play(),
-            .variant = s_tb.liveCapture ? guikit::UiVariant::Success : guikit::UiVariant::Warning,
+        tb.Toggle(s_tb.livePreview, {
+            .text = s_tb.livePreview ? "Live" : "Preview",
+            .tooltip = "Toggle Live Preview",
+            .icon = s_tb.livePreview ? guikit::Icon::Pause() : guikit::Icon::Play(),
+            .variant = s_tb.livePreview ? guikit::UiVariant::Success : guikit::UiVariant::Warning,
             .square = isSq,
-            .badge = (s_tb.showBadges && s_tb.liveCapture) ? "REC" : ""
+            .badge = (s_tb.showBadges && s_tb.livePreview) ? "LIVE" : ""
         });
 
-        static constexpr keel::StaticArray<keel::StringRef, 3> kTriggerModes = {
-            "Auto Trigger", "Normal Trigger", "Single Shot"
+        static constexpr keel::StaticArray<keel::StringRef, 3> kSyncModes = {
+            "Auto Sync", "Manual Sync", "Offline"
         };
-        tb.SplitToggle(s_tb.triggerArmed, s_tb.triggerMode, kTriggerModes, {
-            .text = kTriggerModes[keel::as<keel::usize>(keel::clamp(s_tb.triggerMode, 0, 2))],
-            .tooltip = "Toggle Trigger & Select Mode",
+        tb.SplitToggle(s_tb.syncEnabled, s_tb.syncMode, kSyncModes, {
+            .text = kSyncModes[keel::as<keel::usize>(keel::clamp(s_tb.syncMode, 0, 2))],
+            .tooltip = "Toggle Sync & Select Mode",
             .icon = guikit::Icon::Flash(),
             .square = isSq
         });
@@ -159,7 +159,7 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
             .badge = s_tb.showBadges ? "3" : ""
         }, {
             {.label = "Export Vector SVG...", .shortcut = "Ctrl+E",       .icon = guikit::Icon::Folder()},
-            {.label = "Export Raw IQ (Float32)", .shortcut = "Ctrl+Shift+E", .icon = guikit::Icon::Copy(), .separatorAfter = true},
+            {.label = "Export JSON Data...",  .shortcut = "Ctrl+Shift+E", .icon = guikit::Icon::Copy(), .separatorAfter = true},
             {.label = "Copy Clipboard Summary", .shortcut = "Ctrl+C",     .icon = guikit::Icon::Check()}
         });
     }
@@ -177,9 +177,9 @@ keel::String GenerateToolbarCode(const DemoContext& ctx) {
         "    tb.Item(activeTool, 2, {{.text = \"Measure\", .icon = guikit::Icon::Search(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
         "    tb.Separator();\n"
         "    tb.Toggle(snapToGrid,  {{.text = \"Snap\",    .icon = guikit::Icon::Settings(), .variant = guikit::UiVariant::Info,    .square = {}}});\n"
-        "    tb.Toggle(liveCapture, {{.text = \"Capture\", .icon = guikit::Icon::Play(),     .variant = guikit::UiVariant::Success, .square = {}}});\n"
-        "    tb.SplitToggle(triggerArmed, triggerMode, {{\"Auto Trigger\", \"Normal Trigger\", \"Single Shot\"}}, {{\n"
-        "        .text = \"Trigger\", .icon = guikit::Icon::Flash(), .square = {}\n"
+        "    tb.Toggle(livePreview, {{.text = \"Preview\", .icon = guikit::Icon::Play(),     .variant = guikit::UiVariant::Success, .square = {}}});\n"
+        "    tb.SplitToggle(syncEnabled, syncMode, {{\"Auto Sync\", \"Manual Sync\", \"Offline\"}}, {{\n"
+        "        .text = \"Auto Sync\", .icon = guikit::Icon::Flash(), .square = {}\n"
         "    }});\n"
         "    tb.Separator();\n"
         "    auto menu = tb.Dropdown({{.text = \"Export\"{}}}, {{\n"

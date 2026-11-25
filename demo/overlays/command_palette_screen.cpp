@@ -87,12 +87,12 @@ void RenderCommandPaletteStage(guikit::Context& ui, DemoContext& ctx) {
     }
 
     static const keel::StaticArray<guikit::CommandPaletteItem, 6> kPaletteCommands = {{
-        {.label = "Configure Telemetry Endpoint", .category = "Dialog",    .description = "Open station profile dialog",         .shortcut = "Ctrl+E", .icon = guikit::Icon::Settings()},
-        {.label = "Spawn Info Notification",      .category = "Toast",     .description = "Emit a streaming info toast",         .shortcut = "Alt+I",  .icon = guikit::Icon::Flash()},
-        {.label = "Toggle Bookmark Target",       .category = "Workspace", .description = "Pin or unpin the active target node", .shortcut = "Ctrl+B", .icon = guikit::Icon::Check()},
-        {.label = "Copy Station Configuration",   .category = "Clipboard", .description = "Serialize JSON profile to clipboard", .shortcut = "Ctrl+C", .icon = guikit::Icon::Copy()},
-        {.label = "Reset DSP Pipeline",           .category = "Signal",    .description = "Clear FFT buffers & peak history",    .shortcut = "Alt+R",  .icon = guikit::Icon::Refresh()},
-        {.label = "Delete Station Node...",       .category = "Danger",    .description = "Permanently purge active node",       .shortcut = "Del",    .icon = guikit::Icon::Trash()}
+        {.label = "Open Workspace Settings", .category = "Dialog",    .description = "Configure workspace preferences",        .shortcut = "Ctrl+E", .icon = guikit::Icon::Settings()},
+        {.label = "Show Info Notification",  .category = "Toast",     .description = "Display an informational toast",         .shortcut = "Alt+I",  .icon = guikit::Icon::Flash()},
+        {.label = "Toggle Bookmark",         .category = "Workspace", .description = "Pin or unpin the current item",          .shortcut = "Ctrl+B", .icon = guikit::Icon::Check()},
+        {.label = "Copy Configuration",      .category = "Clipboard", .description = "Copy JSON settings to clipboard",        .shortcut = "Ctrl+C", .icon = guikit::Icon::Copy()},
+        {.label = "Reset Layout",            .category = "View",      .description = "Restore default panel arrangement",      .shortcut = "Alt+R",  .icon = guikit::Icon::Refresh()},
+        {.label = "Delete Selected Item...", .category = "Danger",    .description = "Permanently remove the active item",     .shortcut = "Del",    .icon = guikit::Icon::Trash()}
     }};
 
     auto cpRes = guikit::CommandPalette(ui, s_cp.open, kPaletteCommands, {

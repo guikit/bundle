@@ -39,7 +39,7 @@ constexpr keel::StaticArray<guikit::UiVariant, 8> kTagVariants = {
 };
 
 constexpr keel::StaticArray<keel::StringRef, 8> kSampleTags = {
-    "SIMD", "WebGPU", "SDF-Fonts", "Flexbox", "Reactive", "Telemetry", "Hot-Reload", "Low-Latency"
+    "SIMD", "WebGPU", "SDF-Fonts", "Flexbox", "Reactive", "Cross-Platform", "Hot-Reload", "Low-Latency"
 };
 
 } // namespace

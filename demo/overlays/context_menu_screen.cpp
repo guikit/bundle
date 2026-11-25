@@ -41,11 +41,11 @@ void RenderContextMenuInspector(guikit::Context& ui, DemoContext& ctx) {
 void RenderContextMenuStage(guikit::Context& ui, DemoContext& ctx) {
     const keel::StaticArray<guikit::ContextMenuItem, 6> menuItems = {{
         {.label = "Edit Properties", .shortcut = "Enter",  .icon = guikit::Icon::Edit()},
-        {.label = "Copy Config",     .shortcut = "Ctrl+C", .icon = guikit::Icon::Copy(), .separatorAfter = true},
-        {.label = "Bookmark Target", .shortcut = "Ctrl+B", .checked = s_cm.itemBookmarked, .hasCheck = true},
+        {.label = "Copy Settings",   .shortcut = "Ctrl+C", .icon = guikit::Icon::Copy(), .separatorAfter = true},
+        {.label = "Add Bookmark",    .shortcut = "Ctrl+B", .checked = s_cm.itemBookmarked, .hasCheck = true},
         {.label = "Snap to Grid",    .shortcut = "Ctrl+G", .checked = s_cm.itemGridSnap,   .hasCheck = true},
-        {.label = "Lock Transform",  .shortcut = "Ctrl+L", .separatorAfter = true, .checked = s_cm.itemLocked, .hasCheck = true},
-        {.label = "Delete Node",     .shortcut = "Del",    .icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger}
+        {.label = "Lock Position",   .shortcut = "Ctrl+L", .separatorAfter = true, .checked = s_cm.itemLocked, .hasCheck = true},
+        {.label = "Delete Item",     .shortcut = "Del",    .icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger}
     }};
 
     const auto zoneTrigger = (s_cm.triggerModeIdx == 0)
@@ -81,7 +81,7 @@ void RenderContextMenuStage(guikit::Context& ui, DemoContext& ctx) {
             if (menuRes.changed && menuRes.clickedIndex >= 0) {
                 switch (menuRes.clickedIndex) {
                     case 0: s_cm.lastAction = "Clicked: Edit Properties"; break;
-                    case 1: s_cm.lastAction = "Clicked: Copy Config"; break;
+                    case 1: s_cm.lastAction = "Clicked: Copy Settings"; break;
                     case 2:
                         s_cm.itemBookmarked = !s_cm.itemBookmarked;
                         s_cm.lastAction = keel::format_fixed<128>("Bookmark = {}", s_cm.itemBookmarked ? "ON" : "OFF");
@@ -92,10 +92,10 @@ void RenderContextMenuStage(guikit::Context& ui, DemoContext& ctx) {
                         break;
                     case 4:
                         s_cm.itemLocked = !s_cm.itemLocked;
-                        s_cm.lastAction = keel::format_fixed<128>("Lock Transform = {}", s_cm.itemLocked ? "ON" : "OFF");
+                        s_cm.lastAction = keel::format_fixed<128>("Lock Position = {}", s_cm.itemLocked ? "ON" : "OFF");
                         break;
                     case 5:
-                        s_cm.lastAction = "Clicked: Delete Node";
+                        s_cm.lastAction = "Clicked: Delete Item";
                         break;
                 }
             }
@@ -114,11 +114,11 @@ keel::String GenerateContextMenuCode(const DemoContext& ctx) {
     return keel::format(
         "const keel::StaticArray<guikit::ContextMenuItem, 6> menuItems = {{{{\n"
         "    {{.label = \"Edit Properties\", .shortcut = \"Enter\",  .icon = guikit::Icon::Edit()}},\n"
-        "    {{.label = \"Copy Config\",     .shortcut = \"Ctrl+C\", .icon = guikit::Icon::Copy(), .separatorAfter = true}},\n"
-        "    {{.label = \"Bookmark Target\", .shortcut = \"Ctrl+B\", .checked = itemBookmarked, .hasCheck = true}},\n"
+        "    {{.label = \"Copy Settings\",   .shortcut = \"Ctrl+C\", .icon = guikit::Icon::Copy(), .separatorAfter = true}},\n"
+        "    {{.label = \"Add Bookmark\",    .shortcut = \"Ctrl+B\", .checked = itemBookmarked, .hasCheck = true}},\n"
         "    {{.label = \"Snap to Grid\",    .shortcut = \"Ctrl+G\", .checked = itemGridSnap,   .hasCheck = true}},\n"
-        "    {{.label = \"Lock Transform\",  .shortcut = \"Ctrl+L\", .separatorAfter = true, .checked = itemLocked, .hasCheck = true}},\n"
-        "    {{.label = \"Delete Node\",     .shortcut = \"Del\",    .icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger}}\n"
+        "    {{.label = \"Lock Position\",   .shortcut = \"Ctrl+L\", .separatorAfter = true, .checked = itemLocked, .hasCheck = true}},\n"
+        "    {{.label = \"Delete Item\",     .shortcut = \"Del\",    .icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger}}\n"
         "}}}};\n\n"
         "if (auto zone = guikit::Box(ui, {{.padding = guikit::Padding::Symmetric(36.0f, 26.0f)}})) {{\n"
         "    if (zone.GetResponse().IsTriggered(guikit::InteractionTrigger::{})) {{\n"

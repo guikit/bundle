@@ -13,8 +13,8 @@ struct ModalDemoState {
     bool showCloseButton = true;
     bool showHeaderDivider = true;
     bool confineToStage = false;
-    keel::FixedString<128> profileName = "Station-Alpha";
-    bool autoReconnect = true;
+    keel::FixedString<128> workspaceName = "Default Workspace";
+    bool autoSave = true;
     keel::FixedString<128> lastStatus = "Ready";
 };
 
@@ -84,8 +84,8 @@ void RenderModalStage(guikit::Context& ui, DemoContext&) {
         })) {
             if (auto hdr = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {
                 guikit::Heading(ui, {
-                    .label = "Configure Station Endpoint",
-                    .description = "Edit connection parameters for the active station.",
+                    .label = "Workspace Settings",
+                    .description = "Update general settings for the active workspace.",
                     .level = guikit::HeadingLevel::H4,
                     .separator = s_modal.showHeaderDivider ? guikit::HeadingSeparator::Bottom : guikit::HeadingSeparator::None
                 });
@@ -100,11 +100,11 @@ void RenderModalStage(guikit::Context& ui, DemoContext&) {
                     }
                 }
             }
-            if (auto el = guikit::Element(ui, {.label = "Profile Name", .layout = guikit::ElementLayout::Top})) {
-                guikit::InputField(ui, s_modal.profileName, {.placeholder = "Enter profile name...", .clearable = true});
+            if (auto el = guikit::Element(ui, {.label = "Workspace Name", .layout = guikit::ElementLayout::Top})) {
+                guikit::InputField(ui, s_modal.workspaceName, {.placeholder = "Enter workspace name...", .clearable = true});
             }
-            if (auto el = guikit::Element(ui, {.label = "Auto-Reconnect on Drop"})) {
-                guikit::Switch(ui, s_modal.autoReconnect);
+            if (auto el = guikit::Element(ui, {.label = "Enable Auto-Save"})) {
+                guikit::Switch(ui, s_modal.autoSave);
             }
             if (auto footer = guikit::Row(ui, {
                 .gap = 10.0f,
@@ -120,7 +120,7 @@ void RenderModalStage(guikit::Context& ui, DemoContext&) {
                     .icon = guikit::Icon::Check(),
                     .variant = guikit::UiVariant::Primary
                 }).clicked) {
-                    s_modal.lastStatus = keel::format_fixed<128>("Saved '{}'", s_modal.profileName.as_ref());
+                    s_modal.lastStatus = keel::format_fixed<128>("Saved '{}'", s_modal.workspaceName.as_ref());
                     modal.Close();
                 }
             }
@@ -161,18 +161,18 @@ keel::String GenerateModalCode(const DemoContext&) {
         "    }})) {{\n"
         "        if (auto hdr = guikit::Row(ui, {{.gap = 8.0f, .align = guikit::Alignment::Center}})) {{\n"
         "            guikit::Heading(ui, {{\n"
-        "                .label = \"Configure Station Endpoint\",\n"
-        "                .description = \"Edit connection parameters for the active station.\",\n"
+        "                .label = \"Workspace Settings\",\n"
+        "                .description = \"Update general settings for the active workspace.\",\n"
         "                .level = guikit::HeadingLevel::H4,\n"
         "                .separator = guikit::HeadingSeparator::{}\n"
         "            }});\n"
         "{}"
         "        }}\n"
-        "        if (auto el = guikit::Element(ui, {{.label = \"Profile Name\", .layout = guikit::ElementLayout::Top}})) {{\n"
-        "            guikit::InputField(ui, profileName, {{.placeholder = \"Enter profile name...\", .clearable = true}});\n"
+        "        if (auto el = guikit::Element(ui, {{.label = \"Workspace Name\", .layout = guikit::ElementLayout::Top}})) {{\n"
+        "            guikit::InputField(ui, workspaceName, {{.placeholder = \"Enter workspace name...\", .clearable = true}});\n"
         "        }}\n"
-        "        if (auto el = guikit::Element(ui, {{.label = \"Auto-Reconnect on Drop\"}})) {{\n"
-        "            guikit::Switch(ui, autoReconnect);\n"
+        "        if (auto el = guikit::Element(ui, {{.label = \"Enable Auto-Save\"}})) {{\n"
+        "            guikit::Switch(ui, autoSave);\n"
         "        }}\n"
         "        if (auto footer = guikit::Row(ui, {{.gap = 10.0f, .justify = guikit::Justify::End}})) {{\n"
         "            if (guikit::Button(ui, {{.text = \"Cancel\", .variant = guikit::UiVariant::Secondary}}).clicked) {{\n"

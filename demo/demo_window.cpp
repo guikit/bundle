@@ -165,9 +165,9 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldInputField),    {.text = "InputField",   .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldSelect),        {.text = "Select",       .icon = guikit::Icon::Plus()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldMultiSelect),   {.text = "MultiSelect",  .icon = guikit::Icon::Plus()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldSpinBox),       {.text = "SpinBox",      .icon = guikit::Icon::Plus()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldDatePicker),    {.text = "DatePicker",   .icon = guikit::Icon::Edit()});
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldTagInput),      {.text = "TagInput",     .icon = guikit::Icon::Edit()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::FieldColorPicker),   {.text = "ColorPicker",  .icon = guikit::Icon::Eye()});
 
             menu.Section("CONTROLS");

@@ -6,7 +6,7 @@ namespace {
 
 struct TooltipDemoState {
     keel::usize contentPresetIdx = 0; // 0 = Short, 1 = Multi-Line, 2 = Rich Text, 3 = Live Coordinates
-    keel::FixedString<192> customText = "Save active station profile (Ctrl+S)";
+    keel::FixedString<192> customText = "Save changes (Ctrl+S)";
     bool pinnedPreview = false;
     bool sampleToggle = true;
 };
@@ -26,7 +26,7 @@ guikit::UiText BuildTooltipText(guikit::Context& ui) {
             };
         case 2:
             return guikit::UiText{
-                "**Station Profile** — Press `Ctrl+S` to commit *calibrated* DSP offsets to flash.",
+                "**Quick Save** — Press `Ctrl+S` to save all *unsaved* changes.",
                 guikit::TextWrap::Rich()
             };
         case 3: {
@@ -84,7 +84,7 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
         if (anchorModeIdx == 0u) {
             if (auto row = guikit::Row(ui, {.gap = 10.0f, .align = guikit::Alignment::Center})) {
                 const auto saveBtn = guikit::Button(ui, {
-                    .text = "Save Profile",
+                    .text = "Save Changes",
                     .icon = guikit::Icon::Save(),
                     .tooltip = tip,
                     .variant = guikit::UiVariant::Primary
@@ -96,18 +96,18 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
                 guikit::Button(ui, {
                     .icon = guikit::Icon::Settings(),
                     .square = true,
-                    .tooltip = "Open hardware diagnostics & calibration",
+                    .tooltip = "Open preferences and settings",
                     .variant = guikit::UiVariant::Secondary
                 });
 
-                guikit::Tag(ui, "48 kHz", {
+                guikit::Tag(ui, "Beta", {
                     .variant = guikit::UiVariant::Info,
                     .style = guikit::TagStyle::Soft,
-                    .tooltip = "Nominal acoustic sampling rate (locked to PPS)"
+                    .tooltip = "Preview feature — behavior may change in future releases"
                 });
 
                 guikit::Switch(ui, s_tip.sampleToggle, {
-                    .tooltip = "Toggle real-time noise floor compensation"
+                    .tooltip = "Enable automatic background saving"
                 });
             }
             guikit::Text(ui, "Hover any widget above to trigger its declarative .tooltip", {
@@ -165,7 +165,7 @@ keel::String GenerateTooltipCode(const DemoContext& ctx) {
             break;
         case 2:
             tipExpr = keel::String::from(
-                "guikit::UiText{\"**Station Profile** — Press `Ctrl+S` to commit *calibrated* offsets.\", guikit::TextWrap::Rich()}"
+                "guikit::UiText{\"**Quick Save** — Press `Ctrl+S` to save all *unsaved* changes.\", guikit::TextWrap::Rich()}"
             );
             break;
         case 3:
@@ -181,7 +181,7 @@ keel::String GenerateTooltipCode(const DemoContext& ctx) {
     if (anchorModeIdx == 0u) {
         return keel::format(
             "guikit::Button(ui, {{\n"
-            "    .text = \"Save Profile\",\n"
+            "    .text = \"Save Changes\",\n"
             "    .icon = guikit::Icon::Save(),\n"
             "    .tooltip = {},\n"
             "    .variant = guikit::UiVariant::Primary\n"

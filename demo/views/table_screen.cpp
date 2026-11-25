@@ -5,15 +5,15 @@ namespace guikit::demo {
 
 namespace {
 
-struct SignalTargetRow {
+struct ServiceNodeRow {
     keel::i32 id{0};
-    keel::FixedString<64> callsign{};
-    keel::FixedString<32> modulation{};
-    keel::f32 freqMhz{0.0f};
-    keel::f32 bearingDeg{0.0f};
-    keel::f32 snrDb{0.0f};
-    keel::i32 status{0}; // 0=LOCKED, 1=TRACKING, 2=SCANNING, 3=ALARM
-    bool tracked{true};
+    keel::FixedString<64> name{};
+    keel::FixedString<32> region{};
+    keel::f32 latencyMs{0.0f};
+    keel::f32 deltaPct{0.0f};
+    keel::f32 cpuLoadPct{0.0f};
+    keel::i32 status{0}; // 0=HEALTHY, 1=ACTIVE, 2=DEGRADED, 3=OVERLOAD
+    bool enabled{true};
 };
 
 struct TableDemoState {
@@ -24,11 +24,11 @@ struct TableDemoState {
     bool resizableColumns{true};
     bool showRowNumbers{true};
     bool showFooter{true};
-    bool liveTelemetry{true};
+    bool liveMetrics{true};
 
     keel::SmallString<128> filterQuery{};
     keel::i32 selectedRow{0};
-    keel::i32 sortCol{2}; // Default sorted by Frequency
+    keel::i32 sortCol{2}; // Default sorted by Service
     TableSortDirection sortDir{TableSortDirection::Ascending};
 
     keel::i32 virtualSelectedRow{0};
@@ -37,37 +37,37 @@ struct TableDemoState {
     keel::i32 pendingJumpRow{-1};
     keel::usize lastVisibleCount{0};
 
-    keel::Array<SignalTargetRow> rows{};
+    keel::Array<ServiceNodeRow> rows{};
     bool initialized{false};
 
     void EnsureInitialized() {
         if (initialized) return;
         initialized = true;
 
-        static constexpr keel::StaticArray<const char*, 8> kCallsigns = {
-            "VHF-BEACON-01", "UHF-LINK-ALPHA", "SAT-DOWNLINK-4", "RADAR-NAV-TX",
-            "AIS-TRANSPONDER", "DMR-REPEATER-7", "OFDM-TELEMETRY", "SONAR-BUOY-12"
+        static constexpr keel::StaticArray<const char*, 8> kServices = {
+            "API-GATEWAY", "AUTH-SERVICE", "CACHE-CLUSTER", "SEARCH-INDEX",
+            "MEDIA-WORKER", "BILLING-JOB", "STORAGE-NODE", "WEB-FRONTEND"
         };
-        static constexpr keel::StaticArray<const char*, 6> kMods = {
-            "QPSK", "OFDM-64", "FM-Narrow", "GMSK", "BPSK-CW", "16-QAM"
+        static constexpr keel::StaticArray<const char*, 6> kRegions = {
+            "us-east", "eu-west", "eu-central", "ap-south", "us-west", "ap-east"
         };
 
         rows.clear();
         rows.reserve(48);
         for (keel::i32 i = 0; i < 48; ++i) {
-            SignalTargetRow r;
+            ServiceNodeRow r;
             r.id = 1001 + i;
-            r.callsign = keel::format_fixed<64>(
+            r.name = keel::format_fixed<64>(
                 "{}-{}",
-                kCallsigns[keel::as<keel::usize>(i) % kCallsigns.size()],
+                kServices[keel::as<keel::usize>(i) % kServices.size()],
                 (i / 8) + 1
             );
-            r.modulation = kMods[keel::as<keel::usize>(i * 3) % kMods.size()];
-            r.freqMhz = 118.500f + keel::as<keel::f32>(i) * 14.375f;
-            r.bearingDeg = -165.0f + keel::fmod(keel::as<keel::f32>(i) * 29.5f, 330.0f);
-            r.snrDb = 8.0f + keel::fmod(keel::as<keel::f32>(i) * 7.3f, 31.0f);
-            r.status = (r.snrDb > 33.0f) ? 3 : ((r.snrDb > 22.0f) ? 0 : ((r.snrDb > 14.0f) ? 1 : 2));
-            r.tracked = (i % 3 != 2);
+            r.region = kRegions[keel::as<keel::usize>(i * 3) % kRegions.size()];
+            r.latencyMs = 8.5f + keel::as<keel::f32>(i) * 1.35f;
+            r.deltaPct = -8.0f + keel::fmod(keel::as<keel::f32>(i) * 2.9f, 16.0f);
+            r.cpuLoadPct = 18.0f + keel::fmod(keel::as<keel::f32>(i) * 17.3f, 76.0f);
+            r.status = (r.cpuLoadPct > 84.0f) ? 3 : ((r.cpuLoadPct > 62.0f) ? 2 : ((r.cpuLoadPct > 38.0f) ? 1 : 0));
+            r.enabled = (i % 3 != 2);
             rows.push_back(r);
         }
         SortRows();
@@ -76,15 +76,15 @@ struct TableDemoState {
     void SortRows() {
         if (sortCol < 0 || sortDir == TableSortDirection::None) return;
         const bool asc = (sortDir == TableSortDirection::Ascending);
-        keel::sort(rows, [&](const SignalTargetRow& a, const SignalTargetRow& b) {
+        keel::sort(rows, [&](const ServiceNodeRow& a, const ServiceNodeRow& b) {
             switch (sortCol) {
-                case 0: return asc ? (a.tracked > b.tracked) : (a.tracked < b.tracked);
+                case 0: return asc ? (a.enabled > b.enabled) : (a.enabled < b.enabled);
                 case 1: return asc ? (a.id < b.id) : (a.id > b.id);
-                case 2: return asc ? (a.callsign.as_ref() < b.callsign.as_ref()) : (a.callsign.as_ref() > b.callsign.as_ref());
-                case 3: return asc ? (a.modulation.as_ref() < b.modulation.as_ref()) : (a.modulation.as_ref() > b.modulation.as_ref());
-                case 4: return asc ? (a.freqMhz < b.freqMhz) : (a.freqMhz > b.freqMhz);
-                case 5: return asc ? (a.bearingDeg < b.bearingDeg) : (a.bearingDeg > b.bearingDeg);
-                case 6: return asc ? (a.snrDb < b.snrDb) : (a.snrDb > b.snrDb);
+                case 2: return asc ? (a.name.as_ref() < b.name.as_ref()) : (a.name.as_ref() > b.name.as_ref());
+                case 3: return asc ? (a.region.as_ref() < b.region.as_ref()) : (a.region.as_ref() > b.region.as_ref());
+                case 4: return asc ? (a.latencyMs < b.latencyMs) : (a.latencyMs > b.latencyMs);
+                case 5: return asc ? (a.deltaPct < b.deltaPct) : (a.deltaPct > b.deltaPct);
+                case 6: return asc ? (a.cpuLoadPct < b.cpuLoadPct) : (a.cpuLoadPct > b.cpuLoadPct);
                 case 7: return asc ? (a.status < b.status) : (a.status > b.status);
                 default: return false;
             }
@@ -134,7 +134,7 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& ctx) {
             .layout = ElementLayout::Top
         })) {
             if (guikit::InputField(ui, g_tableDemo.filterQuery, {
-                .placeholder = "Callsign or modulation...",
+                .placeholder = "Service or region...",
                 .prefix = Icon::Search(),
                 .clearable = true,
                 .size = UiSize::Sm
@@ -143,10 +143,10 @@ void RenderTableInspector(guikit::Context& ui, DemoContext& ctx) {
             }
         }
         if (auto el = guikit::Element(ui, {
-            .label = "Live Signal Telemetry",
-            .description = "Animate SNR level meters and bearings in real time"
+            .label = "Live Metrics Simulation",
+            .description = "Animate CPU load bars and delta values in real time"
         })) {
-            if (guikit::Switch(ui, g_tableDemo.liveTelemetry).changed) {
+            if (guikit::Switch(ui, g_tableDemo.liveMetrics).changed) {
                 ui.InvalidateAll();
             }
         }
@@ -171,16 +171,16 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
     const keel::usize datasetMode = ctx.GetDemoVariant(NavCategory::ViewTable);
 
     if (datasetMode == 0u) {
-        // Animate live telemetry if enabled
-        if (g_tableDemo.liveTelemetry) {
+        // Animate live metrics if enabled
+        if (g_tableDemo.liveMetrics) {
             const keel::f32 t = keel::as<keel::f32>((ui.GetCurrentTime)());
             for (keel::usize i = 0; i < g_tableDemo.rows.size(); ++i) {
                 auto& r = g_tableDemo.rows[i];
-                if (!r.tracked) continue;
+                if (!r.enabled) continue;
                 const keel::f32 wave = keel::sin(t * 2.2f + keel::as<keel::f32>(i) * 0.7f);
-                r.snrDb = keel::clamp(20.0f + wave * 14.0f + keel::as<keel::f32>(i % 5) * 1.5f, 3.0f, 39.5f);
-                r.bearingDeg += keel::cos(t * 1.1f + keel::as<keel::f32>(i)) * 0.08f;
-                r.status = (r.snrDb > 34.0f) ? 3 : ((r.snrDb > 22.0f) ? 0 : ((r.snrDb > 12.0f) ? 1 : 2));
+                r.cpuLoadPct = keel::clamp(50.0f + wave * 35.0f + keel::as<keel::f32>(i % 5) * 3.5f, 8.0f, 98.5f);
+                r.deltaPct = keel::cos(t * 1.1f + keel::as<keel::f32>(i)) * 9.5f;
+                r.status = (r.cpuLoadPct > 84.0f) ? 3 : ((r.cpuLoadPct > 62.0f) ? 2 : ((r.cpuLoadPct > 38.0f) ? 1 : 0));
             }
             ui.RequestRepaint(2);
         }
@@ -193,36 +193,36 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
                 filteredIndices.push_back(i);
             } else {
                 const auto& r = g_tableDemo.rows[i];
-                if (r.callsign.as_ref().contains(query) || r.modulation.as_ref().contains(query)) {
+                if (r.name.as_ref().contains(query) || r.region.as_ref().contains(query)) {
                     filteredIndices.push_back(i);
                 }
             }
         }
 
-        static const keel::StaticArray<TableColumn, 8> kSignalCols = {{
-            {.title = "Track",      .width = 62.0f,  .minWidth = 52.0f, .align = Align::Center, .sortable = true},
-            {.title = "Target ID",  .width = 86.0f,  .minWidth = 68.0f, .align = Align::Start,  .sortable = true},
-            {.title = "Callsign",   .flex = 1.5f,    .minWidth = 130.0f,.align = Align::Start,  .sortable = true},
-            {.title = "Modulation", .width = 102.0f, .minWidth = 80.0f, .align = Align::Center, .sortable = true},
-            {.title = "Frequency",  .width = 116.0f, .minWidth = 90.0f, .align = Align::End,    .sortable = true},
-            {.title = "Azimuth",    .width = 96.0f,  .minWidth = 80.0f, .align = Align::End,    .sortable = true},
-            {.title = "SNR Meter",  .flex = 1.4f,    .minWidth = 150.0f,.align = Align::Start,  .sortable = true},
-            {.title = "State",      .width = 104.0f, .minWidth = 84.0f, .align = Align::Center, .sortable = true}
+        static const keel::StaticArray<TableColumn, 8> kServiceCols = {{
+            {.title = "Active",   .width = 62.0f,  .minWidth = 52.0f, .align = Align::Center, .sortable = true},
+            {.title = "Node ID",  .width = 86.0f,  .minWidth = 68.0f, .align = Align::Start,  .sortable = true},
+            {.title = "Service",  .flex = 1.5f,    .minWidth = 130.0f,.align = Align::Start,  .sortable = true},
+            {.title = "Region",   .width = 102.0f, .minWidth = 80.0f, .align = Align::Center, .sortable = true},
+            {.title = "Latency",  .width = 116.0f, .minWidth = 90.0f, .align = Align::End,    .sortable = true},
+            {.title = "Delta",    .width = 96.0f,  .minWidth = 80.0f, .align = Align::End,    .sortable = true},
+            {.title = "CPU Load", .flex = 1.4f,    .minWidth = 150.0f,.align = Align::Start,  .sortable = true},
+            {.title = "Status",   .width = 104.0f, .minWidth = 84.0f, .align = Align::Center, .sortable = true}
         }};
 
-        const keel::StringRef selCallsign =
+        const keel::StringRef selName =
             (g_tableDemo.selectedRow >= 0 && keel::as<keel::usize>(g_tableDemo.selectedRow) < filteredIndices.size())
-                ? g_tableDemo.rows[filteredIndices[keel::as<keel::usize>(g_tableDemo.selectedRow)]].callsign.as_ref()
+                ? g_tableDemo.rows[filteredIndices[keel::as<keel::usize>(g_tableDemo.selectedRow)]].name.as_ref()
                 : keel::StringRef("None");
 
         char footerBuf[128];
         keel::format_buf(
             footerBuf, sizeof(footerBuf),
             "Selected: {} | Double-click column divider to reset width",
-            selCallsign
+            selName
         );
 
-        if (auto table = guikit::Table(ui, kSignalCols, {
+        if (auto table = guikit::Table(ui, kServiceCols, {
             .totalRows = filteredIndices.size(),
             .selectedRow = &g_tableDemo.selectedRow,
             .sortColumn = &g_tableDemo.sortCol,
@@ -242,7 +242,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
 
             for (keel::usize visRow = table.FirstVisibleRow(); visRow < table.EndVisibleRow(); ++visRow) {
                 if (visRow >= filteredIndices.size()) break;
-                SignalTargetRow& item = g_tableDemo.rows[filteredIndices[visRow]];
+                ServiceNodeRow& item = g_tableDemo.rows[filteredIndices[visRow]];
 
                 TableRowOptions rowOpts{};
                 if (item.status == 3) {
@@ -251,36 +251,36 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
 
                 if (auto row = table.Row(visRow, rowOpts)) {
                     // Col 0: Embedded Checkbox widget
-                    guikit::Checkbox(ui, item.tracked, {.size = UiSize::Sm, .color = StateColor::Primary()});
+                    guikit::Checkbox(ui, item.enabled, {.size = UiSize::Sm, .color = StateColor::Primary()});
 
-                    // Col 1: Target ID
-                    guikit::Text(ui, ui.Format("T-{:04d}", item.id), {.variant = UiVariant::Secondary});
+                    // Col 1: Node ID
+                    guikit::Text(ui, ui.Format("SRV-{:04d}", item.id), {.variant = UiVariant::Secondary});
 
-                    // Col 2: Callsign with leading icon
-                    guikit::Element(ui, {.label = item.callsign.as_ref(), .icon = Icon::Play(), .width = SizeMode::Fit});
+                    // Col 2: Service name with leading icon
+                    guikit::Element(ui, {.label = item.name.as_ref(), .icon = Icon::Play(), .width = SizeMode::Fit});
 
-                    // Col 3: Modulation badge
-                    guikit::Element(ui, {.badge = {item.modulation.as_ref(), UiVariant::Info}, .width = SizeMode::Fit});
+                    // Col 3: Region badge
+                    guikit::Element(ui, {.badge = {item.region.as_ref(), UiVariant::Info}, .width = SizeMode::Fit});
 
-                    // Col 4: Frequency
-                    guikit::Text(ui, ui.Format("{:.3f} MHz", item.freqMhz));
+                    // Col 4: Latency
+                    guikit::Text(ui, ui.Format("{:.1f} ms", item.latencyMs));
 
-                    // Col 5: Azimuth bearing
+                    // Col 5: Trend delta
                     guikit::Text(ui,
-                        ui.Format("{:+05.1f} deg", item.bearingDeg),
-                        {.variant = (keel::abs(item.bearingDeg) < 25.0f) ? UiVariant::Success : UiVariant::Default}
+                        ui.Format("{:+04.1f}%", item.deltaPct),
+                        {.variant = (item.deltaPct <= 0.0f) ? UiVariant::Success : UiVariant::Default}
                     );
 
-                    // Col 6: Embedded Segmented VU ProgressBar widget
-                    guikit::ProgressBar(ui, item.snrDb, 0.0f, 40.0f, {
-                        .valueFormat = "%.1f dB",
+                    // Col 6: Embedded Segmented ProgressBar widget
+                    guikit::ProgressBar(ui, item.cpuLoadPct, 0.0f, 100.0f, {
+                        .valueFormat = "%.0f%%",
                         .segments = 12,
                         .multiZoneColor = true,
                         .size = UiSize::Sm
                     });
 
                     // Col 7: Status pill badge
-                    static constexpr keel::StaticArray<const char*, 4> kStatusLabels = {"LOCKED", "TRACKING", "SCANNING", "OVERLOAD"};
+                    static constexpr keel::StaticArray<const char*, 4> kStatusLabels = {"HEALTHY", "ACTIVE", "DEGRADED", "OVERLOAD"};
                     static constexpr keel::StaticArray<UiVariant, 4> kStatusVars = {
                         UiVariant::Success, UiVariant::Primary, UiVariant::Warning, UiVariant::Danger
                     };
@@ -294,12 +294,12 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
         constexpr keel::usize kTotalVirtualRows = 100000;
 
         static const keel::StaticArray<TableColumn, 6> kVirtualCols = {{
-            {.title = "Packet ID",   .width = 110.0f, .minWidth = 80.0f,  .align = Align::Start,  .sortable = true},
-            {.title = "Timestamp",   .width = 125.0f, .minWidth = 95.0f,  .align = Align::Start,  .sortable = true},
-            {.title = "Source Node", .flex = 1.3f,    .minWidth = 120.0f, .align = Align::Start,  .sortable = true},
-            {.title = "Channel Freq",.width = 125.0f, .minWidth = 95.0f,  .align = Align::End,    .sortable = true},
-            {.title = "Payload RSSI",.flex = 1.2f,    .minWidth = 140.0f, .align = Align::Start,  .sortable = true},
-            {.title = "Integrity",   .width = 105.0f, .minWidth = 85.0f,  .align = Align::Center, .sortable = true}
+            {.title = "Event ID",  .width = 110.0f, .minWidth = 80.0f,  .align = Align::Start,  .sortable = true},
+            {.title = "Timestamp", .width = 125.0f, .minWidth = 95.0f,  .align = Align::Start,  .sortable = true},
+            {.title = "Service",   .flex = 1.3f,    .minWidth = 120.0f, .align = Align::Start,  .sortable = true},
+            {.title = "Latency",   .width = 125.0f, .minWidth = 95.0f,  .align = Align::End,    .sortable = true},
+            {.title = "CPU Load",  .flex = 1.2f,    .minWidth = 140.0f, .align = Align::Start,  .sortable = true},
+            {.title = "Result",    .width = 105.0f, .minWidth = 85.0f,  .align = Align::Center, .sortable = true}
         }};
 
         char ftrBuf[128];
@@ -338,7 +338,7 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
             for (keel::usize r = firstRow; r < endRow; ++r) {
                 const keel::usize logicalIdx = desc ? (kTotalVirtualRows - 1 - r) : r;
                 if (auto row = table.Row(r)) {
-                    guikit::Text(ui, ui.Format("PKT-{:06}", logicalIdx + 1), {.variant = UiVariant::Secondary});
+                    guikit::Text(ui, ui.Format("EVT-{:06}", logicalIdx + 1), {.variant = UiVariant::Secondary});
 
                     const keel::u32 mins = keel::as<keel::u32>((logicalIdx / 600) % 60);
                     const keel::u32 secs = keel::as<keel::u32>((logicalIdx / 10) % 60);
@@ -346,25 +346,25 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
                     guikit::Text(ui, ui.Format("12:{:02}:{:02}.{}00", mins, secs, tenths));
 
                     static constexpr keel::StaticArray<const char*, 6> kNodes = {
-                        "ARRAY-NORTH-A1", "ARRAY-EAST-B4", "HYDROPHONE-C2",
-                        "SDR-RECEIVER-09", "BEAMFORMER-DSP", "SATCOM-GATEWAY"
+                        "API-GATEWAY-01", "AUTH-SERVICE-04", "CACHE-CLUSTER-02",
+                        "SEARCH-INDEX-09", "MEDIA-WORKER-03", "STORAGE-NODE-07"
                     };
                     guikit::Text(ui, kNodes[logicalIdx % kNodes.size()]);
 
-                    const keel::f32 freq = 430.000f + keel::as<keel::f32>(logicalIdx % 250) * 0.025f;
-                    guikit::Text(ui, ui.Format("{:.3f} MHz", freq));
+                    const keel::f32 latency = 4.0f + keel::as<keel::f32>(logicalIdx % 250) * 0.35f;
+                    guikit::Text(ui, ui.Format("{:.1f} ms", latency));
 
-                    const keel::f32 rssi = -95.0f + keel::as<keel::f32>((logicalIdx * 17) % 65);
-                    guikit::ProgressBar(ui, rssi, -100.0f, -30.0f, {
-                        .valueFormat = "%.0f dBm",
+                    const keel::f32 load = 12.0f + keel::as<keel::f32>((logicalIdx * 17) % 85);
+                    guikit::ProgressBar(ui, load, 0.0f, 100.0f, {
+                        .valueFormat = "%.0f%%",
                         .segments = 10,
                         .multiZoneColor = true,
                         .size = UiSize::Xs
                     });
 
-                    const bool crcOk = (logicalIdx % 19 != 0);
+                    const bool ok = (logicalIdx % 19 != 0);
                     guikit::Element(ui, {
-                        .badge = {crcOk ? "CRC OK" : "RETRANSMIT", crcOk ? UiVariant::Success : UiVariant::Warning},
+                        .badge = {ok ? "200 OK" : "RETRY", ok ? UiVariant::Success : UiVariant::Warning},
                         .width = SizeMode::Fit
                     });
                 }
@@ -376,11 +376,11 @@ void RenderTableStage(guikit::Context& ui, DemoContext& ctx) {
 keel::String GenerateTableCode(const DemoContext& /*ctx*/) {
     return keel::format(
         "static const keel::StaticArray<guikit::TableColumn, 5> cols = {{{{\n"
-        "    {{.title = \"ID\",        .width = 80.0f,  .sortable = true}},\n"
-        "    {{.title = \"Callsign\",  .flex = 1.5f,    .sortable = true}},\n"
-        "    {{.title = \"Frequency\", .width = 120.0f, .align = guikit::Align::End, .sortable = true}},\n"
-        "    {{.title = \"SNR Level\", .flex = 1.4f,    .sortable = true}},\n"
-        "    {{.title = \"Status\",    .width = 100.0f, .align = guikit::Align::Center, .sortable = true}}\n"
+        "    {{.title = \"ID\",       .width = 80.0f,  .sortable = true}},\n"
+        "    {{.title = \"Service\",  .flex = 1.5f,    .sortable = true}},\n"
+        "    {{.title = \"Latency\",  .width = 120.0f, .align = guikit::Align::End, .sortable = true}},\n"
+        "    {{.title = \"CPU Load\", .flex = 1.4f,    .sortable = true}},\n"
+        "    {{.title = \"Status\",   .width = 100.0f, .align = guikit::Align::Center, .sortable = true}}\n"
         "}}}};\n\n"
         "if (auto table = guikit::Table(ui, cols, {{\n"
         "    .totalRows = rows.size(),\n"
@@ -396,11 +396,11 @@ keel::String GenerateTableCode(const DemoContext& /*ctx*/) {
         "}})) {{\n"
         "    for (size_t r = table.FirstVisibleRow(); r < table.EndVisibleRow(); ++r) {{\n"
         "        if (auto row = table.Row(r)) {{\n"
-        "            guikit::Text(ui, ui.Format(\"T-{{:04d}}\", rows[r].id));\n"
-        "            guikit::Text(ui, rows[r].callsign);\n"
-        "            guikit::Text(ui, ui.Format(\"{{:.3f}} MHz\", rows[r].freqMhz));\n"
-        "            guikit::ProgressBar(ui, rows[r].snrDb, 0.0f, 40.0f, {{.segments = 12, .multiZoneColor = true}});\n"
-        "            guikit::Element(ui, {{.badge = {{\"LOCKED\", guikit::UiVariant::Success}}, .width = guikit::SizeMode::Fit}});\n"
+        "            guikit::Text(ui, ui.Format(\"SRV-{{:04d}}\", rows[r].id));\n"
+        "            guikit::Text(ui, rows[r].name);\n"
+        "            guikit::Text(ui, ui.Format(\"{{:.1f}} ms\", rows[r].latencyMs));\n"
+        "            guikit::ProgressBar(ui, rows[r].cpuLoadPct, 0.0f, 100.0f, {{.segments = 12, .multiZoneColor = true}});\n"
+        "            guikit::Element(ui, {{.badge = {{\"HEALTHY\", guikit::UiVariant::Success}}, .width = guikit::SizeMode::Fit}});\n"
         "        }}\n"
         "    }}\n"
         "}}",

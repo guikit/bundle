@@ -12,7 +12,7 @@ struct SpinBoxState {
     keel::i32 iconStyleIdx = 0; // 0 = Minus/Plus, 1 = Chevrons, 2 = Arrows
     bool showFillBar = true;
     keel::SmallString<64> prefix{""};
-    keel::SmallString<64> suffix{"MHz"};
+    keel::SmallString<64> suffix{"px"};
     guikit::CursorBlinkMode cursorMode = guikit::CursorBlinkMode::Blinking;
     bool readOnly = false;
 };
@@ -60,10 +60,10 @@ void RenderSpinBoxInspector(guikit::Context& ui, DemoContext&) {
         if (guikit::Slider(ui, s_state.step, 0.5f, 25.0f, {.valueFormat = "%.1f", .step = 0.5f}).changed) ui.InvalidateAll();
     }
     if (auto el = guikit::Element(ui, {.label = "Prefix Text"})) {
-        if (guikit::InputField(ui, s_state.prefix, {.placeholder = "e.g. Fc =", .clearable = true}).changed) ui.InvalidateAll();
+        if (guikit::InputField(ui, s_state.prefix, {.placeholder = "e.g. Width:", .clearable = true}).changed) ui.InvalidateAll();
     }
     if (auto el = guikit::Element(ui, {.label = "Unit Suffix"})) {
-        if (guikit::InputField(ui, s_state.suffix, {.placeholder = "e.g. MHz / dB / %", .clearable = true}).changed) {
+        if (guikit::InputField(ui, s_state.suffix, {.placeholder = "e.g. px / % / ms", .clearable = true}).changed) {
             ui.InvalidateAll();
         }
     }
@@ -127,7 +127,7 @@ keel::String GenerateSpinBoxCode(const DemoContext& ctx) {
         : keel::FixedString<64>{};
 
     const keel::String ctrl = keel::format(
-        "guikit::SpinBox(ui, centerFreqMhz, {{\n"
+        "guikit::SpinBox(ui, numericValue, {{\n"
         "    .prefix = \"{}\",\n"
         "    .suffix = \"{}\",\n"
         "    .valueFormat = \"%.1f\",\n"

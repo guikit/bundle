@@ -281,7 +281,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::DisplayReadout:     return "Readout — Interactive Telemetry Channel Display";
         case NavCategory::DisplayImage:       return "Image — Vector SVG & Raster Display";
         // 9. VIEWS
-        case NavCategory::ViewTable:          return "Table — 100k Virtualized Data Grid";
+        case NavCategory::ViewTable:          return "Table — Virtualized Data Grid";
         case NavCategory::ViewTreeView:       return "TreeView — Hierarchical Node Explorer";
         case NavCategory::ViewMarkdown:       return "Markdown — Rich Document Renderer";
         case NavCategory::ViewCodeEditor:     return "Code Editor (TextArea) — Syntax Highlighting, Minimap & Debugger";
@@ -635,8 +635,8 @@ struct DemoContext {
         static constexpr keel::StaticArray<keel::StringRef, 2> kLevelMeter = {
             "Stereo (L/R)", "Mono (1ch)"
         };
-        static constexpr keel::StaticArray<keel::StringRef, 2> kTable = {
-            "Rich DataGrid", "100k Virtual Log"
+        static constexpr keel::StaticArray<keel::StringRef, 3> kTable = {
+            "Interactive Grid", "100k Virtualized", "Wide Grid (24 cols)"
         };
         static constexpr keel::StaticArray<keel::StringRef, 2> kImageView = {
             "16-bit Monochrome", "RGB Multi-Channel"

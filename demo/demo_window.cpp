@@ -628,9 +628,9 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderInputInspector,
         &RenderSelectInspector,
         &RenderMultiSelectInspector,
+        &RenderTagInputInspector,
         &RenderSpinBoxInspector,
         &RenderDatePickerInspector,
-        &RenderTagInputInspector,
         &RenderColorPickerInspector,
         // 7. CONTROLS
         &RenderCheckboxInspector,
@@ -699,9 +699,9 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderInputStage,
         &RenderSelectStage,
         &RenderMultiSelectStage,
+        &RenderTagInputStage,
         &RenderSpinBoxStage,
         &RenderDatePickerStage,
-        &RenderTagInputStage,
         &RenderColorPickerStage,
         // 7. CONTROLS
         &RenderCheckboxStage,
@@ -770,9 +770,9 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateInputCode,
         &GenerateSelectCode,
         &GenerateMultiSelectCode,
+        &GenerateTagInputCode,
         &GenerateSpinBoxCode,
         &GenerateDatePickerCode,
-        &GenerateTagInputCode,
         &GenerateColorPickerCode,
         // 7. CONTROLS
         &GenerateCheckboxCode,

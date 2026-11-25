@@ -291,37 +291,6 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
     return "GuiKit Preview";
 }
 
-constexpr keel::StringRef CategoryControlName(NavCategory cat) noexcept {
-    switch (cat) {
-        case NavCategory::StyleThemeStudio:   return "Theme Studio";
-        case NavCategory::LayoutElement:      return "Element";
-        case NavCategory::ActionButton:       return "Button";
-        case NavCategory::ActionSegmented:    return "Segmented";
-        case NavCategory::FieldInputField:    return "InputField";
-        case NavCategory::FieldSelect:        return "Select";
-        case NavCategory::FieldMultiSelect:   return "MultiSelect";
-        case NavCategory::FieldSpinBox:       return "SpinBox";
-        case NavCategory::FieldDatePicker:    return "DatePicker";
-        case NavCategory::FieldTagInput:      return "TagInput";
-        case NavCategory::FieldColorPicker:   return "ColorPicker";
-        case NavCategory::ViewCodeEditor:     return "Code Editor";
-        case NavCategory::ControlCheckbox:    return "Checkbox";
-        case NavCategory::ControlRadio:       return "Radio";
-        case NavCategory::ControlSwitch:      return "Switch";
-        case NavCategory::ControlSlider:      return "Slider";
-        case NavCategory::ControlStepSlider:  return "StepSlider";
-        case NavCategory::ControlRangeSlider: return "RangeSlider";
-        case NavCategory::ControlKnob:        return "Knob";
-        case NavCategory::DisplayHeading:     return "Heading";
-        case NavCategory::DisplayTag:         return "Tag";
-        case NavCategory::DisplayProgressBar: return "ProgressBar";
-        case NavCategory::DisplayLevelMeter:  return "LevelMeter";
-        case NavCategory::DisplayReadout:     return "Readout";
-        case NavCategory::DisplayImage:       return "Image";
-        default:                              return "Control";
-    }
-}
-
 inline constexpr keel::StaticArray<keel::StringRef, 3> kLabelAlignNames = {"Start", "Center", "End"};
 
 inline constexpr keel::StaticArray<keel::StringRef, 3> kFieldStyleNames = {

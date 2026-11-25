@@ -252,9 +252,6 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
                     .size = guikit::UiSize::Sm,
                     .disabled = !hasCtrlLayout
                 };
-                if (!hasCtrlLayout) {
-                    ctrlLayoutAccOpts.badge = {"Fit", guikit::UiVariant::Secondary};
-                }
                 if (auto ctrlLayoutAcc = guikit::Accordion(ui,
                     hasCtrlLayout ? m_demoCtx.ctrlLayoutOpen : collapsedOpen,
                     ctrlLayoutAccOpts
@@ -272,7 +269,6 @@ void DemoWindow::RenderInspectorSidebar(guikit::Context& ui) {
 
                 if (auto specAcc = guikit::Accordion(ui, {
                     .label = "SPECIFIC",
-                    .badge = {CategoryControlName(m_selectedCategory), guikit::UiVariant::Secondary},
                     .defaultOpen = true,
                     .size = guikit::UiSize::Sm
                 })) {

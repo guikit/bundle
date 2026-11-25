@@ -54,26 +54,11 @@ namespace {
     return "Auto";
 }
 
-[[nodiscard]] constexpr keel::StringRef ScrollbarPresetEnumIdentifier(guikit::ScrollbarPreset p) noexcept {
-    switch (p) {
-        case guikit::ScrollbarPreset::Auto:         return "Auto";
-        case guikit::ScrollbarPreset::Modern:       return "Modern";
-        case guikit::ScrollbarPreset::Classic1988:  return "Classic1988";
-        case guikit::ScrollbarPreset::Windows98:    return "Windows98";
-        case guikit::ScrollbarPreset::WindowsXp:    return "WindowsXp";
-        case guikit::ScrollbarPreset::WindowsVista: return "WindowsVista";
-        case guikit::ScrollbarPreset::Windows7:     return "Windows7";
-        case guikit::ScrollbarPreset::WindowsFlat:  return "WindowsFlat";
-    }
-    return "Auto";
-}
-
 [[nodiscard]] constexpr keel::StringRef ScrollbarChromeLabel(guikit::ScrollbarChromeStyle c) noexcept {
     switch (c) {
         case guikit::ScrollbarChromeStyle::Modern:       return "Modern";
         case guikit::ScrollbarChromeStyle::ClassicBevel: return "Classic 3D";
-        case guikit::ScrollbarChromeStyle::Outlined:     return "Outlined";
-        case guikit::ScrollbarChromeStyle::Flat:         return "Flat";
+        case guikit::ScrollbarChromeStyle::Framed:       return "Framed";
     }
     return "Modern";
 }
@@ -234,7 +219,6 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 st.SelectBasePreset(p);
                 st.chrome = c;
                 st.fillStyle = f;
-                st.scrollbarPreset = guikit::ScrollbarPreset::Auto;
                 const auto tok = guikit::ChromeTokens::FromStyle(c);
                 st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
                 dirty = true;
@@ -294,41 +278,13 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     }
 
     // 2b. SCROLLBAR CUSTOMIZATION
-    static constexpr keel::StaticArray<keel::StringRef, guikit::kScrollbarPresetCount> kScrollbarPresetNames = {{
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Auto),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Modern),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Classic1988),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Windows98),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::WindowsXp),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::WindowsVista),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::Windows7),
-        guikit::ScrollbarPresetName(guikit::ScrollbarPreset::WindowsFlat)
-    }};
-    static constexpr keel::StaticArray<keel::StringRef, 4> kSbChromeNames = {
-        "Modern", "Classic 3D", "Outlined", "Flat"
+    static constexpr keel::StaticArray<keel::StringRef, 3> kSbChromeNames = {
+        "Modern", "Classic 3D", "Framed"
     };
-    static constexpr keel::StaticArray<keel::StringRef, 4> kSbArrowNames = {
-        "None", "Triangle", "Chevron", "Arrow"
-    };
-    static constexpr keel::StaticArray<keel::StringRef, 3> kSbGripNames = {
-        "None", "Lines", "Dots"
+    static constexpr keel::StaticArray<keel::StringRef, 3> kSbArrowNames = {
+        "None", "Triangle", "Chevron"
     };
     if (auto acc = guikit::Accordion(ui, {.label = "SCROLLBAR", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
-        keel::usize sbPresetIdx = keel::as<keel::usize>(st.scrollbarPreset);
-        if (auto el = guikit::Element(ui, {.label = "Scrollbar Preset", .description = "Windows 1988–2012 or Modern"})) {
-            if (guikit::Select(ui, sbPresetIdx, kScrollbarPresetNames, {.size = guikit::UiSize::Sm}).changed) {
-                st.scrollbarPreset = keel::from_underlying<guikit::ScrollbarPreset>(sbPresetIdx);
-                if (st.scrollbarPreset == guikit::ScrollbarPreset::Auto) {
-                    const auto chromeTok = guikit::ChromeTokens::FromStyle(st.chrome);
-                    st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(chromeTok.scrollbar);
-                } else {
-                    st.customScrollbarTokens = guikit::ScrollbarStyleTokens::FromPreset(st.scrollbarPreset);
-                }
-                st.customizeScrollbarTokens = false;
-                dirty = true;
-            }
-        }
-
         if (auto el = guikit::Element(ui, {.label = "Custom Width", .layout = guikit::ElementLayout::Leading})) {
             if (guikit::Switch(ui, st.overrideScrollbarWidth, {.size = guikit::UiSize::Sm}).changed) {
                 if (st.overrideScrollbarWidth) {
@@ -356,7 +312,9 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             keel::usize chromeIdx = keel::as<keel::usize>(sbTok.chrome);
             if (auto el = guikit::Element(ui, {.label = "Chrome Style"})) {
                 if (guikit::Select(ui, chromeIdx, kSbChromeNames, {.size = guikit::UiSize::Sm}).changed) {
-                    sbTok.chrome = keel::from_underlying<guikit::ScrollbarChromeStyle>(chromeIdx);
+                    sbTok = guikit::ScrollbarStyleTokens::ForChrome(
+                        keel::from_underlying<guikit::ScrollbarChromeStyle>(chromeIdx)
+                    );
                     dirty = true;
                 }
             }
@@ -377,30 +335,13 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                     }
                 }
             }
-            keel::usize gripIdx = keel::as<keel::usize>(sbTok.gripStyle);
-            if (auto el = guikit::Element(ui, {.label = "Thumb Grip"})) {
-                if (guikit::Select(ui, gripIdx, kSbGripNames, {.size = guikit::UiSize::Sm}).changed) {
-                    sbTok.gripStyle = keel::from_underlying<guikit::ScrollbarGripStyle>(gripIdx);
-                    dirty = true;
-                }
-            }
             if (auto el = guikit::Element(ui, {.label = "Thumb Inset"})) {
                 if (guikit::Slider(ui, sbTok.thumbInset, 0.0f, 4.0f, {.valueFormat = "%.1f dp", .step = 0.5f, .size = guikit::UiSize::Sm}).changed) {
                     dirty = true;
                 }
             }
-            if (auto el = guikit::Element(ui, {.label = "Border Width"})) {
-                if (guikit::Slider(ui, sbTok.borderWidth, 0.0f, 3.0f, {.valueFormat = "%.1f dp", .step = 0.5f, .size = guikit::UiSize::Sm}).changed) {
-                    dirty = true;
-                }
-            }
             if (auto el = guikit::Element(ui, {.label = "Always Show Track", .layout = guikit::ElementLayout::Leading})) {
                 if (guikit::Switch(ui, sbTok.alwaysShowTrack, {.size = guikit::UiSize::Sm}).changed) {
-                    dirty = true;
-                }
-            }
-            if (auto el = guikit::Element(ui, {.label = "Track Hatch", .layout = guikit::ElementLayout::Leading})) {
-                if (guikit::Switch(ui, sbTok.trackHatch, {.size = guikit::UiSize::Sm}).changed) {
                     dirty = true;
                 }
             }
@@ -959,9 +900,9 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                             // Interactive 2D Scrollbar Preview (Vertical + Horizontal + Corner Box)
                             if (auto sbEl = guikit::Element(ui, {
                                 .label = ui.Format("Scrollbar Preview — {} ({:.0f}dp)",
-                                    guikit::ScrollbarPresetName(built.scrollbarPreset),
+                                    ScrollbarChromeLabel(built.scrollbarStyle.chrome),
                                     built.GetScrollbar(guikit::UiSize::Md).trackWidth),
-                                .description = "Test vertical/horizontal stepper arrows, thumb drag, grip & corner box"
+                                .description = "Test vertical/horizontal stepper arrows, thumb drag & corner box"
                             })) {
                                 if (auto sbBox = guikit::ScrollArea(ui, {
                                     .orientation = guikit::Orientation::Both,
@@ -975,9 +916,9 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                                 })) {
                                     for (keel::i32 row = 1; row <= 14; ++row) {
                                         guikit::Text(ui, ui.Format(
-                                            "Row {:02d}  |  Scrollbar Preset: {}  |  Chrome: {}  |  Horizontal overflow sample column A · column B · column C · column D",
+                                            "Row {:02d}  |  Theme: {}  |  Scrollbar: {}  |  Horizontal overflow sample column A · column B · column C · column D",
                                             row,
-                                            guikit::ScrollbarPresetName(built.scrollbarPreset),
+                                            guikit::ChromeStyleName(built.chromeStyle),
                                             ScrollbarChromeLabel(built.scrollbarStyle.chrome)
                                         ), {.role = guikit::TextRole::CodeSmall});
                                     }
@@ -1097,10 +1038,6 @@ keel::String GenerateThemeStudioCode(const DemoContext& ctx) {
     if (spec.syntaxPreset != guikit::SyntaxPreset::Auto) {
         keel::format_into(out, ",\n    .syntaxPreset = guikit::SyntaxPreset::{}",
             SyntaxPresetEnumIdentifier(spec.syntaxPreset));
-    }
-    if (spec.scrollbarPreset.has_value() && *spec.scrollbarPreset != guikit::ScrollbarPreset::Auto) {
-        keel::format_into(out, ",\n    .scrollbarPreset = guikit::ScrollbarPreset::{}",
-            ScrollbarPresetEnumIdentifier(*spec.scrollbarPreset));
     }
     if (spec.scrollbarWidth.has_value()) {
         keel::format_into(out, ",\n    .scrollbarWidth = {:.1f}f", *spec.scrollbarWidth);

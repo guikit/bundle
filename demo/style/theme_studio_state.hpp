@@ -14,7 +14,6 @@ struct ThemeStudioState {
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
     // Scrollbar Customization
-    guikit::ScrollbarPreset scrollbarPreset = guikit::ScrollbarPreset::Auto;
     bool overrideScrollbarWidth = false;
     keel::f32 scrollbarWidth = 10.0f;
     bool customizeScrollbarTokens = false;
@@ -86,7 +85,6 @@ struct ThemeStudioState {
         chrome = guikit::ChromeStyle::Modern;
         fillStyle = guikit::FillStyle::Solid;
         syntaxPreset = guikit::SyntaxPreset::Auto;
-        scrollbarPreset = guikit::ScrollbarPreset::Auto;
         overrideScrollbarWidth = false;
         scrollbarWidth = 10.0f;
         customizeScrollbarTokens = false;
@@ -144,7 +142,6 @@ struct ThemeStudioState {
         chrome = spec.chrome.value_or(def.chromeStyle);
         fillStyle = spec.fillStyle.value_or(def.fillStyle);
         syntaxPreset = spec.syntaxPreset;
-        scrollbarPreset = spec.scrollbarPreset.value_or(guikit::ScrollbarPreset::Auto);
         if (spec.scrollbarWidth.has_value()) {
             overrideScrollbarWidth = true;
             scrollbarWidth = *spec.scrollbarWidth;
@@ -195,9 +192,6 @@ struct ThemeStudioState {
         spec.chrome = chrome;
         spec.fillStyle = fillStyle;
         spec.syntaxPreset = syntaxPreset;
-        if (scrollbarPreset != guikit::ScrollbarPreset::Auto) {
-            spec.scrollbarPreset = scrollbarPreset;
-        }
         if (overrideScrollbarWidth) {
             spec.scrollbarWidth = scrollbarWidth;
         }

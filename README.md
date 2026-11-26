@@ -1,6 +1,8 @@
 # guikit/bundle
 
-Unified workspace, umbrella CMake target (`guikit::all`), and full 38-screen interactive showcase (`guikit_demo`) for the **GuiKit** C++20 ecosystem (Native Desktop & WebAssembly).
+Unified workspace, umbrella CMake target (`guikit::all`), and full 39-screen interactive showcase (`guikit_demo_native` / `guikit_demo`) for the **GuiKit** C++20 ecosystem (Native Desktop & WebAssembly).
+
+GuiKit ships with its own zero-dependency native platform/GPU backend (**Win32 / X11 / Wayland / Emscripten + OpenGL ES 3.0 / GL 3.3 / WebGL2**) and built-in **`keel::font`** C++20 TrueType/OpenType glyph rasterizer, with **optional** **SDL3**, **ThorVG**, and **FreeType** backends.
 
 ## 👉 [Live Interactive Demo (WebAssembly): https://guikit.github.io/demo/](https://guikit.github.io/demo/)
 
@@ -20,12 +22,15 @@ Unified workspace, umbrella CMake target (`guikit::all`), and full 38-screen int
 
 | Module | CMake Target | Description |
 | :--- | :--- | :--- |
-| [`guikit`](https://github.com/guikit/guikit) | `guikit::guikit` | Core immediate-mode vector GUI library, layout engine, widgets, panels, `Scene`, `ImageView`, and rendering/windowing backends |
+| [`guikit`](https://github.com/guikit/guikit) | `guikit::guikit` | Pure C++20 immediate-mode vector GUI core (zero-STL, `keel` only): layout engine, widgets, panels, `DockArea`, `Scene`, `ImageView` |
+| [`native`](https://github.com/guikit/native) | `guikit::native` | GuiKit's own native platform windowing (Win32 / X11 / Wayland / Emscripten) and OpenGL ES 3.0 / GL 3.3 / WebGL2 2D vector renderer (zero SDL3, zero ThorVG) |
+| [`text`](https://github.com/guikit/text) | `guikit::text` | Standalone glyph rasterizer & LRU glyph cache powered by built-in `keel::font` (TrueType/OpenType) with optional **FreeType** backend |
+| [`sdl`](https://github.com/guikit/sdl) | `guikit::sdl` | *(Optional)* **SDL3** windowing, GLSL shader underlays, and **ThorVG** CPU vector rasterizer backend |
 | [`geo`](https://github.com/guikit/geo) | `guikit::geo` | Cartography, 7 geodetic projections, GeoJSON I/O, S-52/ENC marine GIS engine, OSM tile provider, and `guikit::geo::MapView` |
 | [`signal`](https://github.com/guikit/signal) | `guikit::signal` | DSP Waveform + STFT Spectrogram (`SignalView`), Polar Sonar/Radar (`SonarView`), and RTSA Waterfall (`WaterfallView`) |
 | [`cockpit`](https://github.com/guikit/cockpit) | `guikit::cockpit` | Avionics Primary Flight Display (`AttitudeView`) and Automotive Instrument Cluster (`CarClusterView`) |
 | [`diagram`](https://github.com/guikit/diagram) | `guikit::diagram` | Interactive BPMN 2.0 Modeler & Token Simulator (`BpmnEditor`) |
-| `demo/` | `guikit_demo` | Unified 38-screen interactive studio & C++20 code generator showcasing all modules |
+| `demo/` | `guikit_demo_native` / `guikit_demo` | Unified 39-screen interactive studio & C++20 code generator showcasing all modules |
 
 ---
 
@@ -48,22 +53,22 @@ cmake -S . -B build
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 
-# Native showcase (100% GuiKit + keel::font + OpenGL ES3 — zero SDL3 / ThorVG / FreeType)
+# Native showcase (GuiKit's own native backend + keel::font + OpenGL ES3 — zero SDL3 / ThorVG / FreeType)
 ./scripts/linux/native-build.sh
 ./scripts/linux/native-run.sh
 
-# SDL3 + ThorVG + FreeType showcase
+# Optional SDL3 + ThorVG + FreeType showcase
 ./scripts/linux/sdl-build.sh
 ./scripts/linux/sdl-run.sh
 ```
 
 **Windows:**
 ```cmd
-:: Native showcase (zero SDL3 / ThorVG / FreeType)
+:: Native showcase (GuiKit's own native backend + keel::font — zero SDL3 / ThorVG / FreeType)
 scripts\windows\native-build.cmd
 scripts\windows\native-run.cmd
 
-:: SDL3 + ThorVG + FreeType showcase
+:: Optional SDL3 + ThorVG + FreeType showcase
 scripts\windows\sdl-build.cmd
 scripts\windows\sdl-run.cmd
 ```

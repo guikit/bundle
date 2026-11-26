@@ -30,6 +30,7 @@ enum class NavCategory : keel::u8 {
     SurfaceActivityBar,
     SurfaceBottomPanel,
     SurfaceStatusBar,
+    SurfaceDockArea,
 
     // 4. OVERLAYS (Transient Floating Layers)
     OverlayModal,
@@ -189,6 +190,7 @@ constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
            cat == NavCategory::SurfaceActivityBar ||
            cat == NavCategory::SurfaceBottomPanel ||
            cat == NavCategory::SurfaceStatusBar ||
+           cat == NavCategory::SurfaceDockArea ||
            cat == NavCategory::ViewTable ||
            cat == NavCategory::ViewTreeView ||
            cat == NavCategory::ViewMarkdown ||
@@ -261,6 +263,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::SurfaceActivityBar: return "ActivityBar — Primary Icon Rail & Linked Sidebar";
         case NavCategory::SurfaceBottomPanel: return "BottomPanel — Resizable Dockable Bottom Drawer";
         case NavCategory::SurfaceStatusBar:   return "StatusBar — Compact Window Status & Action Strip";
+        case NavCategory::SurfaceDockArea:    return "DockArea — Docking Panels, Tab Groups & Floating Cards";
         // 4. OVERLAYS
         case NavCategory::OverlayModal:          return "Modal — Dialogs, Backdrops & Focus Trap";
         case NavCategory::OverlayPopover:        return "Popover — Anchored Non-Modal Floating Card";
@@ -1488,6 +1491,10 @@ keel::String GenerateBottomPanelCode(const DemoContext& ctx);
 void RenderStatusBarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderStatusBarStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateStatusBarCode(const DemoContext& ctx);
+
+void RenderDockAreaInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderDockAreaStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateDockAreaCode(const DemoContext& ctx);
 
 void RenderRowInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderRowStage(guikit::Context& ui, DemoContext& ctx);

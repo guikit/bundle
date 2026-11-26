@@ -29,8 +29,10 @@ $ErrorActionPreference = "Stop"
 $RepoRoot   = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $TargetName = if ($Sdl) { "guikit_demo" } else { "guikit_demo_native" }
 $BuildSdl   = if ($Sdl) { "ON" } else { "OFF" }
-$BuildDir   = Join-Path $RepoRoot (if ($Sdl) { "build_wasm" } else { "build_wasm_native" })
-$OutDir     = Join-Path $RepoRoot (if ($Sdl) { "dist\web-sdl" } else { "dist\web" })
+$BuildSubDir = if ($Sdl) { "build_wasm" } else { "build_wasm_native" }
+$OutSubDir   = if ($Sdl) { "dist\web-sdl" } else { "dist\web" }
+$BuildDir    = Join-Path $RepoRoot $BuildSubDir
+$OutDir      = Join-Path $RepoRoot $OutSubDir
 
 function Find-Or-Activate-Emsdk {
     if (Get-Command "emcmake" -ErrorAction SilentlyContinue) {

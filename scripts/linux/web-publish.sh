@@ -39,12 +39,12 @@ if [[ "$USE_NATIVE" -eq 1 ]]; then
     BUILD_DIR="${REPO_ROOT}/build_wasm_native"
     TARGET_NAME="guikit_demo_native"
     BUILD_FLAG="--native"
-    STACK_DESC="Emscripten + Native WebGL2 + FreeType (zero SDL3, zero ThorVG)"
+    STACK_DESC="Emscripten + GuiKit Native WebGL2 + keel::font (zero SDL3, zero ThorVG, zero FreeType)"
 else
     BUILD_DIR="${REPO_ROOT}/build_wasm"
     TARGET_NAME="guikit_demo"
     BUILD_FLAG="--sdl"
-    STACK_DESC="Emscripten + SDL3 + ThorVG + WebGL2"
+    STACK_DESC="Emscripten + Optional SDL3 + ThorVG + WebGL2"
 fi
 
 echo "==> [1/4] Preparing WebAssembly build (${TARGET_NAME})..."

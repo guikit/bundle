@@ -27,8 +27,9 @@ $ErrorActionPreference = "Stop"
 $RepoRoot   = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $TargetName = if ($Sdl) { "guikit_demo" } else { "guikit_demo_native" }
 $BuildSdl   = if ($Sdl) { "ON" } else { "OFF" }
-$StackDesc  = if ($Sdl) { "Emscripten + SDL3 + ThorVG + WebGL2" } else { "Emscripten + Native WebGL2 + FreeType (zero SDL3, zero ThorVG)" }
-$BuildDir   = Join-Path $RepoRoot (if ($Sdl) { "build_wasm" } else { "build_wasm_native" })
+$StackDesc  = if ($Sdl) { "Emscripten + Optional SDL3 + ThorVG + WebGL2" } else { "Emscripten + GuiKit Native WebGL2 + keel::font (zero SDL3, zero ThorVG, zero FreeType)" }
+$BuildSubDir = if ($Sdl) { "build_wasm" } else { "build_wasm_native" }
+$BuildDir    = Join-Path $RepoRoot $BuildSubDir
 $StageDir   = Join-Path $RepoRoot "dist\gh-pages"
 $EmsdkDir   = Join-Path $RepoRoot ".emsdk"
 

@@ -118,6 +118,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/surfaces/activity_bar_screen.cpp
         demo/surfaces/bottom_panel_screen.cpp
         demo/surfaces/status_bar_screen.cpp
+        demo/surfaces/dock_area_screen.cpp
         # 4. OVERLAYS
         demo/overlays/modal_screen.cpp
         demo/overlays/popover_screen.cpp

@@ -160,6 +160,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceActivityBar), {.text = "ActivityBar",  .icon = guikit::Icon::Folder()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceBottomPanel), {.text = "BottomPanel",  .icon = guikit::Icon::ChevronUp()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceStatusBar),   {.text = "StatusBar",    .icon = guikit::Icon::Info()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceDockArea),    {.text = "DockArea",     .icon = guikit::Icon::Copy()});
 
             menu.Section("OVERLAYS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayModal),          {.text = "Modal",          .icon = guikit::Icon::Copy()});
@@ -516,7 +517,8 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
                     m_selectedCategory == NavCategory::SurfaceActivityBar ||
                     m_selectedCategory == NavCategory::SurfaceSidebar ||
                     m_selectedCategory == NavCategory::SurfaceBottomPanel ||
-                    m_selectedCategory == NavCategory::SurfaceStatusBar
+                    m_selectedCategory == NavCategory::SurfaceStatusBar ||
+                    m_selectedCategory == NavCategory::SurfaceDockArea
                 );
                 const keel::StringRef title = extActive
                     ? m_extensions[keel::as<keel::usize>(m_selectedExtension)].title
@@ -647,6 +649,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderActivityBarInspector,
         &RenderBottomPanelInspector,
         &RenderStatusBarInspector,
+        &RenderDockAreaInspector,
         // 4. OVERLAYS
         &RenderModalInspector,
         &RenderPopoverInspector,
@@ -725,6 +728,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderActivityBarStage,
         &RenderBottomPanelStage,
         &RenderStatusBarStage,
+        &RenderDockAreaStage,
         // 4. OVERLAYS
         &RenderModalStage,
         &RenderPopoverStage,
@@ -803,6 +807,7 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateActivityBarCode,
         &GenerateBottomPanelCode,
         &GenerateStatusBarCode,
+        &GenerateDockAreaCode,
         // 4. OVERLAYS
         &GenerateModalCode,
         &GeneratePopoverCode,

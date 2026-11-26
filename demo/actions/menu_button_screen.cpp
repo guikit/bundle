@@ -111,6 +111,16 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
         ? keel::format("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::String{};
 
+    const keel::String submenuBlock = s_mb.showSubmenu
+        ? keel::String(
+            "    if (auto sub = menu.SubMenu(\"Resolution\", {.icon = guikit::Icon::Settings()})) {\n"
+            "        sub.Radio(\"1x (72 DPI)\", dpiIdx, 0, {.keepOpen = true});\n"
+            "        sub.Radio(\"2x (Retina)\", dpiIdx, 1, {.keepOpen = true});\n"
+            "        sub.Radio(\"4x (Print)\",  dpiIdx, 2, {.keepOpen = true});\n"
+            "    }\n"
+        )
+        : keel::String{};
+
     return keel::format(
         "if (auto menu = guikit::MenuButton(ui, {{\n"
         "    .text = \"{}\",\n"
@@ -125,6 +135,7 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
         "}}, {{.minWidth = {:.1f}f}})) {{\n"
         "    if (menu.Item(\"Export PNG\", {{.shortcut = \"Ctrl+E\", .icon = guikit::Icon::Save()}})) {{}}\n"
         "    if (menu.Item(\"Export SVG\", {{.shortcut = \"Ctrl+Shift+E\", .icon = guikit::Icon::Copy()}})) {{}}\n"
+        "{}"
         "    menu.Separator();\n"
         "    menu.Checkbox(\"Include Grid Overlay\", includeGrid, {{.keepOpen = true}});\n"
         "}}",
@@ -137,7 +148,8 @@ keel::String GenerateMenuButtonCode(const DemoContext& ctx) {
         ctx.FormatCtrlHeightCode(),
         ButtonStyleEnumName(s_mb.style),
         VariantName(effVar),
-        s_mb.menuMinWidth
+        s_mb.menuMinWidth,
+        submenuBlock
     );
 }
 

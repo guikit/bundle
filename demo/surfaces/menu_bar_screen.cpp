@@ -7,7 +7,6 @@ namespace {
 
 struct MenuBarDemoState {
     guikit::MenuBarStyle style = guikit::MenuBarStyle::Header;
-    bool showRightPill = true;
     bool disabled = false;
     keel::f32 maxMenuHeight = 260.0f;
 
@@ -67,9 +66,6 @@ void RenderMenuBarInspector(guikit::Context& ui, DemoContext&) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {.label = "Trailing Status Tag"})) {
-        if (guikit::Switch(ui, s_mb.showRightPill).changed) ui.InvalidateAll();
-    }
     if (auto el = guikit::Element(ui, {.label = "Disabled"})) {
         if (guikit::Switch(ui, s_mb.disabled).changed) ui.InvalidateAll();
     }
@@ -185,15 +181,6 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
                     RecordAction(ui, ui.Format("GuiKit v{}", guikit::Version::string), guikit::UiVariant::Primary);
                 }
             }
-
-            if (s_mb.showRightPill) {
-                mb.Spacer();
-                (void)guikit::Tag(ui, ui.Format("Zoom {}%", s_mb.zoomPct), {
-                    .variant = guikit::UiVariant::Info,
-                    .style = guikit::TagStyle::Soft,
-                    .size = guikit::UiSize::Xs
-                });
-            }
         }
 
         // 2. Clean workspace area supporting Right-Click RAII ContextMenu with cascading submenus
@@ -241,10 +228,13 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
     }
 }
 
-keel::String GenerateMenuBarCode(const DemoContext&) {
+keel::String GenerateMenuBarCode(const DemoContext& ctx) {
+    const bool isDisabled = s_mb.disabled || ctx.elemDisabled;
+    const keel::String disabledPart = isDisabled ? keel::String(", .disabled = true") : keel::String{};
     return keel::format(
-        "if (auto mb = guikit::MenuBar(ui, {{.style = guikit::MenuBarStyle::{}}})) {{\n"
-        "    if (auto file = mb.Menu(\"File\")) {{\n"
+        "guikit::ContextMenuOptions dropOpts{{.maxHeight = {:.0f}.0f}};\n"
+        "if (auto mb = guikit::MenuBar(ui, {{.style = guikit::MenuBarStyle::{}{}}})) {{\n"
+        "    if (auto file = mb.Menu(\"File\", dropOpts)) {{\n"
         "        if (file.Item(\"New\", {{.shortcut = \"Ctrl+N\", .icon = guikit::Icon::Plus()}})) {{}}\n"
         "        if (auto exp = file.SubMenu(\"Export\", {{.icon = guikit::Icon::Save()}})) {{\n"
         "            if (exp.Item(\"PNG Image\")) {{}}\n"
@@ -253,15 +243,15 @@ keel::String GenerateMenuBarCode(const DemoContext&) {
         "        file.Separator();\n"
         "        if (file.Item(\"Exit\", {{.variant = guikit::UiVariant::Danger}})) {{}}\n"
         "    }}\n"
-        "    if (auto view = mb.Menu(\"View\")) {{\n"
+        "    if (auto view = mb.Menu(\"View\", dropOpts)) {{\n"
         "        view.Section(\"WORKSPACE\");\n"
         "        view.Checkbox(\"Show Grid\", showGrid, {{.keepOpen = true}});\n"
         "        view.Radio(\"Standard\", densityIdx, 1);\n"
         "    }}\n"
-        "    mb.Spacer();\n"
-        "    guikit::Tag(ui, \"Ready\", {{.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Xs}});\n"
         "}}",
-        StyleName(s_mb.style)
+        s_mb.maxMenuHeight,
+        StyleName(s_mb.style),
+        disabledPart
     );
 }
 

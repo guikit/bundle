@@ -100,17 +100,24 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         # 1. STYLE
         demo/style/theme_studio_screen.cpp
         # 2. LAYOUT
-        demo/layout/flex_screen.cpp
+        demo/layout/row_screen.cpp
+        demo/layout/column_screen.cpp
         demo/layout/wrap_screen.cpp
         demo/layout/grid_screen.cpp
         demo/layout/scroll_area_screen.cpp
         demo/layout/split_view_screen.cpp
         demo/layout/element_screen.cpp
         # 3. SURFACES
+        demo/surfaces/box_screen.cpp
         demo/surfaces/card_screen.cpp
+        demo/surfaces/accordion_screen.cpp
+        demo/surfaces/carousel_screen.cpp
         demo/surfaces/menu_bar_screen.cpp
         demo/surfaces/toolbar_screen.cpp
         demo/surfaces/sidebar_screen.cpp
+        demo/surfaces/activity_bar_screen.cpp
+        demo/surfaces/bottom_panel_screen.cpp
+        demo/surfaces/status_bar_screen.cpp
         # 4. OVERLAYS
         demo/overlays/modal_screen.cpp
         demo/overlays/popover_screen.cpp

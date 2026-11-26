@@ -113,8 +113,12 @@ void RenderTagStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateTagCode(const DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Sm : ctx.controlsSize;
+    const keel::String iconLine = s_state.showIcon
+        ? keel::String("    .icon = guikit::Icon::Check(),\n")
+        : keel::String{};
     return keel::format(
         "if (auto r = guikit::Tag(ui, \"{}\", {{\n"
+        "{}"
         "    .variant = guikit::UiVariant::{},\n"
         "    .style = guikit::TagStyle::{},\n"
         "    .size = guikit::UiSize::{},\n"
@@ -126,6 +130,7 @@ keel::String GenerateTagCode(const DemoContext& ctx) {
         "    // Handle click\n"
         "}}",
         s_state.label,
+        iconLine,
         VariantName(s_state.variant),
         TagStyleName(s_state.style),
         SizeName(effSize),

@@ -11,7 +11,8 @@ enum class NavCategory : keel::u8 {
     StyleThemeStudio = 0,
 
     // 2. LAYOUT (Geometry & Slot Framing)
-    LayoutFlex,
+    LayoutRow,
+    LayoutColumn,
     LayoutWrap,
     LayoutGrid,
     LayoutScrollArea,
@@ -19,10 +20,16 @@ enum class NavCategory : keel::u8 {
     LayoutElement,
 
     // 3. SURFACES (Containers & Application Shell)
+    SurfaceBox,
     SurfaceCard,
+    SurfaceAccordion,
+    SurfaceCarousel,
     SurfaceMenuBar,
     SurfaceToolbar,
     SurfaceSidebar,
+    SurfaceActivityBar,
+    SurfaceBottomPanel,
+    SurfaceStatusBar,
 
     // 4. OVERLAYS (Transient Floating Layers)
     OverlayModal,
@@ -170,13 +177,18 @@ constexpr bool IsSandboxCategory(NavCategory cat) noexcept {
 
 constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
     return cat == NavCategory::StyleThemeStudio ||
-           cat == NavCategory::LayoutFlex ||
+           cat == NavCategory::LayoutRow ||
+           cat == NavCategory::LayoutColumn ||
            cat == NavCategory::LayoutWrap ||
            cat == NavCategory::LayoutGrid ||
            cat == NavCategory::LayoutScrollArea ||
            cat == NavCategory::LayoutSplitView ||
            cat == NavCategory::SurfaceSidebar ||
            cat == NavCategory::SurfaceMenuBar ||
+           cat == NavCategory::SurfaceToolbar ||
+           cat == NavCategory::SurfaceActivityBar ||
+           cat == NavCategory::SurfaceBottomPanel ||
+           cat == NavCategory::SurfaceStatusBar ||
            cat == NavCategory::ViewTable ||
            cat == NavCategory::ViewTreeView ||
            cat == NavCategory::ViewMarkdown ||
@@ -231,17 +243,24 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         // 1. STYLE
         case NavCategory::StyleThemeStudio:   return "Theme Studio — Palette × Chrome × Fill & Tokens";
         // 2. LAYOUT
-        case NavCategory::LayoutFlex:         return "Row & Column — Flex Layout & Elastic Spacer";
+        case NavCategory::LayoutRow:          return "Row — Horizontal Flex Layout & Elastic Spacer";
+        case NavCategory::LayoutColumn:       return "Column — Vertical Flex Layout & Elastic Spacer";
         case NavCategory::LayoutWrap:         return "Wrap — Responsive Flow-Wrapping Layout";
         case NavCategory::LayoutGrid:         return "Grid — 12-Column Responsive Track Grid";
         case NavCategory::LayoutScrollArea:   return "ScrollArea — 1D & 2D Scrollable Viewport";
         case NavCategory::LayoutSplitView:    return "SplitView — Resizable Dual-Pane Sash";
         case NavCategory::LayoutElement:      return "Element — Form-Field Wrapper & Slot Anatomy";
         // 3. SURFACES
+        case NavCategory::SurfaceBox:         return "Box — Primitive Visual Container & Surface Roles";
         case NavCategory::SurfaceCard:        return "Card — Surface Container & Elevation";
+        case NavCategory::SurfaceAccordion:   return "Accordion — Collapsible Sections & Settings Groups";
+        case NavCategory::SurfaceCarousel:    return "Carousel — Horizontal Scrollable Ribbon & Arrows";
         case NavCategory::SurfaceMenuBar:     return "MenuBar — Desktop Menu Bar & Cascading Submenus";
         case NavCategory::SurfaceToolbar:     return "Toolbar — Command Strip & Tool Palettes";
         case NavCategory::SurfaceSidebar:     return "Sidebar — Application Workbench Shell";
+        case NavCategory::SurfaceActivityBar: return "ActivityBar — Primary Icon Rail & Linked Sidebar";
+        case NavCategory::SurfaceBottomPanel: return "BottomPanel — Resizable Dockable Bottom Drawer";
+        case NavCategory::SurfaceStatusBar:   return "StatusBar — Compact Window Status & Action Strip";
         // 4. OVERLAYS
         case NavCategory::OverlayModal:          return "Modal — Dialogs, Backdrops & Focus Trap";
         case NavCategory::OverlayPopover:        return "Popover — Anchored Non-Modal Floating Card";
@@ -531,6 +550,32 @@ inline keel::String BgPresetToCode(
     return code;
 }
 
+constexpr guikit::StateColor BorderPresetToStateColor(keel::usize idx) noexcept {
+    switch (idx) {
+        case 1: return guikit::StateColor::Primary();
+        case 2: return guikit::StateColor::Secondary();
+        case 3: return guikit::StateColor::Success();
+        case 4: return guikit::StateColor::Warning();
+        case 5: return guikit::StateColor::Danger();
+        case 6: return guikit::StateColor::Info();
+        case 7: return guikit::StateColor::Ghost();
+        default: return guikit::StateColor{};
+    }
+}
+
+constexpr keel::StringRef BorderPresetToCode(keel::usize idx) noexcept {
+    switch (idx) {
+        case 1: return "guikit::StateColor::Primary()";
+        case 2: return "guikit::StateColor::Secondary()";
+        case 3: return "guikit::StateColor::Success()";
+        case 4: return "guikit::StateColor::Warning()";
+        case 5: return "guikit::StateColor::Danger()";
+        case 6: return "guikit::StateColor::Info()";
+        case 7: return "guikit::StateColor::Ghost()";
+        default: return "guikit::StateColor{}";
+    }
+}
+
 struct DemoContext {
     bool shellLightMode = false;
     bool shellFloating = false;
@@ -623,7 +668,10 @@ struct DemoContext {
     keel::f32 rowGap = 8.0f;
 
     static keel::ArrayRef<keel::StringRef> DemoVariantsFor(NavCategory cat) noexcept {
-        static constexpr keel::StaticArray<keel::StringRef, 3> kFlex = {"Row", "Column", "Row + Spacer"};
+        static constexpr keel::StaticArray<keel::StringRef, 2> kBox = {"Single Box", "SurfaceRole Gallery"};
+        static constexpr keel::StaticArray<keel::StringRef, 2> kCarousel = {"Card Deck", "Filter Chips"};
+        static constexpr keel::StaticArray<keel::StringRef, 2> kRow = {"Horizontal Row", "Row + Spacer"};
+        static constexpr keel::StaticArray<keel::StringRef, 2> kColumn = {"Vertical Column", "Column + Spacer"};
         static constexpr keel::StaticArray<keel::StringRef, 2> kGrid = {"12-Col Bento", "Equal Columns"};
         static constexpr keel::StaticArray<keel::StringRef, 2> kSplitView = {"3-Pane Nested", "2-Pane Single"};
         static constexpr keel::StaticArray<keel::StringRef, 4> kElement = {
@@ -642,10 +690,13 @@ struct DemoContext {
             "16-bit Monochrome", "RGB Multi-Channel"
         };
         switch (cat) {
-            case NavCategory::LayoutFlex:        return kFlex;
+            case NavCategory::LayoutRow:         return kRow;
+            case NavCategory::LayoutColumn:      return kColumn;
             case NavCategory::LayoutGrid:        return kGrid;
             case NavCategory::LayoutSplitView:   return kSplitView;
             case NavCategory::LayoutElement:     return kElement;
+            case NavCategory::SurfaceBox:        return kBox;
+            case NavCategory::SurfaceCarousel:   return kCarousel;
             case NavCategory::OverlayTooltip:    return kTooltip;
             case NavCategory::DisplayLevelMeter: return kLevelMeter;
             case NavCategory::ViewTable:         return kTable;
@@ -1397,13 +1448,41 @@ keel::String GenerateRadioCode(const DemoContext& ctx);
 // ============================================================================
 // 2. PANELS & NAV (Containers & Navigation)
 // ============================================================================
+void RenderBoxInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderBoxStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateBoxCode(const DemoContext& ctx);
+
 void RenderCardInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderCardStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateCardCode(const DemoContext& ctx);
 
-void RenderFlexInspector(guikit::Context& ui, DemoContext& ctx);
-void RenderFlexStage(guikit::Context& ui, DemoContext& ctx);
-keel::String GenerateFlexCode(const DemoContext& ctx);
+void RenderAccordionInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderAccordionStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateAccordionCode(const DemoContext& ctx);
+
+void RenderCarouselInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderCarouselStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateCarouselCode(const DemoContext& ctx);
+
+void RenderActivityBarInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderActivityBarStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateActivityBarCode(const DemoContext& ctx);
+
+void RenderBottomPanelInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderBottomPanelStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateBottomPanelCode(const DemoContext& ctx);
+
+void RenderStatusBarInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderStatusBarStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateStatusBarCode(const DemoContext& ctx);
+
+void RenderRowInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderRowStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateRowCode(const DemoContext& ctx);
+
+void RenderColumnInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderColumnStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateColumnCode(const DemoContext& ctx);
 
 void RenderWrapInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderWrapStage(guikit::Context& ui, DemoContext& ctx);

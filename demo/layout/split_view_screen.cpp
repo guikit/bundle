@@ -15,7 +15,7 @@ struct SplitViewDemoState {
     keel::f32 minPaneSize = 48.0f;
     bool showGrip = true;
     bool collapsible = true;
-    bool showOuterBorder = true;
+    keel::f32 outerBorderWidth = 1.0f;
 };
 
 SplitViewDemoState s_split;
@@ -98,8 +98,8 @@ void RenderSplitViewInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
-    if (auto el = guikit::Element(ui, {.label = "Show Outer Frame"})) {
-        if (guikit::Switch(ui, s_split.showOuterBorder).changed) {
+    if (auto el = guikit::Element(ui, {.label = "Outer Border Width"})) {
+        if (guikit::Slider(ui, s_split.outerBorderWidth, 0.0f, 4.0f, {.valueFormat = "%.1f px", .step = 0.5f}).changed) {
             ui.InvalidateAll();
         }
     }
@@ -140,8 +140,8 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
         .width = guikit::SizeMode::Stretch,
         .height = guikit::SizeMode::Stretch,
         .background = {pal.surface},
-        .border = s_split.showOuterBorder
-            ? guikit::Border{.width = 1.0f, .radius = ui.GetTheme().GetRadius(guikit::UiSize::Md), .color = {pal.borderSubtle}}
+        .border = (s_split.outerBorderWidth > 0.0f)
+            ? guikit::Border{.width = s_split.outerBorderWidth, .radius = ui.GetTheme().GetRadius(guikit::UiSize::Md), .color = {pal.borderSubtle}}
             : guikit::Border::None(),
         .clipChildren = true
     };
@@ -217,6 +217,9 @@ void RenderSplitViewStage(guikit::Context& ui, DemoContext& ctx) {
 keel::String GenerateSplitViewCode(const DemoContext& ctx) {
     const bool isNested = (ctx.GetDemoVariant(NavCategory::LayoutSplitView) == 0u);
     const keel::StringRef orientName = kOrientations[s_split.orientationIdx];
+    const keel::String borderLine = (s_split.outerBorderWidth > 0.0f)
+        ? keel::format(",\n    .border = {{.width = {:.1f}f}}", s_split.outerBorderWidth)
+        : keel::String(",\n    .border = guikit::Border::None()");
     if (!isNested) {
         return keel::format(
             "float primaryRatio = {:.2f}f;\n\n"
@@ -229,7 +232,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
             "    .minSecondSize = {:.0f}f,\n"
             "    .sashSize = {:.0f}f,\n"
             "    .showGrip = {},\n"
-            "    .collapsible = {}\n"
+            "    .collapsible = {}{}\n"
             "}})) {{\n"
             "    if (auto first = split.First()) {{\n"
             "        guikit::Text(ui, ui.Format(\"Pane 1 ({{:.0f}}%)\", split.Ratio() * 100.0f));\n"
@@ -246,7 +249,8 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
             s_split.minPaneSize,
             s_split.sashSize,
             s_split.showGrip ? "true" : "false",
-            s_split.collapsible ? "true" : "false"
+            s_split.collapsible ? "true" : "false",
+            borderLine
         );
     }
 
@@ -263,7 +267,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
         "    .minSecondSize = {:.0f}f,\n"
         "    .sashSize = {:.0f}f,\n"
         "    .showGrip = {},\n"
-        "    .collapsible = {}\n"
+        "    .collapsible = {}{}\n"
         "}})) {{\n"
         "    if (auto first = split.First()) {{\n"
         "        guikit::Text(ui, ui.Format(\"Pane 1 ({{:.0f}}%)\", split.Ratio() * 100.0f));\n"
@@ -299,6 +303,7 @@ keel::String GenerateSplitViewCode(const DemoContext& ctx) {
         s_split.sashSize,
         s_split.showGrip ? "true" : "false",
         s_split.collapsible ? "true" : "false",
+        borderLine,
         nestedOrientName,
         s_split.minRatio,
         s_split.maxRatio,

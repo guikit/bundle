@@ -619,16 +619,31 @@ keel::String GenerateCodeEditorCode(const DemoContext& ctx) {
     const keel::String sizeLine = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md)
         ? keel::format("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::String{};
+    const keel::String zoomLine = (keel::abs(s_state.zoom - 1.0f) > 0.01f)
+        ? keel::format("    .zoom = {:.2f}f,\n", s_state.zoom)
+        : keel::String{};
+    const keel::String diagLine = s_state.showDiagnostics
+        ? keel::String(",\n    .diagnostics = diagnostics")
+        : keel::String{};
+    const keel::String inlineLine = s_state.showInlineValues
+        ? keel::String(",\n    .inlineValues = inlineValues")
+        : keel::String{};
+    const keel::String hoverLine = s_state.showHoverDataTips
+        ? keel::String(",\n    .debugVariables = debugVariables")
+        : keel::String{};
 
     return keel::format(
         "auto resp = guikit::TextArea(ui, sourceBuffer, {{\n"
+        "    .readOnly = {},\n"
         "    .showLineNumbers = {},\n"
+        "    .wordWrap = {},\n"
+        "{}"
         "    .syntax = {},\n"
         "    .syntaxPalette = {},\n"
-        "    .style = guikit::FieldStyle::{},\n"
-        "    .status = guikit::UiVariant::{},\n"
         "{}"
         "    .height = guikit::SizeMode::Stretch,\n"
+        "    .style = guikit::FieldStyle::{},\n"
+        "    .status = guikit::UiVariant::{},\n"
         "    .showMinimap = {},\n"
         "    .showStatusBar = {},\n"
         "    .showIndentGuides = {},\n"
@@ -637,27 +652,30 @@ keel::String GenerateCodeEditorCode(const DemoContext& ctx) {
         "    .breakpoints = &breakpoints,\n"
         "    .executionLine = debugExecLine,\n"
         "    .showDebugToolbar = {},\n"
-        "    .debugToolbarAlign = {},\n"
-        "    .diagnostics = diagnostics,\n"
-        "    .inlineValues = inlineValues,\n"
-        "    .debugVariables = debugVariables\n"
+        "    .debugToolbarAlign = {}{}{}{}\n"
         "}});\n"
         "if (resp.debugAction == guikit::CodeDebugAction::StepOver) {{\n"
         "    StepDebugger();\n"
         "}}",
+        s_state.readOnly ? "true" : "false",
         s_state.lineNumbers ? "true" : "false",
+        s_state.wordWrap ? "true" : "false",
+        zoomLine,
         synLine,
         palLine,
+        sizeLine,
         FieldStyleEnumName(ctx.ctrlFieldStyle),
         VariantName(ctx.ctrlFieldStatus),
-        sizeLine,
         s_state.showMinimap ? "true" : "false",
         s_state.showStatusBar ? "true" : "false",
         s_state.showIndentGuides ? "true" : "false",
         s_state.showWhitespace ? "true" : "false",
         s_state.codeFolding ? "true" : "false",
         s_state.showDebugToolbar ? "true" : "false",
-        dbgAlignStr
+        dbgAlignStr,
+        diagLine,
+        inlineLine,
+        hoverLine
     );
 }
 

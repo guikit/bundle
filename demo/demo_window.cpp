@@ -131,7 +131,8 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::StyleThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
 
             menu.Section("LAYOUT");
-            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutFlex),         {.text = "Row & Column", .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutRow),          {.text = "Row",          .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutColumn),       {.text = "Column",       .icon = guikit::Icon::Copy()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutWrap),         {.text = "Wrap",         .icon = guikit::Icon::Refresh()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutGrid),         {.text = "Grid",         .icon = guikit::Icon::Copy()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutScrollArea),   {.text = "ScrollArea",   .icon = guikit::Icon::ChevronDown()});
@@ -139,10 +140,16 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::LayoutElement),      {.text = "Element",      .icon = guikit::Icon::Settings()});
 
             menu.Section("SURFACES");
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceBox),         {.text = "Box",          .icon = guikit::Icon::Copy()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceCard),        {.text = "Card",         .icon = guikit::Icon::Copy()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceAccordion),   {.text = "Accordion",    .icon = guikit::Icon::ChevronDown()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceCarousel),    {.text = "Carousel",     .icon = guikit::Icon::ArrowRight()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceMenuBar),     {.text = "MenuBar",      .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceToolbar),     {.text = "Toolbar",      .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceSidebar),     {.text = "Sidebar",      .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceActivityBar), {.text = "ActivityBar",  .icon = guikit::Icon::Folder()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceBottomPanel), {.text = "BottomPanel",  .icon = guikit::Icon::ChevronUp()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceStatusBar),   {.text = "StatusBar",    .icon = guikit::Icon::Info()});
 
             menu.Section("OVERLAYS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayModal),          {.text = "Modal",          .icon = guikit::Icon::Copy()});
@@ -598,17 +605,24 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         // 1. STYLE
         &RenderThemeStudioInspector,
         // 2. LAYOUT
-        &RenderFlexInspector,
+        &RenderRowInspector,
+        &RenderColumnInspector,
         &RenderWrapInspector,
         &RenderGridInspector,
         &RenderScrollAreaInspector,
         &RenderSplitViewInspector,
         &RenderElementInspector,
         // 3. SURFACES
+        &RenderBoxInspector,
         &RenderCardInspector,
+        &RenderAccordionInspector,
+        &RenderCarouselInspector,
         &RenderMenuBarInspector,
         &RenderToolbarInspector,
         &RenderSidebarInspector,
+        &RenderActivityBarInspector,
+        &RenderBottomPanelInspector,
+        &RenderStatusBarInspector,
         // 4. OVERLAYS
         &RenderModalInspector,
         &RenderPopoverInspector,
@@ -669,17 +683,24 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         // 1. STYLE
         &RenderThemeStudioStage,
         // 2. LAYOUT
-        &RenderFlexStage,
+        &RenderRowStage,
+        &RenderColumnStage,
         &RenderWrapStage,
         &RenderGridStage,
         &RenderScrollAreaStage,
         &RenderSplitViewStage,
         &RenderElementStage,
         // 3. SURFACES
+        &RenderBoxStage,
         &RenderCardStage,
+        &RenderAccordionStage,
+        &RenderCarouselStage,
         &RenderMenuBarStage,
         &RenderToolbarStage,
         &RenderSidebarStage,
+        &RenderActivityBarStage,
+        &RenderBottomPanelStage,
+        &RenderStatusBarStage,
         // 4. OVERLAYS
         &RenderModalStage,
         &RenderPopoverStage,
@@ -740,17 +761,24 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         // 1. STYLE
         &GenerateThemeStudioCode,
         // 2. LAYOUT
-        &GenerateFlexCode,
+        &GenerateRowCode,
+        &GenerateColumnCode,
         &GenerateWrapCode,
         &GenerateGridCode,
         &GenerateScrollAreaCode,
         &GenerateSplitViewCode,
         &GenerateElementCode,
         // 3. SURFACES
+        &GenerateBoxCode,
         &GenerateCardCode,
+        &GenerateAccordionCode,
+        &GenerateCarouselCode,
         &GenerateMenuBarCode,
         &GenerateToolbarCode,
         &GenerateSidebarCode,
+        &GenerateActivityBarCode,
+        &GenerateBottomPanelCode,
+        &GenerateStatusBarCode,
         // 4. OVERLAYS
         &GenerateModalCode,
         &GeneratePopoverCode,

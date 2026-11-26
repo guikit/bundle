@@ -455,7 +455,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
         "        .style = guikit::SidebarMenuStyle::{},\n"
         "        .variant = guikit::UiVariant::{}{}\n"
         "    }})) {{\n"
-        "        menu.Section(\"WORKSPACE\");\n"
+        "{}"
         "        menu.Item(selected, 0, {{.text = \"Overview\", .icon = guikit::Icon::Folder(){}}});\n"
         "        menu.Item(selected, 1, {{.text = \"Analytics\", .icon = guikit::Icon::Search(){}}});\n"
         "    }}\n"
@@ -468,6 +468,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
         s_state.menuStyle == guikit::SidebarMenuStyle::Indicator ? "Indicator" : "Pill",
         VariantName(ctx.btnVariant),
         FormatUiSizePrefix(ctx.controlsSize),
+        s_state.showSections ? "        menu.Section(\"WORKSPACE\");\n" : "",
         s_state.showBadges ? ", .badge = \"3\"" : "",
         s_state.showBadges ? ", .badge = \"New\"" : ""
     );
@@ -496,7 +497,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
         keel::format_into(
             out,
             "\n\nif (auto sb = guikit::StatusBar(ui, {{.style = guikit::StatusBarStyle::{}}})) {{\n"
-            "    sb.Item({{.text = \"Ready\", .dotColor = theme.variants.success.base}});\n"
+            "    sb.Item({{.text = \"Ready\", .dotColor = theme.GetVariant(guikit::UiVariant::Success).bg}});\n"
             "    sb.Spacer();\n"
             "    if (sb.Action({{.text = \"Bottom Panel\", .active = showBottomPanel}}).clicked) {{\n"
             "        showBottomPanel = !showBottomPanel;\n"

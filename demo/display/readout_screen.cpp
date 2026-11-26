@@ -257,6 +257,7 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
 
 keel::String GenerateReadoutCode(const DemoContext& ctx) {
     const guikit::UiSize effSize = (ctx.controlsSize == guikit::UiSize::None) ? guikit::UiSize::Md : ctx.controlsSize;
+    const keel::String lockLine = s_state.lockZero ? keel::String(", .actionDisabled = true") : keel::String{};
     return keel::format(
         "static constexpr guikit::ReadoutUnit kVoltageUnits[] = {{\n"
         "    {{.label = \"mV\", .factor = 1000.0}},\n"
@@ -266,7 +267,7 @@ keel::String GenerateReadoutCode(const DemoContext& ctx) {
         "guikit::ReadoutChannel channels[] = {{\n"
         "    {{.label = \"Supply Voltage\", .headerLabel = \"VOLTAGE\",\n"
         "      .value = voltageV, .units = kVoltageUnits,\n"
-        "      .defaultUnitIndex = 1, .defaultPrecision = 2}}\n"
+        "      .defaultUnitIndex = 1, .defaultPrecision = 2{}}}\n"
         "}};\n\n"
         "auto resp = guikit::Readout(ui, slotState, channels, {{\n"
         "    .size = guikit::UiSize::{},\n"
@@ -274,13 +275,20 @@ keel::String GenerateReadoutCode(const DemoContext& ctx) {
         "    .surface = guikit::SurfaceRole::{},\n"
         "    .disabled = {},\n"
         "    .maxPrecision = {},\n"
+        "    .allowChannelMenu = {},\n"
+        "    .allowPrecisionMenu = {},\n"
+        "    .allowUnitMenu = {},\n"
         "    .showPlusSign = {}\n"
         "}});\n"
         "if (resp.actionClicked) {{ ZeroChannel(slotState.channelIndex); }}",
+        lockLine,
         SizeName(effSize),
         s_state.elevated ? "Raised" : "Flat",
         ctx.elemDisabled ? "true" : "false",
         s_state.maxPrecision,
+        s_state.allowChannelMenu ? "true" : "false",
+        s_state.allowPrecisionMenu ? "true" : "false",
+        s_state.allowUnitMenu ? "true" : "false",
         s_state.showPlusSign ? "true" : "false"
     );
 }

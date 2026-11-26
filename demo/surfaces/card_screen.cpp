@@ -56,29 +56,11 @@ keel::String CardBgCodeName() {
 }
 
 guikit::StateColor ResolveCardBorderColor() noexcept {
-    switch (s_card.borderIdx) {
-        case 1: return guikit::StateColor::Primary();
-        case 2: return guikit::StateColor::Secondary();
-        case 3: return guikit::StateColor::Success();
-        case 4: return guikit::StateColor::Warning();
-        case 5: return guikit::StateColor::Danger();
-        case 6: return guikit::StateColor::Info();
-        case 7: return guikit::StateColor::Ghost();
-        default: return guikit::StateColor{};
-    }
+    return BorderPresetToStateColor(s_card.borderIdx);
 }
 
 keel::StringRef CardBorderCodeName() noexcept {
-    switch (s_card.borderIdx) {
-        case 1: return "guikit::StateColor::Primary()";
-        case 2: return "guikit::StateColor::Secondary()";
-        case 3: return "guikit::StateColor::Success()";
-        case 4: return "guikit::StateColor::Warning()";
-        case 5: return "guikit::StateColor::Danger()";
-        case 6: return "guikit::StateColor::Info()";
-        case 7: return "guikit::StateColor::Ghost()";
-        default: return "guikit::StateColor{}";
-    }
+    return BorderPresetToCode(s_card.borderIdx);
 }
 
 } // namespace
@@ -189,9 +171,22 @@ keel::String GenerateCardCode(const DemoContext& ctx) {
     const keel::String borderCode = (ctx.cardRadius < 0.0f)
         ? keel::format("{{.width = {:.1f}f, .color = {}}}", ctx.cardBorderWidth, CardBorderCodeName())
         : keel::format("{{.width = {:.1f}f, .radius = {:.1f}f, .color = {}}}", ctx.cardBorderWidth, ctx.cardRadius, CardBorderCodeName());
+    const keel::String minWLine = s_card.fullWidth
+        ? keel::String{}
+        : keel::format("    .minWidth = {:.1f}f,\n", s_card.minWidth);
+    const keel::String headerBlock = s_card.showHeader
+        ? keel::format(
+            "    guikit::Heading(ui, {{\n"
+            "        .label = \"Card Container\",\n"
+            "        .description = \"Elevated surface with padding, gap, and border\",\n"
+            "        .separator = {}\n"
+            "    }});\n",
+            s_card.showDivider ? "guikit::HeadingSeparator::Bottom" : "guikit::HeadingSeparator::None"
+        )
+        : keel::String{};
     return keel::format(
         "if (auto card = guikit::Card(ui, {{\n"
-        "    .minWidth = {:.1f}f,\n"
+        "{}"
         "    .width = guikit::SizeMode::{},\n"
         "    .gap = {:.1f}f,\n"
         "    .padding = guikit::Padding::All({:.1f}f),\n"
@@ -199,22 +194,18 @@ keel::String GenerateCardCode(const DemoContext& ctx) {
         "    .border = {},\n"
         "    .surface = guikit::SurfaceRole::{}\n"
         "}})) {{\n"
-        "    guikit::Heading(ui, {{\n"
-        "        .label = \"Card Container\",\n"
-        "        .description = \"Elevated surface with padding, gap, and border\",\n"
-        "        .separator = {}\n"
-        "    }});\n"
+        "{}"
         "    guikit::Text(ui, \"First content row inside the card container.\");\n"
         "    guikit::Text(ui, \"Second content row spaced by the card's gap property.\");\n"
         "}}",
-        s_card.fullWidth ? 0.0f : s_card.minWidth,
+        minWLine,
         s_card.fullWidth ? "Stretch" : "Fit",
         ctx.cardGap,
         ctx.cardPadding,
         CardBgCodeName(),
         borderCode,
         SurfaceRoleCodeName(s_card.surface),
-        s_card.showDivider ? "guikit::HeadingSeparator::Bottom" : "guikit::HeadingSeparator::None"
+        headerBlock
     );
 }
 

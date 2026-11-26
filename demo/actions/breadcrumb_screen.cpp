@@ -128,14 +128,21 @@ keel::String GenerateBreadcrumbCode(const DemoContext& ctx) {
         : keel::FixedString<64>{};
     const keel::FixedString<64> variantCode = keel::format_fixed<64>("guikit::UiVariant::{}", VariantName(ctx.btnVariant));
 
-    const keel::String crumbsDecl = keel::String::from(
-        "static const keel::StaticArray<guikit::BreadcrumbItem, 5> crumbs = {{\n"
-        "    {.label = \"Workspace\", .icon = guikit::Icon::Folder()},\n"
-        "    {.label = \"Projects\",  .icon = guikit::Icon::Settings(), .badge = \"Team\"},\n"
-        "    {.label = \"WebApp\",    .icon = guikit::Icon::Flash()},\n"
-        "    {.label = \"Releases\",  .icon = guikit::Icon::Search(),   .badge = \"v2.4\"},\n"
-        "    {.label = \"Overview\",  .icon = guikit::Icon::Play()}\n"
-        "}};\n"
+    const keel::String crumbsDecl = keel::format(
+        "static const keel::StaticArray<guikit::BreadcrumbItem, 5> crumbs = {{{{\n"
+        "    {{.label = \"Workspace\"{}}},\n"
+        "    {{.label = \"Projects\"{}{}}},\n"
+        "    {{.label = \"WebApp\"{}}},\n"
+        "    {{.label = \"Releases\"{}{}}},\n"
+        "    {{.label = \"Overview\"{}}}\n"
+        "}}}};\n",
+        s_bc.showCrumbIcons ? ", .icon = guikit::Icon::Folder()" : "",
+        s_bc.showCrumbIcons ? ", .icon = guikit::Icon::Settings()" : "",
+        s_bc.showCrumbBadges ? ", .badge = \"Team\"" : "",
+        s_bc.showCrumbIcons ? ", .icon = guikit::Icon::Flash()" : "",
+        s_bc.showCrumbIcons ? ", .icon = guikit::Icon::Search()" : "",
+        s_bc.showCrumbBadges ? ", .badge = \"v2.4\"" : "",
+        s_bc.showCrumbIcons ? ", .icon = guikit::Icon::Play()" : ""
     );
 
     if (s_bc.showSurfaceBox) {

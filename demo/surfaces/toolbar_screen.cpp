@@ -5,6 +5,7 @@ namespace guikit::demo {
 namespace {
 struct ToolbarDemoState {
     guikit::ToolbarStyle style = guikit::ToolbarStyle::Surface;
+    guikit::ButtonStyle buttonStyle = guikit::ButtonStyle::Ghost;
     guikit::Orientation orientation = guikit::Orientation::Horizontal;
     guikit::ToolbarOverflow overflow = guikit::ToolbarOverflow::AutoCompact;
     bool showBadges = true;
@@ -49,6 +50,23 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
+    static constexpr keel::StaticArray<keel::StringRef, 4> kBtnStyleLabels = {"Ghost", "Default", "Soft", "Outline"};
+    keel::usize btnStyleIdx = 0;
+    if (s_tb.buttonStyle == guikit::ButtonStyle::Default) btnStyleIdx = 1;
+    else if (s_tb.buttonStyle == guikit::ButtonStyle::Soft) btnStyleIdx = 2;
+    else if (s_tb.buttonStyle == guikit::ButtonStyle::Outline) btnStyleIdx = 3;
+    if (auto el = guikit::Element(ui, {.label = "Button Style", .layout = guikit::ElementLayout::Stacked})) {
+        if (guikit::Segmented(ui, btnStyleIdx, kBtnStyleLabels).changed) {
+            switch (btnStyleIdx) {
+                case 1:  s_tb.buttonStyle = guikit::ButtonStyle::Default; break;
+                case 2:  s_tb.buttonStyle = guikit::ButtonStyle::Soft;    break;
+                case 3:  s_tb.buttonStyle = guikit::ButtonStyle::Outline; break;
+                default: s_tb.buttonStyle = guikit::ButtonStyle::Ghost;   break;
+            }
+            ui.InvalidateAll();
+        }
+    }
+
     static constexpr keel::StaticArray<keel::StringRef, 2> kOrientLabels = {"Horizontal", "Vertical"};
     keel::usize orientIdx = (s_tb.orientation == guikit::Orientation::Vertical) ? 1 : 0;
     if (auto el = guikit::Element(ui, {.label = "Orientation", .layout = guikit::ElementLayout::Stacked})) {
@@ -89,88 +107,178 @@ void RenderToolbarInspector(guikit::Context& ui, DemoContext& ctx) {
 void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
     const bool isVert = (s_tb.orientation == guikit::Orientation::Vertical);
     const bool isSq = s_tb.squareIcons || isVert;
+    const bool isFloating = (s_tb.style == guikit::ToolbarStyle::Floating);
+    const bool isSurface = (s_tb.style == guikit::ToolbarStyle::Surface);
 
     const guikit::UiVariant toolVar = (ctx.btnVariant == guikit::UiVariant::Ghost)
         ? guikit::UiVariant::Primary
         : ctx.btnVariant;
-    if (auto tb = guikit::Toolbar(ui, {
-        .style = s_tb.style,
-        .orientation = s_tb.orientation,
-        .overflow = s_tb.overflow,
-        .size = ctx.controlsSize
-    })) {
-        tb.Item(s_tb.activeTool, 0, {
-            .text = "Select",
-            .tooltip = "Select Tool (V)",
-            .icon = guikit::Icon::Check(),
-            .variant = toolVar,
-            .square = isSq
-        });
-        tb.Item(s_tb.activeTool, 1, {
-            .text = "Pan",
-            .tooltip = "Pan Viewport (H)",
-            .icon = guikit::Icon::Folder(),
-            .variant = toolVar,
-            .square = isSq
-        });
-        tb.Item(s_tb.activeTool, 2, {
-            .text = "Measure",
-            .tooltip = "Measure Cursor (M)",
-            .icon = guikit::Icon::Search(),
-            .variant = toolVar,
-            .square = isSq
-        });
 
-        tb.Separator();
+    auto renderToolbarWidget = [&]() {
+        if (auto tb = guikit::Toolbar(ui, {
+            .style = s_tb.style,
+            .orientation = s_tb.orientation,
+            .overflow = s_tb.overflow,
+            .buttonStyle = s_tb.buttonStyle,
+            .size = ctx.controlsSize
+        })) {
+            tb.Item(s_tb.activeTool, 0, {
+                .text = "Select",
+                .tooltip = "Select Tool (V)",
+                .icon = guikit::Icon::Check(),
+                .variant = toolVar,
+                .square = isSq
+            });
+            tb.Item(s_tb.activeTool, 1, {
+                .text = "Pan",
+                .tooltip = "Pan Viewport (H)",
+                .icon = guikit::Icon::Folder(),
+                .variant = toolVar,
+                .square = isSq
+            });
+            tb.Item(s_tb.activeTool, 2, {
+                .text = "Measure",
+                .tooltip = "Measure Cursor (M)",
+                .icon = guikit::Icon::Search(),
+                .variant = toolVar,
+                .square = isSq
+            });
 
-        tb.Toggle(s_tb.snapToGrid, {
-            .text = "Snap",
-            .tooltip = "Toggle Grid Snapping",
-            .icon = guikit::Icon::Settings(),
-            .variant = guikit::UiVariant::Info,
-            .square = isSq
-        });
-        tb.Toggle(s_tb.livePreview, {
-            .text = s_tb.livePreview ? "Live" : "Preview",
-            .tooltip = "Toggle Live Preview",
-            .icon = s_tb.livePreview ? guikit::Icon::Pause() : guikit::Icon::Play(),
-            .variant = s_tb.livePreview ? guikit::UiVariant::Success : guikit::UiVariant::Warning,
-            .square = isSq,
-            .badge = (s_tb.showBadges && s_tb.livePreview) ? "LIVE" : ""
-        });
+            tb.Separator();
 
-        static constexpr keel::StaticArray<keel::StringRef, 3> kSyncModes = {
-            "Auto Sync", "Manual Sync", "Offline"
-        };
-        tb.SplitToggle(s_tb.syncEnabled, s_tb.syncMode, kSyncModes, {
-            .text = kSyncModes[keel::as<keel::usize>(keel::clamp(s_tb.syncMode, 0, 2))],
-            .tooltip = "Toggle Sync & Select Mode",
-            .icon = guikit::Icon::Flash(),
-            .square = isSq
-        });
+            tb.Toggle(s_tb.snapToGrid, {
+                .text = "Snap",
+                .tooltip = "Toggle Grid Snapping",
+                .icon = guikit::Icon::Settings(),
+                .variant = guikit::UiVariant::Info,
+                .square = isSq
+            });
+            tb.Toggle(s_tb.livePreview, {
+                .text = s_tb.livePreview ? "Live" : "Preview",
+                .tooltip = "Toggle Live Preview",
+                .icon = s_tb.livePreview ? guikit::Icon::Pause() : guikit::Icon::Play(),
+                .variant = s_tb.livePreview ? guikit::UiVariant::Success : guikit::UiVariant::Warning,
+                .square = isSq,
+                .badge = (s_tb.showBadges && s_tb.livePreview) ? "LIVE" : ""
+            });
 
-        tb.Separator();
+            static constexpr keel::StaticArray<keel::StringRef, 3> kSyncModes = {
+                "Auto Sync", "Manual Sync", "Offline"
+            };
+            tb.SplitToggle(s_tb.syncEnabled, s_tb.syncMode, kSyncModes, {
+                .text = kSyncModes[keel::as<keel::usize>(keel::clamp(s_tb.syncMode, 0, 2))],
+                .tooltip = "Toggle Sync & Select Mode",
+                .icon = guikit::Icon::Flash(),
+                .square = isSq
+            });
 
-        tb.Dropdown({
-            .text = "Export",
-            .tooltip = "Export Snapshot",
-            .icon = guikit::Icon::Save(),
-            .square = isSq,
-            .badge = s_tb.showBadges ? "3" : ""
-        }, {
-            {.label = "Export Vector SVG...", .shortcut = "Ctrl+E",       .icon = guikit::Icon::Folder()},
-            {.label = "Export JSON Data...",  .shortcut = "Ctrl+Shift+E", .icon = guikit::Icon::Copy(), .separatorAfter = true},
-            {.label = "Copy Clipboard Summary", .shortcut = "Ctrl+C",     .icon = guikit::Icon::Check()}
-        });
+            tb.Separator();
+
+            tb.Dropdown({
+                .text = "Export",
+                .tooltip = "Export Snapshot",
+                .icon = guikit::Icon::Save(),
+                .square = isSq,
+                .badge = s_tb.showBadges ? "3" : ""
+            }, {
+                {.label = "Export Vector SVG...",   .shortcut = "Ctrl+E",       .icon = guikit::Icon::Folder()},
+                {.label = "Export JSON Data...",    .shortcut = "Ctrl+Shift+E", .icon = guikit::Icon::Copy(), .separatorAfter = true},
+                {.label = "Copy Clipboard Summary", .shortcut = "Ctrl+C",       .icon = guikit::Icon::Check()}
+            });
+
+            if (isFloating) {
+                tb.Separator();
+            } else {
+                tb.Spacer();
+            }
+            if (tb.ToolButton({
+                .text = "Reset",
+                .tooltip = "Reset Toolbar State",
+                .icon = guikit::Icon::Refresh(),
+                .square = isSq
+            }).clicked) {
+                s_tb.activeTool = 0;
+                s_tb.snapToGrid = true;
+                s_tb.livePreview = false;
+                s_tb.syncEnabled = true;
+                s_tb.syncMode = 0;
+                ui.InvalidateAll();
+            }
+        }
+    };
+
+    auto renderWorkspaceBody = [&]() {
+        static constexpr keel::StaticArray<keel::StringRef, 3> kToolNames = {"Select", "Pan", "Measure"};
+        static constexpr keel::StaticArray<keel::StringRef, 3> kSyncNames = {"Auto Sync", "Manual Sync", "Offline"};
+        const keel::usize toolIdx = keel::as<keel::usize>(keel::clamp(s_tb.activeTool, 0, 2));
+        const keel::usize syncIdx = keel::as<keel::usize>(keel::clamp(s_tb.syncMode, 0, 2));
+
+        if (auto body = guikit::Column(ui, {
+            .gap = 8.0f,
+            .padding = guikit::Padding::All(20.0f),
+            .align = guikit::Alignment::Center,
+            .justify = guikit::Justify::Center,
+            .width = guikit::SizeMode::Stretch,
+            .height = guikit::SizeMode::Stretch
+        })) {
+            guikit::Text(ui, ui.Format(
+                "Tool: {}  |  Snap: {}  |  Preview: {}  |  Sync: {} ({})",
+                kToolNames[toolIdx],
+                s_tb.snapToGrid ? "ON" : "OFF",
+                s_tb.livePreview ? "Live" : "Paused",
+                s_tb.syncEnabled ? "ON" : "OFF",
+                kSyncNames[syncIdx]
+            ), {
+                .role = guikit::TextRole::BodySmall,
+                .variant = guikit::UiVariant::Muted
+            });
+        }
+    };
+
+    const guikit::Padding shellPad = isFloating
+        ? guikit::Padding::All(12.0f)
+        : (isSurface ? guikit::Padding::All(10.0f) : guikit::Padding{});
+
+    if (isVert) {
+        if (auto shell = guikit::Row(ui, {
+            .gap = 0.0f,
+            .padding = shellPad,
+            .align = isFloating ? guikit::Alignment::Center : guikit::Alignment::Stretch,
+            .width = guikit::SizeMode::Stretch,
+            .height = guikit::SizeMode::Stretch
+        })) {
+            renderToolbarWidget();
+            renderWorkspaceBody();
+        }
+    } else {
+        if (auto shell = guikit::Column(ui, {
+            .gap = 0.0f,
+            .padding = shellPad,
+            .align = isFloating ? guikit::Alignment::Center : guikit::Alignment::Stretch,
+            .width = guikit::SizeMode::Stretch,
+            .height = guikit::SizeMode::Stretch
+        })) {
+            renderToolbarWidget();
+            renderWorkspaceBody();
+        }
     }
 }
 
 keel::String GenerateToolbarCode(const DemoContext& ctx) {
+    const bool isVert = (s_tb.orientation == guikit::Orientation::Vertical);
+    const bool isSq = s_tb.squareIcons || isVert;
+    const guikit::UiVariant toolVar = (ctx.btnVariant == guikit::UiVariant::Ghost)
+        ? guikit::UiVariant::Primary
+        : ctx.btnVariant;
+    const bool isFloating = (s_tb.style == guikit::ToolbarStyle::Floating);
+    const keel::StringRef sqStr = isSq ? "true" : "false";
+    const keel::StringRef varStr = VariantName(toolVar);
     return keel::format(
         "if (auto tb = guikit::Toolbar(ui, {{\n"
         "    .style = guikit::ToolbarStyle::{},\n"
         "    .orientation = guikit::Orientation::{},\n"
-        "    .overflow = guikit::ToolbarOverflow::{}{}\n"
+        "    .overflow = guikit::ToolbarOverflow::{},\n"
+        "    .buttonStyle = guikit::ButtonStyle::{}{}\n"
         "}})) {{\n"
         "    tb.Item(activeTool, 0, {{.text = \"Select\",  .icon = guikit::Icon::Check(),  .variant = guikit::UiVariant::{}, .square = {}}});\n"
         "    tb.Item(activeTool, 1, {{.text = \"Pan\",     .icon = guikit::Icon::Folder(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
@@ -186,21 +294,26 @@ keel::String GenerateToolbarCode(const DemoContext& ctx) {
         "        {{.label = \"Export Vector SVG...\", .shortcut = \"Ctrl+E\", .icon = guikit::Icon::Folder()}},\n"
         "        {{.label = \"Copy Summary\",         .shortcut = \"Ctrl+C\", .icon = guikit::Icon::Check()}}\n"
         "    }});\n"
+        "    {}\n"
+        "    if (tb.ToolButton({{.text = \"Reset\", .icon = guikit::Icon::Refresh(), .square = {}}}).clicked) {{ /* ... */ }}\n"
         "}}",
         StyleEnumName(s_tb.style),
-        s_tb.orientation == guikit::Orientation::Vertical ? "Vertical" : "Horizontal",
+        isVert ? "Vertical" : "Horizontal",
         OverflowEnumName(s_tb.overflow),
+        ButtonStyleEnumName(s_tb.buttonStyle),
         FormatUiSizePrefix(ctx.controlsSize),
-        VariantName(ctx.btnVariant),
-        s_tb.squareIcons ? "true" : "false",
-        VariantName(ctx.btnVariant),
-        s_tb.squareIcons ? "true" : "false",
-        VariantName(ctx.btnVariant),
-        s_tb.squareIcons ? "true" : "false",
-        s_tb.squareIcons ? "true" : "false",
-        s_tb.squareIcons ? "true" : "false",
-        s_tb.squareIcons ? "true" : "false",
-        s_tb.showBadges ? ", .badge = \"3\"" : ""
+        varStr,
+        sqStr,
+        varStr,
+        sqStr,
+        varStr,
+        sqStr,
+        sqStr,
+        sqStr,
+        sqStr,
+        s_tb.showBadges ? ", .badge = \"3\"" : "",
+        isFloating ? "tb.Separator();" : "tb.Spacer();",
+        sqStr
     );
 }
 

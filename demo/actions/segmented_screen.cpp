@@ -125,13 +125,39 @@ keel::String GenerateSegmentedCode(const DemoContext& ctx) {
     const keel::FixedString<64> sizeLine = hasCustomSize
         ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
         : keel::FixedString<64>{};
+    const keel::String placePart = (s_state.showIcons && s_state.showText && s_state.iconPlacement != guikit::Placement::Leading)
+        ? keel::format(", .iconPlacement = guikit::Placement::{}", PlacementName(s_state.iconPlacement))
+        : keel::String{};
+
+    auto formatItem = [&](keel::StringRef text, keel::StringRef icon, bool addDisabled) -> keel::String {
+        keel::String item = keel::String::from("{");
+        bool first = true;
+        if (s_state.showText) {
+            keel::format_into(item, ".text = \"{}\"", text);
+            first = false;
+        }
+        if (s_state.showIcons) {
+            if (!first) item.append(", ");
+            keel::format_into(item, ".icon = guikit::Icon::{}()", icon);
+            first = false;
+        }
+        if (!placePart.empty()) {
+            item.append(placePart.as_ref());
+        }
+        if (addDisabled) {
+            if (!first) item.append(", ");
+            keel::format_into(item, ".disabled = {}", s_state.disableLastSegment ? "true" : "false");
+        }
+        item.push_back('}');
+        return item;
+    };
 
     return keel::format(
         "guikit::{}(ui, {}, {{\n"
-        "    {{.text = \"Overview\", .icon = guikit::Icon::Eye()}},\n"
-        "    {{.text = \"Editor\", .icon = guikit::Icon::Edit()}},\n"
-        "    {{.text = \"Preview\", .icon = guikit::Icon::Play()}},\n"
-        "    {{.text = \"Archive\", .icon = guikit::Icon::Folder(), .disabled = {}}}\n"
+        "    {},\n"
+        "    {},\n"
+        "    {},\n"
+        "    {}\n"
         "}}, {{\n"
         "    .equalWidth = {},\n"
         "    .showDividers = {},\n"
@@ -145,7 +171,10 @@ keel::String GenerateSegmentedCode(const DemoContext& ctx) {
         "}});",
         fnName,
         varName,
-        s_state.disableLastSegment ? "true" : "false",
+        formatItem("Overview", "Eye", false),
+        formatItem("Editor", "Edit", false),
+        formatItem("Preview", "Play", false),
+        formatItem("Archive", "Folder", true),
         s_state.equalWidth ? "true" : "false",
         s_state.showDividers ? "true" : "false",
         ctx.elemDisabled ? "true" : "false",

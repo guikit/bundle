@@ -78,9 +78,9 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
     dropOpts.maxHeight = s_mb.maxMenuHeight;
 
     if (auto root = guikit::Column(ui, {
-        .gap = 0.0f,
         .width = guikit::SizeMode::Stretch,
-        .height = guikit::SizeMode::Stretch
+        .height = guikit::SizeMode::Stretch,
+        .shell = true
     })) {
         // 1. Desktop MenuBar with hover-scrubbing, cascading SubMenus, Sections, Checkboxes, Radios & Scrolling
         if (auto mb = guikit::MenuBar(ui, {
@@ -184,13 +184,11 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
         }
 
         // 2. Clean workspace area supporting Right-Click RAII ContextMenu with cascading submenus
-        if (auto body = guikit::Column(ui, {
-            .gap = 8.0f,
-            .padding = guikit::Padding::All(18.0f),
-            .align = guikit::Alignment::Center,
-            .justify = guikit::Justify::Center,
+        if (auto body = guikit::Card(ui, {
             .width = guikit::SizeMode::Stretch,
-            .height = guikit::SizeMode::Stretch
+            .height = guikit::SizeMode::Stretch,
+            .gap = 0.0f,
+            .padding = guikit::Padding{}
         })) {
             const auto bodyRes = body.GetResponse();
             if (bodyRes.rightClicked) {
@@ -199,10 +197,19 @@ void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx) {
                 ui.InvalidateAll();
             }
 
-            guikit::Text(ui, s_mb.lastAction.as_ref(), {
-                .role = guikit::TextRole::BodySmall,
-                .variant = guikit::UiVariant::Muted
-            });
+            if (auto center = guikit::Column(ui, {
+                .gap = 8.0f,
+                .padding = guikit::Padding::All(18.0f),
+                .align = guikit::Alignment::Center,
+                .justify = guikit::Justify::Center,
+                .width = guikit::SizeMode::Stretch,
+                .height = guikit::SizeMode::Stretch
+            })) {
+                guikit::Text(ui, s_mb.lastAction.as_ref(), {
+                    .role = guikit::TextRole::BodySmall,
+                    .variant = guikit::UiVariant::Muted
+                });
+            }
 
             // Right-click RAII ContextMenu using the exact same cascading engine
             if (auto ctxMenu = guikit::ContextMenu(ui, s_mb.ctxMenuOpen, {

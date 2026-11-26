@@ -506,6 +506,7 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
             if (extActive || IsSandboxCategory(m_selectedCategory)) {
                 const bool isFullStage = extActive ? true : IsFullStageCategory(m_selectedCategory);
                 const bool isShellScreen = !extActive && (
+                    m_selectedCategory == NavCategory::StyleThemeStudio ||
                     m_selectedCategory == NavCategory::SurfaceMenuBar ||
                     m_selectedCategory == NavCategory::SurfaceToolbar ||
                     m_selectedCategory == NavCategory::SurfaceActivityBar ||

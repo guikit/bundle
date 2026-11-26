@@ -568,10 +568,10 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
     const guikit::UiTheme& built = ctx.previewTheme;
 
     if (auto bg = guikit::Box(ui, {
-            .gap = 0.0f,
             .width = guikit::SizeMode::Stretch,
             .height = guikit::SizeMode::Stretch,
-            .background = guikit::StateColor{built.palette.background}
+            .background = guikit::StateColor{built.palette.background},
+            .shell = true
         })) {
             // Live Application Chrome Preview (MenuBar + Toolbar under the active theme)
             guikit::ContextMenuOptions dropOpts{};
@@ -665,12 +665,6 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                     if (viewMenu.Radio("Controls & States", tabIdx, 2)) { st.activeStageTab = 2u; ui.InvalidateAll(); }
                     if (viewMenu.Radio("Zones & Syntax", tabIdx, 3))    { st.activeStageTab = 3u; ui.InvalidateAll(); }
                 }
-
-                mb.Spacer();
-                guikit::Tag(ui, guikit::ThemePresetName(built.preset), {
-                    .variant = guikit::UiVariant::Primary,
-                    .size = guikit::UiSize::Xs
-                });
             }
 
             if (auto tb = guikit::Toolbar(ui, {.size = guikit::UiSize::Sm})) {
@@ -743,326 +737,347 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                     ctx.RebuildPreviewTheme();
                     ui.InvalidateAll();
                 }
-
-                tb.Spacer();
-                const keel::f32 txtBgRatio = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.background);
-                guikit::Tag(ui, ui.Format("WCAG {:.1f}:1", txtBgRatio), {
-                    .variant = ContrastBadgeVariant(txtBgRatio),
-                    .size = guikit::UiSize::Xs
-                });
             }
 
-            if (auto scroll = guikit::ScrollArea(ui, {
+            if (auto workspace = guikit::Box(ui, {
+                .gap = 0.0f,
                 .width = guikit::SizeMode::Stretch,
-                .height = guikit::SizeMode::Stretch
+                .height = guikit::SizeMode::Stretch,
+                .background = guikit::StateColor{built.palette.background},
+                .clipChildren = true
             })) {
-                if (auto root = guikit::Column(ui, {
-                    .gap = 14.0f,
-                    .padding = guikit::Padding::All(18.0f),
-                    .width = guikit::SizeMode::Stretch
+                if (auto scroll = guikit::ScrollArea(ui, {
+                    .width = guikit::SizeMode::Stretch,
+                    .height = guikit::SizeMode::Stretch
                 })) {
-                    // 1. Header & Live Audit Strip
-                    const keel::f32 textBgRatio   = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.background);
-                    const keel::f32 accentRatio   = guikit::Color::ContrastRatio(built.palette.accentText, built.palette.accent);
-                    const keel::f32 surfaceRatio  = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.surface);
-                    const auto& primVc = built.GetVariant(guikit::UiVariant::Primary);
-                    const guikit::Color primBgRef = (primVc.bg.a > 0u) ? primVc.bg : built.palette.surface;
-                    const keel::f32 primBtnRatio  = guikit::Color::ContrastRatio(primVc.text, primBgRef);
+                    if (auto root = guikit::Column(ui, {
+                        .gap = 14.0f,
+                        .padding = guikit::Padding::All(18.0f),
+                        .width = guikit::SizeMode::Stretch
+                    })) {
+                        // 1. Header & Live Audit Strip
+                        const keel::f32 textBgRatio   = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.background);
+                        const keel::f32 accentRatio   = guikit::Color::ContrastRatio(built.palette.accentText, built.palette.accent);
+                        const keel::f32 surfaceRatio  = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.surface);
+                        const auto& primVc = built.GetVariant(guikit::UiVariant::Primary);
+                        const guikit::Color primBgRef = (primVc.bg.a > 0u) ? primVc.bg : built.palette.surface;
+                        const keel::f32 primBtnRatio  = guikit::Color::ContrastRatio(primVc.text, primBgRef);
 
-                    const keel::StringRef titleText = st.enableLerp && st.lerpT > 0.001f
-                        ? ui.Format("Theme Studio — {} <-> {} ({:.0f}%)",
-                            guikit::ThemePresetName(st.preset),
-                            guikit::ThemePresetName(st.lerpTarget),
-                            st.lerpT * 100.0f)
-                        : ui.Format("Theme Studio — {}", guikit::ThemePresetName(built.preset));
+                        const keel::StringRef titleText = st.enableLerp && st.lerpT > 0.001f
+                            ? ui.Format("Theme Studio — {} <-> {} ({:.0f}%)",
+                                guikit::ThemePresetName(st.preset),
+                                guikit::ThemePresetName(st.lerpTarget),
+                                st.lerpT * 100.0f)
+                            : ui.Format("Theme Studio — {}", guikit::ThemePresetName(built.preset));
 
-                    guikit::Heading(ui, {
-                        .label = titleText,
-                        .description = ui.Format("{} · {} · {} · Focus {:.1f}dp · Motion {:.1f}x",
-                            built.mode == guikit::ThemeMode::Dark ? "Dark" : "Light",
-                            guikit::ChromeStyleName(built.chromeStyle),
-                            guikit::FillStyleName(built.fillStyle),
-                            built.focusRingWidth,
-                            built.animationScale),
-                        .badge = {
-                            built.shadowsEnabled ? "Elevated" : "Flat",
-                            built.shadowsEnabled ? guikit::UiVariant::Primary : guikit::UiVariant::Secondary
-                        },
-                        .level = guikit::HeadingLevel::H3,
-                        .separator = guikit::HeadingSeparator::Bottom
-                    });
+                        guikit::Heading(ui, {
+                            .label = titleText,
+                            .description = ui.Format("{} · {} · {} · Focus {:.1f}dp · Motion {:.1f}x",
+                                built.mode == guikit::ThemeMode::Dark ? "Dark" : "Light",
+                                guikit::ChromeStyleName(built.chromeStyle),
+                                guikit::FillStyleName(built.fillStyle),
+                                built.focusRingWidth,
+                                built.animationScale),
+                            .badge = {
+                                built.shadowsEnabled ? "Elevated" : "Flat",
+                                built.shadowsEnabled ? guikit::UiVariant::Primary : guikit::UiVariant::Secondary
+                            },
+                            .level = guikit::HeadingLevel::H3,
+                            .separator = guikit::HeadingSeparator::Bottom
+                        });
 
-                    // Stage section filter tabs
-                    static const keel::StaticArray<guikit::TabItem, 4> kStageTabs = {{
-                        {.label = "Full Showcase"},
-                        {.label = "Token Swatches"},
-                        {.label = "Controls & States"},
-                        {.label = "Zones & Syntax"}
-                    }};
-                    guikit::TabBar(ui, st.activeStageTab, kStageTabs, {.size = guikit::UiSize::Sm});
+                        // Stage section filter tabs
+                        static const keel::StaticArray<guikit::TabItem, 4> kStageTabs = {{
+                            {.label = "Full Showcase"},
+                            {.label = "Token Swatches"},
+                            {.label = "Controls & States"},
+                            {.label = "Zones & Syntax"}
+                        }};
+                        guikit::TabBar(ui, st.activeStageTab, kStageTabs, {.size = guikit::UiSize::Sm});
 
-                    const bool showAll = (st.activeStageTab == 0u);
+                        const bool showAll = (st.activeStageTab == 0u);
 
-                    // WCAG 2.1 Audit Cards (visible on Full Showcase & Token Swatches)
-                    if (showAll || st.activeStageTab == 1u) {
-                        if (auto wcagRow = guikit::Row(ui, {.gap = 10.0f, .equalWidths = true})) {
-                            auto auditCard = [&](keel::StringRef label, keel::f32 ratio) {
-                                if (auto c = guikit::Card(ui, {.gap = 4.0f, .padding = guikit::Padding::All(10.0f)})) {
-                                    guikit::Text(ui, label, {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
-                                    if (auto r = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Align::Center})) {
-                                        guikit::Text(ui, ui.Format("{:.1f}:1", ratio), {.role = guikit::TextRole::TitleMedium});
-                                        guikit::Tag(ui, ContrastGradeLabel(ratio), {.variant = ContrastBadgeVariant(ratio), .size = guikit::UiSize::Xs});
+                        // WCAG 2.1 Audit Cards (visible on Full Showcase & Token Swatches)
+                        if (showAll || st.activeStageTab == 1u) {
+                            if (auto wcagRow = guikit::Row(ui, {.gap = 10.0f, .equalWidths = true})) {
+                                auto auditCard = [&](keel::StringRef label, keel::f32 ratio) {
+                                    if (auto c = guikit::Card(ui, {.gap = 4.0f, .padding = guikit::Padding::All(10.0f)})) {
+                                        guikit::Text(ui, label, {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
+                                        if (auto r = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Align::Center})) {
+                                            guikit::Text(ui, ui.Format("{:.1f}:1", ratio), {.role = guikit::TextRole::TitleMedium});
+                                            guikit::Tag(ui, ContrastGradeLabel(ratio), {.variant = ContrastBadgeVariant(ratio), .size = guikit::UiSize::Xs});
+                                        }
                                     }
-                                }
-                            };
-                            auditCard("Text / Background", textBgRatio);
-                            auditCard("Text / Surface",    surfaceRatio);
-                            auditCard("Accent / Ink",      accentRatio);
-                            auditCard("Primary Button",    primBtnRatio);
-                        }
-
-                        // Color Swatch Token Map
-                        if (auto swCard = guikit::Card(ui, {.gap = 10.0f, .padding = guikit::Padding::All(14.0f)})) {
-                            guikit::Heading(ui, {
-                                .label = "Design Token Palette",
-                                .description = "Resolved surface, ink, border & semantic hue swatches",
-                                .level = guikit::HeadingLevel::H6
-                            });
-                            if (auto w = guikit::Wrap(ui, {.gap = 8.0f})) {
-                                RenderColorSwatchCard(ui, "Background",  built.palette.background,      built.palette.border);
-                                RenderColorSwatchCard(ui, "Surface",     built.palette.surface,         built.palette.border);
-                                RenderColorSwatchCard(ui, "Elevated",    built.palette.surfaceElevated, built.palette.border);
-                                RenderColorSwatchCard(ui, "Input Bg",    built.palette.inputBackground, built.palette.border);
-                                RenderColorSwatchCard(ui, "Border",      built.palette.border,          built.palette.borderHover);
-                                RenderColorSwatchCard(ui, "Focus Ring",  built.palette.focusRing,       built.palette.border);
-                                RenderColorSwatchCard(ui, "Text Ink",    built.palette.textPrimary,     built.palette.border);
-                                RenderColorSwatchCard(ui, "Accent",      built.palette.accent,          built.palette.border);
-                                RenderColorSwatchCard(ui, "Success",     built.GetSemanticAccent(guikit::UiVariant::Success), built.palette.border);
-                                RenderColorSwatchCard(ui, "Warning",     built.GetSemanticAccent(guikit::UiVariant::Warning), built.palette.border);
-                                RenderColorSwatchCard(ui, "Danger",      built.GetSemanticAccent(guikit::UiVariant::Danger),  built.palette.border);
-                                RenderColorSwatchCard(ui, "Info",        built.GetSemanticAccent(guikit::UiVariant::Info),    built.palette.border);
+                                };
+                                auditCard("Text / Background", textBgRatio);
+                                auditCard("Text / Surface",    surfaceRatio);
+                                auditCard("Accent / Ink",      accentRatio);
+                                auditCard("Primary Button",    primBtnRatio);
                             }
-                        }
-                    }
 
-                    // Controls, SurfaceStyle Matrix, Elevation Comparison & Accessibility Testbench
-                    if (showAll || st.activeStageTab == 2u) {
-                        // Flat vs Elevated card comparison
-                        if (auto cmpRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
-                            if (auto flatCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .surface = guikit::SurfaceRole::Flat})) {
+                            // Color Swatch Token Map
+                            if (auto swCard = guikit::Card(ui, {.gap = 10.0f, .padding = guikit::Padding::All(14.0f)})) {
                                 guikit::Heading(ui, {
-                                    .label = "Flat Surface Card",
-                                    .description = "Tests surfaceContrast & borderScale separation",
+                                    .label = "Design Token Palette",
+                                    .description = "Resolved surface, ink, border & semantic hue swatches",
                                     .level = guikit::HeadingLevel::H6
                                 });
-                                if (auto tagWrap = guikit::Wrap(ui, {.gap = 6.0f})) {
-                                    guikit::Tag(ui, "Soft Primary",    {.variant = guikit::UiVariant::Primary, .style = guikit::TagStyle::Soft,    .size = guikit::UiSize::Sm});
-                                    guikit::Tag(ui, "Outline Success", {.variant = guikit::UiVariant::Success, .style = guikit::TagStyle::Outline, .size = guikit::UiSize::Sm});
-                                    guikit::Tag(ui, "Solid Danger",    {.variant = guikit::UiVariant::Danger,  .style = guikit::TagStyle::Solid,   .size = guikit::UiSize::Sm});
-                                    guikit::Tag(ui, "Disabled",        {.variant = guikit::UiVariant::Warning, .style = guikit::TagStyle::Soft,    .size = guikit::UiSize::Sm, .disabled = true});
+                                if (auto w = guikit::Wrap(ui, {.gap = 8.0f})) {
+                                    RenderColorSwatchCard(ui, "Background",  built.palette.background,      built.palette.border);
+                                    RenderColorSwatchCard(ui, "Surface",     built.palette.surface,         built.palette.border);
+                                    RenderColorSwatchCard(ui, "Elevated",    built.palette.surfaceElevated, built.palette.border);
+                                    RenderColorSwatchCard(ui, "Input Bg",    built.palette.inputBackground, built.palette.border);
+                                    RenderColorSwatchCard(ui, "Border",      built.palette.border,          built.palette.borderHover);
+                                    RenderColorSwatchCard(ui, "Focus Ring",  built.palette.focusRing,       built.palette.border);
+                                    RenderColorSwatchCard(ui, "Text Ink",    built.palette.textPrimary,     built.palette.border);
+                                    RenderColorSwatchCard(ui, "Accent",      built.palette.accent,          built.palette.border);
+                                    RenderColorSwatchCard(ui, "Success",     built.GetSemanticAccent(guikit::UiVariant::Success), built.palette.border);
+                                    RenderColorSwatchCard(ui, "Warning",     built.GetSemanticAccent(guikit::UiVariant::Warning), built.palette.border);
+                                    RenderColorSwatchCard(ui, "Danger",      built.GetSemanticAccent(guikit::UiVariant::Danger),  built.palette.border);
+                                    RenderColorSwatchCard(ui, "Info",        built.GetSemanticAccent(guikit::UiVariant::Info),    built.palette.border);
                                 }
-                            }
-                            if (auto elevCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .surface = guikit::SurfaceRole::Raised})) {
-                                guikit::Heading(ui, {
-                                    .label = "Elevated Surface Card",
-                                    .description = "Tests Elevation::Md shadowIntensity & surfaceElevated",
-                                    .level = guikit::HeadingLevel::H6
-                                });
-                                guikit::Text(ui, "Shadow blur, vertical offset, and alpha react immediately to Shadow Intensity and Brutalist / HighContrast presets.", {
-                                    .role = guikit::TextRole::BodySmall,
-                                    .variant = guikit::UiVariant::Secondary
-                                });
                             }
                         }
 
-                        // Buttons (Active + Disabled rows) & Interactive Controls
-                        if (auto card = guikit::Card(ui, {
-                            .gap = 12.0f,
-                            .padding = guikit::Padding::All(16.0f),
-                            .surface = guikit::SurfaceRole::Raised
-                        })) {
-                            guikit::Heading(ui, {
-                                .label = ui.Format("Controls & States — {} / {}",
-                                    guikit::ChromeStyleName(built.chromeStyle),
-                                    guikit::FillStyleName(built.fillStyle)),
-                                .description = "Active vs Disabled rows verify ChromeStyle, FillStyle, Disabled Opacity & Focus Ring",
-                                .level = guikit::HeadingLevel::H5
-                            });
-
-                            if (auto btnWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
-                                guikit::Button(ui, {.text = "Default"});
-                                guikit::Button(ui, {.text = "Primary", .variant = guikit::UiVariant::Primary});
-                                guikit::Button(ui, {.text = "Soft",    .style = guikit::ButtonStyle::Soft,    .variant = guikit::UiVariant::Primary});
-                                guikit::Button(ui, {.text = "Outline", .style = guikit::ButtonStyle::Outline, .variant = guikit::UiVariant::Info});
-                                guikit::Button(ui, {.text = "Success", .variant = guikit::UiVariant::Success});
-                                guikit::Button(ui, {.text = "Warning", .variant = guikit::UiVariant::Warning});
-                                guikit::Button(ui, {.text = "Danger",  .variant = guikit::UiVariant::Danger});
-                                guikit::Button(ui, {.text = "Ghost",   .style = guikit::ButtonStyle::Ghost});
-                            }
-
-                            if (auto disWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
-                                guikit::Button(ui, {.text = "Default (Dis)", .disabled = true});
-                                guikit::Button(ui, {.text = "Primary (Dis)", .disabled = true, .variant = guikit::UiVariant::Primary});
-                                guikit::Button(ui, {.text = "Success (Dis)", .disabled = true, .variant = guikit::UiVariant::Success});
-                                guikit::Button(ui, {.text = "Danger (Dis)",  .disabled = true, .variant = guikit::UiVariant::Danger});
-                            }
-
-                            if (auto controlsRow = guikit::Row(ui, {.gap = 14.0f, .equalWidths = true})) {
-                                if (auto leftCol = guikit::Column(ui, {.gap = 8.0f})) {
-                                    if (auto el = guikit::Element(ui, {.label = "Focusable Input (Focus Ring)"})) {
-                                        guikit::InputField(ui, st.sampleInput, {.clearable = true});
-                                    }
-                                    if (auto el = guikit::Element(ui, {.label = "Disabled Input", .disabled = true})) {
-                                        guikit::InputField(ui, st.disabledInput, {.disabled = true});
-                                    }
-                                    static constexpr keel::StaticArray<keel::StringRef, 3> kSampleItems = {
-                                        "Low Latency", "Balanced", "High Precision"
-                                    };
-                                    if (auto el = guikit::Element(ui, {.label = "Dropdown Select"})) {
-                                        guikit::Select(ui, st.sampleSelectIdx, kSampleItems);
+                        // Controls, SurfaceStyle Matrix, Elevation Comparison & Accessibility Testbench
+                        if (showAll || st.activeStageTab == 2u) {
+                            // Flat vs Elevated card comparison
+                            if (auto cmpRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
+                                if (auto flatCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .surface = guikit::SurfaceRole::Flat})) {
+                                    guikit::Heading(ui, {
+                                        .label = "Flat Surface Card",
+                                        .description = "Tests surfaceContrast & borderScale separation",
+                                        .level = guikit::HeadingLevel::H6
+                                    });
+                                    if (auto tagWrap = guikit::Wrap(ui, {.gap = 6.0f})) {
+                                        guikit::Tag(ui, "Soft Primary",    {.variant = guikit::UiVariant::Primary, .style = guikit::TagStyle::Soft,    .size = guikit::UiSize::Sm});
+                                        guikit::Tag(ui, "Outline Success", {.variant = guikit::UiVariant::Success, .style = guikit::TagStyle::Outline, .size = guikit::UiSize::Sm});
+                                        guikit::Tag(ui, "Solid Danger",    {.variant = guikit::UiVariant::Danger,  .style = guikit::TagStyle::Solid,   .size = guikit::UiSize::Sm});
+                                        guikit::Tag(ui, "Disabled",        {.variant = guikit::UiVariant::Warning, .style = guikit::TagStyle::Soft,    .size = guikit::UiSize::Sm, .disabled = true});
                                     }
                                 }
-                                if (auto rightCol = guikit::Column(ui, {.gap = 8.0f})) {
-                                    if (auto el = guikit::Element(ui, {.label = "Parameter Level"})) {
-                                        guikit::Slider(ui, st.sampleSlider, 0.0f, 100.0f, {.valueFormat = "%.0f %%"});
+                                if (auto elevCard = guikit::Card(ui, {.gap = 6.0f, .padding = guikit::Padding::All(14.0f), .surface = guikit::SurfaceRole::Raised})) {
+                                    guikit::Heading(ui, {
+                                        .label = "Elevated Surface Card",
+                                        .description = "Tests Elevation::Md shadowIntensity & surfaceElevated",
+                                        .level = guikit::HeadingLevel::H6
+                                    });
+                                    guikit::Text(ui, "Shadow blur, vertical offset, and alpha react immediately to Shadow Intensity and Brutalist / HighContrast presets.", {
+                                        .role = guikit::TextRole::BodySmall,
+                                        .variant = guikit::UiVariant::Secondary
+                                    });
+                                }
+                            }
+
+                            // Buttons (Active + Disabled rows) & Interactive Controls
+                            if (auto card = guikit::Card(ui, {
+                                .gap = 12.0f,
+                                .padding = guikit::Padding::All(16.0f),
+                                .surface = guikit::SurfaceRole::Raised
+                            })) {
+                                guikit::Heading(ui, {
+                                    .label = ui.Format("Controls & States — {} / {}",
+                                        guikit::ChromeStyleName(built.chromeStyle),
+                                        guikit::FillStyleName(built.fillStyle)),
+                                    .description = "Active vs Disabled rows verify ChromeStyle, FillStyle, Disabled Opacity & Focus Ring",
+                                    .level = guikit::HeadingLevel::H5
+                                });
+
+                                if (auto btnWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
+                                    guikit::Button(ui, {.text = "Default"});
+                                    guikit::Button(ui, {.text = "Primary", .variant = guikit::UiVariant::Primary});
+                                    guikit::Button(ui, {.text = "Soft",    .style = guikit::ButtonStyle::Soft,    .variant = guikit::UiVariant::Primary});
+                                    guikit::Button(ui, {.text = "Outline", .style = guikit::ButtonStyle::Outline, .variant = guikit::UiVariant::Info});
+                                    guikit::Button(ui, {.text = "Success", .variant = guikit::UiVariant::Success});
+                                    guikit::Button(ui, {.text = "Warning", .variant = guikit::UiVariant::Warning});
+                                    guikit::Button(ui, {.text = "Danger",  .variant = guikit::UiVariant::Danger});
+                                    guikit::Button(ui, {.text = "Ghost",   .style = guikit::ButtonStyle::Ghost});
+                                }
+
+                                if (auto disWrap = guikit::Wrap(ui, {.gap = 8.0f})) {
+                                    guikit::Button(ui, {.text = "Default (Dis)", .disabled = true});
+                                    guikit::Button(ui, {.text = "Primary (Dis)", .disabled = true, .variant = guikit::UiVariant::Primary});
+                                    guikit::Button(ui, {.text = "Success (Dis)", .disabled = true, .variant = guikit::UiVariant::Success});
+                                    guikit::Button(ui, {.text = "Danger (Dis)",  .disabled = true, .variant = guikit::UiVariant::Danger});
+                                }
+
+                                if (auto controlsRow = guikit::Row(ui, {.gap = 14.0f, .equalWidths = true})) {
+                                    if (auto leftCol = guikit::Column(ui, {.gap = 8.0f})) {
+                                        if (auto el = guikit::Element(ui, {.label = "Focusable Input (Focus Ring)"})) {
+                                            guikit::InputField(ui, st.sampleInput, {.clearable = true});
+                                        }
+                                        if (auto el = guikit::Element(ui, {.label = "Disabled Input", .disabled = true})) {
+                                            guikit::InputField(ui, st.disabledInput, {.disabled = true});
+                                        }
+                                        static constexpr keel::StaticArray<keel::StringRef, 3> kSampleItems = {
+                                            "Low Latency", "Balanced", "High Precision"
+                                        };
+                                        if (auto el = guikit::Element(ui, {.label = "Dropdown Select"})) {
+                                            guikit::Select(ui, st.sampleSelectIdx, kSampleItems);
+                                        }
                                     }
-                                    if (auto el = guikit::Element(ui, {.label = "Progress & Motion (Animation Scale)"})) {
-                                        guikit::ProgressBar(ui, st.sampleSlider / 100.0f, {
-                                            .indeterminate = st.indeterminateBar,
-                                            .color = guikit::StateColor::Primary()
+                                    if (auto rightCol = guikit::Column(ui, {.gap = 8.0f})) {
+                                        if (auto el = guikit::Element(ui, {.label = "Parameter Level"})) {
+                                            guikit::Slider(ui, st.sampleSlider, 0.0f, 100.0f, {.valueFormat = "%.0f %%"});
+                                        }
+                                        if (auto el = guikit::Element(ui, {.label = "Progress & Motion (Animation Scale)"})) {
+                                            guikit::ProgressBar(ui, st.sampleSlider / 100.0f, {
+                                                .indeterminate = st.indeterminateBar,
+                                                .color = guikit::StateColor::Primary()
+                                            });
+                                        }
+                                        if (auto toggleRow = guikit::Row(ui, {.gap = 14.0f, .align = guikit::Align::Center})) {
+                                            guikit::Switch(ui, st.sampleSwitch, {.textRight = "Active"});
+                                            guikit::Switch(ui, st.sampleSwitchOff, {.textRight = "Dis", .disabled = true});
+                                            if (auto chkEl = guikit::Element(ui, {.label = "Motion Bar", .layout = guikit::ElementLayout::Trailing})) {
+                                                guikit::Checkbox(ui, st.indeterminateBar);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Instrumentation Strip: Knob + LevelMeter
+                                if (auto instRow = guikit::Row(ui, {.gap = 16.0f, .align = guikit::Align::Center})) {
+                                    guikit::Knob(ui, st.sampleKnob, 0.0f, 100.0f, {.valueFormat = "%.0f%%", .size = guikit::UiSize::Sm});
+                                    if (auto meterCol = guikit::Column(ui, {.gap = 4.0f, .width = guikit::SizeMode::Stretch})) {
+                                        guikit::Text(ui, "Multi-Zone DSP LevelMeter (tracks Success / Warning / Danger tokens)", {
+                                            .role = guikit::TextRole::LabelSmall,
+                                            .variant = guikit::UiVariant::Muted
                                         });
+                                        const keel::f64 dbVal = -60.0 + keel::as<keel::f64>(st.sampleSlider) * 0.58;
+                                        guikit::LevelMeter(ui, dbVal, -60.0, 0.0, {.segments = 24u, .multiZoneColor = true, .size = guikit::UiSize::Sm});
                                     }
-                                    if (auto toggleRow = guikit::Row(ui, {.gap = 14.0f, .align = guikit::Align::Center})) {
-                                        guikit::Switch(ui, st.sampleSwitch, {.textRight = "Active"});
-                                        guikit::Switch(ui, st.sampleSwitchOff, {.textRight = "Dis", .disabled = true});
-                                        if (auto chkEl = guikit::Element(ui, {.label = "Motion Bar", .layout = guikit::ElementLayout::Trailing})) {
-                                            guikit::Checkbox(ui, st.indeterminateBar);
+                                }
+
+                                // Interactive 2D Scrollbar Preview (Vertical + Horizontal + Corner Box)
+                                if (auto sbEl = guikit::Element(ui, {
+                                    .label = ui.Format("Scrollbar Preview — {} ({:.0f}dp)",
+                                        guikit::ScrollbarChromeStyleName(built.scrollbarStyle.chrome),
+                                        built.GetScrollbar(guikit::UiSize::Md).trackWidth),
+                                    .description = "Test vertical/horizontal stepper arrows, thumb drag & corner box"
+                                })) {
+                                    if (auto sbBox = guikit::ScrollArea(ui, {
+                                        .orientation = guikit::Orientation::Both,
+                                        .scrollbar = guikit::VisibilityPolicy::Always,
+                                        .gap = 4.0f,
+                                        .padding = guikit::Padding::All(10.0f),
+                                        .width = guikit::SizeMode::Stretch,
+                                        .height = 136.0f,
+                                        .background = guikit::StateColor{built.palette.inputBackground},
+                                        .border = {.width = 1.0f, .color = guikit::StateColor{built.palette.border}}
+                                    })) {
+                                        for (keel::i32 row = 1; row <= 14; ++row) {
+                                            guikit::Text(ui, ui.Format(
+                                                "Row {:02d}  |  Theme: {}  |  Scrollbar: {}  |  Horizontal overflow sample column A · column B · column C · column D",
+                                                row,
+                                                guikit::ChromeStyleName(built.chromeStyle),
+                                                guikit::ScrollbarChromeStyleName(built.scrollbarStyle.chrome)
+                                            ), {.role = guikit::TextRole::CodeSmall});
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Scoped Subtree Overrides (ui.Zone) + Syntax Highlighting Preview
+                        if (showAll || st.activeStageTab == 3u) {
+                            if (auto zoneRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
+                                if (auto z1 = ui.Zone({
+                                    .chrome = guikit::ChromeStyle::Fluent,
+                                    .fillStyle = guikit::FillStyle::Soft,
+                                    .accent = guikit::Color::Hex(0xF59E0BFF)
+                                })) {
+                                    if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
+                                        guikit::Heading(ui, {
+                                            .label = "Zone: Fluent Soft Amber",
+                                            .description = ".chrome = Fluent, .fillStyle = Soft",
+                                            .level = guikit::HeadingLevel::H6
+                                        });
+                                        if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
+                                            guikit::Button(ui, {.text = "Tonal CTA", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
+                                            guikit::Tag(ui, "Zero-Alloc", {.variant = guikit::UiVariant::Warning, .size = guikit::UiSize::Sm});
+                                        }
+                                    }
+                                }
+
+                                if (auto z2 = ui.Zone({
+                                    .chrome = guikit::ChromeStyle::Classic3D,
+                                    .fillStyle = guikit::FillStyle::Outline,
+                                    .accent = guikit::Color::Hex(0x10B981FF)
+                                })) {
+                                    if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
+                                        guikit::Heading(ui, {
+                                            .label = "Zone: Classic 3D Outline",
+                                            .description = ".chrome = Classic3D, .fillStyle = Outline",
+                                            .level = guikit::HeadingLevel::H6
+                                        });
+                                        if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
+                                            guikit::Button(ui, {.text = "Outlined", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
+                                            guikit::Tag(ui, "Emerald", {.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Sm});
+                                        }
+                                    }
+                                }
+
+                                const guikit::ThemePreset hcPreset = (built.mode == guikit::ThemeMode::Dark)
+                                    ? guikit::ThemePreset::HighContrastDark
+                                    : guikit::ThemePreset::HighContrastLight;
+                                if (auto z3 = ui.Zone({.preset = hcPreset})) {
+                                    if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
+                                        guikit::Heading(ui, {
+                                            .label = "Zone: High Contrast",
+                                            .description = ".preset = HighContrast",
+                                            .level = guikit::HeadingLevel::H6
+                                        });
+                                        if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
+                                            guikit::Button(ui, {.text = "WCAG AAA", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
+                                            guikit::Tag(ui, "3dp Focus", {.variant = guikit::UiVariant::Info, .size = guikit::UiSize::Sm});
                                         }
                                     }
                                 }
                             }
 
-                            // Instrumentation Strip: Knob + LevelMeter
-                            if (auto instRow = guikit::Row(ui, {.gap = 16.0f, .align = guikit::Align::Center})) {
-                                guikit::Knob(ui, st.sampleKnob, 0.0f, 100.0f, {.valueFormat = "%.0f%%", .size = guikit::UiSize::Sm});
-                                if (auto meterCol = guikit::Column(ui, {.gap = 4.0f, .width = guikit::SizeMode::Stretch})) {
-                                    guikit::Text(ui, "Multi-Zone DSP LevelMeter (tracks Success / Warning / Danger tokens)", {
-                                        .role = guikit::TextRole::LabelSmall,
-                                        .variant = guikit::UiVariant::Muted
-                                    });
-                                    const keel::f64 dbVal = -60.0 + keel::as<keel::f64>(st.sampleSlider) * 0.58;
-                                    guikit::LevelMeter(ui, dbVal, -60.0, 0.0, {.segments = 24u, .multiZoneColor = true, .size = guikit::UiSize::Sm});
-                                }
-                            }
-
-                            // Interactive 2D Scrollbar Preview (Vertical + Horizontal + Corner Box)
-                            if (auto sbEl = guikit::Element(ui, {
-                                .label = ui.Format("Scrollbar Preview — {} ({:.0f}dp)",
-                                    guikit::ScrollbarChromeStyleName(built.scrollbarStyle.chrome),
-                                    built.GetScrollbar(guikit::UiSize::Md).trackWidth),
-                                .description = "Test vertical/horizontal stepper arrows, thumb drag & corner box"
-                            })) {
-                                if (auto sbBox = guikit::ScrollArea(ui, {
-                                    .orientation = guikit::Orientation::Both,
-                                    .scrollbar = guikit::VisibilityPolicy::Always,
-                                    .gap = 4.0f,
-                                    .padding = guikit::Padding::All(10.0f),
-                                    .width = guikit::SizeMode::Stretch,
-                                    .height = 136.0f,
-                                    .background = guikit::StateColor{built.palette.inputBackground},
-                                    .border = {.width = 1.0f, .color = guikit::StateColor{built.palette.border}}
-                                })) {
-                                    for (keel::i32 row = 1; row <= 14; ++row) {
-                                        guikit::Text(ui, ui.Format(
-                                            "Row {:02d}  |  Theme: {}  |  Scrollbar: {}  |  Horizontal overflow sample column A · column B · column C · column D",
-                                            row,
-                                            guikit::ChromeStyleName(built.chromeStyle),
-                                            guikit::ScrollbarChromeStyleName(built.scrollbarStyle.chrome)
-                                        ), {.role = guikit::TextRole::CodeSmall});
-                                    }
-                                }
-                            }
+                            // Syntax Palette Preview
+                            static constexpr keel::StringRef kSyntaxSnippet =
+                                "// Live SyntaxPalette (synced with ThemePreset or custom SyntaxPreset)\n"
+                                "guikit::ThemeSpec spec{\n"
+                                "    .base = guikit::ThemePreset::Nord,\n"
+                                "    .chrome = guikit::ChromeStyle::Classic3D,\n"
+                                "    .fillStyle = guikit::FillStyle::Soft,\n"
+                                "    .surfaceContrast = 1.15f,\n"
+                                "    .radiusScale = 0.85f\n"
+                                "};\n"
+                                "const guikit::UiTheme theme = guikit::UiTheme::Build(spec);";
+                            keel::String previewCode = keel::String::from(kSyntaxSnippet);
+                            guikit::TextArea(ui, previewCode, {
+                                .autoHeight = true,
+                                .readOnly = true,
+                                .showLineNumbers = true,
+                                .monospace = true,
+                                .syntax = guikit::SyntaxConfig::Cpp()
+                            });
                         }
-                    }
-
-                    // Scoped Subtree Overrides (ui.Zone) + Syntax Highlighting Preview
-                    if (showAll || st.activeStageTab == 3u) {
-                        if (auto zoneRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
-                            if (auto z1 = ui.Zone({
-                                .chrome = guikit::ChromeStyle::Fluent,
-                                .fillStyle = guikit::FillStyle::Soft,
-                                .accent = guikit::Color::Hex(0xF59E0BFF)
-                            })) {
-                                if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
-                                    guikit::Heading(ui, {
-                                        .label = "Zone: Fluent Soft Amber",
-                                        .description = ".chrome = Fluent, .fillStyle = Soft",
-                                        .level = guikit::HeadingLevel::H6
-                                    });
-                                    if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
-                                        guikit::Button(ui, {.text = "Tonal CTA", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
-                                        guikit::Tag(ui, "Zero-Alloc", {.variant = guikit::UiVariant::Warning, .size = guikit::UiSize::Sm});
-                                    }
-                                }
-                            }
-
-                            if (auto z2 = ui.Zone({
-                                .chrome = guikit::ChromeStyle::Classic3D,
-                                .fillStyle = guikit::FillStyle::Outline,
-                                .accent = guikit::Color::Hex(0x10B981FF)
-                            })) {
-                                if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
-                                    guikit::Heading(ui, {
-                                        .label = "Zone: Classic 3D Outline",
-                                        .description = ".chrome = Classic3D, .fillStyle = Outline",
-                                        .level = guikit::HeadingLevel::H6
-                                    });
-                                    if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
-                                        guikit::Button(ui, {.text = "Outlined", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
-                                        guikit::Tag(ui, "Emerald", {.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Sm});
-                                    }
-                                }
-                            }
-
-                            const guikit::ThemePreset hcPreset = (built.mode == guikit::ThemeMode::Dark)
-                                ? guikit::ThemePreset::HighContrastDark
-                                : guikit::ThemePreset::HighContrastLight;
-                            if (auto z3 = ui.Zone({.preset = hcPreset})) {
-                                if (auto zCard = guikit::Card(ui, {.gap = 8.0f, .padding = guikit::Padding::All(12.0f)})) {
-                                    guikit::Heading(ui, {
-                                        .label = "Zone: High Contrast",
-                                        .description = ".preset = HighContrast",
-                                        .level = guikit::HeadingLevel::H6
-                                    });
-                                    if (auto r = guikit::Row(ui, {.gap = 6.0f})) {
-                                        guikit::Button(ui, {.text = "WCAG AAA", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
-                                        guikit::Tag(ui, "3dp Focus", {.variant = guikit::UiVariant::Info, .size = guikit::UiSize::Sm});
-                                    }
-                                }
-                            }
-                        }
-
-                        // Syntax Palette Preview
-                        static constexpr keel::StringRef kSyntaxSnippet =
-                            "// Live SyntaxPalette (synced with ThemePreset or custom SyntaxPreset)\n"
-                            "guikit::ThemeSpec spec{\n"
-                            "    .base = guikit::ThemePreset::Nord,\n"
-                            "    .chrome = guikit::ChromeStyle::Classic3D,\n"
-                            "    .fillStyle = guikit::FillStyle::Soft,\n"
-                            "    .surfaceContrast = 1.15f,\n"
-                            "    .radiusScale = 0.85f\n"
-                            "};\n"
-                            "const guikit::UiTheme theme = guikit::UiTheme::Build(spec);";
-                        keel::String previewCode = keel::String::from(kSyntaxSnippet);
-                        guikit::TextArea(ui, previewCode, {
-                            .autoHeight = true,
-                            .readOnly = true,
-                            .showLineNumbers = true,
-                            .monospace = true,
-                            .syntax = guikit::SyntaxConfig::Cpp()
-                        });
                     }
                 }
+            }
+
+            if (auto sb = guikit::StatusBar(ui, {.size = guikit::UiSize::Sm})) {
+                sb.Item({
+                    .text = guikit::ThemePresetName(built.preset),
+                    .dotColor = built.palette.accent,
+                    .color = guikit::StateColor::Primary()
+                });
+                sb.Separator();
+                sb.Item({.text = guikit::ChromeStyleName(built.chromeStyle)});
+                sb.Separator();
+                sb.Item({.text = guikit::FillStyleName(built.fillStyle)});
+                sb.Separator();
+                sb.Item({.text = (built.shellStyle == guikit::ShellStyle::Floating) ? "Floating Shell" : "Docked Shell"});
+                sb.Spacer();
+                const keel::f32 txtBgRatio = guikit::Color::ContrastRatio(built.palette.textPrimary, built.palette.background);
+                sb.Item({
+                    .text = ui.Format("Contrast {:.1f}:1", txtBgRatio),
+                    .color = (txtBgRatio >= 7.0f) ? guikit::StateColor::Success() : guikit::StateColor::Warning()
+                });
             }
         }
 }

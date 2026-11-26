@@ -366,7 +366,8 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ChromeStyleName(guikit::ChromeStyle::Modern),
             guikit::ChromeStyleName(guikit::ChromeStyle::Fluent),
             guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
-            guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist)
+            guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist),
+            guikit::ChromeStyleName(guikit::ChromeStyle::Glass)
         }};
         keel::usize previewChromeIdx = keel::as<keel::usize>(m_demoCtx.studio.chrome);
         if (guikit::Select(ui, previewChromeIdx, kPreviewChromeLabels, {

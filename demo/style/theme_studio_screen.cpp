@@ -27,6 +27,7 @@ namespace {
         case guikit::ChromeStyle::Fluent:    return "Fluent";
         case guikit::ChromeStyle::Classic3D: return "Classic3D";
         case guikit::ChromeStyle::Brutalist: return "Brutalist";
+        case guikit::ChromeStyle::Glass:     return "Glass";
     }
     return "Modern";
 }
@@ -381,7 +382,65 @@ void RenderTypographyTab(guikit::Context& ui, const guikit::UiTheme& built) {
     }
 }
 
-void RenderSurfacesTab(guikit::Context& ui, const guikit::UiTheme& built) {
+void RenderGlassStageBackdrop(const guikit::Node* node, guikit::ICanvas& canvas, const guikit::UiTheme& theme) {
+    if (!node) return;
+    const guikit::Rect r = node->computedRect;
+    if (r.w <= 1.0f || r.h <= 1.0f) return;
+
+    const auto& pal = theme.palette;
+    const bool isDark = (theme.mode == guikit::ThemeMode::Dark);
+    const guikit::Color baseBg = isDark
+        ? guikit::Color::Lerp(pal.background, pal.accent, 0.14f).WithAlpha(255u)
+        : guikit::Color::Lerp(pal.background, pal.accent, 0.10f).WithAlpha(255u);
+    canvas.DrawRoundRect(r, node->cornerRadius, baseBg, {}, 0.0f);
+
+    const guikit::Color cAccent  = pal.accent;
+    const guikit::Color cInfo    = theme.GetSemanticAccent(guikit::UiVariant::Info);
+    const guikit::Color cSuccess = theme.GetSemanticAccent(guikit::UiVariant::Success);
+    const guikit::Color cWarning = theme.GetSemanticAccent(guikit::UiVariant::Warning);
+    const guikit::Color cDanger  = theme.GetSemanticAccent(guikit::UiVariant::Danger);
+
+    // Subtle geometric grid lines so refractive edge bending is immediately legible
+    const guikit::Color gridCol = pal.textPrimary.WithAlphaF(isDark ? 0.10f : 0.09f);
+    for (keel::f32 gx = r.x + 24.0f; gx < r.Right(); gx += 24.0f) {
+        canvas.DrawLine({gx, r.y}, {gx, r.Bottom()}, gridCol, 1.0f);
+    }
+    for (keel::f32 gy = r.y + 24.0f; gy < r.Bottom(); gy += 24.0f) {
+        canvas.DrawLine({r.x, gy}, {r.Right(), gy}, gridCol, 1.0f);
+    }
+
+    // Vivid theme-harmonized geometric orbs & ribbons behind the floating cards
+    auto drawOrb = [&](keel::f32 cx, keel::f32 cy, keel::f32 rad, guikit::Color col) {
+        canvas.DrawRoundRect(
+            guikit::Rect(cx - rad, cy - rad, rad * 2.0f, rad * 2.0f),
+            rad,
+            col,
+            {},
+            0.0f
+        );
+    };
+    drawOrb(r.x + r.w * 0.14f, r.y + r.h * 0.28f, 64.0f, cAccent.WithAlphaF(isDark ? 0.85f : 0.72f));
+    drawOrb(r.x + r.w * 0.42f, r.y + r.h * 0.78f, 56.0f, cInfo.WithAlphaF(isDark ? 0.80f : 0.68f));
+    drawOrb(r.x + r.w * 0.64f, r.y + r.h * 0.24f, 60.0f, cDanger.WithAlphaF(isDark ? 0.78f : 0.65f));
+    drawOrb(r.x + r.w * 0.88f, r.y + r.h * 0.68f, 68.0f, cSuccess.WithAlphaF(isDark ? 0.82f : 0.70f));
+    drawOrb(r.x + r.w * 0.28f, r.y + r.h * 0.64f, 34.0f, cWarning.WithAlphaF(isDark ? 0.90f : 0.80f));
+
+    // Crisp high-contrast diagonal stripes for testing optical edge dispersion
+    canvas.DrawLine(
+        {r.x + r.w * 0.06f, r.Bottom() - 10.0f},
+        {r.x + r.w * 0.94f, r.y + 10.0f},
+        cWarning.WithAlphaF(isDark ? 0.55f : 0.50f),
+        6.0f
+    );
+    canvas.DrawLine(
+        {r.x + r.w * 0.10f, r.y + 16.0f},
+        {r.x + r.w * 0.90f, r.Bottom() - 16.0f},
+        cInfo.WithAlphaF(isDark ? 0.45f : 0.40f),
+        4.0f
+    );
+}
+
+void RenderSurfacesTab(guikit::Context& ui, const guikit::UiTheme& built, ThemeStudioState& st) {
     // 1. SurfaceRole & Elevation Spectrum
     if (auto roleRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
         auto roleCard = [&](keel::StringRef title, keel::StringRef meta, guikit::SurfaceRole role) {
@@ -394,6 +453,64 @@ void RenderSurfacesTab(guikit::Context& ui, const guikit::UiTheme& built) {
         roleCard("Sunken", "Recessed well & list tray",   guikit::SurfaceRole::Sunken);
         roleCard("Raised", "Elevated card & dialog",      guikit::SurfaceRole::Raised);
         roleCard("Popup",  "Menu, popover & toast layer", guikit::SurfaceRole::Popup);
+    }
+
+    // 1b. Live Backdrop & Glass Refraction Stage
+    if (auto stageCard = guikit::Card(ui, {.gap = 10.0f, .padding = guikit::Padding::All(14.0f)})) {
+        if (auto hdr = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Align::Center})) {
+            guikit::Heading(ui, {.label = "Backdrop & Glass Refraction", .level = guikit::HeadingLevel::H6});
+            guikit::Spacer(ui);
+            const bool gpuBlur = (ui.GetCanvas() != nullptr && ui.GetCanvas()->SupportsBackdropBlur());
+            guikit::Tag(ui, gpuBlur ? "GPU Backdrop Blur" : "Software Fallback", {
+                .variant = gpuBlur ? guikit::UiVariant::Success : guikit::UiVariant::Info,
+                .size = guikit::UiSize::Xs
+            });
+        }
+        if (auto stage = guikit::Box(ui, {
+            .width = guikit::SizeMode::Stretch,
+            .padding = guikit::Padding::All(16.0f),
+            .border = {.width = 1.0f, .radius = built.GetRadius(guikit::UiSize::Md), .color = guikit::StateColor{built.palette.border}},
+            .clipChildren = true
+        })) {
+            if (guikit::Node* stageNode = ui.GetCurrentContainer()) {
+                stageNode->renderFn = &RenderGlassStageBackdrop;
+            }
+            if (auto overlayRow = guikit::Row(ui, {.gap = 14.0f, .equalWidths = true})) {
+                if (auto c1 = guikit::Card(ui, {
+                    .gap = 8.0f,
+                    .padding = guikit::Padding::All(12.0f),
+                    .surface = guikit::SurfaceRole::Raised
+                })) {
+                    guikit::Heading(ui, {.label = "Raised Surface", .level = guikit::HeadingLevel::H6});
+                    guikit::Text(ui, "Switch Chrome to Glass to inspect live refraction, Kawase blur & rim lighting.", {
+                        .role = guikit::TextRole::BodySmall,
+                        .variant = guikit::UiVariant::Secondary
+                    });
+                    guikit::Slider(ui, st.sampleSlider, 0.0f, 100.0f, {.showValue = true});
+                    if (auto btns = guikit::Row(ui, {.gap = 8.0f})) {
+                        guikit::Button(ui, {.text = "Glass Action", .size = guikit::UiSize::Sm});
+                        guikit::Button(ui, {.text = "Primary", .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Primary});
+                    }
+                }
+                if (auto c2 = guikit::Card(ui, {
+                    .gap = 8.0f,
+                    .padding = guikit::Padding::All(12.0f),
+                    .surface = guikit::SurfaceRole::Popup
+                })) {
+                    guikit::Heading(ui, {.label = "Popup / Overlay", .level = guikit::HeadingLevel::H6});
+                    guikit::Text(ui, "Higher frost & tint density keeps overlay copy sharp over vibrant imagery.", {
+                        .role = guikit::TextRole::BodySmall,
+                        .variant = guikit::UiVariant::Secondary
+                    });
+                    if (auto tags = guikit::Wrap(ui, {.gap = 6.0f, .runGap = 6.0f})) {
+                        guikit::Tag(ui, "Refraction", {.variant = guikit::UiVariant::Primary, .size = guikit::UiSize::Xs});
+                        guikit::Tag(ui, "Dual-Kawase", {.variant = guikit::UiVariant::Info, .size = guikit::UiSize::Xs});
+                        guikit::Tag(ui, "WCAG Ink", {.variant = guikit::UiVariant::Success, .size = guikit::UiSize::Xs});
+                    }
+                    guikit::Button(ui, {.text = "Confirm", .icon = guikit::Icon::Check(), .size = guikit::UiSize::Sm, .variant = guikit::UiVariant::Success});
+                }
+            }
+        }
     }
 
     // 2. Accordion & Live Shell Metrics
@@ -808,7 +925,8 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         guikit::ChromeStyleName(guikit::ChromeStyle::Modern),
         guikit::ChromeStyleName(guikit::ChromeStyle::Fluent),
         guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
-        guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist)
+        guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist),
+        guikit::ChromeStyleName(guikit::ChromeStyle::Glass)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kFillStyleCount> kFillNames = {{
@@ -898,6 +1016,12 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 }
                 if (guikit::Button(ui, {.text = "Industrial x Brutal", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Warning}).clicked) {
                     applyCombo(guikit::ThemePreset::Industrial, guikit::ChromeStyle::Brutalist, guikit::FillStyle::Solid);
+                }
+                if (guikit::Button(ui, {.text = "Nord x Glass", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Primary}).clicked) {
+                    applyCombo(guikit::ThemePreset::Nord, guikit::ChromeStyle::Glass, guikit::FillStyle::Soft);
+                }
+                if (guikit::Button(ui, {.text = "Light x Glass", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Info}).clicked) {
+                    applyCombo(guikit::ThemePreset::Light, guikit::ChromeStyle::Glass, guikit::FillStyle::Solid);
                 }
             }
         }
@@ -1406,7 +1530,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                         switch (st.activeStageTab) {
                             case 0u: RenderTokensTab(ui, built); break;
                             case 1u: RenderTypographyTab(ui, built); break;
-                            case 2u: RenderSurfacesTab(ui, built); break;
+                            case 2u: RenderSurfacesTab(ui, built, st); break;
                             case 3u: RenderActionsTab(ui, st); break;
                             case 4u: RenderFieldsTab(ui, st); break;
                             case 5u: RenderControlsTab(ui, st); break;

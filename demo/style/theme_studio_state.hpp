@@ -71,16 +71,49 @@ struct ThemeStudioState {
     keel::u32 randomSeed = 1337u;
 
     // Stage Navigation & Live Preview Widget State
-    keel::usize activeStageTab = 0u; // 0 = Showcase, 1 = Swatches, 2 = Controls, 3 = Zones & Code
+    keel::usize activeStageTab = 0u; // 0=Tokens, 1=Typography, 2=Surfaces, 3=Actions, 4=Fields, 5=Controls, 6=Display
+
+    // Actions preview state
+    keel::usize sampleSegmentedIdx = 1u;
+    keel::usize sampleSubTabIdx = 0u;
+    keel::usize sampleBreadcrumbIdx = 2u;
+    keel::usize samplePage = 2u;
+
+    // Fields preview state
     keel::SmallString<64> sampleInput{"Click to test Focus Ring"};
+    keel::SmallString<64> sampleFilledInput{"Filled field style"};
     keel::SmallString<64> disabledInput{"Disabled input preview"};
+    keel::SmallString<64> sampleValidInput{"Validated value"};
+    keel::SmallString<64> sampleWarnInput{"Needs review"};
+    keel::SmallString<64> sampleErrorInput{"Invalid syntax"};
     keel::usize sampleSelectIdx = 1u;
+    keel::SmallArray<keel::usize, 6> sampleMultiSelect =
+        keel::SmallArray<keel::usize, 6>::from({0u, 2u});
+    keel::SmallArray<keel::FixedString<64>, 8> sampleTags =
+        keel::SmallArray<keel::FixedString<64>, 8>::from({"C++20", "GuiKit", "Zero-STL"});
+    keel::f64 sampleSpin = 42.5;
+    keel::i32 sampleSpinSplit = 12;
+    guikit::DateTime sampleDate{2026, 11, 26, 14, 30, 0};
+    guikit::Color sampleColor = guikit::Color::Hex(0x38BDF8FF);
+
+    // Controls preview state
+    bool sampleCheckbox = true;
+    bool sampleCheckboxOff = false;
+    keel::i32 sampleRadio = 1;
     bool sampleSwitch = true;
     bool sampleSwitchOff = false;
-    bool sampleCheckbox = true;
     keel::f32 sampleSlider = 68.0f;
+    keel::usize sampleStepIdx = 2u;
+    keel::f32 sampleRangeLow = 22.0f;
+    keel::f32 sampleRangeHigh = 74.0f;
     keel::f32 sampleKnob = 42.0f;
-    bool indeterminateBar = true;
+    keel::f32 sampleKnobAux = 76.0f;
+
+    // Display preview state
+    bool indeterminateBar = false;
+    guikit::ReadoutState sampleReadoutA{};
+    guikit::ReadoutState sampleReadoutB{};
+    guikit::ReadoutState sampleReadoutC{};
 
     void ResetToDefaults() noexcept {
         preset = guikit::ThemePreset::Dark;

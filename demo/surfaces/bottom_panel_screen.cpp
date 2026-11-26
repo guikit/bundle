@@ -6,13 +6,12 @@ namespace {
 
 struct BottomPanelDemoState {
     guikit::BottomPanelMode mode = guikit::BottomPanelMode::Expanded;
-    keel::f32 defaultHeight = 170.0f;
+    keel::f32 defaultHeight = 190.0f;
     keel::f32 maxRatio = 0.70f;
     bool resizable = true;
     bool allowCollapse = true;
     bool showToggleButton = true;
-    bool scrollable = true;
-    bool floatingFrame = false;
+    bool scrollable = false;
     keel::usize activeTab = 0;
 };
 
@@ -39,15 +38,6 @@ void RenderBottomPanelInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
         }
     }
 
-    static constexpr keel::StaticArray<keel::StringRef, 2> kFrameNames = {"Docked", "Floating"};
-    keel::usize frameIdx = s_bp.floatingFrame ? 1u : 0u;
-    if (auto el = guikit::Element(ui, {.label = "Shell Frame"})) {
-        if (guikit::Segmented(ui, frameIdx, kFrameNames).changed) {
-            s_bp.floatingFrame = (frameIdx == 1u);
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {
         .label = "Resizable Top Sash",
         .description = "Drag the top border up/down to resize"
@@ -66,27 +56,26 @@ void RenderBottomPanelInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     })) {
         if (guikit::Switch(ui, s_bp.showToggleButton).changed) ui.InvalidateAll();
     }
-    if (auto el = guikit::Element(ui, {.label = "Scrollable Body"})) {
+    if (auto el = guikit::Element(ui, {
+        .label = "Scrollable Body",
+        .description = "Enables panel scrollbar (see Problems tab list)"
+    })) {
         if (guikit::Switch(ui, s_bp.scrollable).changed) ui.InvalidateAll();
     }
 }
 
 void RenderBottomPanelStage(guikit::Context& ui, DemoContext& /*ctx*/) {
-    guikit::UiTheme stageTheme = ui.GetTheme();
-    stageTheme.SetShellStyle(s_bp.floatingFrame ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked);
-
-    if (auto stageZone = ui.Zone({.theme = stageTheme})) {
-        if (auto shell = guikit::Column(ui, {
-            .width = guikit::SizeMode::Stretch,
-            .height = guikit::SizeMode::Stretch
-        })) {
-            // Main workspace area above the bottom panel
-            if (auto mainArea = guikit::Column(ui, {
-                .gap = 10.0f,
-                .padding = guikit::Padding::All(20.0f),
-                .align = guikit::Alignment::Start,
+    const bool isFloating = (ui.GetTheme().shellStyle == guikit::ShellStyle::Floating);
+    if (auto shell = guikit::Column(ui, {
+        .width = guikit::SizeMode::Stretch,
+        .height = guikit::SizeMode::Stretch
+    })) {
+            // Main workspace area above the bottom panel (Card adapts seamlessly to Docked vs Floating shell)
+            if (auto mainArea = guikit::Card(ui, {
                 .width = guikit::SizeMode::Stretch,
-                .height = guikit::SizeMode::Stretch
+                .height = guikit::SizeMode::Stretch,
+                .gap = 10.0f,
+                .padding = guikit::Padding::All(20.0f)
             })) {
                 guikit::Heading(ui, {
                     .label = "Workspace Viewport",
@@ -94,23 +83,16 @@ void RenderBottomPanelStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                     .separator = guikit::HeadingSeparator::Bottom
                 });
 
-                if (auto row = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {
-                    guikit::Tag(ui, s_bp.mode == guikit::BottomPanelMode::Expanded ? "EXPANDED" : "COLLAPSED", {
-                        .variant = s_bp.mode == guikit::BottomPanelMode::Expanded ? guikit::UiVariant::Success : guikit::UiVariant::Secondary,
-                        .style = guikit::TagStyle::Soft,
-                        .size = guikit::UiSize::Sm
-                    });
-                    if (guikit::Button(ui, {
-                        .text = s_bp.mode == guikit::BottomPanelMode::Expanded ? "Collapse Panel" : "Expand Panel",
-                        .icon = s_bp.mode == guikit::BottomPanelMode::Expanded ? guikit::Icon::ChevronDown() : guikit::Icon::ChevronUp(),
-                        .size = guikit::UiSize::Sm,
-                        .variant = guikit::UiVariant::Secondary
-                    }).clicked) {
-                        s_bp.mode = (s_bp.mode == guikit::BottomPanelMode::Expanded)
-                            ? guikit::BottomPanelMode::Collapsed
-                            : guikit::BottomPanelMode::Expanded;
-                        ui.InvalidateAll();
-                    }
+                if (guikit::Button(ui, {
+                    .text = s_bp.mode == guikit::BottomPanelMode::Expanded ? "Collapse Panel" : "Expand Panel",
+                    .icon = s_bp.mode == guikit::BottomPanelMode::Expanded ? guikit::Icon::ChevronDown() : guikit::Icon::ChevronUp(),
+                    .size = guikit::UiSize::Sm,
+                    .variant = guikit::UiVariant::Secondary
+                }).clicked) {
+                    s_bp.mode = (s_bp.mode == guikit::BottomPanelMode::Expanded)
+                        ? guikit::BottomPanelMode::Collapsed
+                        : guikit::BottomPanelMode::Expanded;
+                    ui.InvalidateAll();
                 }
             }
 
@@ -123,47 +105,111 @@ void RenderBottomPanelStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                 .showToggleButton = s_bp.showToggleButton,
                 .scrollable = s_bp.scrollable
             })) {
-                if (auto hdr = guikit::Toolbar(ui, {.style = guikit::ToolbarStyle::Header, .size = guikit::UiSize::Sm})) {
+                if (auto bar = guikit::TabBar(ui, {
+                    .style = guikit::TabBarStyle::Underline,
+                    .padding = guikit::Padding{isFloating ? 6.0f : 0.0f, 4.0f, 4.0f, 0.0f},
+                    .size = guikit::UiSize::Sm
+                })) {
                     static const keel::StaticArray<guikit::TabItem, 3> kTabs = {{
                         {.label = "Output",   .icon = guikit::Icon::Info()},
-                        {.label = "Problems", .icon = guikit::Icon::Warning(), .badge = "2"},
+                        {.label = "Problems", .icon = guikit::Icon::Warning(), .badge = "6"},
                         {.label = "Terminal", .icon = guikit::Icon::Play()}
                     }};
-                    guikit::TabBar(ui, s_bp.activeTab, kTabs, {.style = guikit::TabBarStyle::Underline, .size = guikit::UiSize::Sm});
-                    hdr.Spacer();
-                    if (hdr.ToolButton({.tooltip = "Close Panel", .icon = guikit::Icon::Close(), .square = true}).clicked) {
+                    bar.Items(s_bp.activeTab, kTabs);
+                    if (bar.Action({.tooltip = "Close Panel", .icon = guikit::Icon::Close(), .square = true}).clicked) {
                         s_bp.mode = guikit::BottomPanelMode::Collapsed;
                         ui.InvalidateAll();
                     }
                 }
 
-                if (auto body = guikit::Column(ui, {
-                    .gap = 4.0f,
-                    .padding = guikit::Padding::Symmetric(12.0f, 8.0f),
-                    .width = guikit::SizeMode::Stretch,
-                    .height = guikit::SizeMode::Fit
-                })) {
-                    if (s_bp.activeTab == 0u) {
-                        guikit::Text(ui, "[12:04:01] Configuring CMake workspace...", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Muted});
-                        guikit::Text(ui, "[12:04:03] Building guikit_core (C++20, zero warnings)", {.role = guikit::TextRole::BodySmall});
-                        guikit::Text(ui, "[12:04:06] Linking guikit_demo_native -> build_native/Release", {.role = guikit::TextRole::BodySmall});
-                        guikit::Text(ui, "[12:04:07] 21/21 test suites passed (100%).", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Success});
-                        guikit::Text(ui, "[12:04:08] Ready for interactive preview.", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Secondary});
-                    } else if (s_bp.activeTab == 1u) {
-                        guikit::Text(ui, "WARN  layout/split_view.cpp:142 — Unused layout hint token", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Warning});
-                        guikit::Text(ui, "INFO  style/theme.cpp:88 — Custom accent fallback verified", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Info});
-                    } else {
-                        guikit::Text(ui, "$ ctest --test-dir build --output-on-failure --parallel 8", {.role = guikit::TextRole::BodySmall});
-                        guikit::Text(ui, "100% tests passed, 0 tests failed out of 21", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Success});
+                if (s_bp.activeTab == 1u) {
+                    struct DiagItem {
+                        keel::StringRef severity;
+                        guikit::UiVariant variant;
+                        keel::StringRef location;
+                        keel::StringRef message;
+                    };
+                    static constexpr keel::StaticArray<DiagItem, 6> kDiags = {{
+                        {"WARN", guikit::UiVariant::Warning, "layout/split_view.cpp:142",  "Unused layout hint token in fallback branch"},
+                        {"INFO", guikit::UiVariant::Info,    "style/theme.cpp:88",         "Custom accent fallback verified against WCAG AA"},
+                        {"WARN", guikit::UiVariant::Warning, "surfaces/toolbar.cpp:312",   "Explicit gap overrides density token"},
+                        {"INFO", guikit::UiVariant::Info,    "actions/tab_bar.cpp:210",    "Scrollable strip active with trailing action slot"},
+                        {"WARN", guikit::UiVariant::Warning, "views/table.cpp:1184",       "Virtual row estimate adjusted on DPI change"},
+                        {"INFO", guikit::UiVariant::Success, "tests/test_context.cpp:1",   "All 21 ecosystem CTest suites passed (0 warnings)"}
+                    }};
+                    if (auto list = guikit::Column(ui, {
+                        .gap = 6.0f,
+                        .padding = guikit::Padding::Symmetric(10.0f, 8.0f),
+                        .width = guikit::SizeMode::Stretch,
+                        .height = guikit::SizeMode::Fit
+                    })) {
+                        for (keel::usize i = 0u; i < kDiags.size(); ++i) {
+                            auto rowScope = ui.IdScope(i);
+                            if (auto row = guikit::Row(ui, {
+                                .gap = 8.0f,
+                                .align = guikit::Alignment::Center,
+                                .width = guikit::SizeMode::Stretch
+                            })) {
+                                guikit::Tag(ui, kDiags[i].severity, {
+                                    .variant = kDiags[i].variant,
+                                    .style = guikit::TagStyle::Soft,
+                                    .size = guikit::UiSize::Xs
+                                });
+                                guikit::Text(ui, kDiags[i].location, {
+                                    .role = guikit::TextRole::CodeSmall,
+                                    .variant = guikit::UiVariant::Secondary
+                                });
+                                guikit::Text(ui, kDiags[i].message, {
+                                    .role = guikit::TextRole::BodySmall
+                                });
+                            }
+                        }
+                    }
+                } else {
+                    static constexpr keel::StringRef kOutputText =
+                        "[12:04:01] Configuring CMake workspace (Visual Studio 17 2022)...\n"
+                        "[12:04:02] Checking keel guidelines for guikit_core -> OK\n"
+                        "[12:04:03] Building guikit_core (C++20, zero warnings, zero STL headers)\n"
+                        "[12:04:05] Building guikit_native & guikit_demo_native (Release)\n"
+                        "[12:04:06] Linking guikit_demo_native -> build_native/Release/guikit_demo_native.exe\n"
+                        "[12:04:07] Running CTest: 21/21 test suites passed (100%)\n"
+                        "[12:04:08] Ready for interactive preview.";
+
+                    static constexpr keel::StringRef kTerminalText =
+                        "$ cmake --build build --config Release --parallel 8\n"
+                        "[100%] Built target guikit_demo_native\n"
+                        "$ ctest --test-dir build -C Debug --output-on-failure --parallel\n"
+                        "100% tests passed, 0 tests failed out of 21\n"
+                        "Total Test time (real) = 28.55 sec\n"
+                        "$ _";
+
+                    const keel::StringRef consoleText = (s_bp.activeTab == 2u) ? kTerminalText : kOutputText;
+                    if (auto body = guikit::Column(ui, {
+                        .gap = 0.0f,
+                        .padding = guikit::Padding::All(6.0f),
+                        .width = guikit::SizeMode::Stretch,
+                        .height = guikit::SizeMode::Stretch
+                    })) {
+                        auto tabScope = ui.IdScope(s_bp.activeTab);
+                        guikit::TextArea(ui, consoleText, {
+                            .readOnly = true,
+                            .showLineNumbers = false,
+                            .showCopyButton = true,
+                            .monospace = true,
+                            .size = guikit::UiSize::Sm,
+                            .width = guikit::SizeMode::Stretch,
+                            .height = guikit::SizeMode::Stretch,
+                            .showIndentGuides = false
+                        });
                     }
                 }
             }
         }
-    }
 }
 
-keel::String GenerateBottomPanelCode(const DemoContext& /*ctx*/) {
-    const keel::String shellComment = s_bp.floatingFrame
+keel::String GenerateBottomPanelCode(const DemoContext& ctx) {
+    const bool isFloating = (ctx.studio.shellStyle == guikit::ShellStyle::Floating);
+    const keel::String shellComment = isFloating
         ? keel::String("// theme.SetShellStyle(guikit::ShellStyle::Floating);\n")
         : keel::String{};
     return keel::format(
@@ -177,14 +223,32 @@ keel::String GenerateBottomPanelCode(const DemoContext& /*ctx*/) {
         "    .showToggleButton = {},\n"
         "    .scrollable = {}\n"
         "}})) {{\n"
-        "    if (auto hdr = guikit::Toolbar(ui, {{.style = guikit::ToolbarStyle::Header, .size = guikit::UiSize::Sm}})) {{\n"
-        "        guikit::TabBar(ui, activeTab, tabs, {{.style = guikit::TabBarStyle::Underline, .size = guikit::UiSize::Sm}});\n"
-        "        hdr.Spacer();\n"
-        "        if (hdr.ToolButton({{.tooltip = \"Close Panel\", .icon = guikit::Icon::Close(), .square = true}}).clicked) {{\n"
+        "    if (auto bar = guikit::TabBar(ui, {{\n"
+        "        .style = guikit::TabBarStyle::Underline,\n"
+        "        .padding = guikit::Padding{{{}, 4.0f, 4.0f, 0.0f}},\n"
+        "        .size = guikit::UiSize::Sm\n"
+        "    }})) {{\n"
+        "        bar.Items(activeTab, tabs);\n"
+        "        if (bar.Action({{.tooltip = \"Close Panel\", .icon = guikit::Icon::Close(), .square = true}}).clicked) {{\n"
         "            panelMode = guikit::BottomPanelMode::Collapsed;\n"
         "        }}\n"
         "    }}\n"
-        "    // Panel body content...\n"
+        "    if (auto body = guikit::Column(ui, {{\n"
+        "        .padding = guikit::Padding::All(6.0f),\n"
+        "        .width = guikit::SizeMode::Stretch,\n"
+        "        .height = guikit::SizeMode::Stretch\n"
+        "    }})) {{\n"
+        "        guikit::TextArea(ui, consoleText, {{\n"
+        "            .readOnly = true,\n"
+        "            .showLineNumbers = false,\n"
+        "            .showCopyButton = true,\n"
+        "            .monospace = true,\n"
+        "            .size = guikit::UiSize::Sm,\n"
+        "            .width = guikit::SizeMode::Stretch,\n"
+        "            .height = guikit::SizeMode::Stretch,\n"
+        "            .showIndentGuides = false\n"
+        "        }});\n"
+        "    }}\n"
         "}}",
         shellComment,
         (s_bp.mode == guikit::BottomPanelMode::Collapsed) ? "Collapsed" : "Expanded",
@@ -193,7 +257,8 @@ keel::String GenerateBottomPanelCode(const DemoContext& /*ctx*/) {
         s_bp.resizable ? "true" : "false",
         s_bp.allowCollapse ? "true" : "false",
         s_bp.showToggleButton ? "true" : "false",
-        s_bp.scrollable ? "true" : "false"
+        s_bp.scrollable ? "true" : "false",
+        isFloating ? "6.0f" : "0.0f"
     );
 }
 

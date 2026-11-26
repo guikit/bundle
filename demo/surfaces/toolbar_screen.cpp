@@ -207,13 +207,13 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
         }
     };
 
-    auto renderWorkspaceBody = [&]() {
+    auto renderStatusBody = [&]() {
         static constexpr keel::StaticArray<keel::StringRef, 3> kToolNames = {"Select", "Pan", "Measure"};
         static constexpr keel::StaticArray<keel::StringRef, 3> kSyncNames = {"Auto Sync", "Manual Sync", "Offline"};
         const keel::usize toolIdx = keel::as<keel::usize>(keel::clamp(s_tb.activeTool, 0, 2));
         const keel::usize syncIdx = keel::as<keel::usize>(keel::clamp(s_tb.syncMode, 0, 2));
 
-        if (auto body = guikit::Column(ui, {
+        if (auto center = guikit::Column(ui, {
             .gap = 8.0f,
             .padding = guikit::Padding::All(20.0f),
             .align = guikit::Alignment::Center,
@@ -235,31 +235,89 @@ void RenderToolbarStage(guikit::Context& ui, DemoContext& ctx) {
         }
     };
 
-    const guikit::Padding shellPad = isFloating
-        ? guikit::Padding::All(12.0f)
-        : (isSurface ? guikit::Padding::All(10.0f) : guikit::Padding{});
-
-    if (isVert) {
-        if (auto shell = guikit::Row(ui, {
-            .gap = 0.0f,
-            .padding = shellPad,
-            .align = isFloating ? guikit::Alignment::Center : guikit::Alignment::Stretch,
-            .width = guikit::SizeMode::Stretch,
-            .height = guikit::SizeMode::Stretch
-        })) {
+    auto renderShellContent = [&]() {
+        if (isSurface) {
+            // Standalone shell panel: separate from workspace Card in Floating, flush in Docked
             renderToolbarWidget();
-            renderWorkspaceBody();
+            if (auto workspace = guikit::Card(ui, {
+                .width = guikit::SizeMode::Stretch,
+                .height = guikit::SizeMode::Stretch,
+                .gap = 0.0f,
+                .padding = guikit::Padding{}
+            })) {
+                renderStatusBody();
+            }
+        } else if (isFloating) {
+            // Compact floating tool palette hovering inside the workspace Card
+            if (auto workspace = guikit::Card(ui, {
+                .width = guikit::SizeMode::Stretch,
+                .height = guikit::SizeMode::Stretch,
+                .gap = 0.0f,
+                .padding = guikit::Padding::All(12.0f)
+            })) {
+                if (isVert) {
+                    if (auto stage = guikit::Row(ui, {
+                        .gap = 0.0f,
+                        .align = guikit::Alignment::Center,
+                        .width = guikit::SizeMode::Stretch,
+                        .height = guikit::SizeMode::Stretch
+                    })) {
+                        renderToolbarWidget();
+                        renderStatusBody();
+                    }
+                } else {
+                    if (auto stage = guikit::Column(ui, {
+                        .gap = 0.0f,
+                        .align = guikit::Alignment::Center,
+                        .width = guikit::SizeMode::Stretch,
+                        .height = guikit::SizeMode::Stretch
+                    })) {
+                        renderToolbarWidget();
+                        renderStatusBody();
+                    }
+                }
+            }
+        } else {
+            // Integrated flush header strip docked inside the workspace Card
+            if (auto workspace = guikit::Card(ui, {
+                .width = guikit::SizeMode::Stretch,
+                .height = guikit::SizeMode::Stretch,
+                .gap = 0.0f,
+                .padding = guikit::Padding{},
+                .clipChildren = true
+            })) {
+                if (isVert) {
+                    if (auto split = guikit::Row(ui, {
+                        .gap = 0.0f,
+                        .width = guikit::SizeMode::Stretch,
+                        .height = guikit::SizeMode::Stretch
+                    })) {
+                        renderToolbarWidget();
+                        renderStatusBody();
+                    }
+                } else {
+                    renderToolbarWidget();
+                    renderStatusBody();
+                }
+            }
+        }
+    };
+
+    if (isVert && isSurface) {
+        if (auto shell = guikit::Row(ui, {
+            .width = guikit::SizeMode::Stretch,
+            .height = guikit::SizeMode::Stretch,
+            .shell = true
+        })) {
+            renderShellContent();
         }
     } else {
         if (auto shell = guikit::Column(ui, {
-            .gap = 0.0f,
-            .padding = shellPad,
-            .align = isFloating ? guikit::Alignment::Center : guikit::Alignment::Stretch,
             .width = guikit::SizeMode::Stretch,
-            .height = guikit::SizeMode::Stretch
+            .height = guikit::SizeMode::Stretch,
+            .shell = true
         })) {
-            renderToolbarWidget();
-            renderWorkspaceBody();
+            renderShellContent();
         }
     }
 }
@@ -270,50 +328,71 @@ keel::String GenerateToolbarCode(const DemoContext& ctx) {
     const guikit::UiVariant toolVar = (ctx.btnVariant == guikit::UiVariant::Ghost)
         ? guikit::UiVariant::Primary
         : ctx.btnVariant;
+    const bool isSurface = (s_tb.style == guikit::ToolbarStyle::Surface);
     const bool isFloating = (s_tb.style == guikit::ToolbarStyle::Floating);
     const keel::StringRef sqStr = isSq ? "true" : "false";
     const keel::StringRef varStr = VariantName(toolVar);
+    const keel::String shellHeader = isSurface
+        ? keel::format(
+            "// theme.SetShellStyle(guikit::ShellStyle::{});\n"
+            "if (auto shell = guikit::{}(ui, {{.shell = true}})) {{\n",
+            (ctx.studio.shellStyle == guikit::ShellStyle::Floating) ? "Floating" : "Docked",
+            isVert ? "Row" : "Column"
+        )
+        : keel::String{};
+    const keel::StringRef ind = isSurface ? "    " : "";
+    const keel::StringRef shellFooter = isSurface ? "\n}" : "";
     return keel::format(
-        "if (auto tb = guikit::Toolbar(ui, {{\n"
-        "    .style = guikit::ToolbarStyle::{},\n"
-        "    .orientation = guikit::Orientation::{},\n"
-        "    .overflow = guikit::ToolbarOverflow::{},\n"
-        "    .buttonStyle = guikit::ButtonStyle::{}{}\n"
-        "}})) {{\n"
-        "    tb.Item(activeTool, 0, {{.text = \"Select\",  .icon = guikit::Icon::Check(),  .variant = guikit::UiVariant::{}, .square = {}}});\n"
-        "    tb.Item(activeTool, 1, {{.text = \"Pan\",     .icon = guikit::Icon::Folder(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
-        "    tb.Item(activeTool, 2, {{.text = \"Measure\", .icon = guikit::Icon::Search(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
-        "    tb.Separator();\n"
-        "    tb.Toggle(snapToGrid,  {{.text = \"Snap\",    .icon = guikit::Icon::Settings(), .variant = guikit::UiVariant::Info,    .square = {}}});\n"
-        "    tb.Toggle(livePreview, {{.text = \"Preview\", .icon = guikit::Icon::Play(),     .variant = guikit::UiVariant::Success, .square = {}}});\n"
-        "    tb.SplitToggle(syncEnabled, syncMode, {{\"Auto Sync\", \"Manual Sync\", \"Offline\"}}, {{\n"
-        "        .text = \"Auto Sync\", .icon = guikit::Icon::Flash(), .square = {}\n"
-        "    }});\n"
-        "    tb.Separator();\n"
-        "    auto menu = tb.Dropdown({{.text = \"Export\"{}}}, {{\n"
-        "        {{.label = \"Export Vector SVG...\", .shortcut = \"Ctrl+E\", .icon = guikit::Icon::Folder()}},\n"
-        "        {{.label = \"Copy Summary\",         .shortcut = \"Ctrl+C\", .icon = guikit::Icon::Check()}}\n"
-        "    }});\n"
-        "    {}\n"
-        "    if (tb.ToolButton({{.text = \"Reset\", .icon = guikit::Icon::Refresh(), .square = {}}}).clicked) {{ /* ... */ }}\n"
-        "}}",
-        StyleEnumName(s_tb.style),
-        isVert ? "Vertical" : "Horizontal",
-        OverflowEnumName(s_tb.overflow),
-        ButtonStyleEnumName(s_tb.buttonStyle),
-        FormatUiSizePrefix(ctx.controlsSize),
-        varStr,
-        sqStr,
-        varStr,
-        sqStr,
-        varStr,
-        sqStr,
-        sqStr,
-        sqStr,
-        sqStr,
-        s_tb.showBadges ? ", .badge = \"3\"" : "",
-        isFloating ? "tb.Separator();" : "tb.Spacer();",
-        sqStr
+        "{}"
+        "{}if (auto tb = guikit::Toolbar(ui, {{\n"
+        "{}    .style = guikit::ToolbarStyle::{},\n"
+        "{}    .orientation = guikit::Orientation::{},\n"
+        "{}    .overflow = guikit::ToolbarOverflow::{},\n"
+        "{}    .buttonStyle = guikit::ButtonStyle::{}{}\n"
+        "{}}})) {{\n"
+        "{}    tb.Item(activeTool, 0, {{.text = \"Select\",  .icon = guikit::Icon::Check(),  .variant = guikit::UiVariant::{}, .square = {}}});\n"
+        "{}    tb.Item(activeTool, 1, {{.text = \"Pan\",     .icon = guikit::Icon::Folder(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
+        "{}    tb.Item(activeTool, 2, {{.text = \"Measure\", .icon = guikit::Icon::Search(), .variant = guikit::UiVariant::{}, .square = {}}});\n"
+        "{}    tb.Separator();\n"
+        "{}    tb.Toggle(snapToGrid,  {{.text = \"Snap\",    .icon = guikit::Icon::Settings(), .variant = guikit::UiVariant::Info,    .square = {}}});\n"
+        "{}    tb.Toggle(livePreview, {{.text = \"Preview\", .icon = guikit::Icon::Play(),     .variant = guikit::UiVariant::Success, .square = {}}});\n"
+        "{}    tb.SplitToggle(syncEnabled, syncMode, {{\"Auto Sync\", \"Manual Sync\", \"Offline\"}}, {{\n"
+        "{}        .text = \"Auto Sync\", .icon = guikit::Icon::Flash(), .square = {}\n"
+        "{}    }});\n"
+        "{}    tb.Separator();\n"
+        "{}    auto menu = tb.Dropdown({{.text = \"Export\"{}}}, {{\n"
+        "{}        {{.label = \"Export Vector SVG...\", .shortcut = \"Ctrl+E\", .icon = guikit::Icon::Folder()}},\n"
+        "{}        {{.label = \"Copy Summary\",         .shortcut = \"Ctrl+C\", .icon = guikit::Icon::Check()}}\n"
+        "{}    }});\n"
+        "{}    {}\n"
+        "{}    if (tb.ToolButton({{.text = \"Reset\", .icon = guikit::Icon::Refresh(), .square = {}}}).clicked) {{ /* ... */ }}\n"
+        "{}}}"
+        "{}",
+        shellHeader,
+        ind,
+        ind, StyleEnumName(s_tb.style),
+        ind, isVert ? "Vertical" : "Horizontal",
+        ind, OverflowEnumName(s_tb.overflow),
+        ind, ButtonStyleEnumName(s_tb.buttonStyle), FormatUiSizePrefix(ctx.controlsSize),
+        ind,
+        ind, varStr, sqStr,
+        ind, varStr, sqStr,
+        ind, varStr, sqStr,
+        ind,
+        ind, sqStr,
+        ind, sqStr,
+        ind,
+        ind, sqStr,
+        ind,
+        ind,
+        ind, s_tb.showBadges ? ", .badge = \"3\"" : "",
+        ind,
+        ind,
+        ind,
+        ind, isFloating ? "tb.Separator();" : "tb.Spacer();",
+        ind, sqStr,
+        ind,
+        shellFooter
     );
 }
 

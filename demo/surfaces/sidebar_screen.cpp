@@ -6,7 +6,6 @@ namespace {
 struct SidebarState {
     keel::i32 activityIdx = 0;
     keel::i32 menuIdx = 0;
-    bool floatingFrame = true;
     bool showActivityBar = false;
     guikit::ActivityBarStyle activityStyle = guikit::ActivityBarStyle::Indicator;
     guikit::SidebarMode mode = guikit::SidebarMode::Expanded;
@@ -112,14 +111,6 @@ void RenderSidebarInspector(guikit::Context& ui, DemoContext& ctx) {
 
     guikit::Heading(ui, {.label = "SHELL COMPANIONS", .level = guikit::HeadingLevel::H6, .separator = guikit::HeadingSeparator::Bottom});
 
-    keel::usize frameIdx = s_state.floatingFrame ? 1 : 0;
-    if (auto el = guikit::Element(ui, {.label = "Shell Frame", .layout = guikit::ElementLayout::Stacked})) {
-        if (guikit::Segmented(ui, frameIdx, {"Docked (Flush)", "Floating (Island)"}).changed) {
-            s_state.floatingFrame = (frameIdx == 1);
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {
         .label = "ActivityBar Rail",
         .description = "Primary icon rail docked flush to Sidebar"
@@ -162,15 +153,10 @@ void RenderSidebarInspector(guikit::Context& ui, DemoContext& ctx) {
 }
 
 void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
-    const bool isFloating = s_state.floatingFrame;
-    guikit::UiTheme stageTheme = ui.GetTheme(); // the zone keeps its own copy for the frame
-    stageTheme.SetShellStyle(isFloating ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked);
-
-    if (auto stageZone = ui.Zone({.theme = stageTheme})) {
-        if (auto workbenchShell = guikit::Column(ui, {
-            .width = guikit::SizeMode::Stretch,
-            .height = guikit::SizeMode::Stretch
-        })) {
+    if (auto workbenchShell = guikit::Column(ui, {
+        .width = guikit::SizeMode::Stretch,
+        .height = guikit::SizeMode::Stretch
+    })) {
             if (auto demoWorkspace = guikit::Box(ui, {
                 .width = guikit::SizeMode::Stretch,
                 .height = guikit::SizeMode::Stretch
@@ -400,7 +386,6 @@ void RenderSidebarStage(guikit::Context& ui, DemoContext& ctx) {
                 }
             }
         }
-    }
 }
 
 keel::String GenerateSidebarCode(const DemoContext& ctx) {
@@ -412,7 +397,7 @@ keel::String GenerateSidebarCode(const DemoContext& ctx) {
         "// Theme-driven application shell framing (Docked vs Floating)\n"
         "theme.SetShellStyle(guikit::ShellStyle::{});\n"
         "ui.SetTheme(theme);\n\n",
-        s_state.floatingFrame ? "Floating" : "Docked"
+        (ctx.studio.shellStyle == guikit::ShellStyle::Floating) ? "Floating" : "Docked"
     );
 
     if (s_state.showActivityBar) {

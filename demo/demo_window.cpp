@@ -403,6 +403,17 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             ui.InvalidateAll();
         }
 
+        static constexpr keel::StaticArray<keel::StringRef, 2> kPreviewShellLabels = {{"Docked", "Floating"}};
+        keel::usize previewShellIdx = (m_demoCtx.studio.shellStyle == guikit::ShellStyle::Floating) ? 1u : 0u;
+        if (guikit::Select(ui, previewShellIdx, kPreviewShellLabels, {
+            .tooltip = "Preview Shell Frame (Docked vs Floating, synced with Theme Studio)",
+            .size = guikit::UiSize::Sm,
+            .width = kSelectCompactW
+        }).changed) {
+            m_demoCtx.SelectPreviewShellStyle(previewShellIdx == 1u ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked);
+            ui.InvalidateAll();
+        }
+
         previewTb.Toggle(m_demoCtx.previewBounds, {
             .text = "Bounds",
             .icon = m_demoCtx.previewBounds ? guikit::Icon::Eye() : guikit::Icon::EyeOff(),
@@ -493,7 +504,14 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
             const bool extActive = (m_selectedExtension >= 0 && keel::as<keel::usize>(m_selectedExtension) < m_extensions.size());
             if (extActive || IsSandboxCategory(m_selectedCategory)) {
                 const bool isFullStage = extActive ? true : IsFullStageCategory(m_selectedCategory);
-                const bool isShellScreen = !extActive && (m_selectedCategory == NavCategory::SurfaceSidebar);
+                const bool isShellScreen = !extActive && (
+                    m_selectedCategory == NavCategory::SurfaceMenuBar ||
+                    m_selectedCategory == NavCategory::SurfaceToolbar ||
+                    m_selectedCategory == NavCategory::SurfaceActivityBar ||
+                    m_selectedCategory == NavCategory::SurfaceSidebar ||
+                    m_selectedCategory == NavCategory::SurfaceBottomPanel ||
+                    m_selectedCategory == NavCategory::SurfaceStatusBar
+                );
                 const keel::StringRef title = extActive
                     ? m_extensions[keel::as<keel::usize>(m_selectedExtension)].title
                     : CategoryDisplayTitle(m_selectedCategory);

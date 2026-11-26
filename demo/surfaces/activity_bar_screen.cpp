@@ -10,7 +10,6 @@ struct ActivityBarDemoState {
     guikit::ActivityBarStyle style = guikit::ActivityBarStyle::Indicator;
     guikit::ButtonStyle buttonStyle = guikit::ButtonStyle::Ghost;
     guikit::UiSize size = guikit::UiSize::Md;
-    bool floatingFrame = false;
     bool linkSidebar = true;
     guikit::SidebarMode linkedMode = guikit::SidebarMode::Expanded;
     bool showBadges = true;
@@ -77,15 +76,6 @@ void RenderActivityBarInspector(guikit::Context& ui, DemoContext& ctx) {
 
     ctx.RenderVariantPicker(ui);
 
-    static constexpr keel::StaticArray<keel::StringRef, 2> kFrameNames = {"Docked", "Floating"};
-    keel::usize frameIdx = s_actBar.floatingFrame ? 1u : 0u;
-    if (auto el = guikit::Element(ui, {.label = "Shell Frame"})) {
-        if (guikit::Segmented(ui, frameIdx, kFrameNames).changed) {
-            s_actBar.floatingFrame = (frameIdx == 1u);
-            ui.InvalidateAll();
-        }
-    }
-
     if (auto el = guikit::Element(ui, {
         .label = "Link Companion Sidebar",
         .description = "Clicking active icon collapses/expands the linked Sidebar"
@@ -106,14 +96,10 @@ void RenderActivityBarInspector(guikit::Context& ui, DemoContext& ctx) {
 }
 
 void RenderActivityBarStage(guikit::Context& ui, DemoContext& ctx) {
-    guikit::UiTheme stageTheme = ui.GetTheme();
-    stageTheme.SetShellStyle(s_actBar.floatingFrame ? guikit::ShellStyle::Floating : guikit::ShellStyle::Docked);
-
-    if (auto stageZone = ui.Zone({.theme = stageTheme})) {
-        if (auto shell = guikit::Box(ui, {
-            .width = guikit::SizeMode::Stretch,
-            .height = guikit::SizeMode::Stretch
-        })) {
+    if (auto shell = guikit::Box(ui, {
+        .width = guikit::SizeMode::Stretch,
+        .height = guikit::SizeMode::Stretch
+    })) {
             guikit::ActivityBarOptions barOpts{
                 .side = s_actBar.side,
                 .style = s_actBar.style,
@@ -228,7 +214,6 @@ void RenderActivityBarStage(guikit::Context& ui, DemoContext& ctx) {
                 }
             }
         }
-    }
 }
 
 keel::String GenerateActivityBarCode(const DemoContext& ctx) {
@@ -238,7 +223,7 @@ keel::String GenerateActivityBarCode(const DemoContext& ctx) {
     const keel::String colorLine = (ctx.btnVariant != guikit::UiVariant::Default)
         ? keel::format(",\n    .color = {}", ctx.FormatControlColorCode())
         : keel::String{};
-    const keel::String shellComment = s_actBar.floatingFrame
+    const keel::String shellComment = (ctx.studio.shellStyle == guikit::ShellStyle::Floating)
         ? keel::String("// theme.SetShellStyle(guikit::ShellStyle::Floating);\n")
         : keel::String{};
     const keel::String badge2 = s_actBar.showBadges ? keel::String(", .badge = \"2\"") : keel::String{};

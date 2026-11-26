@@ -625,6 +625,11 @@ struct DemoContext {
         RebuildPreviewTheme();
     }
 
+    void SelectPreviewShellStyle(guikit::ShellStyle shellStyle) noexcept {
+        studio.shellStyle = shellStyle;
+        RebuildPreviewTheme();
+    }
+
     void TogglePreviewDarkLight() noexcept {
         const bool nextLight = (previewTheme.mode == guikit::ThemeMode::Dark);
         SelectPreviewPreset(nextLight ? guikit::ThemePreset::Light : guikit::ThemePreset::Dark);

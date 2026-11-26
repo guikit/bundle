@@ -600,7 +600,7 @@ struct DemoContext {
 
     ThemeStudioState studio{};
     guikit::UiTheme shellTheme = guikit::UiTheme::Dark();
-    guikit::UiTheme previewTheme = guikit::UiTheme::Dark();
+    guikit::UiTheme previewTheme = guikit::UiTheme::Pulse();
     keel::Optional<guikit::UiTheme> pendingShellTheme = keel::kNullOpt;
     keel::f32 previewDensity = 1.0f;
 
@@ -631,6 +631,14 @@ struct DemoContext {
     }
 
     void TogglePreviewDarkLight() noexcept {
+        if (studio.preset == guikit::ThemePreset::Pulse) {
+            SelectPreviewPreset(guikit::ThemePreset::PulseLight);
+            return;
+        }
+        if (studio.preset == guikit::ThemePreset::PulseLight) {
+            SelectPreviewPreset(guikit::ThemePreset::Pulse);
+            return;
+        }
         const bool nextLight = (previewTheme.mode == guikit::ThemeMode::Dark);
         SelectPreviewPreset(nextLight ? guikit::ThemePreset::Light : guikit::ThemePreset::Dark);
     }

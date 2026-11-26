@@ -17,6 +17,8 @@ namespace {
         case guikit::ThemePreset::HighContrastDark:  return "HighContrastDark";
         case guikit::ThemePreset::HighContrastLight: return "HighContrastLight";
         case guikit::ThemePreset::Windows98:         return "Windows98";
+        case guikit::ThemePreset::Pulse:             return "Pulse";
+        case guikit::ThemePreset::PulseLight:        return "PulseLight";
     }
     return "Dark";
 }
@@ -652,6 +654,16 @@ void RenderActionsTab(guikit::Context& ui, ThemeStudioState& st) {
 
         guikit::Text(ui, "PER-WIDGET GRADIENTS", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
         if (auto w = guikit::Wrap(ui, {.gap = 8.0f, .runGap = 8.0f})) {
+            guikit::Button(ui, {
+                .text = "Pulse Brand",
+                .icon = guikit::Icon::Flash(),
+                .background = guikit::StateColor::LinearGradient3(
+                    guikit::Color::Hex(0xE11D74FF),
+                    guikit::Color::Hex(0xF59E0BFF),
+                    guikit::Color::Hex(0xB8F200FF),
+                    135.0f
+                )
+            });
             guikit::Button(ui, {.text = "Auto Primary", .icon = guikit::Icon::Flash(), .background = guikit::StateColor::Primary().AsGradient(135.0f)});
             guikit::Button(ui, {.text = "Auto Success", .icon = guikit::Icon::Check(), .background = guikit::StateColor::Success().AsGradient(120.0f)});
             guikit::Button(ui, {
@@ -1002,7 +1014,9 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         guikit::ThemePresetName(guikit::ThemePreset::IndustrialLight),
         guikit::ThemePresetName(guikit::ThemePreset::HighContrastDark),
         guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight),
-        guikit::ThemePresetName(guikit::ThemePreset::Windows98)
+        guikit::ThemePresetName(guikit::ThemePreset::Windows98),
+        guikit::ThemePresetName(guikit::ThemePreset::Pulse),
+        guikit::ThemePresetName(guikit::ThemePreset::PulseLight)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kChromeStyleCount> kChromeNames = {{
@@ -1102,6 +1116,12 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 }
                 if (guikit::Button(ui, {.text = "Industrial x Brutal", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Warning}).clicked) {
                     applyCombo(guikit::ThemePreset::Industrial, guikit::ChromeStyle::Brutalist, guikit::FillStyle::Solid);
+                }
+                if (guikit::Button(ui, {.text = "Pulse x Glass", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Primary}).clicked) {
+                    applyCombo(guikit::ThemePreset::Pulse, guikit::ChromeStyle::Glass, guikit::FillStyle::Gradient);
+                }
+                if (guikit::Button(ui, {.text = "Pulse Light", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Success}).clicked) {
+                    applyCombo(guikit::ThemePreset::PulseLight, guikit::ChromeStyle::Luminous, guikit::FillStyle::Gradient);
                 }
                 if (guikit::Button(ui, {.text = "Nord x Glass", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Primary}).clicked) {
                     applyCombo(guikit::ThemePreset::Nord, guikit::ChromeStyle::Glass, guikit::FillStyle::Gradient);

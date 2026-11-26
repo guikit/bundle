@@ -347,7 +347,9 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ThemePresetName(guikit::ThemePreset::IndustrialLight),
             guikit::ThemePresetName(guikit::ThemePreset::HighContrastDark),
             guikit::ThemePresetName(guikit::ThemePreset::HighContrastLight),
-            guikit::ThemePresetName(guikit::ThemePreset::Windows98)
+            guikit::ThemePresetName(guikit::ThemePreset::Windows98),
+            guikit::ThemePresetName(guikit::ThemePreset::Pulse),
+            guikit::ThemePresetName(guikit::ThemePreset::PulseLight)
         }};
         keel::usize previewPresetIdx = keel::as<keel::usize>(m_demoCtx.studio.preset);
         if (previewPresetIdx >= guikit::kThemePresetCount) {

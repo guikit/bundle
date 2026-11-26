@@ -8,9 +8,9 @@ namespace guikit::demo {
 /// Single source of truth for the live Preview Zone design system (Palette x Chrome x Fill + tokens).
 struct ThemeStudioState {
     // Base Preset & Orthogonal Design-System Axes (Palette x Chrome x Fill)
-    guikit::ThemePreset preset = guikit::ThemePreset::Dark;
-    guikit::ChromeStyle chrome = guikit::ChromeStyle::Modern;
-    guikit::FillStyle fillStyle = guikit::FillStyle::Solid;
+    guikit::ThemePreset preset = guikit::ThemePreset::Pulse;
+    guikit::ChromeStyle chrome = guikit::ChromeStyle::Luminous;
+    guikit::FillStyle fillStyle = guikit::FillStyle::Gradient;
     guikit::SyntaxPreset syntaxPreset = guikit::SyntaxPreset::Auto;
 
     // Scrollbar & Slider Customization
@@ -57,7 +57,7 @@ struct ThemeStudioState {
     keel::f32 focusRingWidth = 2.0f;
     keel::f32 disabledOpacity = 0.50f;
     keel::f32 animationScale = 1.0f;
-    guikit::ShellStyle shellStyle = guikit::ShellStyle::Docked;
+    guikit::ShellStyle shellStyle = guikit::ShellStyle::Floating;
 
     // Theme Morphing (UiTheme::Lerp)
     bool enableLerp = false;
@@ -116,9 +116,9 @@ struct ThemeStudioState {
     guikit::ReadoutState sampleReadoutC{};
 
     void ResetToDefaults() noexcept {
-        preset = guikit::ThemePreset::Dark;
-        chrome = guikit::ChromeStyle::Modern;
-        fillStyle = guikit::FillStyle::Solid;
+        preset = guikit::ThemePreset::Pulse;
+        chrome = guikit::ChromeStyle::Luminous;
+        fillStyle = guikit::FillStyle::Gradient;
         syntaxPreset = guikit::SyntaxPreset::Auto;
         scrollbarChrome = keel::kNullOpt;
         overrideScrollbarWidth = false;
@@ -149,7 +149,7 @@ struct ThemeStudioState {
         focusRingWidth = 2.0f;
         disabledOpacity = 0.50f;
         animationScale = 1.0f;
-        shellStyle = guikit::ShellStyle::Docked;
+        shellStyle = guikit::ShellStyle::Floating;
 
         enableLerp = false;
         lerpT = 0.0f;
@@ -160,6 +160,7 @@ struct ThemeStudioState {
         const guikit::UiTheme def = guikit::UiTheme::FromPreset(p);
         chrome = def.chromeStyle;
         fillStyle = def.fillStyle;
+        shellStyle = def.shellStyle;
         overrideAccent = false;
         overrideNeutral = false;
         overrideBackground = false;

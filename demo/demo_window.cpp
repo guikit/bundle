@@ -97,6 +97,17 @@ void DemoWindow::RenderTopToolbar(guikit::Context& ui) {
     if (auto tb = guikit::Toolbar(ui)) {
         m_shellControls.RenderSidebarCycleButton(*this, tb, m_navSidebarMode, "Nav", "Navigation Sidebar", guikit::Icon::Folder());
         m_shellControls.RenderSidebarToggle(*this, tb, m_inspectorSidebarMode, "Inspector", "Inspector Sidebar", guikit::Icon::Settings());
+        if (tb.Toggle(m_demoCtx.previewShowCode, {
+            .text = "Code",
+            .tooltip = m_demoCtx.previewShowCode
+                ? "Generated C++20 Code Panel: Expanded (Click to Collapse)"
+                : "Generated C++20 Code Panel: Collapsed (Click to Expand)",
+            .icon = m_demoCtx.previewShowCode ? guikit::Icon::Eye() : guikit::Icon::EyeOff(),
+            .variant = guikit::UiVariant::Primary
+        }).changed) {
+            ui.InvalidateAll();
+            ui.RequestRepaint(3);
+        }
 
         tb.Separator();
 
@@ -425,16 +436,6 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             .icon = guikit::Icon::Search(),
             .variant = guikit::UiVariant::Warning
         });
-
-        if (m_selectedExtension >= 0 || IsSandboxCategory(m_selectedCategory)) {
-            if (previewTb.Toggle(m_demoCtx.previewShowCode, {
-                .text = "Code",
-                .icon = m_demoCtx.previewShowCode ? guikit::Icon::Eye() : guikit::Icon::EyeOff(),
-                .variant = guikit::UiVariant::Primary
-            }).changed) {
-                ui.RequestRepaint(3);
-            }
-        }
     }
 }
 

@@ -8,7 +8,6 @@ struct TooltipDemoState {
     keel::usize contentPresetIdx = 0; // 0 = Short, 1 = Multi-Line, 2 = Rich Text, 3 = Live Coordinates
     keel::FixedString<192> customText = "Save changes (Ctrl+S)";
     bool pinnedPreview = false;
-    bool sampleToggle = true;
 };
 
 TooltipDemoState s_tip;
@@ -82,41 +81,23 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
         .justify = guikit::Justify::Center
     })) {
         if (anchorModeIdx == 0u) {
-            if (auto row = guikit::Row(ui, {.gap = 10.0f, .align = guikit::Alignment::Center})) {
-                const auto saveBtn = guikit::Button(ui, {
-                    .text = "Save Changes",
-                    .icon = guikit::Icon::Save(),
-                    .tooltip = tip,
-                    .variant = guikit::UiVariant::Primary
-                });
-                if (s_tip.pinnedPreview) {
-                    ui.SetTooltip(tip, saveBtn.rect);
-                }
-
-                guikit::Button(ui, {
-                    .icon = guikit::Icon::Settings(),
-                    .square = true,
-                    .tooltip = "Open preferences and settings",
-                    .variant = guikit::UiVariant::Secondary
-                });
-
-                guikit::Tag(ui, "Beta", {
-                    .variant = guikit::UiVariant::Info,
-                    .style = guikit::TagStyle::Soft,
-                    .tooltip = "Preview feature — behavior may change in future releases"
-                });
-
-                guikit::Switch(ui, s_tip.sampleToggle, {
-                    .tooltip = "Enable automatic background saving"
-                });
+            const auto saveBtn = guikit::Button(ui, {
+                .text = "Save Changes",
+                .icon = guikit::Icon::Save(),
+                .tooltip = tip,
+                .variant = guikit::UiVariant::Primary
+            });
+            if (s_tip.pinnedPreview) {
+                ui.SetTooltip(tip, saveBtn.rect);
             }
-            guikit::Text(ui, "Hover any widget above to trigger its declarative .tooltip", {
+            guikit::Text(ui, "Hover the button above to trigger its declarative .tooltip", {
                 .role = guikit::TextRole::BodySmall,
                 .variant = guikit::UiVariant::Secondary
             });
         } else if (anchorModeIdx == 1u) {
             if (auto zone = guikit::Box(ui, {
                 .gap = 4.0f,
+                .width = guikit::SizeMode::Fit,
                 .padding = guikit::Padding::Symmetric(32.0f, 22.0f),
                 .background = {ui.GetTheme().palette.surfaceHover.WithAlphaF(0.45f)},
                 .border = {.width = 1.0f, .radius = 8.0f, .color = {ui.GetTheme().palette.borderHover}}
@@ -134,6 +115,7 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
         } else {
             if (auto zone = guikit::Box(ui, {
                 .gap = 4.0f,
+                .width = guikit::SizeMode::Fit,
                 .padding = guikit::Padding::Symmetric(40.0f, 28.0f),
                 .background = {ui.GetTheme().palette.surfaceHover.WithAlphaF(0.45f)},
                 .border = {.width = 1.0f, .radius = 8.0f, .color = {ui.GetTheme().palette.borderHover}}

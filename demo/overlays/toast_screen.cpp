@@ -71,7 +71,11 @@ void RenderToastStage(guikit::Context& ui, DemoContext&) {
         .align = guikit::Alignment::Center,
         .justify = guikit::Justify::Center
     })) {
-        if (auto btnWrap = guikit::Row(ui, {.gap = 8.0f, .align = guikit::Alignment::Center})) {
+        if (auto btnWrap = guikit::Wrap(ui, {
+            .gap = 8.0f,
+            .align = guikit::Alignment::Center,
+            .justify = guikit::Justify::Center
+        })) {
             if (guikit::Button(ui, {
                 .text = "Info",
                 .icon = guikit::Icon::Info(),

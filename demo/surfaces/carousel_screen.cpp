@@ -79,8 +79,7 @@ void RenderCarouselStage(guikit::Context& ui, DemoContext& ctx) {
     if (auto wrapper = guikit::Column(ui, {
         .gap = 12.0f,
         .width = guikit::SizeMode::Stretch,
-        .height = guikit::SizeMode::Fit,
-        .maxWidth = 640.0f
+        .height = guikit::SizeMode::Fit
     })) {
         if (variant == 0u) {
             static constexpr keel::StaticArray<keel::StringRef, 12> kTitles = {

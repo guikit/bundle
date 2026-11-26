@@ -97,13 +97,13 @@ namespace {
     return "Fail";
 }
 
-void RenderColorSwatchCard(guikit::Context& ui, keel::StringRef name, guikit::Color color, guikit::Color borderCol) {
+void RenderColorSwatchCard(guikit::Context& ui, keel::StringRef name, guikit::Color color, guikit::Color borderCol, keel::f32 radius) {
     const guikit::Color ink = guikit::Color::BestTextColor(color, guikit::Color::Hex(0x0F172AFF), guikit::Color::Hex(0xFFFFFFFF));
     if (auto tile = guikit::Box(ui, {
         .width = 114.0f,
         .padding = guikit::Padding::Symmetric(9.0f, 7.0f),
         .background = guikit::StateColor{color},
-        .border = {.width = 1.0f, .color = guikit::StateColor{borderCol}}
+        .border = {.width = 1.0f, .radius = radius, .color = guikit::StateColor{borderCol}}
     })) {
         if (auto col = guikit::Column(ui, {.gap = 2.0f})) {
             guikit::Text(ui, guikit::UiText{name, guikit::StateColor{ink}}, {.role = guikit::TextRole::LabelSmall});
@@ -114,6 +114,7 @@ void RenderColorSwatchCard(guikit::Context& ui, keel::StringRef name, guikit::Co
 
 void RenderTokensTab(guikit::Context& ui, const guikit::UiTheme& built) {
     const auto& pal = built.palette;
+    const keel::f32 tileRad = built.GetRadius(guikit::UiSize::Sm);
 
     // 1. Grouped Color Palette
     if (auto card = guikit::Card(ui, {.gap = 12.0f, .padding = guikit::Padding::All(14.0f)})) {
@@ -121,31 +122,31 @@ void RenderTokensTab(guikit::Context& ui, const guikit::UiTheme& built) {
 
         guikit::Text(ui, "SURFACES", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
         if (auto w = guikit::Wrap(ui, {.gap = 8.0f, .runGap = 8.0f})) {
-            RenderColorSwatchCard(ui, "Background", pal.background,      pal.border);
-            RenderColorSwatchCard(ui, "Surface",    pal.surface,         pal.border);
-            RenderColorSwatchCard(ui, "Elevated",   pal.surfaceElevated, pal.border);
-            RenderColorSwatchCard(ui, "Hover",      pal.surfaceHover,    pal.border);
-            RenderColorSwatchCard(ui, "Active",     pal.surfaceActive,   pal.border);
-            RenderColorSwatchCard(ui, "Input Bg",   pal.inputBackground, pal.border);
+            RenderColorSwatchCard(ui, "Background", pal.background,      pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Surface",    pal.surface,         pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Elevated",   pal.surfaceElevated, pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Hover",      pal.surfaceHover,    pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Active",     pal.surfaceActive,   pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Input Bg",   pal.inputBackground, pal.border, tileRad);
         }
 
         guikit::Text(ui, "INK & BORDERS", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
         if (auto w = guikit::Wrap(ui, {.gap = 8.0f, .runGap = 8.0f})) {
-            RenderColorSwatchCard(ui, "Text Primary",   pal.textPrimary,   pal.border);
-            RenderColorSwatchCard(ui, "Text Secondary", pal.textSecondary, pal.border);
-            RenderColorSwatchCard(ui, "Text Muted",     pal.textMuted,     pal.border);
-            RenderColorSwatchCard(ui, "Border",         pal.border,        pal.borderHover);
-            RenderColorSwatchCard(ui, "Border Subtle",  pal.borderSubtle,  pal.border);
-            RenderColorSwatchCard(ui, "Focus Ring",     pal.focusRing,     pal.border);
+            RenderColorSwatchCard(ui, "Text Primary",   pal.textPrimary,   pal.border,      tileRad);
+            RenderColorSwatchCard(ui, "Text Secondary", pal.textSecondary, pal.border,      tileRad);
+            RenderColorSwatchCard(ui, "Text Muted",     pal.textMuted,     pal.border,      tileRad);
+            RenderColorSwatchCard(ui, "Border",         pal.border,        pal.borderHover, tileRad);
+            RenderColorSwatchCard(ui, "Border Subtle",  pal.borderSubtle,  pal.border,      tileRad);
+            RenderColorSwatchCard(ui, "Focus Ring",     pal.focusRing,     pal.border,      tileRad);
         }
 
         guikit::Text(ui, "SEMANTIC", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
         if (auto w = guikit::Wrap(ui, {.gap = 8.0f, .runGap = 8.0f})) {
-            RenderColorSwatchCard(ui, "Accent",  pal.accent,                                      pal.border);
-            RenderColorSwatchCard(ui, "Success", built.GetSemanticAccent(guikit::UiVariant::Success), pal.border);
-            RenderColorSwatchCard(ui, "Warning", built.GetSemanticAccent(guikit::UiVariant::Warning), pal.border);
-            RenderColorSwatchCard(ui, "Danger",  built.GetSemanticAccent(guikit::UiVariant::Danger),  pal.border);
-            RenderColorSwatchCard(ui, "Info",    built.GetSemanticAccent(guikit::UiVariant::Info),    pal.border);
+            RenderColorSwatchCard(ui, "Accent",  pal.accent,                                          pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Success", built.GetSemanticAccent(guikit::UiVariant::Success), pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Warning", built.GetSemanticAccent(guikit::UiVariant::Warning), pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Danger",  built.GetSemanticAccent(guikit::UiVariant::Danger),  pal.border, tileRad);
+            RenderColorSwatchCard(ui, "Info",    built.GetSemanticAccent(guikit::UiVariant::Info),    pal.border, tileRad);
         }
     }
 
@@ -163,12 +164,13 @@ void RenderTokensTab(guikit::Context& ui, const guikit::UiTheme& built) {
             if (auto cell = guikit::Box(ui, {
                 .padding = guikit::Padding::Symmetric(10.0f, 8.0f),
                 .background = guikit::StateColor{pal.background},
-                .border = {.width = 1.0f, .color = guikit::StateColor{pal.borderSubtle}}
+                .border = {.width = 1.0f, .radius = tileRad, .color = guikit::StateColor{pal.borderSubtle}}
             })) {
-                if (auto col = guikit::Column(ui, {.gap = 3.0f})) {
+                if (auto col = guikit::Column(ui, {.gap = 4.0f, .width = guikit::SizeMode::Stretch})) {
                     guikit::Text(ui, pairLabel, {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
-                    if (auto r = guikit::Row(ui, {.gap = 6.0f, .align = guikit::Align::Center})) {
+                    if (auto r = guikit::Row(ui, {.gap = 6.0f, .align = guikit::Align::Center, .width = guikit::SizeMode::Stretch})) {
                         guikit::Text(ui, ui.Format("{:.1f}:1", ratio), {.role = guikit::TextRole::TitleSmall});
+                        guikit::Spacer(ui);
                         guikit::Tag(ui, ContrastGradeLabel(ratio), {
                             .variant = ContrastBadgeVariant(ratio),
                             .size = guikit::UiSize::Xs
@@ -862,7 +864,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     }
 
     // 1. THEME PRESET
-    if (auto acc = guikit::Accordion(ui, {.label = "THEME PRESET", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
+    if (auto acc = guikit::Accordion(ui, {.label = "THEME PRESET", .defaultOpen = false, .size = guikit::UiSize::Sm})) {
         keel::usize presetIdx = keel::as<keel::usize>(st.preset);
         if (auto el = guikit::Element(ui, {.label = "Base Preset"})) {
             if (guikit::Select(ui, presetIdx, kPresetNames, {.size = guikit::UiSize::Sm}).changed) {
@@ -903,7 +905,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
 
     // 2. APPEARANCE & PALETTE
     const guikit::UiTheme baseRef = guikit::UiTheme::FromPreset(st.preset);
-    if (auto acc = guikit::Accordion(ui, {.label = "APPEARANCE & PALETTE", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
+    if (auto acc = guikit::Accordion(ui, {.label = "APPEARANCE & PALETTE", .defaultOpen = false, .size = guikit::UiSize::Sm})) {
         keel::usize chromeIdx = keel::as<keel::usize>(st.chrome);
         if (auto el = guikit::Element(ui, {.label = "Chrome Style", .description = "Structural look-and-feel (color-independent)"})) {
             if (guikit::Select(ui, chromeIdx, kChromeNames, {.size = guikit::UiSize::Sm}).changed) {
@@ -971,7 +973,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, 3> kSbArrowNames = {
         "None", "Triangle", "Chevron"
     };
-    if (auto acc = guikit::Accordion(ui, {.label = "SCROLLBAR", .defaultOpen = true, .size = guikit::UiSize::Sm})) {
+    if (auto acc = guikit::Accordion(ui, {.label = "SCROLLBAR", .defaultOpen = false, .size = guikit::UiSize::Sm})) {
         keel::usize sbOverrideIdx = st.scrollbarChrome.has_value()
             ? (keel::as<keel::usize>(*st.scrollbarChrome) + 1u)
             : 0u;

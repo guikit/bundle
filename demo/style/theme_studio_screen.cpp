@@ -28,15 +28,17 @@ namespace {
         case guikit::ChromeStyle::Classic3D: return "Classic3D";
         case guikit::ChromeStyle::Brutalist: return "Brutalist";
         case guikit::ChromeStyle::Glass:     return "Glass";
+        case guikit::ChromeStyle::Luminous:  return "Luminous";
     }
     return "Modern";
 }
 
 [[nodiscard]] constexpr keel::StringRef FillStyleEnumIdentifier(guikit::FillStyle s) noexcept {
     switch (s) {
-        case guikit::FillStyle::Solid:   return "Solid";
-        case guikit::FillStyle::Soft:    return "Soft";
-        case guikit::FillStyle::Outline: return "Outline";
+        case guikit::FillStyle::Solid:    return "Solid";
+        case guikit::FillStyle::Soft:     return "Soft";
+        case guikit::FillStyle::Outline:  return "Outline";
+        case guikit::FillStyle::Gradient: return "Gradient";
     }
     return "Solid";
 }
@@ -561,6 +563,65 @@ void RenderSurfacesTab(guikit::Context& ui, const guikit::UiTheme& built, ThemeS
             }
         }
     }
+
+    // 4. Per-Surface Gradient Overrides (StateColor::LinearGradient / RadialGradient)
+    if (auto gradCard = guikit::Card(ui, {.gap = 10.0f, .padding = guikit::Padding::All(14.0f)})) {
+        guikit::Heading(ui, {.label = "Per-Surface & Toolbar Gradients", .level = guikit::HeadingLevel::H6});
+        const auto& pal = built.palette;
+        const guikit::Color cA = pal.accent;
+        const guikit::Color cB = built.GetSemanticAccent(guikit::UiVariant::Info);
+        const guikit::Color cC = built.GetSemanticAccent(guikit::UiVariant::Success);
+        const bool isDark = (built.mode == guikit::ThemeMode::Dark);
+        if (auto tb = guikit::Toolbar(ui, {
+            .style = guikit::ToolbarStyle::Floating,
+            .buttonStyle = guikit::ButtonStyle::Ghost,
+            .background = guikit::StateColor::LinearGradient(
+                guikit::Color::Lerp(pal.surfaceElevated, cA, isDark ? 0.28f : 0.16f),
+                guikit::Color::Lerp(pal.surfaceElevated, cB, isDark ? 0.24f : 0.14f),
+                90.0f
+            ),
+            .border = {
+                .width = 1.0f,
+                .color = guikit::StateColor::LinearGradient(cA.WithAlphaF(0.65f), cB.WithAlphaF(0.45f), 90.0f)
+            },
+            .size = guikit::UiSize::Sm
+        })) {
+            tb.ToolButton({.text = "Build", .icon = guikit::Icon::Flash()});
+            tb.ToolButton({.text = "Deploy", .icon = guikit::Icon::Check(), .style = guikit::ButtonStyle::Solid, .background = guikit::StateColor::Primary().AsGradient(135.0f)});
+            tb.Spacer();
+            tb.ToolButton({.text = "Settings", .icon = guikit::Icon::Settings()});
+        }
+        if (auto gRow = guikit::Row(ui, {.gap = 12.0f, .equalWidths = true})) {
+            if (auto c1 = guikit::Card(ui, {
+                .gap = 4.0f,
+                .padding = guikit::Padding::All(12.0f),
+                .background = guikit::StateColor::LinearGradient(
+                    guikit::Color::Lerp(pal.surface, cA, isDark ? 0.22f : 0.12f),
+                    guikit::Color::Lerp(pal.surface, cC, isDark ? 0.18f : 0.10f),
+                    135.0f
+                ),
+                .border = {
+                    .width = 1.0f,
+                    .color = guikit::StateColor::LinearGradient(cA.WithAlphaF(0.70f), cC.WithAlphaF(0.40f), 135.0f)
+                }
+            })) {
+                guikit::Heading(ui, {.label = "Linear Surface + Border", .level = guikit::HeadingLevel::H6});
+                guikit::Text(ui, "StateColor::LinearGradient on Card background & border.", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Secondary});
+            }
+            if (auto c2 = guikit::Card(ui, {
+                .gap = 4.0f,
+                .padding = guikit::Padding::All(12.0f),
+                .background = guikit::StateColor::RadialGradient(
+                    guikit::Color::Lerp(pal.surfaceElevated, cB, isDark ? 0.26f : 0.14f),
+                    pal.surface
+                ),
+                .border = {.width = 1.0f, .color = guikit::StateColor{pal.border}}
+            })) {
+                guikit::Heading(ui, {.label = "Radial Spotlight Card", .level = guikit::HeadingLevel::H6});
+                guikit::Text(ui, "StateColor::RadialGradient adapts to any ChromeStyle (including Glass).", {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Secondary});
+            }
+        }
+    }
 }
 
 void RenderActionsTab(guikit::Context& ui, ThemeStudioState& st) {
@@ -587,6 +648,29 @@ void RenderActionsTab(guikit::Context& ui, ThemeStudioState& st) {
             guikit::Button(ui, {.text = "Ghost",   .style = guikit::ButtonStyle::Ghost});
             guikit::Button(ui, {.text = "Save",    .icon = guikit::Icon::Save(), .variant = guikit::UiVariant::Success});
             guikit::Button(ui, {.icon = guikit::Icon::Settings(), .square = true, .tooltip = "Icon button"});
+        }
+
+        guikit::Text(ui, "PER-WIDGET GRADIENTS", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
+        if (auto w = guikit::Wrap(ui, {.gap = 8.0f, .runGap = 8.0f})) {
+            guikit::Button(ui, {.text = "Auto Primary", .icon = guikit::Icon::Flash(), .background = guikit::StateColor::Primary().AsGradient(135.0f)});
+            guikit::Button(ui, {.text = "Auto Success", .icon = guikit::Icon::Check(), .background = guikit::StateColor::Success().AsGradient(120.0f)});
+            guikit::Button(ui, {
+                .text = "Indigo -> Cyan",
+                .background = guikit::StateColor::LinearGradient(guikit::Color::Hex(0x6366F1FF), guikit::Color::Hex(0x06B6D4FF), 135.0f)
+            });
+            guikit::Button(ui, {
+                .text = "Sunset 3-Stop",
+                .background = guikit::StateColor::LinearGradient3(
+                    guikit::Color::Hex(0xF97316FF),
+                    guikit::Color::Hex(0xEC4899FF),
+                    guikit::Color::Hex(0x8B5CF6FF),
+                    135.0f
+                )
+            });
+            guikit::Button(ui, {
+                .text = "Radial Glow",
+                .background = guikit::StateColor::RadialGradient(guikit::Color::Hex(0x38BDF8FF), guikit::Color::Hex(0x1D4ED8FF))
+            });
         }
 
         guikit::Text(ui, "DISABLED", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
@@ -926,13 +1010,15 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         guikit::ChromeStyleName(guikit::ChromeStyle::Fluent),
         guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
         guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist),
-        guikit::ChromeStyleName(guikit::ChromeStyle::Glass)
+        guikit::ChromeStyleName(guikit::ChromeStyle::Glass),
+        guikit::ChromeStyleName(guikit::ChromeStyle::Luminous)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kFillStyleCount> kFillNames = {{
         guikit::FillStyleName(guikit::FillStyle::Solid),
         guikit::FillStyleName(guikit::FillStyle::Soft),
-        guikit::FillStyleName(guikit::FillStyle::Outline)
+        guikit::FillStyleName(guikit::FillStyle::Outline),
+        guikit::FillStyleName(guikit::FillStyle::Gradient)
     }};
 
     static constexpr keel::StaticArray<keel::StringRef, guikit::kSyntaxPresetCount> kSyntaxNames = {{
@@ -1018,10 +1104,16 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                     applyCombo(guikit::ThemePreset::Industrial, guikit::ChromeStyle::Brutalist, guikit::FillStyle::Solid);
                 }
                 if (guikit::Button(ui, {.text = "Nord x Glass", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Primary}).clicked) {
-                    applyCombo(guikit::ThemePreset::Nord, guikit::ChromeStyle::Glass, guikit::FillStyle::Soft);
+                    applyCombo(guikit::ThemePreset::Nord, guikit::ChromeStyle::Glass, guikit::FillStyle::Gradient);
                 }
                 if (guikit::Button(ui, {.text = "Light x Glass", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Info}).clicked) {
-                    applyCombo(guikit::ThemePreset::Light, guikit::ChromeStyle::Glass, guikit::FillStyle::Solid);
+                    applyCombo(guikit::ThemePreset::Light, guikit::ChromeStyle::Glass, guikit::FillStyle::Gradient);
+                }
+                if (guikit::Button(ui, {.text = "Dark x Luminous", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Success}).clicked) {
+                    applyCombo(guikit::ThemePreset::Dark, guikit::ChromeStyle::Luminous, guikit::FillStyle::Gradient);
+                }
+                if (guikit::Button(ui, {.text = "Dracula x Luminous", .size = guikit::UiSize::Xs, .style = guikit::ButtonStyle::Soft, .variant = guikit::UiVariant::Danger}).clicked) {
+                    applyCombo(guikit::ThemePreset::Dracula, guikit::ChromeStyle::Luminous, guikit::FillStyle::Gradient);
                 }
             }
         }

@@ -367,7 +367,8 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             guikit::ChromeStyleName(guikit::ChromeStyle::Fluent),
             guikit::ChromeStyleName(guikit::ChromeStyle::Classic3D),
             guikit::ChromeStyleName(guikit::ChromeStyle::Brutalist),
-            guikit::ChromeStyleName(guikit::ChromeStyle::Glass)
+            guikit::ChromeStyleName(guikit::ChromeStyle::Glass),
+            guikit::ChromeStyleName(guikit::ChromeStyle::Luminous)
         }};
         keel::usize previewChromeIdx = keel::as<keel::usize>(m_demoCtx.studio.chrome);
         if (guikit::Select(ui, previewChromeIdx, kPreviewChromeLabels, {
@@ -382,7 +383,8 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         static constexpr keel::StaticArray<keel::StringRef, guikit::kFillStyleCount> kPreviewFillLabels = {{
             guikit::FillStyleName(guikit::FillStyle::Solid),
             guikit::FillStyleName(guikit::FillStyle::Soft),
-            guikit::FillStyleName(guikit::FillStyle::Outline)
+            guikit::FillStyleName(guikit::FillStyle::Outline),
+            guikit::FillStyleName(guikit::FillStyle::Gradient)
         }};
         keel::usize previewFillIdx = keel::as<keel::usize>(m_demoCtx.studio.fillStyle);
         if (guikit::Select(ui, previewFillIdx, kPreviewFillLabels, {

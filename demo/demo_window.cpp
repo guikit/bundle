@@ -111,7 +111,7 @@ void DemoWindow::RenderTopToolbar(guikit::Context& ui) {
 
         tb.Separator();
 
-        m_shellControls.RenderThemeControls(*this, tb);
+        m_shellControls.RenderThemeControls(*this, tb, /*showShellStyle=*/false);
         m_shellControls.RenderDebugControls(*this, tb);
         m_shellControls.RenderEngineControls(*this, tb);
 
@@ -304,26 +304,6 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
         constexpr keel::f32 kSelectCompactW = 96.0f;
         constexpr keel::f32 kSelectWideW = 160.0f;
 
-        guikit::Text(ui, "PREVIEW", {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Muted});
-
-        if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {
-            .tooltip = "Preview Viewport Form Factor & Orientation",
-            .size = guikit::UiSize::Sm,
-            .width = kSelectWideW
-        }).changed) {
-            const PreviewFormFactor ff = keel::from_underlying<PreviewFormFactor>(
-                keel::min<keel::usize>(m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames.size() - 1u)
-            );
-            const bool isDevice = (ff == PreviewFormFactor::TabletLandscape ||
-                                   ff == PreviewFormFactor::TabletPortrait ||
-                                   ff == PreviewFormFactor::PhonePortrait ||
-                                   ff == PreviewFormFactor::PhoneLandscape);
-            if (isDevice && m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
-                m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
-            }
-            ui.InvalidateAll();
-        }
-
         const keel::i32 effZoomPct = keel::round_i32(m_demoCtx.previewEffectiveZoom * 100.0f);
         guikit::SelectOptions zoomSelectOpts{
             .tooltip = "Preview Zoom / Scale (Fit, Real 1:1 physical mm, or Ctrl + MouseWheel)",
@@ -436,6 +416,26 @@ void DemoWindow::RenderPreviewToolbar(guikit::Context& ui) {
             .icon = guikit::Icon::Search(),
             .variant = guikit::UiVariant::Warning
         });
+
+        previewTb.Spacer();
+
+        if (guikit::Select(ui, m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames, {
+            .tooltip = "Preview Viewport Form Factor & Orientation",
+            .size = guikit::UiSize::Sm,
+            .width = kSelectWideW
+        }).changed) {
+            const PreviewFormFactor ff = keel::from_underlying<PreviewFormFactor>(
+                keel::min<keel::usize>(m_demoCtx.previewFormFactorIdx, kPreviewFormFactorNames.size() - 1u)
+            );
+            const bool isDevice = (ff == PreviewFormFactor::TabletLandscape ||
+                                   ff == PreviewFormFactor::TabletPortrait ||
+                                   ff == PreviewFormFactor::PhonePortrait ||
+                                   ff == PreviewFormFactor::PhoneLandscape);
+            if (isDevice && m_demoCtx.previewZoomModeIdx == keel::as<keel::usize>(PreviewZoomMode::Zoom100)) {
+                m_demoCtx.previewZoomModeIdx = keel::as<keel::usize>(PreviewZoomMode::Fit);
+            }
+            ui.InvalidateAll();
+        }
     }
 }
 

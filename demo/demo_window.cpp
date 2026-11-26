@@ -138,7 +138,6 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
                 ? (kBaseCount + m_selectedExtension)
                 : keel::as<keel::i32>(m_selectedCategory);
 
-            menu.Section("STYLE");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::StyleThemeStudio),   {.text = "Theme Studio", .icon = guikit::Icon::Eye()});
 
             menu.Section("LAYOUT");

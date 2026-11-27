@@ -20,6 +20,13 @@ struct ThemeStudioState {
     bool customizeScrollbarTokens = false;
     guikit::ScrollbarStyleTokens customScrollbarTokens = guikit::ScrollbarStyleTokens::Modern();
     keel::Optional<guikit::SliderThumbShape> sliderThumb = keel::kNullOpt;
+    keel::Optional<guikit::SliderTrackStyle> sliderTrackStyle = keel::kNullOpt;
+    keel::Optional<guikit::SliderTickStyle> sliderTickStyle = keel::kNullOpt;
+    keel::Optional<guikit::SliderTrackCaps> sliderTrackCaps = keel::kNullOpt;
+    bool overrideSliderTrackHeight = false;
+    keel::f32 sliderTrackHeight = 4.0f;
+    bool overrideSliderThumbSize = false;
+    keel::f32 sliderThumbSize = 14.0f;
 
     // Seed & Direct Color Overrides
     bool overrideAccent = false;
@@ -128,6 +135,13 @@ struct ThemeStudioState {
         customizeScrollbarTokens = false;
         customScrollbarTokens = guikit::ScrollbarStyleTokens::Modern();
         sliderThumb = keel::kNullOpt;
+        sliderTrackStyle = keel::kNullOpt;
+        sliderTickStyle = keel::kNullOpt;
+        sliderTrackCaps = keel::kNullOpt;
+        overrideSliderTrackHeight = false;
+        sliderTrackHeight = 4.0f;
+        overrideSliderThumbSize = false;
+        sliderThumbSize = 14.0f;
 
         overrideAccent = false;
         overrideNeutral = false;
@@ -184,6 +198,17 @@ struct ThemeStudioState {
         syntaxPreset = spec.syntaxPreset;
         scrollbarChrome = spec.scrollbarChrome;
         sliderThumb = spec.sliderThumb;
+        sliderTrackStyle = spec.sliderTrackStyle;
+        sliderTickStyle = spec.sliderTickStyle;
+        sliderTrackCaps = spec.sliderTrackCaps;
+        if (spec.sliderTrackHeight.has_value()) {
+            overrideSliderTrackHeight = true;
+            sliderTrackHeight = *spec.sliderTrackHeight;
+        }
+        if (spec.sliderThumbSize.has_value()) {
+            overrideSliderThumbSize = true;
+            sliderThumbSize = *spec.sliderThumbSize;
+        }
         if (spec.scrollbarWidth.has_value()) {
             overrideScrollbarWidth = true;
             scrollbarWidth = *spec.scrollbarWidth;
@@ -242,6 +267,21 @@ struct ThemeStudioState {
         }
         if (sliderThumb.has_value()) {
             spec.sliderThumb = sliderThumb;
+        }
+        if (sliderTrackStyle.has_value()) {
+            spec.sliderTrackStyle = sliderTrackStyle;
+        }
+        if (sliderTickStyle.has_value()) {
+            spec.sliderTickStyle = sliderTickStyle;
+        }
+        if (sliderTrackCaps.has_value()) {
+            spec.sliderTrackCaps = sliderTrackCaps;
+        }
+        if (overrideSliderTrackHeight) {
+            spec.sliderTrackHeight = sliderTrackHeight;
+        }
+        if (overrideSliderThumbSize) {
+            spec.sliderThumbSize = sliderThumbSize;
         }
         if (overrideAccent)     spec.accent = accentColor;
         if (overrideNeutral)    spec.neutral = neutralColor;

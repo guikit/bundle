@@ -1104,6 +1104,11 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 st.fillStyle = f;
                 st.scrollbarChrome = keel::kNullOpt;
                 st.sliderThumb = keel::kNullOpt;
+                st.sliderTrackStyle = keel::kNullOpt;
+                st.sliderTickStyle = keel::kNullOpt;
+                st.sliderTrackCaps = keel::kNullOpt;
+                st.overrideSliderTrackHeight = false;
+                st.overrideSliderThumbSize = false;
                 const auto tok = guikit::ChromeTokens::FromStyle(c);
                 st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
                 st.customizeScrollbarTokens = false;
@@ -1159,26 +1164,6 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         if (auto el = guikit::Element(ui, {.label = "Fill Style", .description = "Semantic emphasis fill (Solid / Soft / Outline)"})) {
             if (guikit::Select(ui, fillIdx, kFillNames, {.size = guikit::UiSize::Sm}).changed) {
                 st.fillStyle = keel::from_underlying<guikit::FillStyle>(fillIdx);
-                dirty = true;
-            }
-        }
-
-        static constexpr keel::StaticArray<keel::StringRef, 6> kSliderThumbNames = {
-            "Auto (Match Chrome)",
-            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Circle),
-            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Ring),
-            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Square),
-            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Pointer3D),
-            guikit::SliderThumbShapeName(guikit::SliderThumbShape::Bar)
-        };
-        keel::usize sliderThumbIdx = st.sliderThumb.has_value()
-            ? (keel::as<keel::usize>(*st.sliderThumb) + 1u)
-            : 0u;
-        if (auto el = guikit::Element(ui, {.label = "Slider Thumb", .description = "Circle, Ring (Fluent), Square, Pointer 3D, or Bar"})) {
-            if (guikit::Select(ui, sliderThumbIdx, kSliderThumbNames, {.size = guikit::UiSize::Sm}).changed) {
-                st.sliderThumb = (sliderThumbIdx == 0u)
-                    ? keel::Optional<guikit::SliderThumbShape>(keel::kNullOpt)
-                    : keel::Optional<guikit::SliderThumbShape>(keel::from_underlying<guikit::SliderThumbShape>(sliderThumbIdx - 1u));
                 dirty = true;
             }
         }
@@ -1283,6 +1268,72 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             st.customScrollbarTokens = sbTok;
             st.customizeScrollbarTokens = true;
             dirty = true;
+        }
+    }
+
+    // 2c. SLIDER CUSTOMIZATION
+    static constexpr keel::StaticArray<keel::StringRef, 6> kSliderThumbNames = {
+        "Auto (Match Chrome)",
+        guikit::SliderThumbShapeName(guikit::SliderThumbShape::Circle),
+        guikit::SliderThumbShapeName(guikit::SliderThumbShape::Ring),
+        guikit::SliderThumbShapeName(guikit::SliderThumbShape::Square),
+        guikit::SliderThumbShapeName(guikit::SliderThumbShape::Pointer3D),
+        guikit::SliderThumbShapeName(guikit::SliderThumbShape::Bar)
+    };
+    static constexpr keel::StaticArray<keel::StringRef, 3> kSliderTrackStyleNames = {
+        "Auto (Match Chrome)",
+        guikit::SliderTrackStyleName(guikit::SliderTrackStyle::Filled),
+        guikit::SliderTrackStyleName(guikit::SliderTrackStyle::NeutralGroove)
+    };
+    static constexpr keel::StaticArray<keel::StringRef, 4> kSliderTickStyleNames = {
+        "Auto (Match Chrome)",
+        guikit::SliderTickStyleName(guikit::SliderTickStyle::Dot),
+        guikit::SliderTickStyleName(guikit::SliderTickStyle::Line),
+        guikit::SliderTickStyleName(guikit::SliderTickStyle::Notch)
+    };
+    static constexpr keel::StaticArray<keel::StringRef, 3> kSliderTrackCapsNames = {
+        "Auto (Match Chrome)",
+        guikit::SliderTrackCapsName(guikit::SliderTrackCaps::Round),
+        guikit::SliderTrackCapsName(guikit::SliderTrackCaps::Square)
+    };
+    if (auto acc = guikit::Accordion(ui, {.label = "SLIDER", .defaultOpen = false, .size = guikit::UiSize::Sm})) {
+        auto renderOptSelect = [&]<typename EnumT>(keel::StringRef label, keel::StringRef desc, keel::Optional<EnumT>& optEnum, keel::ArrayRef<keel::StringRef> names) {
+            keel::usize idx = optEnum.has_value() ? (keel::as<keel::usize>(*optEnum) + 1u) : 0u;
+            if (auto el = guikit::Element(ui, {.label = label, .description = desc})) {
+                if (guikit::Select(ui, idx, names, {.size = guikit::UiSize::Sm}).changed) {
+                    optEnum = (idx == 0u)
+                        ? keel::Optional<EnumT>(keel::kNullOpt)
+                        : keel::Optional<EnumT>(keel::from_underlying<EnumT>(idx - 1u));
+                    dirty = true;
+                }
+            }
+        };
+
+        renderOptSelect("Thumb Shape", "Circle, Ring (Fluent), Square, Pointer 3D, or Bar", st.sliderThumb, kSliderThumbNames);
+        renderOptSelect("Track Style", {}, st.sliderTrackStyle, kSliderTrackStyleNames);
+        renderOptSelect("Tick Style", {}, st.sliderTickStyle, kSliderTickStyleNames);
+        renderOptSelect("Track Caps", "Pill-rounded or sharp rectangular track ends", st.sliderTrackCaps, kSliderTrackCapsNames);
+
+        static constexpr keel::StaticArray<keel::StringRef, 1> kAutoStop = {"Auto"};
+        if (auto el = guikit::Element(ui, {.label = "Track Thickness"})) {
+            if (guikit::HybridSlider(ui, st.overrideSliderTrackHeight, st.sliderTrackHeight, 2.0f, 12.0f, {
+                .stops = kAutoStop,
+                .valueFormat = "%.1f dp",
+                .step = 0.5f,
+                .size = guikit::UiSize::Sm
+            }).changed) {
+                dirty = true;
+            }
+        }
+        if (auto el = guikit::Element(ui, {.label = "Thumb Size"})) {
+            if (guikit::HybridSlider(ui, st.overrideSliderThumbSize, st.sliderThumbSize, 10.0f, 24.0f, {
+                .stops = kAutoStop,
+                .valueFormat = "%.0f dp",
+                .step = 1.0f,
+                .size = guikit::UiSize::Sm
+            }).changed) {
+                dirty = true;
+            }
         }
     }
 
@@ -1712,6 +1763,26 @@ keel::String GenerateThemeStudioCode(const DemoContext& ctx) {
     if (spec.sliderThumb.has_value()) {
         keel::format_into(out, ",\n    .sliderThumb = guikit::SliderThumbShape::{}",
             SliderThumbEnumIdentifier(*spec.sliderThumb));
+    }
+    if (spec.sliderTrackStyle.has_value()) {
+        keel::format_into(out, ",\n    .sliderTrackStyle = guikit::SliderTrackStyle::{}",
+            (*spec.sliderTrackStyle == guikit::SliderTrackStyle::NeutralGroove) ? "NeutralGroove" : "Filled");
+    }
+    if (spec.sliderTickStyle.has_value()) {
+        const keel::StringRef tickId = (*spec.sliderTickStyle == guikit::SliderTickStyle::Line)
+            ? "Line"
+            : ((*spec.sliderTickStyle == guikit::SliderTickStyle::Notch) ? "Notch" : "Dot");
+        keel::format_into(out, ",\n    .sliderTickStyle = guikit::SliderTickStyle::{}", tickId);
+    }
+    if (spec.sliderTrackCaps.has_value()) {
+        keel::format_into(out, ",\n    .sliderTrackCaps = guikit::SliderTrackCaps::{}",
+            (*spec.sliderTrackCaps == guikit::SliderTrackCaps::Square) ? "Square" : "Round");
+    }
+    if (spec.sliderTrackHeight.has_value()) {
+        keel::format_into(out, ",\n    .sliderTrackHeight = {:.1f}f", *spec.sliderTrackHeight);
+    }
+    if (spec.sliderThumbSize.has_value()) {
+        keel::format_into(out, ",\n    .sliderThumbSize = {:.1f}f", *spec.sliderThumbSize);
     }
     if (spec.accent.has_value())      keel::format_into(out, ",\n    .accent = guikit::Color::Hex({})", FormatHexLiteral(*spec.accent));
     if (spec.neutral.has_value())     keel::format_into(out, ",\n    .neutral = guikit::Color::Hex({})", FormatHexLiteral(*spec.neutral));

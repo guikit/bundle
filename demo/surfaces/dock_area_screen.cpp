@@ -15,6 +15,9 @@ struct DockAreaDemoState {
     bool reorderable = true;
     bool dockable = true;
     bool tearable = true;
+    bool expandable = true;
+    bool expandCloseOnBackdrop = true;
+    bool expandCloseOnEscape = true;
     bool showTabBarForSingle = true;
     bool animateLayout = true;
     guikit::TabBarStyle tabStyle = guikit::TabBarStyle::Underline;
@@ -133,8 +136,19 @@ void RenderDockAreaInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
     if (auto el = guikit::Element(ui, {.label = "Dockable Splits", .description = "Drop on 5-way compass or outer 4 edges"})) {
         if (guikit::Switch(ui, s_dock.dockable).changed) ui.InvalidateAll();
     }
-    if (auto el = guikit::Element(ui, {.label = "Tearable Floating", .description = "Drag a tab away to detach as floating card"})) {
+    if (auto el = guikit::Element(ui, {.label = "Tearable Floating", .description = "Drag tab outside DockArea or click Float button in tab bar"})) {
         if (guikit::Switch(ui, s_dock.tearable).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Expandable Panels", .description = "Double-click a tab or click Expand for Modal / Fullscreen"})) {
+        if (guikit::Switch(ui, s_dock.expandable).changed) ui.InvalidateAll();
+    }
+    if (s_dock.expandable) {
+        if (auto el = guikit::Element(ui, {.label = "Close Expand on Backdrop", .description = "Clicking dimmed backdrop returns expanded panel to dock"})) {
+            if (guikit::Switch(ui, s_dock.expandCloseOnBackdrop).changed) ui.InvalidateAll();
+        }
+        if (auto el = guikit::Element(ui, {.label = "Close Expand on Escape", .description = "Pressing Escape returns expanded panel to dock"})) {
+            if (guikit::Switch(ui, s_dock.expandCloseOnEscape).changed) ui.InvalidateAll();
+        }
     }
     if (auto el = guikit::Element(ui, {.label = "Show Single Tab Bar"})) {
         if (guikit::Switch(ui, s_dock.showTabBarForSingle).changed) ui.InvalidateAll();
@@ -176,6 +190,9 @@ void RenderDockAreaStage(guikit::Context& ui, DemoContext& /*ctx*/) {
         .reorderable = s_dock.reorderable,
         .dockable = s_dock.dockable,
         .tearable = s_dock.tearable,
+        .expandable = s_dock.expandable,
+        .expandCloseOnBackdrop = s_dock.expandCloseOnBackdrop,
+        .expandCloseOnEscape = s_dock.expandCloseOnEscape,
         .showTabBarForSingle = s_dock.showTabBarForSingle,
         .animateLayout = s_dock.animateLayout,
         .tabStyle = s_dock.tabStyle
@@ -356,9 +373,9 @@ void RenderDockAreaStage(guikit::Context& ui, DemoContext& /*ctx*/) {
         })) {
             struct Diag { keel::StringRef tag; guikit::UiVariant var; keel::StringRef loc; keel::StringRef msg; };
             static constexpr keel::StaticArray<Diag, 3> kDiags = {{
-                {"INFO", guikit::UiVariant::Info,    "dock_area.cpp:1", "Drag any tab onto the 5-way compass to merge or split"},
-                {"INFO", guikit::UiVariant::Success, "dock_area.cpp:2", "Drag outside docked panes to tear into a floating card"},
-                {"WARN", guikit::UiVariant::Warning, "dock_area.cpp:3", "Double-click a floating card title bar or sash to reset/redock"}
+                {"INFO", guikit::UiVariant::Info,    "dock_area.cpp:1", "Drag any tab onto the 5-way compass or outer tiles (drop in empty space to cancel)"},
+                {"INFO", guikit::UiVariant::Success, "dock_area.cpp:2", "Double-click any tab to expand into a Modal overlay, then toggle Fullscreen"},
+                {"WARN", guikit::UiVariant::Warning, "dock_area.cpp:3", "Use the tab bar Float button or drag outside DockArea to detach as a floating card"}
             }};
             for (keel::usize i = 0; i < kDiags.size(); ++i) {
                 auto sc = ui.IdScope(i);
@@ -388,6 +405,9 @@ keel::String GenerateDockAreaCode(const DemoContext& /*ctx*/) {
         "    .reorderable = {},\n"
         "    .dockable = {},\n"
         "    .tearable = {},\n"
+        "    .expandable = {},\n"
+        "    .expandCloseOnBackdrop = {},\n"
+        "    .expandCloseOnEscape = {},\n"
         "    .showTabBarForSingle = {},\n"
         "    .animateLayout = {},\n"
         "    .tabStyle = guikit::TabBarStyle::{}\n"
@@ -409,6 +429,9 @@ keel::String GenerateDockAreaCode(const DemoContext& /*ctx*/) {
         s_dock.reorderable ? "true" : "false",
         s_dock.dockable ? "true" : "false",
         s_dock.tearable ? "true" : "false",
+        s_dock.expandable ? "true" : "false",
+        s_dock.expandCloseOnBackdrop ? "true" : "false",
+        s_dock.expandCloseOnEscape ? "true" : "false",
         s_dock.showTabBarForSingle ? "true" : "false",
         s_dock.animateLayout ? "true" : "false",
         styleName

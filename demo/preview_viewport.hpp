@@ -3,6 +3,8 @@
 #include "demo_context.hpp"
 #include "guikit/backend/i_canvas.hpp"
 #include "guikit/core/node.hpp"
+#include "guikit/style/style_painter.hpp"
+#include "guikit/surfaces/header_bar.hpp"
 #include "keel/keel.h"
 #include "keel/math.h"
 
@@ -83,6 +85,10 @@ struct ResizeGripPayload {
     bool highlighted{false};
 };
 
+struct PreviewHeaderHeightState {
+    keel::f32 heightLogical{0.0f};
+};
+
 inline void RenderWindowResizeGrip(const guikit::Node* n, guikit::ICanvas& canvas, const guikit::UiTheme& theme) noexcept {
     const guikit::Rect& r = n->computedRect;
     if (r.w <= 20.0f || r.h <= 20.0f) return;
@@ -100,26 +106,6 @@ inline void RenderWindowResizeGrip(const guikit::Node* n, guikit::ICanvas& canva
         const keel::f32 span = (3.5f + keel::as<keel::f32>(i) * 3.5f) * s;
         canvas.DrawLine({bx - span, by}, {bx, by - span}, gripCol, keel::max(1.0f, 1.2f * s));
     }
-}
-
-inline void RenderWindowTitlebarTrafficLights(const guikit::Node* n, guikit::ICanvas& canvas, const guikit::UiTheme& theme) noexcept {
-    const guikit::Rect& r = n->computedRect;
-    if (r.w <= 20.0f || r.h <= 4.0f) return;
-
-    constexpr keel::f32 s = 1.0f;
-    const keel::f32 dotD = 10.0f * s;
-    const keel::f32 dotR = dotD * 0.5f;
-    const keel::f32 gap = 7.0f * s;
-    const keel::f32 cy = r.Center().y - dotR;
-    const keel::f32 x0 = r.x + 12.0f * s;
-
-    // Traffic lights: Close (Red), Minimize (Amber), Zoom (Green)
-    canvas.DrawRoundRect(guikit::Rect(x0, cy, dotD, dotD), dotR, guikit::Color(255, 95, 86, 255), guikit::Color(224, 68, 62, 180), 0.75f);
-    canvas.DrawRoundRect(guikit::Rect(x0 + dotD + gap, cy, dotD, dotD), dotR, guikit::Color(255, 189, 46, 255), guikit::Color(222, 159, 34, 180), 0.75f);
-    canvas.DrawRoundRect(guikit::Rect(x0 + (dotD + gap) * 2.0f, cy, dotD, dotD), dotR, guikit::Color(39, 201, 63, 255), guikit::Color(29, 171, 47, 180), 0.75f);
-
-    // 1px bottom divider of the window titlebar
-    canvas.DrawRect(guikit::Rect(r.x, r.Bottom() - 1.0f, r.w, 1.0f), theme.palette.border);
 }
 
 template <bool IsPhone>
@@ -448,13 +434,15 @@ inline void RenderPreviewViewport(
             .inspectMode = demoCtx.previewInspect
         };
         if (formFactor == PreviewFormFactor::Window) {
-                // Desktop OS Window Bezel (Traffic lights + Screen Title + Client WxH badge + Interactive Edge/Corner Resize)
+                // Theme-authentic Desktop OS Window Frame (real HeaderBar + theme WindowCornerStyle + Interactive Edge/Corner Resize)
+                const guikit::UiTheme& pt = demoCtx.previewTheme;
+                const guikit::HeaderBarChromeMetrics hdrMetrics = pt.Painter().GetHeaderBarMetrics(pt, true);
+                const keel::f32 frameInset = pt.Painter().GetChromeMetrics(pt).frameBevelInset;
+                const keel::f32 winRadius = pt.GetWindowCornerRadius();
                 const bool resizeActiveOrHovered = (demoCtx.previewWindowResizeEdge != 0 || demoCtx.previewWindowHoverEdge != 0);
                 const guikit::Color winBorderCol = resizeActiveOrHovered
-                    ? demoCtx.shellTheme.GetVariant(guikit::UiVariant::Primary).bg
-                    : ((demoCtx.shellTheme.mode == guikit::ThemeMode::Light)
-                        ? guikit::Color(148, 163, 184, 255)
-                        : guikit::Color(71, 85, 105, 255));
+                    ? pt.GetSemanticAccent(guikit::UiVariant::Primary)
+                    : pt.palette.border;
 
                 // The slot is the area the window occupies, in studio units: edge / corner resizing is hit-tested here,
                 // so the drag stays stable while the centered window moves. The window itself is scaled inside it.
@@ -468,11 +456,28 @@ inline void RenderPreviewViewport(
                 })) {
                     const guikit::Id winId = windowSlot.GetNode()->id;
                     const guikit::Id winResizeId(guikit::detail::HashArgs(winId.value, keel::u64(0x57494E5F52535Aull)));
+                    auto& headerHState = ui.GetOrCreateState<detail::PreviewHeaderHeightState>(winId);
+                    const keel::f32 titleHLogical = (headerHState.heightLogical > 0.5f)
+                        ? headerHState.heightLogical
+                        : keel::max(24.0f, 34.0f + hdrMetrics.defaultHeightDelta);
                     const guikit::Rect winBounds = ui.GetPrevFrameBounds(winId);
+                    const keel::f32 maxFitW = keel::max(320.0f, keel::floor(availPxW / relScale));
+                    const keel::f32 maxFitH = keel::max(220.0f, keel::floor(availPxH / relScale));
+
+                    auto toggleMaximizeRestore = [&]() {
+                        if (demoCtx.previewWindowCustomSize) {
+                            demoCtx.previewWindowCustomSize = false;
+                        } else {
+                            demoCtx.previewWindowCustomSize = true;
+                            demoCtx.previewWindowW = keel::clamp(keel::round(maxFitW * 0.78f), 320.0f, maxFitW);
+                            demoCtx.previewWindowH = keel::clamp(keel::round(maxFitH * 0.78f), 220.0f, maxFitH);
+                        }
+                        ui.InvalidateAll();
+                    };
 
                     if (winBounds.w > 40.0f && winBounds.h > 40.0f) {
                         const guikit::Vec2 mouse = ui.GetMousePos();
-                        const keel::f32 titleH = 28.0f * relScale;
+                        const keel::f32 titleH = (titleHLogical + frameInset) * relScale;
                         const keel::f32 gripThick = 7.0f;
                         const keel::f32 cornerSpan = 16.0f;
 
@@ -482,16 +487,13 @@ inline void RenderPreviewViewport(
                         const guikit::Rect lEdge(winBounds.x - gripThick, winBounds.y + titleH, gripThick * 2.0f, keel::max(0.0f, winBounds.h - titleH - cornerSpan));
                         const guikit::Rect bEdge(winBounds.x + cornerSpan, winBounds.Bottom() - gripThick, keel::max(0.0f, winBounds.w - cornerSpan * 2.0f), gripThick * 2.0f);
 
-                        // Green traffic-light button & titlebar double-click (Maximize / Restore toggle)
-                        const keel::f32 dotD = 10.0f * relScale;
-                        const keel::f32 dotGap = 7.0f * relScale;
-                        const guikit::Rect greenBtnRect(
-                            winBounds.x + 12.0f * relScale + (dotD + dotGap) * 2.0f - 2.0f,
-                            winBounds.y,
-                            dotD + 4.0f,
-                            titleH
-                        );
-                        const guikit::Rect titlebarRect(winBounds.x, winBounds.y, winBounds.w, titleH);
+                        // Caption area excluding trailing/leading window controls for double-click Maximize / Restore
+                        const keel::f32 ctrlSpan = (hdrMetrics.controlBtnWidth * 3.0f + hdrMetrics.controlGap * 2.0f + hdrMetrics.closeExtraGap + hdrMetrics.rightEdgePadding + 8.0f) * relScale;
+#if defined(__APPLE__)
+                        const guikit::Rect captionDblClickRect(winBounds.x + ctrlSpan, winBounds.y, keel::max(0.0f, winBounds.w - ctrlSpan), titleH);
+#else
+                        const guikit::Rect captionDblClickRect(winBounds.x, winBounds.y, keel::max(0.0f, winBounds.w - ctrlSpan), titleH);
+#endif
 
                         const bool occluded = ui.IsMouseOccluded(winId, mouse);
                         const bool otherActive = ui.GetActiveId().IsValid() && ui.GetActiveId() != winResizeId;
@@ -516,20 +518,6 @@ inline void RenderPreviewViewport(
                             else if (edge & 4)        ui.SetCursor(guikit::CursorType::ResizeNS);
                         };
 
-                        const keel::f32 maxFitW = keel::max(320.0f, keel::floor(availPxW / relScale));
-                        const keel::f32 maxFitH = keel::max(220.0f, keel::floor(availPxH / relScale));
-
-                        auto toggleMaximizeRestore = [&]() {
-                            if (demoCtx.previewWindowCustomSize) {
-                                demoCtx.previewWindowCustomSize = false;
-                            } else {
-                                demoCtx.previewWindowCustomSize = true;
-                                demoCtx.previewWindowW = keel::clamp(keel::round(maxFitW * 0.78f), 320.0f, maxFitW);
-                                demoCtx.previewWindowH = keel::clamp(keel::round(maxFitH * 0.78f), 220.0f, maxFitH);
-                            }
-                            ui.InvalidateAll();
-                        };
-
                         if (demoCtx.previewWindowResizeEdge == 0 && !occluded && !otherActive) {
                             if (hovEdge != 0) {
                                 applyEdgeCursor(hovEdge);
@@ -550,13 +538,7 @@ inline void RenderPreviewViewport(
                                     ui.ConsumeMouseClick();
                                     ui.InvalidateAll();
                                 }
-                            } else if (greenBtnRect.Contains(mouse)) {
-                                ui.SetCursor(guikit::CursorType::Pointer);
-                                if (ui.IsMouseClicked()) {
-                                    toggleMaximizeRestore();
-                                    ui.ConsumeMouseClick();
-                                }
-                            } else if (titlebarRect.Contains(mouse) && ui.IsMouseDoubleClicked()) {
+                            } else if (captionDblClickRect.Contains(mouse) && ui.IsMouseDoubleClicked()) {
                                 toggleMaximizeRestore();
                                 ui.ConsumeMouseClick();
                             }
@@ -604,13 +586,17 @@ inline void RenderPreviewViewport(
                     }
 
                     if (auto previewZoneScope = ui.Zone(previewZone)) {
+                        const keel::f32 borderW = resizeActiveOrHovered
+                            ? 2.0f
+                            : keel::max(1.0f, pt.shell.panelBorderWidth);
                         if (auto windowFrame = guikit::Box(ui, {
                             .gap = 0.0f,
                             .width = guikit::SizeMode::Stretch,
                             .height = guikit::SizeMode::Stretch,
-                            .padding = guikit::Padding::All(0.0f),
-                            .background = {demoCtx.previewTheme.palette.surface},
-                            .border = {.width = resizeActiveOrHovered ? 2.0f : 1.5f, .radius = 10.0f, .color = {winBorderCol}},
+                            .padding = guikit::Padding::All(frameInset),
+                            .background = {pt.palette.surface},
+                            .border = {.width = borderW, .radius = winRadius, .color = {winBorderCol}},
+                            .surface = guikit::SurfaceRole::Raised,
                             .clipChildren = true
                         })) {
                             guikit::Node* winNode = windowFrame.GetNode();
@@ -618,43 +604,29 @@ inline void RenderPreviewViewport(
                             auto* grip = ui.AllocPayload<detail::ResizeGripPayload>(winNode);
                             grip->highlighted = (demoCtx.previewWindowHoverEdge != 0) || (demoCtx.previewWindowResizeEdge != 0);
 
-                            const guikit::Color titlebarBg = (ui.GetTheme().mode == guikit::ThemeMode::Light)
-                                ? guikit::Color(241, 245, 249, 255)
-                                : guikit::Color(15, 23, 42, 255);
-                            if (auto titlebar = guikit::Box(ui, {
-                                .width = guikit::SizeMode::Stretch,
-                                .height = 28.0f,
-                                .padding = guikit::Padding::Symmetric(12.0f, 0.0f),
-                                .background = {titlebarBg},
-                                .border = {.width = 0.0f, .radius = 0.0f}
+                            const keel::i32 clientW = demoCtx.previewWindowCustomSize
+                                ? keel::max(0, keel::round_i32(demoCtx.previewWindowW - frameInset * 2.0f))
+                                : keel::max(0, keel::round_i32(availPxW / relScale - frameInset * 2.0f));
+                            const keel::i32 clientH = demoCtx.previewWindowCustomSize
+                                ? keel::max(0, keel::round_i32(demoCtx.previewWindowH - titleHLogical - frameInset * 2.0f))
+                                : keel::max(0, keel::round_i32(availPxH / relScale - titleHLogical - frameInset * 2.0f));
+
+                            if (auto hb = guikit::HeaderBar(ui, {
+                                .title = displayTitle,
+                                .subtitle = ui.Format("{} x {}", clientW, clientH),
+                                .bindToWindow = false,
+                                .maximizedOverride = !demoCtx.previewWindowCustomSize,
+                                .focusedOverride = true,
+                                .size = guikit::UiSize::Sm
                             })) {
-                                titlebar.GetNode()->postRenderFn = &detail::RenderWindowTitlebarTrafficLights;
-                                if (auto titleRow = guikit::Row(ui, {
-                                    .gap = 8.0f,
-                                    .align = guikit::Alignment::Center,
-                                    .height = guikit::SizeMode::Stretch
-                                })) {
-                                    // Left slot reserved for Traffic Lights (3 dots * 10px + 2 * 7px gaps = 44px + 8px breathing room)
-                                    if (auto tlSlot = guikit::Box(ui, {
-                                        .width = 52.0f,
-                                        .height = guikit::SizeMode::Stretch
-                                    })) {}
-                                    guikit::Spacer(ui);
-                                    guikit::Text(ui, displayTitle, {
-                                        .role = guikit::TextRole::LabelSmall,
-                                        .variant = guikit::UiVariant::Secondary
-                                    });
-                                    guikit::Spacer(ui);
-                                    const keel::i32 clientW = demoCtx.previewWindowCustomSize
-                                        ? keel::max(0, keel::round_i32(demoCtx.previewWindowW))
-                                        : keel::max(0, keel::round_i32(availPxW / relScale));
-                                    const keel::i32 clientH = demoCtx.previewWindowCustomSize
-                                        ? keel::max(0, keel::round_i32(demoCtx.previewWindowH - 28.0f))
-                                        : keel::max(0, keel::round_i32(availPxH / relScale - 28.0f));
-                                    guikit::Text(ui, ui.Format("{} x {}", clientW, clientH), {
-                                        .role = guikit::TextRole::CodeSmall,
-                                        .variant = guikit::UiVariant::Muted
-                                    });
+                                const keel::f32 measuredH = (hb.response.rect.h > 0.5f)
+                                    ? hb.response.rect.h
+                                    : (hb.GetNode() ? hb.GetNode()->fixedHeight : 0.0f);
+                                if (measuredH > 0.5f) {
+                                    headerHState.heightLogical = measuredH;
+                                }
+                                if (hb.maximizeClicked) {
+                                    toggleMaximizeRestore();
                                 }
                             }
 
@@ -745,16 +717,17 @@ inline void RenderPreviewViewport(
                     }
                 }
             } else {
-                // Full Artboard Mode (clean bordered surface on the recessed backdrop)
+                // Full Artboard Mode (clean theme-aware bordered surface on the recessed backdrop)
                 if (auto previewZoneScope = ui.Zone(previewZone)) {
+                    const guikit::UiTheme& pt = demoCtx.previewTheme;
                     if (auto artboard = guikit::Box(ui, {
                         .width = guikit::SizeMode::Stretch,
                         .height = guikit::SizeMode::Stretch,
-                        .background = {demoCtx.previewTheme.palette.surface},
+                        .background = {pt.palette.surface},
                         .border = {
-                            .width = 1.0f,
-                            .radius = 8.0f,
-                            .color = {demoCtx.previewTheme.palette.border}
+                            .width = keel::max(1.0f, pt.shell.panelBorderWidth),
+                            .radius = pt.GetWindowCornerRadius(),
+                            .color = {pt.palette.border}
                         },
                         .clipChildren = true
                     })) {

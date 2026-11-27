@@ -865,6 +865,10 @@ void RenderControlsTab(guikit::Context& ui, ThemeStudioState& st) {
             if (auto el = guikit::Element(ui, {.label = "RangeSlider"})) {
                 guikit::RangeSlider(ui, st.sampleRangeLow, st.sampleRangeHigh, 0.0f, 100.0f, {.valueFormat = "%.0f"});
             }
+            static constexpr keel::StaticArray<keel::StringRef, 2> kHybridStops = {"Off", "Auto"};
+            if (auto el = guikit::Element(ui, {.label = "HybridSlider"})) {
+                guikit::HybridSlider(ui, st.sampleHybridMode, st.sampleHybridVal, 1.0f, 100.0f, kHybridStops, {.valueFormat = "%.0f %%"});
+            }
         }
 
         if (auto c = guikit::Card(ui, {.gap = 12.0f, .padding = guikit::Padding::All(14.0f)})) {
@@ -1102,6 +1106,7 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 st.sliderThumb = keel::kNullOpt;
                 const auto tok = guikit::ChromeTokens::FromStyle(c);
                 st.customScrollbarTokens = guikit::ScrollbarStyleTokens::ForChrome(tok.scrollbar);
+                st.customizeScrollbarTokens = false;
                 dirty = true;
             };
             if (auto w = guikit::Wrap(ui, {.gap = 4.0f, .runGap = 4.0f})) {
@@ -1200,12 +1205,6 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
     static constexpr keel::StaticArray<keel::StringRef, 5> kSbOverrideNames = {
         "Auto (Match Chrome)", "Modern", "Flat", "Classic 3D", "Framed"
     };
-    static constexpr keel::StaticArray<keel::StringRef, guikit::kScrollbarChromeStyleCount> kSbChromeNames = {
-        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::Modern),
-        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::Flat),
-        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::ClassicBevel),
-        guikit::ScrollbarChromeStyleName(guikit::ScrollbarChromeStyle::Framed)
-    };
     static constexpr keel::StaticArray<keel::StringRef, 3> kSbArrowNames = {
         "None", "Triangle", "Chevron"
     };
@@ -1228,71 +1227,62 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
                 dirty = true;
             }
         }
-        if (auto el = guikit::Element(ui, {.label = "Custom Width", .layout = guikit::ElementLayout::Leading})) {
-            if (guikit::Switch(ui, st.overrideScrollbarWidth, {.size = guikit::UiSize::Sm}).changed) {
-                if (st.overrideScrollbarWidth) {
+        if (auto el = guikit::Element(ui, {.label = "Custom Width"})) {
+            static constexpr keel::StaticArray<keel::StringRef, 1> kAutoStop = {"Auto"};
+            const bool wasOverridden = st.overrideScrollbarWidth;
+            if (guikit::HybridSlider(ui, st.overrideScrollbarWidth, st.scrollbarWidth, 4.0f, 24.0f, {
+                .stops = kAutoStop,
+                .valueFormat = "%.0f dp",
+                .step = 1.0f,
+                .size = guikit::UiSize::Sm
+            }).changed) {
+                if (!wasOverridden && st.overrideScrollbarWidth && st.scrollbarWidth < 4.0f) {
                     st.scrollbarWidth = ctx.previewTheme.GetScrollbar(guikit::UiSize::Md).trackWidth;
                 }
                 dirty = true;
             }
         }
-        if (st.overrideScrollbarWidth) {
-            if (guikit::Slider(ui, st.scrollbarWidth, 4.0f, 24.0f, {.valueFormat = "%.0f dp", .step = 1.0f, .size = guikit::UiSize::Sm}).changed) {
-                dirty = true;
-            }
-        }
 
-        if (auto el = guikit::Element(ui, {.label = "Fine-Tune Tokens", .layout = guikit::ElementLayout::Leading})) {
-            if (guikit::Switch(ui, st.customizeScrollbarTokens, {.size = guikit::UiSize::Sm}).changed) {
-                if (st.customizeScrollbarTokens) {
-                    st.customScrollbarTokens = ctx.previewTheme.scrollbarStyle;
+        guikit::ScrollbarStyleTokens sbTok = st.customizeScrollbarTokens
+            ? st.customScrollbarTokens
+            : ctx.previewTheme.scrollbarStyle;
+        bool tokEdited = false;
+        if (auto el = guikit::Element(ui, {.label = "Arrow Buttons", .layout = guikit::ElementLayout::Leading})) {
+            if (guikit::Switch(ui, sbTok.showButtons, {.size = guikit::UiSize::Sm}).changed) {
+                if (sbTok.showButtons && sbTok.arrowStyle == guikit::ScrollbarArrowStyle::None) {
+                    sbTok.arrowStyle = guikit::ScrollbarArrowStyle::Triangle;
                 }
-                dirty = true;
+                tokEdited = true;
             }
         }
-        if (st.customizeScrollbarTokens) {
-            auto& sbTok = st.customScrollbarTokens;
-            keel::usize chromeIdx = keel::as<keel::usize>(sbTok.chrome);
-            if (auto el = guikit::Element(ui, {.label = "Chrome Style"})) {
-                if (guikit::Select(ui, chromeIdx, kSbChromeNames, {.size = guikit::UiSize::Sm}).changed) {
-                    sbTok = guikit::ScrollbarStyleTokens::ForChrome(
-                        keel::from_underlying<guikit::ScrollbarChromeStyle>(chromeIdx)
-                    );
-                    dirty = true;
+        if (sbTok.showButtons) {
+            keel::usize arrowIdx = keel::as<keel::usize>(sbTok.arrowStyle);
+            if (auto el = guikit::Element(ui, {.label = "Arrow Glyph"})) {
+                if (guikit::Select(ui, arrowIdx, kSbArrowNames, {.size = guikit::UiSize::Sm}).changed) {
+                    sbTok.arrowStyle = keel::from_underlying<guikit::ScrollbarArrowStyle>(arrowIdx);
+                    tokEdited = true;
                 }
             }
-            if (auto el = guikit::Element(ui, {.label = "Arrow Buttons", .layout = guikit::ElementLayout::Leading})) {
-                if (guikit::Switch(ui, sbTok.showButtons, {.size = guikit::UiSize::Sm}).changed) {
-                    if (sbTok.showButtons && sbTok.arrowStyle == guikit::ScrollbarArrowStyle::None) {
-                        sbTok.arrowStyle = guikit::ScrollbarArrowStyle::Triangle;
-                    }
-                    dirty = true;
-                }
+        }
+        if (auto el = guikit::Element(ui, {.label = "Thumb Inset"})) {
+            if (guikit::Slider(ui, sbTok.thumbInset, 0.0f, 4.0f, {.valueFormat = "%.1f dp", .step = 0.5f, .size = guikit::UiSize::Sm}).changed) {
+                tokEdited = true;
             }
-            if (sbTok.showButtons) {
-                keel::usize arrowIdx = keel::as<keel::usize>(sbTok.arrowStyle);
-                if (auto el = guikit::Element(ui, {.label = "Arrow Glyph"})) {
-                    if (guikit::Select(ui, arrowIdx, kSbArrowNames, {.size = guikit::UiSize::Sm}).changed) {
-                        sbTok.arrowStyle = keel::from_underlying<guikit::ScrollbarArrowStyle>(arrowIdx);
-                        dirty = true;
-                    }
-                }
+        }
+        if (auto el = guikit::Element(ui, {.label = "Always Show Track", .layout = guikit::ElementLayout::Leading})) {
+            if (guikit::Switch(ui, sbTok.alwaysShowTrack, {.size = guikit::UiSize::Sm}).changed) {
+                tokEdited = true;
             }
-            if (auto el = guikit::Element(ui, {.label = "Thumb Inset"})) {
-                if (guikit::Slider(ui, sbTok.thumbInset, 0.0f, 4.0f, {.valueFormat = "%.1f dp", .step = 0.5f, .size = guikit::UiSize::Sm}).changed) {
-                    dirty = true;
-                }
+        }
+        if (auto el = guikit::Element(ui, {.label = "Corner Box", .layout = guikit::ElementLayout::Leading})) {
+            if (guikit::Switch(ui, sbTok.showCornerBox, {.size = guikit::UiSize::Sm}).changed) {
+                tokEdited = true;
             }
-            if (auto el = guikit::Element(ui, {.label = "Always Show Track", .layout = guikit::ElementLayout::Leading})) {
-                if (guikit::Switch(ui, sbTok.alwaysShowTrack, {.size = guikit::UiSize::Sm}).changed) {
-                    dirty = true;
-                }
-            }
-            if (auto el = guikit::Element(ui, {.label = "Corner Box", .layout = guikit::ElementLayout::Leading})) {
-                if (guikit::Switch(ui, sbTok.showCornerBox, {.size = guikit::UiSize::Sm}).changed) {
-                    dirty = true;
-                }
-            }
+        }
+        if (tokEdited) {
+            st.customScrollbarTokens = sbTok;
+            st.customizeScrollbarTokens = true;
+            dirty = true;
         }
     }
 

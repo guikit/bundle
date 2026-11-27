@@ -195,6 +195,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlSlider),      {.text = "Slider",       .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlStepSlider),  {.text = "StepSlider",   .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlRangeSlider), {.text = "RangeSlider",  .icon = guikit::Icon::Settings()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlHybridSlider), {.text = "HybridSlider", .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ControlKnob),        {.text = "Knob",         .icon = guikit::Icon::Refresh()});
 
             menu.Section("DISPLAY");
@@ -680,6 +681,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderSliderInspector,
         &RenderStepSliderInspector,
         &RenderRangeSliderInspector,
+        &RenderHybridSliderInspector,
         &RenderKnobInspector,
         // 8. DISPLAY
         &RenderHeadingInspector,
@@ -759,6 +761,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderSliderStage,
         &RenderStepSliderStage,
         &RenderRangeSliderStage,
+        &RenderHybridSliderStage,
         &RenderKnobStage,
         // 8. DISPLAY
         &RenderHeadingStage,
@@ -838,6 +841,7 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateSliderCode,
         &GenerateStepSliderCode,
         &GenerateRangeSliderCode,
+        &GenerateHybridSliderCode,
         &GenerateKnobCode,
         // 8. DISPLAY
         &GenerateHeadingCode,

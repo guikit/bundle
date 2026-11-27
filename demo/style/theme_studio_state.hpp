@@ -106,6 +106,8 @@ struct ThemeStudioState {
     keel::usize sampleStepIdx = 2u;
     keel::f32 sampleRangeLow = 22.0f;
     keel::f32 sampleRangeHigh = 74.0f;
+    keel::i32 sampleHybridMode = 2; // 0 = Off, 1 = Auto, 2 = Manual
+    keel::f32 sampleHybridVal = 48.0f;
     keel::f32 sampleKnob = 42.0f;
     keel::f32 sampleKnobAux = 76.0f;
 

@@ -65,6 +65,7 @@ enum class NavCategory : keel::u8 {
     ControlSlider,
     ControlStepSlider,
     ControlRangeSlider,
+    ControlHybridSlider,
     ControlKnob,
 
     // 8. DISPLAY (Typography, Indicators & Media)
@@ -105,6 +106,7 @@ constexpr bool IsControlCategory(NavCategory cat) noexcept {
         case NavCategory::ControlSlider:
         case NavCategory::ControlStepSlider:
         case NavCategory::ControlRangeSlider:
+        case NavCategory::ControlHybridSlider:
         case NavCategory::ControlKnob:
         case NavCategory::DisplayTag:
         case NavCategory::DisplayProgressBar:
@@ -147,6 +149,7 @@ constexpr bool HasElementWrapperCategory(NavCategory cat) noexcept {
         case NavCategory::ControlSlider:
         case NavCategory::ControlStepSlider:
         case NavCategory::ControlRangeSlider:
+        case NavCategory::ControlHybridSlider:
         case NavCategory::ControlKnob:
             return true;
         default:
@@ -294,6 +297,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::ControlSlider:      return "Slider — Continuous Numeric Track";
         case NavCategory::ControlStepSlider:  return "StepSlider — Discrete Labeled Steps";
         case NavCategory::ControlRangeSlider: return "RangeSlider — Dual-Thumb Min/Max Interval";
+        case NavCategory::ControlHybridSlider: return "HybridSlider — Discrete Leading Stops + Continuous Range";
         case NavCategory::ControlKnob:        return "Knob — Rotary Parameter Control";
         // 8. DISPLAY
         case NavCategory::DisplayHeading:     return "Heading — Section & Title Typography";
@@ -1222,6 +1226,7 @@ struct DemoContext {
             cat == NavCategory::ControlSlider ||
             cat == NavCategory::ControlStepSlider ||
             cat == NavCategory::ControlRangeSlider ||
+            cat == NavCategory::ControlHybridSlider ||
             cat == NavCategory::ControlKnob ||
             cat == NavCategory::ControlSwitch ||
             cat == NavCategory::ControlCheckbox ||
@@ -1396,6 +1401,10 @@ keel::String GenerateStepSliderCode(const DemoContext& ctx);
 void RenderRangeSliderInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderRangeSliderStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateRangeSliderCode(const DemoContext& ctx);
+
+void RenderHybridSliderInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderHybridSliderStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateHybridSliderCode(const DemoContext& ctx);
 
 void RenderProgressBarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderProgressBarStage(guikit::Context& ui, DemoContext& ctx);

@@ -12,6 +12,12 @@ struct SliderDemoState {
     keel::f32 rangeMinSpan = 10.0f;
     bool quantizeStep = false;
 
+    keel::i32 hybridPreset = 0; // 0 = 1 stop (Off | 1..100), 1 = 2 stops (Off | Auto | 1..100)
+    bool hybridEnabled = true;
+    keel::i32 hybridMode = 1; // 0 = Off, 1 = Auto, 2 = Manual
+    keel::f32 hybridVal = 42.0f;
+    guikit::Placement hybridValuePlacement = guikit::Placement::Bottom;
+
     bool showTicks = true;
     bool showLabels = true;
     bool showValue = true;
@@ -321,6 +327,163 @@ keel::String GenerateRangeSliderCode(const DemoContext& ctx) {
         ctx.FormatControlColorCode()
     );
     return ctx.WrapInElementCode(ctrl);
+}
+
+// ============================================================================
+// 4. HybridSlider (Discrete Leading Stops + Continuous Range)
+// ============================================================================
+
+void RenderHybridSliderInspector(guikit::Context& ui, DemoContext&) {
+    static constexpr keel::StaticArray<keel::StringRef, 2> kPresetNames = {
+        "Off | 1..100",
+        "Off | Auto | 1..100"
+    };
+    if (auto el = guikit::Element(ui, {.label = "Stop Preset"})) {
+        if (guikit::Segmented(ui, s_state.hybridPreset, kPresetNames).changed) {
+            ui.InvalidateAll();
+        }
+    }
+
+    keel::i32 orientIdx = (s_state.orientation == guikit::Orientation::Vertical) ? 1 : 0;
+    static constexpr keel::StaticArray<keel::StringRef, 2> orientNames = {"Horizontal", "Vertical (Fader)"};
+    if (auto el = guikit::Element(ui, {.label = "Orientation"})) {
+        if (guikit::Segmented(ui, orientIdx, orientNames).changed) {
+            s_state.orientation = (orientIdx == 1)
+                ? guikit::Orientation::Vertical
+                : guikit::Orientation::Horizontal;
+            ui.InvalidateAll();
+        }
+    }
+    if (s_state.orientation == guikit::Orientation::Vertical) {
+        if (auto el = guikit::Element(ui, {.label = "Compact Vertical Height (Fit)"})) {
+            if (guikit::Switch(ui, s_state.compactVertical).changed) ui.InvalidateAll();
+        }
+    }
+    if (auto el = guikit::Element(ui, {.label = "Show Stop Ticks"})) {
+        if (guikit::Switch(ui, s_state.showTicks).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Show Stop Labels"})) {
+        if (guikit::Switch(ui, s_state.showLabels).changed) ui.InvalidateAll();
+    }
+    if (auto el = guikit::Element(ui, {.label = "Show Manual Value"})) {
+        if (guikit::Switch(ui, s_state.showValue).changed) ui.InvalidateAll();
+    }
+    static constexpr keel::StaticArray<keel::StringRef, 5> valPlaceNames = {
+        "Leading", "Trailing", "Top", "Bottom", "Thumb"
+    };
+    keel::usize valPlaceIdx = keel::as<keel::usize>(s_state.hybridValuePlacement);
+    if (auto el = guikit::Element(ui, {.label = "Value Placement", .disabled = !s_state.showValue})) {
+        if (guikit::Select(ui, valPlaceIdx, valPlaceNames, {
+            .disabled = !s_state.showValue
+        }).changed) {
+            s_state.hybridValuePlacement = keel::from_underlying<guikit::Placement>(valPlaceIdx);
+            ui.InvalidateAll();
+        }
+    }
+    if (auto el = guikit::Element(ui, {.label = "Quantize Step (5.0%)"})) {
+        if (guikit::Switch(ui, s_state.quantizeStep).changed) ui.InvalidateAll();
+    }
+}
+
+void RenderHybridSliderStage(guikit::Context& ui, DemoContext& ctx) {
+    const keel::Optional<keel::f64> stepOpt = s_state.quantizeStep ? keel::Optional<keel::f64>(5.0) : keel::kNullOpt;
+    const guikit::AxisSize wSize = ctx.ResolveCtrlWidth();
+    const guikit::AxisSize hSize = ResolveSliderHeight(ctx);
+
+    ctx.RunElementStage(ui, [&]() {
+        guikit::HybridSliderOptions opts{};
+        opts.orientation = s_state.orientation;
+        opts.valueFormat = "%.0f %%";
+        opts.step = stepOpt;
+        opts.showTicks = s_state.showTicks;
+        opts.showStopLabels = s_state.showLabels;
+        opts.showValue = s_state.showValue;
+        opts.valuePlacement = s_state.hybridValuePlacement;
+        opts.disabled = ctx.elemDisabled;
+        opts.size = ctx.controlsSize;
+        opts.width = wSize;
+        opts.height = hSize;
+        opts.color = ctx.GetControlColor();
+
+        if (s_state.hybridPreset == 0) {
+            guikit::HybridSlider(ui, s_state.hybridEnabled, s_state.hybridVal, 1.0f, 100.0f, opts);
+        } else {
+            static constexpr keel::StaticArray<keel::StringRef, 2> kStops = {"Off", "Auto"};
+            guikit::HybridSlider(ui, s_state.hybridMode, s_state.hybridVal, 1.0f, 100.0f, kStops, opts);
+        }
+    });
+}
+
+keel::String GenerateHybridSliderCode(const DemoContext& ctx) {
+    const keel::FixedString<48> heightCode = DemoContext::FormatAxisSizeCode(ResolveSliderHeight(ctx));
+    const bool hasCustomSize = (ctx.controlsSize != guikit::UiSize::None && ctx.controlsSize != guikit::UiSize::Md);
+    const keel::FixedString<64> sizeLine = hasCustomSize
+        ? keel::format_fixed<64>("    .size = guikit::UiSize::{},\n", SizeName(ctx.controlsSize))
+        : keel::FixedString<64>{};
+
+    if (s_state.hybridPreset == 0) {
+        const keel::String ctrl = keel::format(
+            "guikit::HybridSlider(ui, enabled, value, 1.0f, 100.0f, {{\n"
+            "    .orientation = guikit::Orientation::{},\n"
+            "    .valueFormat = \"%.0f %%\",\n"
+            "    .step = {},\n"
+            "    .showTicks = {},\n"
+            "    .showStopLabels = {},\n"
+            "    .showValue = {},\n"
+            "    .valuePlacement = guikit::Placement::{},\n"
+            "    .disabled = {},\n"
+            "{}"
+            "    .width = {},\n"
+            "    .height = {},\n"
+            "    .color = {}\n"
+            "}});",
+            OrientationEnumName(s_state.orientation),
+            s_state.quantizeStep ? "5.0" : "keel::kNullOpt",
+            s_state.showTicks ? "true" : "false",
+            s_state.showLabels ? "true" : "false",
+            s_state.showValue ? "true" : "false",
+            PlacementName(s_state.hybridValuePlacement),
+            ctx.elemDisabled ? "true" : "false",
+            sizeLine,
+            ctx.FormatCtrlWidthCode(),
+            heightCode,
+            ctx.FormatControlColorCode()
+        );
+        return ctx.WrapInElementCode(ctrl);
+    }
+
+    const keel::String ctrl = keel::format(
+        "guikit::HybridSlider(ui, mode, value, 1.0f, 100.0f, stops, {{\n"
+        "    .orientation = guikit::Orientation::{},\n"
+        "    .valueFormat = \"%.0f %%\",\n"
+        "    .step = {},\n"
+        "    .showTicks = {},\n"
+        "    .showStopLabels = {},\n"
+        "    .showValue = {},\n"
+        "    .valuePlacement = guikit::Placement::{},\n"
+        "    .disabled = {},\n"
+        "{}"
+        "    .width = {},\n"
+        "    .height = {},\n"
+        "    .color = {}\n"
+        "}});",
+        OrientationEnumName(s_state.orientation),
+        s_state.quantizeStep ? "5.0" : "keel::kNullOpt",
+        s_state.showTicks ? "true" : "false",
+        s_state.showLabels ? "true" : "false",
+        s_state.showValue ? "true" : "false",
+        PlacementName(s_state.hybridValuePlacement),
+        ctx.elemDisabled ? "true" : "false",
+        sizeLine,
+        ctx.FormatCtrlWidthCode(),
+        heightCode,
+        ctx.FormatControlColorCode()
+    );
+    keel::String out = keel::String::from(
+        "static constexpr keel::StaticArray<keel::StringRef, 2> stops = {\"Off\", \"Auto\"};\n"
+    );
+    out.append(ctx.WrapInElementCode(ctrl));
+    return out;
 }
 
 } // namespace guikit::demo

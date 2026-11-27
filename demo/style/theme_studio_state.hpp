@@ -65,6 +65,7 @@ struct ThemeStudioState {
     keel::f32 disabledOpacity = 0.50f;
     keel::f32 animationScale = 1.0f;
     guikit::ShellStyle shellStyle = guikit::ShellStyle::Floating;
+    guikit::WindowCornerStyle windowCorners = guikit::WindowCornerStyle::Auto;
 
     // Theme Morphing (UiTheme::Lerp)
     bool enableLerp = false;
@@ -166,6 +167,7 @@ struct ThemeStudioState {
         disabledOpacity = 0.50f;
         animationScale = 1.0f;
         shellStyle = guikit::ShellStyle::Floating;
+        windowCorners = guikit::WindowCornerStyle::Auto;
 
         enableLerp = false;
         lerpT = 0.0f;
@@ -234,6 +236,7 @@ struct ThemeStudioState {
         disabledOpacity = spec.disabledOpacity;
         animationScale = spec.animationScale;
         shellStyle = spec.shellStyle;
+        windowCorners = spec.windowCorners;
     }
 
     void RandomizeHarmonic() noexcept {
@@ -304,6 +307,7 @@ struct ThemeStudioState {
         spec.disabledOpacity = disabledOpacity;
         spec.animationScale = animationScale;
         spec.shellStyle = shellStyle;
+        spec.windowCorners = windowCorners;
         return spec;
     }
 

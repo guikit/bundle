@@ -81,27 +81,7 @@ void DemoWindow::OnRender(guikit::Context& ui) {
             .icon = guikit::Icon::Copy(),
             .size = guikit::UiSize::Sm
         })) {
-            hb.Spacer();
-            if (guikit::Button(ui, {
-                .text = "HeaderBar",
-                .icon = guikit::Icon::Settings(),
-                .size = guikit::UiSize::Xs,
-                .style = guikit::ButtonStyle::Ghost
-            }).clicked) {
-                m_selectedExtension = -1;
-                m_selectedCategory = NavCategory::SurfaceHeaderBar;
-                ui.InvalidateAll();
-            }
-            if (guikit::Button(ui, {
-                .text = "Dialogs",
-                .icon = guikit::Icon::Folder(),
-                .size = guikit::UiSize::Xs,
-                .style = guikit::ButtonStyle::Ghost
-            }).clicked) {
-                m_selectedExtension = -1;
-                m_selectedCategory = NavCategory::OverlaySystemDialogs;
-                ui.InvalidateAll();
-            }
+            // Clean native-style window title bar; CSD toggle lives in Engine menu
         }
     }
 

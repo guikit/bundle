@@ -23,32 +23,6 @@ HeaderBarDemoState s_hb;
 } // namespace
 
 void RenderHeaderBarInspector(guikit::Context& ui, DemoContext& /*ctx*/) {
-    const auto& host = ui.GetWindowHostService();
-    const bool supportsCsd = host.supportsCustomTitleBar && host.supportsCustomTitleBar() && static_cast<bool>(host.setCustomTitleBar);
-    bool liveCsd = host.isCustomTitleBar && host.isCustomTitleBar();
-
-    guikit::Heading(ui, {
-        .label = "Host Window (Live)",
-        .level = guikit::HeadingLevel::H6,
-        .separator = guikit::HeadingSeparator::Bottom
-    });
-    if (auto el = guikit::Element(ui, {
-        .label = "Custom HeaderBar (CSD)",
-        .description = supportsCsd
-            ? "Switch this OS window between Custom HeaderBar and System Title Bar at runtime"
-            : "Not supported on the current platform backend"
-    })) {
-        if (guikit::Switch(ui, liveCsd, {.disabled = !supportsCsd}).changed && host.setCustomTitleBar) {
-            (void)host.setCustomTitleBar(liveCsd);
-            ui.InvalidateAll();
-        }
-    }
-
-    guikit::Heading(ui, {
-        .label = "Preview Mockup",
-        .level = guikit::HeadingLevel::H6,
-        .separator = guikit::HeadingSeparator::Bottom
-    });
     if (auto el = guikit::Element(ui, {.label = "Controls Placement", .layout = guikit::ElementLayout::Stacked})) {
         if (guikit::Segmented(ui, s_hb.placement, {"Auto", "Right", "Left", "None"}).changed) {
             ui.InvalidateAll();
@@ -175,29 +149,15 @@ void RenderHeaderBarStage(guikit::Context& ui, DemoContext& /*ctx*/) {
                 const auto& host = ui.GetWindowHostService();
                 const bool hostCsd = host.isCustomTitleBar && host.isCustomTitleBar();
                 const bool hostSupportsCsd = host.supportsCustomTitleBar && host.supportsCustomTitleBar();
-                if (auto row = guikit::Row(ui, {.gap = 12.0f, .align = guikit::Alignment::Center})) {
-                    guikit::Text(
-                        ui,
-                        ui.Format(
-                            "Host CSD active: {}  |  Backend supports CSD: {}",
-                            hostCsd ? "Yes" : "No",
-                            hostSupportsCsd ? "Yes" : "No"
-                        ),
-                        {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Secondary}
-                    );
-                    if (hostSupportsCsd && host.setCustomTitleBar) {
-                        if (guikit::Button(ui, {
-                            .text = hostCsd ? "Switch to System Title Bar" : "Switch to Custom HeaderBar",
-                            .icon = guikit::Icon::Refresh(),
-                            .size = guikit::UiSize::Xs,
-                            .style = guikit::ButtonStyle::Soft,
-                            .variant = guikit::UiVariant::Primary
-                        }).clicked) {
-                            (void)host.setCustomTitleBar(!hostCsd);
-                            ui.InvalidateAll();
-                        }
-                    }
-                }
+                guikit::Text(
+                    ui,
+                    ui.Format(
+                        "Host CSD active: {}  |  Backend supports CSD: {}  (toggle anytime in Engine -> Custom HeaderBar)",
+                        hostCsd ? "Yes" : "No",
+                        hostSupportsCsd ? "Yes" : "No"
+                    ),
+                    {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Secondary}
+                );
             }
         }
 

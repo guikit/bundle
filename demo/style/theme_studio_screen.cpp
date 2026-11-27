@@ -1363,6 +1363,15 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
             if (guikit::Button(ui, {.text = "Std",   .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) { st.radiusScale = 1.0f; dirty = true; }
             if (guikit::Button(ui, {.text = "Soft",  .size = guikit::UiSize::Xs, .variant = guikit::UiVariant::Secondary}).clicked) { st.radiusScale = 1.6f; dirty = true; }
         }
+        if (auto el = guikit::Element(ui, {
+            .label = "Window Corners",
+            .description = "OS window frame rounding (Auto derives from radius)",
+            .layout = guikit::ElementLayout::Stacked
+        })) {
+            if (guikit::Segmented(ui, st.windowCorners, {"Auto", "Square", "Round", "Small"}, {.size = guikit::UiSize::Sm}).changed) {
+                dirty = true;
+            }
+        }
         if (auto el = guikit::Element(ui, {.label = "Spacing Scale"})) {
             if (guikit::Slider(ui, st.spacingScale, 0.70f, 1.40f, {.valueFormat = "%.2fx", .step = 0.05f, .size = guikit::UiSize::Sm}).changed) {
                 dirty = true;

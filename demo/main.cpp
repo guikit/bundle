@@ -10,12 +10,25 @@ namespace guikit::demo {
 void RegisterDemoEmbeddedAssets() noexcept;
 } // namespace guikit::demo
 
-int main(int /*argc*/, char* /*argv*/[]) {
+int main(int argc, char* argv[]) {
 #if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
     guikit::native::RegisterNativePlatform();
 #endif
     guikit::demo::RegisterDemoEmbeddedAssets();
-    guikit::demo::DemoWindow demo;
+
+    bool customHeader = false;
+    for (keel::i32 i = 1; i < argc; ++i) {
+        if (argv[i] == nullptr) {
+            continue;
+        }
+        const keel::StringRef arg(argv[i]);
+        if (arg == "--custom-header") {
+            customHeader = true;
+        } else if (arg == "--system-header" || arg == "--no-custom-header") {
+            customHeader = false;
+        }
+    }
+    guikit::demo::DemoWindow demo(customHeader);
 
     demo.RegisterExtension({
         .navLabel = "GIS",

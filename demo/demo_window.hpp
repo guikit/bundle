@@ -21,7 +21,7 @@ struct DemoExtensionScreen {
 /// Interactive showcase workbench window for the GuiKit C++20 vector GUI library.
 class DemoWindow : public guikit::MainWindow {
 public:
-    DemoWindow();
+    explicit DemoWindow(bool customHeader = false);
     ~DemoWindow() override = default;
 
     /// Registers an additional domain module showcase screen under the "2D SCENES" catalog section.

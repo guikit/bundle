@@ -118,6 +118,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/surfaces/activity_bar_screen.cpp
         demo/surfaces/bottom_panel_screen.cpp
         demo/surfaces/status_bar_screen.cpp
+        demo/surfaces/header_bar_screen.cpp
         demo/surfaces/dock_area_screen.cpp
         # 4. OVERLAYS
         demo/overlays/modal_screen.cpp
@@ -126,6 +127,7 @@ if (GUIKIT_BUNDLE_BUILD_DEMO AND (TARGET guikit::backend_sdl3 OR TARGET guikit::
         demo/overlays/toast_screen.cpp
         demo/overlays/command_palette_screen.cpp
         demo/overlays/tooltip_screen.cpp
+        demo/overlays/system_dialogs_screen.cpp
         # 5. ACTIONS
         demo/actions/button_screen.cpp
         demo/actions/menu_button_screen.cpp

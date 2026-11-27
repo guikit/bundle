@@ -30,6 +30,7 @@ enum class NavCategory : keel::u8 {
     SurfaceActivityBar,
     SurfaceBottomPanel,
     SurfaceStatusBar,
+    SurfaceHeaderBar,
     SurfaceDockArea,
 
     // 4. OVERLAYS (Transient Floating Layers)
@@ -39,6 +40,7 @@ enum class NavCategory : keel::u8 {
     OverlayToast,
     OverlayCommandPalette,
     OverlayTooltip,
+    OverlaySystemDialogs,
 
     // 5. ACTIONS (Buttons & Navigation Triggers)
     ActionButton,
@@ -193,6 +195,7 @@ constexpr bool IsFullStageCategory(NavCategory cat) noexcept {
            cat == NavCategory::SurfaceActivityBar ||
            cat == NavCategory::SurfaceBottomPanel ||
            cat == NavCategory::SurfaceStatusBar ||
+           cat == NavCategory::SurfaceHeaderBar ||
            cat == NavCategory::SurfaceDockArea ||
            cat == NavCategory::ViewTable ||
            cat == NavCategory::ViewTreeView ||
@@ -266,6 +269,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::SurfaceActivityBar: return "ActivityBar — Primary Icon Rail & Linked Sidebar";
         case NavCategory::SurfaceBottomPanel: return "BottomPanel — Resizable Dockable Bottom Drawer";
         case NavCategory::SurfaceStatusBar:   return "StatusBar — Compact Window Status & Action Strip";
+        case NavCategory::SurfaceHeaderBar:   return "HeaderBar — Custom CSD Window Title Bar";
         case NavCategory::SurfaceDockArea:    return "DockArea — Docking Panels, Tab Groups & Floating Cards";
         // 4. OVERLAYS
         case NavCategory::OverlayModal:          return "Modal — Dialogs, Backdrops & Focus Trap";
@@ -274,6 +278,7 @@ constexpr keel::StringRef CategoryDisplayTitle(NavCategory cat) noexcept {
         case NavCategory::OverlayToast:          return "Toast — Stacked Notifications & Timers";
         case NavCategory::OverlayCommandPalette: return "CommandPalette — Fuzzy Search Command Launcher";
         case NavCategory::OverlayTooltip:        return "Tooltip — Hover Hints, Rich Text & Cursor Tracking";
+        case NavCategory::OverlaySystemDialogs:  return "System Dialogs — Native OS File Pickers & MessageBox";
         // 5. ACTIONS
         case NavCategory::ActionButton:       return "Button — Interactive Push Control";
         case NavCategory::ActionMenuButton:   return "MenuButton — Autonomous Dropdown Action Button";
@@ -1501,6 +1506,10 @@ void RenderStatusBarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderStatusBarStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateStatusBarCode(const DemoContext& ctx);
 
+void RenderHeaderBarInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderHeaderBarStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateHeaderBarCode(const DemoContext& ctx);
+
 void RenderDockAreaInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderDockAreaStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateDockAreaCode(const DemoContext& ctx);
@@ -1576,6 +1585,10 @@ keel::String GenerateCommandPaletteCode(const DemoContext& ctx);
 void RenderTooltipInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx);
 keel::String GenerateTooltipCode(const DemoContext& ctx);
+
+void RenderSystemDialogsInspector(guikit::Context& ui, DemoContext& ctx);
+void RenderSystemDialogsStage(guikit::Context& ui, DemoContext& ctx);
+keel::String GenerateSystemDialogsCode(const DemoContext& ctx);
 
 void RenderMenuBarInspector(guikit::Context& ui, DemoContext& ctx);
 void RenderMenuBarStage(guikit::Context& ui, DemoContext& ctx);

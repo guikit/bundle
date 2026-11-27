@@ -3,8 +3,21 @@ setlocal EnableDelayedExpansion
 cd /d "%~dp0..\.."
 
 set "ROOT_DIR=%CD%"
-set "CONFIG=%~1"
-if "%CONFIG%"=="" set "CONFIG=Release"
+set "CONFIG=Release"
+set "EXTRA_ARGS="
+if /I "%~1"=="Debug" (
+    set "CONFIG=Debug"
+    shift
+) else if /I "%~1"=="Release" (
+    set "CONFIG=Release"
+    shift
+)
+:collect_args
+if "%~1"=="" goto args_done
+set "EXTRA_ARGS=!EXTRA_ARGS! %1"
+shift
+goto collect_args
+:args_done
 
 set "BUILD_DIR=%ROOT_DIR%\build_native"
 set "EXE_PATH=%BUILD_DIR%\%CONFIG%\guikit_demo_native.exe"
@@ -23,7 +36,7 @@ if not exist "%EXE_PATH%" (
     exit /b 1
 )
 
-echo [guikit] Launching Native Desktop Demo ^(zero SDL3 / zero ThorVG^): "%EXE_PATH%"
-"%EXE_PATH%"
+echo [guikit] Launching Native Desktop Demo ^(zero SDL3 / zero ThorVG, CSD HeaderBar^): "%EXE_PATH%" --custom-header!EXTRA_ARGS!
+"%EXE_PATH%" --custom-header!EXTRA_ARGS!
 set "EXIT_CODE=%ERRORLEVEL%"
 endlocal & exit /b %EXIT_CODE%

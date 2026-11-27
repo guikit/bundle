@@ -32,7 +32,7 @@ void ReleaseInactiveSceneBuffers(
 
 } // namespace
 
-DemoWindow::DemoWindow()
+DemoWindow::DemoWindow(bool customHeader)
     : guikit::MainWindow({
 #if defined(GUIKIT_DEMO_USE_NATIVE) && GUIKIT_DEMO_USE_NATIVE
 #if defined(__EMSCRIPTEN__)
@@ -49,6 +49,7 @@ DemoWindow::DemoWindow()
           .height = 800,
           .minWidth = 320,
           .minHeight = 240,
+          .customTitleBar = customHeader,
           .idleHeartbeatMs = 500
       }) {}
 
@@ -73,6 +74,36 @@ void DemoWindow::OnRender(guikit::Context& ui) {
     m_demoCtx.shellTheme = GetShellTheme();
     m_demoCtx.shellLightMode = IsShellLightMode();
     m_demoCtx.shellFloating = IsShellFloating();
+
+    if (IsCustomTitleBar()) {
+        if (auto hb = guikit::HeaderBar(ui, {
+            .title = GetTitle(),
+            .icon = guikit::Icon::Copy(),
+            .size = guikit::UiSize::Sm
+        })) {
+            hb.Spacer();
+            if (guikit::Button(ui, {
+                .text = "HeaderBar",
+                .icon = guikit::Icon::Settings(),
+                .size = guikit::UiSize::Xs,
+                .style = guikit::ButtonStyle::Ghost
+            }).clicked) {
+                m_selectedExtension = -1;
+                m_selectedCategory = NavCategory::SurfaceHeaderBar;
+                ui.InvalidateAll();
+            }
+            if (guikit::Button(ui, {
+                .text = "Dialogs",
+                .icon = guikit::Icon::Folder(),
+                .size = guikit::UiSize::Xs,
+                .style = guikit::ButtonStyle::Ghost
+            }).clicked) {
+                m_selectedExtension = -1;
+                m_selectedCategory = NavCategory::OverlaySystemDialogs;
+                ui.InvalidateAll();
+            }
+        }
+    }
 
     RenderTopToolbar(ui);
     RenderWorkspace(ui);
@@ -160,6 +191,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceActivityBar), {.text = "ActivityBar",  .icon = guikit::Icon::Folder()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceBottomPanel), {.text = "BottomPanel",  .icon = guikit::Icon::ChevronUp()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceStatusBar),   {.text = "StatusBar",    .icon = guikit::Icon::Info()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceHeaderBar),   {.text = "HeaderBar",    .icon = guikit::Icon::Settings()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::SurfaceDockArea),    {.text = "DockArea",     .icon = guikit::Icon::Copy()});
 
             menu.Section("OVERLAYS");
@@ -169,6 +201,7 @@ void DemoWindow::RenderCatalogSidebar(guikit::Context& ui) {
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayToast),          {.text = "Toast",          .icon = guikit::Icon::Info()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayCommandPalette), {.text = "CommandPalette", .icon = guikit::Icon::Search()});
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlayTooltip),        {.text = "Tooltip",        .icon = guikit::Icon::Eye()});
+            menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::OverlaySystemDialogs),  {.text = "System Dialogs", .icon = guikit::Icon::Folder()});
 
             menu.Section("ACTIONS");
             menu.Item(activeIdx, keel::as<keel::i32>(NavCategory::ActionButton),       {.text = "Button",       .icon = guikit::Icon::Play()});
@@ -519,6 +552,7 @@ void DemoWindow::RenderWorkspace(guikit::Context& ui) {
                     m_selectedCategory == NavCategory::SurfaceSidebar ||
                     m_selectedCategory == NavCategory::SurfaceBottomPanel ||
                     m_selectedCategory == NavCategory::SurfaceStatusBar ||
+                    m_selectedCategory == NavCategory::SurfaceHeaderBar ||
                     m_selectedCategory == NavCategory::SurfaceDockArea
                 );
                 const keel::StringRef title = extActive
@@ -650,6 +684,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderActivityBarInspector,
         &RenderBottomPanelInspector,
         &RenderStatusBarInspector,
+        &RenderHeaderBarInspector,
         &RenderDockAreaInspector,
         // 4. OVERLAYS
         &RenderModalInspector,
@@ -658,6 +693,7 @@ void DemoWindow::DispatchInspector(guikit::Context& ui, NavCategory cat, DemoCon
         &RenderToastInspector,
         &RenderCommandPaletteInspector,
         &RenderTooltipInspector,
+        &RenderSystemDialogsInspector,
         // 5. ACTIONS
         &RenderButtonInspector,
         &RenderMenuButtonInspector,
@@ -730,6 +766,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderActivityBarStage,
         &RenderBottomPanelStage,
         &RenderStatusBarStage,
+        &RenderHeaderBarStage,
         &RenderDockAreaStage,
         // 4. OVERLAYS
         &RenderModalStage,
@@ -738,6 +775,7 @@ void DemoWindow::DispatchSandboxStage(guikit::Context& ui, NavCategory cat, Demo
         &RenderToastStage,
         &RenderCommandPaletteStage,
         &RenderTooltipStage,
+        &RenderSystemDialogsStage,
         // 5. ACTIONS
         &RenderButtonStage,
         &RenderMenuButtonStage,
@@ -810,6 +848,7 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateActivityBarCode,
         &GenerateBottomPanelCode,
         &GenerateStatusBarCode,
+        &GenerateHeaderBarCode,
         &GenerateDockAreaCode,
         // 4. OVERLAYS
         &GenerateModalCode,
@@ -818,6 +857,7 @@ keel::String DemoWindow::DispatchCodeGenerator(NavCategory cat, const DemoContex
         &GenerateToastCode,
         &GenerateCommandPaletteCode,
         &GenerateTooltipCode,
+        &GenerateSystemDialogsCode,
         // 5. ACTIONS
         &GenerateButtonCode,
         &GenerateMenuButtonCode,

@@ -55,5 +55,5 @@ if [[ -z "$GUIKIT_BIN" ]]; then
     exit 1
 fi
 
-echo "[guikit] Launching Native Desktop Demo (zero SDL3 / zero ThorVG): $GUIKIT_BIN"
-exec "$GUIKIT_BIN" "$@"
+echo "[guikit] Launching Native Desktop Demo (zero SDL3 / zero ThorVG, CSD HeaderBar): $GUIKIT_BIN --custom-header $*"
+exec "$GUIKIT_BIN" --custom-header "$@"

@@ -477,15 +477,26 @@ inline void RenderPreviewViewport(
 
                     if (winBounds.w > 40.0f && winBounds.h > 40.0f) {
                         const guikit::Vec2 mouse = ui.GetMousePos();
+                        const guikit::Vec2 pressPos = ui.GetMousePressPos();
                         const keel::f32 titleH = (titleHLogical + frameInset) * relScale;
-                        const keel::f32 gripThick = 7.0f;
+                        const keel::f32 innerGrip = 6.0f;
+                        const keel::f32 outerGrip = 10.0f;
                         const keel::f32 cornerSpan = 16.0f;
 
-                        const guikit::Rect brCorner(winBounds.Right() - cornerSpan, winBounds.Bottom() - cornerSpan, cornerSpan + 5.0f, cornerSpan + 5.0f);
-                        const guikit::Rect blCorner(winBounds.x - 5.0f, winBounds.Bottom() - cornerSpan, cornerSpan + 5.0f, cornerSpan + 5.0f);
-                        const guikit::Rect rEdge(winBounds.Right() - gripThick, winBounds.y + titleH, gripThick * 2.0f, keel::max(0.0f, winBounds.h - titleH - cornerSpan));
-                        const guikit::Rect lEdge(winBounds.x - gripThick, winBounds.y + titleH, gripThick * 2.0f, keel::max(0.0f, winBounds.h - titleH - cornerSpan));
-                        const guikit::Rect bEdge(winBounds.x + cornerSpan, winBounds.Bottom() - gripThick, keel::max(0.0f, winBounds.w - cornerSpan * 2.0f), gripThick * 2.0f);
+                        const guikit::Rect brCorner(winBounds.Right() - cornerSpan, winBounds.Bottom() - cornerSpan, cornerSpan + outerGrip, cornerSpan + outerGrip);
+                        const guikit::Rect blCorner(winBounds.x - outerGrip, winBounds.Bottom() - cornerSpan, cornerSpan + outerGrip, cornerSpan + outerGrip);
+                        const guikit::Rect rEdge(winBounds.Right() - innerGrip, winBounds.y + titleH, innerGrip + outerGrip, keel::max(0.0f, winBounds.h - titleH - cornerSpan));
+                        const guikit::Rect lEdge(winBounds.x - outerGrip, winBounds.y + titleH, innerGrip + outerGrip, keel::max(0.0f, winBounds.h - titleH - cornerSpan));
+                        const guikit::Rect bEdge(winBounds.x + cornerSpan, winBounds.Bottom() - innerGrip, keel::max(0.0f, winBounds.w - cornerSpan * 2.0f), innerGrip + outerGrip);
+
+                        auto hitEdgeAt = [&](const guikit::Vec2& pt) noexcept -> keel::u8 {
+                            if (brCorner.Contains(pt)) return 2 | 4;
+                            if (blCorner.Contains(pt)) return 1 | 4;
+                            if (rEdge.Contains(pt))    return 2;
+                            if (lEdge.Contains(pt))    return 1;
+                            if (bEdge.Contains(pt))    return 4;
+                            return 0;
+                        };
 
                         // Caption area excluding trailing/leading window controls for double-click Maximize / Restore
                         const keel::f32 ctrlSpan = (hdrMetrics.controlBtnWidth * 3.0f + hdrMetrics.controlGap * 2.0f + hdrMetrics.closeExtraGap + hdrMetrics.rightEdgePadding + 8.0f) * relScale;
@@ -498,14 +509,9 @@ inline void RenderPreviewViewport(
                         const bool occluded = ui.IsMouseOccluded(winId, mouse);
                         const bool otherActive = ui.GetActiveId().IsValid() && ui.GetActiveId() != winResizeId;
 
-                        keel::u8 hovEdge = 0;
-                        if (!occluded && !otherActive) {
-                            if (brCorner.Contains(mouse))      hovEdge = 2 | 4;
-                            else if (blCorner.Contains(mouse)) hovEdge = 1 | 4;
-                            else if (rEdge.Contains(mouse))    hovEdge = 2;
-                            else if (lEdge.Contains(mouse))    hovEdge = 1;
-                            else if (bEdge.Contains(mouse))    hovEdge = 4;
-                        }
+                        // Never advertise a false hover/grab highlight while the mouse button is already held elsewhere
+                        const bool canHoverEdge = !occluded && !otherActive && (!ui.IsMouseDown() || ui.IsMouseClicked());
+                        const keel::u8 hovEdge = canHoverEdge ? hitEdgeAt(mouse) : 0;
                         if (hovEdge != demoCtx.previewWindowHoverEdge) {
                             demoCtx.previewWindowHoverEdge = hovEdge;
                             ui.InvalidateAll();
@@ -521,26 +527,26 @@ inline void RenderPreviewViewport(
                         if (demoCtx.previewWindowResizeEdge == 0 && !occluded && !otherActive) {
                             if (hovEdge != 0) {
                                 applyEdgeCursor(hovEdge);
-                                if (ui.IsMouseDoubleClicked()) {
-                                    demoCtx.previewWindowCustomSize = false;
-                                    ui.ConsumeMouseClick();
-                                    ui.InvalidateAll();
-                                } else if (ui.IsMouseClicked()) {
-                                    demoCtx.previewWindowResizeEdge = hovEdge;
-                                    demoCtx.previewWindowDragStartMouse = mouse;
-                                    demoCtx.previewWindowDragStartW = demoCtx.previewWindowCustomSize
-                                        ? demoCtx.previewWindowW
-                                        : keel::clamp(keel::round(winBounds.w / relScale), 320.0f, maxFitW);
-                                    demoCtx.previewWindowDragStartH = demoCtx.previewWindowCustomSize
-                                        ? demoCtx.previewWindowH
-                                        : keel::clamp(keel::round(winBounds.h / relScale), 220.0f, maxFitH);
+                            }
+                            if (ui.IsMouseClicked()) {
+                                // Hit-test exact press coordinate first so fast click+drag in one frame never misses
+                                const keel::u8 pressEdge = hitEdgeAt(pressPos);
+                                const keel::u8 grabEdge = (pressEdge != 0) ? pressEdge : hovEdge;
+                                if (grabEdge != 0) {
+                                    applyEdgeCursor(grabEdge);
+                                    demoCtx.previewWindowResizeEdge = grabEdge;
+                                    demoCtx.previewWindowHoverEdge = grabEdge;
+                                    demoCtx.previewWindowDragStartMouse = (pressEdge != 0) ? pressPos : mouse;
+                                    // Always anchor drag start to actual rendered bounds so shrinking never hits a deadzone
+                                    demoCtx.previewWindowDragStartW = keel::clamp(keel::round(winBounds.w / relScale), 320.0f, maxFitW);
+                                    demoCtx.previewWindowDragStartH = keel::clamp(keel::round(winBounds.h / relScale), 220.0f, maxFitH);
                                     ui.SetActiveId(winResizeId);
                                     ui.ConsumeMouseClick();
                                     ui.InvalidateAll();
+                                } else if (captionDblClickRect.Contains(pressPos) && ui.IsMouseDoubleClicked()) {
+                                    toggleMaximizeRestore();
+                                    ui.ConsumeMouseClick();
                                 }
-                            } else if (captionDblClickRect.Contains(mouse) && ui.IsMouseDoubleClicked()) {
-                                toggleMaximizeRestore();
-                                ui.ConsumeMouseClick();
                             }
                         }
 

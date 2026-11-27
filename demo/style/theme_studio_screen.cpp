@@ -1366,26 +1366,27 @@ void RenderThemeStudioInspector(guikit::Context& ui, DemoContext& ctx) {
         }
     }
 
-    // 6. THEME MORPHING (UiTheme::Lerp)
-    if (auto acc = guikit::Accordion(ui, {.label = "THEME MORPHING (LERP)", .defaultOpen = false, .size = guikit::UiSize::Sm})) {
-        if (auto el = guikit::Element(ui, {.label = "Enable Blend", .layout = guikit::ElementLayout::Leading})) {
-            if (guikit::Switch(ui, st.enableLerp, {.size = guikit::UiSize::Sm}).changed) {
-                if (st.enableLerp && st.lerpT < 0.01f) st.lerpT = 0.5f;
+    // 6. COLOR MORPHING (UiTheme::LerpColors)
+    if (auto acc = guikit::Accordion(ui, {.label = "COLOR MORPHING (LERP)", .defaultOpen = false, .size = guikit::UiSize::Sm})) {
+        keel::usize targetIdx = keel::as<keel::usize>(st.lerpTarget);
+        if (auto el = guikit::Element(ui, {.label = "Target Palette B"})) {
+            if (guikit::Select(ui, targetIdx, kPresetNames, {.size = guikit::UiSize::Sm}).changed) {
+                st.lerpTarget = keel::from_underlying<guikit::ThemePreset>(targetIdx);
                 dirty = true;
             }
         }
-        if (st.enableLerp) {
-            keel::usize targetIdx = keel::as<keel::usize>(st.lerpTarget);
-            if (auto el = guikit::Element(ui, {.label = "Target Theme B"})) {
-                if (guikit::Select(ui, targetIdx, kPresetNames, {.size = guikit::UiSize::Sm}).changed) {
-                    st.lerpTarget = keel::from_underlying<guikit::ThemePreset>(targetIdx);
-                    dirty = true;
-                }
-            }
-            if (auto el = guikit::Element(ui, {.label = "Blend Factor t"})) {
-                if (guikit::Slider(ui, st.lerpT, 0.0f, 1.0f, {.valueFormat = "%.0f%%", .step = 0.02f, .size = guikit::UiSize::Sm}).changed) {
-                    dirty = true;
-                }
+        if (auto el = guikit::Element(ui, {
+            .label = "Color Blend",
+            .description = "Blends palette colors only (preserves chrome & geometry)"
+        })) {
+            keel::f32 blendPct = st.lerpT * 100.0f;
+            if (guikit::HybridSlider(ui, st.enableLerp, blendPct, 2.0f, 100.0f, {
+                .valueFormat = "%.0f%%",
+                .step = 2.0f,
+                .size = guikit::UiSize::Sm
+            }).changed) {
+                st.lerpT = st.enableLerp ? (blendPct * 0.01f) : 0.0f;
+                dirty = true;
             }
         }
     }
@@ -1491,7 +1492,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                         ctx.RebuildPreviewTheme();
                         ui.InvalidateAll();
                     }
-                    if (themeMenu.Checkbox("Theme Morph (Lerp)", st.enableLerp, {.keepOpen = true})) {
+                    if (themeMenu.Checkbox("Color Morph (LerpColors)", st.enableLerp, {.keepOpen = true})) {
                         ctx.RebuildPreviewTheme();
                         ui.InvalidateAll();
                     }
@@ -1583,7 +1584,7 @@ void RenderThemeStudioStage(guikit::Context& ui, DemoContext& ctx) {
                 }
                 if (tb.Toggle(st.enableLerp, {
                     .text = "Morph",
-                    .tooltip = "Toggle UiTheme::Lerp morphing",
+                    .tooltip = "Toggle UiTheme::LerpColors color morphing",
                     .icon = guikit::Icon::Flash(),
                     .variant = guikit::UiVariant::Warning
                 }).changed) {
@@ -1739,7 +1740,7 @@ keel::String GenerateThemeStudioCode(const DemoContext& ctx) {
     out.append("\n};\nconst guikit::UiTheme theme = guikit::UiTheme::Build(spec);\n");
     if (st.enableLerp && st.lerpT > 0.001f) {
         keel::format_into(out,
-            "const guikit::UiTheme morphed = guikit::UiTheme::Lerp(\n"
+            "const guikit::UiTheme morphed = guikit::UiTheme::LerpColors(\n"
             "    theme,\n"
             "    guikit::UiTheme::FromPreset(guikit::ThemePreset::{}),\n"
             "    {:.2f}f\n"

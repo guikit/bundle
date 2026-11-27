@@ -277,7 +277,7 @@ struct ThemeStudioState {
         }
         if (enableLerp && lerpT > 0.001f) {
             const guikit::UiTheme target = guikit::UiTheme::FromPreset(lerpTarget);
-            return guikit::UiTheme::Lerp(primary, target, lerpT);
+            return guikit::UiTheme::LerpColors(primary, target, lerpT);
         }
         return primary;
     }

@@ -107,8 +107,8 @@ void RenderBreadcrumbStage(guikit::Context& ui, DemoContext& ctx) {
         if (auto well = guikit::Box(ui, {
             .width = guikit::SizeMode::Fit,
             .padding = guikit::Padding::Symmetric(10.0f, 6.0f),
-            .background = guikit::StateColor::Surface(),
-            .border = {.width = 1.0f, .radius = 8.0f}
+            .border = {.width = 1.0f},
+            .surface = guikit::SurfaceRole::Flat
         })) {
             renderTrail();
         }
@@ -151,8 +151,8 @@ keel::String GenerateBreadcrumbCode(const DemoContext& ctx) {
             "if (auto well = guikit::Box(ui, {{\n"
             "    .width = guikit::SizeMode::Fit,\n"
             "    .padding = guikit::Padding::Symmetric(10.0f, 6.0f),\n"
-            "    .background = guikit::StateColor::Surface(),\n"
-            "    .border = {{.width = 1.0f, .radius = 8.0f}}\n"
+            "    .border = {{.width = 1.0f}},\n"
+            "    .surface = guikit::SurfaceRole::Flat\n"
             "}})) {{\n"
             "    guikit::Breadcrumb(ui, activeCrumb, crumbs, {{\n"
             "        .separator = guikit::BreadcrumbSeparator::{},\n"

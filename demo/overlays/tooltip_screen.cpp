@@ -95,12 +95,11 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
                 .variant = guikit::UiVariant::Secondary
             });
         } else if (anchorModeIdx == 1u) {
-            if (auto zone = guikit::Box(ui, {
-                .gap = 4.0f,
+            if (auto zone = guikit::Card(ui, {
                 .width = guikit::SizeMode::Fit,
+                .gap = 4.0f,
                 .padding = guikit::Padding::Symmetric(32.0f, 22.0f),
-                .background = {ui.GetTheme().palette.surfaceHover.WithAlphaF(0.45f)},
-                .border = {.width = 1.0f, .radius = 8.0f, .color = {ui.GetTheme().palette.borderHover}}
+                .surface = guikit::SurfaceRole::Sunken
             })) {
                 guikit::Text(ui, "Hover this anchored target box", {.role = guikit::TextRole::LabelMedium});
                 const auto resp = zone.GetResponse();
@@ -113,12 +112,11 @@ void RenderTooltipStage(guikit::Context& ui, DemoContext& ctx) {
                 .variant = guikit::UiVariant::Secondary
             });
         } else {
-            if (auto zone = guikit::Box(ui, {
-                .gap = 4.0f,
+            if (auto zone = guikit::Card(ui, {
                 .width = guikit::SizeMode::Fit,
+                .gap = 4.0f,
                 .padding = guikit::Padding::Symmetric(40.0f, 28.0f),
-                .background = {ui.GetTheme().palette.surfaceHover.WithAlphaF(0.45f)},
-                .border = {.width = 1.0f, .radius = 8.0f, .color = {ui.GetTheme().palette.borderHover}}
+                .surface = guikit::SurfaceRole::Sunken
             })) {
                 guikit::Text(ui, "Move pointer inside this canvas zone", {.role = guikit::TextRole::LabelMedium});
                 const auto resp = zone.GetResponse();
@@ -174,7 +172,11 @@ keel::String GenerateTooltipCode(const DemoContext& ctx) {
 
     if (anchorModeIdx == 1u) {
         return keel::format(
-            "if (auto zone = guikit::Box(ui, {{.padding = guikit::Padding::Symmetric(32.0f, 22.0f)}})) {{\n"
+            "if (auto zone = guikit::Card(ui, {{\n"
+            "    .width = guikit::SizeMode::Fit,\n"
+            "    .padding = guikit::Padding::Symmetric(32.0f, 22.0f),\n"
+            "    .surface = guikit::SurfaceRole::Sunken\n"
+            "}})) {{\n"
             "    guikit::Text(ui, \"Hover this anchored target box\");\n"
             "    const auto resp = zone.GetResponse();\n"
             "    if (resp.hovered) {{\n"
@@ -186,7 +188,11 @@ keel::String GenerateTooltipCode(const DemoContext& ctx) {
     }
 
     return keel::format(
-        "if (auto zone = guikit::Box(ui, {{.padding = guikit::Padding::Symmetric(40.0f, 28.0f)}})) {{\n"
+        "if (auto zone = guikit::Card(ui, {{\n"
+        "    .width = guikit::SizeMode::Fit,\n"
+        "    .padding = guikit::Padding::Symmetric(40.0f, 28.0f),\n"
+        "    .surface = guikit::SurfaceRole::Sunken\n"
+        "}})) {{\n"
         "    guikit::Text(ui, \"Move pointer inside this canvas zone\");\n"
         "    if (zone.GetResponse().hovered) {{\n"
         "        const guikit::Vec2 pos = ui.GetMousePos();\n"

@@ -71,11 +71,18 @@ void RenderHeaderBarStage(guikit::Context& ui, DemoContext& /*ctx*/) {
             .separator = guikit::HeadingSeparator::Bottom
         });
 
+        const auto& activeTheme = ui.GetTheme();
+        const keel::f32 frameInset = activeTheme.Painter().GetChromeMetrics(activeTheme).frameBevelInset;
+        const keel::f32 winRad = activeTheme.GetWindowCornerRadius();
+        const keel::Optional<keel::f32> optWinRad = (winRad > 0.01f) ? keel::Optional<keel::f32>(winRad) : keel::kNullOpt;
+
         if (auto frame = guikit::Box(ui, {
             .gap = 0.0f,
             .width = guikit::SizeMode::Stretch,
-            .padding = guikit::Padding::All(0.0f),
-            .border = {.width = 1.0f, .radius = 8.0f}
+            .padding = guikit::Padding::All(frameInset),
+            .border = {.width = 1.0f, .radius = optWinRad},
+            .surface = guikit::SurfaceRole::Raised,
+            .clipChildren = true
         })) {
             if (auto hb = guikit::HeaderBar(ui, {
                 .title = "GuiKit Studio",
@@ -171,8 +178,10 @@ void RenderHeaderBarStage(guikit::Context& ui, DemoContext& /*ctx*/) {
         if (auto minimalFrame = guikit::Box(ui, {
             .gap = 0.0f,
             .width = guikit::SizeMode::Stretch,
-            .padding = guikit::Padding::All(0.0f),
-            .border = {.width = 1.0f, .radius = 8.0f}
+            .padding = guikit::Padding::All(frameInset),
+            .border = {.width = 1.0f, .radius = optWinRad},
+            .surface = guikit::SurfaceRole::Raised,
+            .clipChildren = true
         })) {
             if (auto hb = guikit::HeaderBar(ui, {
                 .title = "Minimal Utility Window",

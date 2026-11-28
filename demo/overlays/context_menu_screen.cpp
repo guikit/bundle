@@ -57,18 +57,33 @@ void RenderContextMenuStage(guikit::Context& ui, DemoContext& ctx) {
         .align = guikit::Alignment::Center,
         .justify = guikit::Justify::Center
     })) {
-        if (auto zone = guikit::Box(ui, {
-            .gap = 4.0f,
-            .padding = guikit::Padding::Symmetric(36.0f, 26.0f),
-            .background = {ui.GetTheme().palette.surfaceHover.WithAlphaF(0.45f)},
-            .border = {.width = 1.0f, .radius = 8.0f, .color = {ui.GetTheme().palette.borderHover}}
+        if (auto zone = guikit::Card(ui, {
+            .minWidth = 360.0f,
+            .width = guikit::SizeMode::Fit,
+            .height = 116.0f,
+            .padding = guikit::Padding::Symmetric(36.0f, 20.0f),
+            .surface = guikit::SurfaceRole::Sunken
         })) {
-            guikit::Text(ui,
-                (s_cm.triggerModeIdx == 0)
-                    ? "Right-Click inside this target zone"
-                    : "Left-Click inside this target zone",
-                {.role = guikit::TextRole::LabelMedium}
-            );
+            if (auto inner = guikit::Column(ui, {
+                .gap = 4.0f,
+                .align = guikit::Alignment::Center,
+                .justify = guikit::Justify::Center,
+                .width = guikit::SizeMode::Stretch,
+                .height = guikit::SizeMode::Stretch
+            })) {
+                guikit::Text(ui,
+                    (s_cm.triggerModeIdx == 0)
+                        ? "Right-Click inside this target zone"
+                        : "Left-Click inside this target zone",
+                    {.role = guikit::TextRole::LabelMedium}
+                );
+                guikit::Text(ui,
+                    (s_cm.triggerModeIdx == 0)
+                        ? "Opens anchored ContextMenu at cursor"
+                        : "Left-click trigger mode active",
+                    {.role = guikit::TextRole::BodySmall, .variant = guikit::UiVariant::Muted}
+                );
+            }
             if (zone.GetResponse().IsTriggered(zoneTrigger)) {
                 s_cm.zoneMenuOpen = true;
                 s_cm.zoneMenuPos = ui.GetMousePos();
@@ -120,7 +135,13 @@ keel::String GenerateContextMenuCode(const DemoContext& ctx) {
         "    {{.label = \"Lock Position\",   .shortcut = \"Ctrl+L\", .separatorAfter = true, .checked = itemLocked, .hasCheck = true}},\n"
         "    {{.label = \"Delete Item\",     .shortcut = \"Del\",    .icon = guikit::Icon::Trash(), .variant = guikit::UiVariant::Danger}}\n"
         "}}}};\n\n"
-        "if (auto zone = guikit::Box(ui, {{.padding = guikit::Padding::Symmetric(36.0f, 26.0f)}})) {{\n"
+        "if (auto zone = guikit::Card(ui, {{\n"
+        "    .minWidth = 360.0f,\n"
+        "    .width = guikit::SizeMode::Fit,\n"
+        "    .height = 116.0f,\n"
+        "    .padding = guikit::Padding::Symmetric(36.0f, 20.0f),\n"
+        "    .surface = guikit::SurfaceRole::Sunken\n"
+        "}})) {{\n"
         "    if (zone.GetResponse().IsTriggered(guikit::InteractionTrigger::{})) {{\n"
         "        zoneMenuOpen = true;\n"
         "        zoneMenuPos = ui.GetMousePos();\n"

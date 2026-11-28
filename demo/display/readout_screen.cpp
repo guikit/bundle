@@ -153,9 +153,8 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
             .defaultPrecision = 2,
             .variant = guikit::UiVariant::Primary,
             .showAction = true,
-            .actionActive = (keel::abs(s_state.voltageZeroV) > 1e-4),
             .actionDisabled = s_state.lockZero,
-            .actionTooltip = "Set relative zero (REL)"
+            .actionTooltip = "Zero voltage offset"
         },
         {
             .label = "Output Current",
@@ -166,7 +165,6 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
             .defaultPrecision = 3,
             .variant = overCurrent ? guikit::UiVariant::Danger : guikit::UiVariant::Info,
             .showAction = true,
-            .actionActive = (keel::abs(s_state.currentZeroA) > 1e-4),
             .actionDisabled = s_state.lockZero,
             .actionTooltip = "Zero current offset"
         },
@@ -179,7 +177,6 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
             .defaultPrecision = 2,
             .variant = guikit::UiVariant::Success,
             .showAction = true,
-            .actionActive = (keel::abs(s_state.powerZeroW) > 1e-4),
             .actionDisabled = s_state.lockZero,
             .actionTooltip = "Zero power baseline"
         },
@@ -202,9 +199,8 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
             .defaultPrecision = 1,
             .variant = guikit::UiVariant::Warning,
             .showAction = true,
-            .actionActive = (keel::abs(s_state.tempZeroC) > 1e-4),
             .actionDisabled = s_state.lockZero,
-            .actionTooltip = "Measure delta temperature"
+            .actionTooltip = "Zero temperature offset"
         },
         {
             .label = "Session Uptime",
@@ -238,16 +234,16 @@ void RenderReadoutStage(guikit::Context& ui, DemoContext& ctx) {
     if (resp.actionClicked) {
         const keel::i32 ch = s_state.slot.channelIndex;
         if (ch == 0) {
-            s_state.voltageZeroV = (keel::abs(s_state.voltageZeroV) > 1e-4) ? 0.0 : rawVoltageV;
+            s_state.voltageZeroV = rawVoltageV;
         } else if (ch == 1) {
-            s_state.currentZeroA = (keel::abs(s_state.currentZeroA) > 1e-4) ? 0.0 : rawCurrentA;
+            s_state.currentZeroA = rawCurrentA;
         } else if (ch == 2) {
-            s_state.powerZeroW = (keel::abs(s_state.powerZeroW) > 1e-4) ? 0.0 : rawPowerW;
+            s_state.powerZeroW = rawPowerW;
         } else if (ch == 4) {
-            s_state.tempZeroC = (keel::abs(s_state.tempZeroC) > 1e-4) ? 0.0 : rawTempC;
+            s_state.tempZeroC = rawTempC;
         }
         guikit::ShowToast(ui, {
-            .title = "Relative Zero Updated",
+            .title = "Channel Zeroed",
             .message = channels[keel::as<keel::usize>(ch)].label,
             .variant = guikit::UiVariant::Success
         });

@@ -1,4 +1,5 @@
 #include "../demo_context.hpp"
+#include "keel/time.h"
 
 namespace guikit::demo {
 
@@ -24,11 +25,17 @@ struct CodeEditorState {
     bool showWhitespace = false;
     keel::f32 zoom = 1.0f;
 
-    keel::usize syntaxMode = 0; // 0 = C++20, 1 = MATLAB, 2 = JSON, 3 = Python, 4 = Custom
-    static constexpr keel::StaticArray<keel::StringRef, 5> syntaxLabels = {
-        "C++20", "MATLAB", "JSON", "Python", "Custom"
+    keel::usize syntaxMode = 0; // 0=C++20, 1=MATLAB, 2=JSON, 3=Python, 4=Custom, 5=1M Lines (C++20), 6=10MB Single Line (JSON)
+    static constexpr keel::StaticArray<keel::StringRef, 7> syntaxLabels = {
+        "C++20",
+        "MATLAB",
+        "JSON",
+        "Python",
+        "Custom",
+        "1M Lines (C++20 Stress)",
+        "10 MB Single Line (JSON)"
     };
-    keel::usize colorScheme = 0; // 0 = Theme Default, 1 = VS Code Dark+, 2 = Monokai, 3 = Dracula, 4 = One Dark, 5 = MATLAB, 6 = Solarized, 7 = GitHub Light
+    keel::usize colorScheme = 0;
     static constexpr keel::StaticArray<keel::StringRef, 8> colorSchemeLabels = {
         "Theme Default",
         "VS Code Dark+",
@@ -41,12 +48,13 @@ struct CodeEditorState {
     };
     static constexpr keel::StaticArray<keel::StringRef, 5> customKeywords = {"rule", "when", "then", "emit", "alert"};
     static constexpr keel::StaticArray<keel::StringRef, 4> customTypes = {"Sensor", "Signal", "Threshold", "Millis"};
-    keel::usize debugToolbarAlignIdx = 1; // 0 = Left (Start), 1 = Center, 2 = Right (End)
+    keel::usize debugToolbarAlignIdx = 1;
     static constexpr keel::StaticArray<keel::StringRef, 3> debugToolbarAlignLabels = {
         "Left", "Center", "Right"
     };
 
-    keel::String editorBuffer{};
+    guikit::TextDocument editorDoc{};
+    keel::f64 lastLoadMs = 0.0;
     keel::Array<keel::usize> breakpoints{};
     keel::usize executionLine = 14;
     keel::i32 stepCounter = 0;
@@ -67,20 +75,14 @@ struct CodeEditorState {
     }
 
     keel::usize FindLineContaining(keel::StringRef needle, keel::usize fallbackLine) const {
-        if (needle.empty()) return fallbackLine;
-        const keel::StringRef buf = editorBuffer.as_ref();
-        keel::usize lineNum = 1;
-        keel::usize pos = 0;
-        while (pos <= buf.size()) {
-            const keel::usize nextNl = buf.find('\n', pos);
-            const keel::usize len = (nextNl == keel::StringRef::npos) ? (buf.size() - pos) : (nextNl - pos);
-            const keel::StringRef lineView = buf.substr(pos, len);
-            if (lineView.contains(needle)) {
-                return lineNum;
+        if (needle.empty() || editorDoc.LineCount() > 1000u) return fallbackLine;
+        const keel::usize nLines = editorDoc.LineCount();
+        keel::String scratch;
+        for (keel::usize i = 0u; i < nLines; ++i) {
+            editorDoc.ReadLineSlice(i, 0u, 256u, scratch);
+            if (scratch.as_ref().contains(needle)) {
+                return i + 1u;
             }
-            if (nextNl == keel::StringRef::npos) break;
-            pos = nextNl + 1;
-            ++lineNum;
         }
         return fallbackLine;
     }
@@ -228,8 +230,9 @@ struct CodeEditorState {
     void LoadPreset(keel::usize mode) {
         syntaxMode = mode;
         stepCounter = 0;
+        const keel::u64 t0 = keel::monotonic_ns();
         if (mode == 0) { // C++20
-            editorBuffer = keel::String::from(
+            editorDoc.SetText(
                 "#include <cmath>\n"
                 "#include \"keel/keel.h\"\n\n"
                 "constexpr double kPi = 3.14159265358979323846;\n"
@@ -258,9 +261,10 @@ struct CodeEditorState {
             );
             breakpoints.assign({14, 18, 22});
             executionLine = 14;
+            showDebugToolbar = true;
             lastDebugEvent = "Paused at dsp::kernel::ComputeBandEnergy (Ln 14)";
         } else if (mode == 1) { // MATLAB
-            editorBuffer = keel::String::from(
+            editorDoc.SetText(
                 "%% MATLAB Spectral Beamforming & Welch PSD Analysis\n"
                 "%{\n"
                 "   Block comment: demonstrates MATLAB transpose (x') vs strings ('periodic'),\n"
@@ -286,9 +290,10 @@ struct CodeEditorState {
             );
             breakpoints.assign({13, 15, 20});
             executionLine = 13;
+            showDebugToolbar = true;
             lastDebugEvent = "Paused in analyzeSpectrum.m (Ln 13)";
         } else if (mode == 2) { // JSON
-            editorBuffer = keel::String::from(
+            editorDoc.SetText(
                 "{\n"
                 "    \"schema\": \"guikit.ide.v2\",\n"
                 "    \"engine\": {\n"
@@ -312,9 +317,10 @@ struct CodeEditorState {
             );
             breakpoints.assign({2, 15});
             executionLine = 15;
+            showDebugToolbar = true;
             lastDebugEvent = "Inspecting JSON configuration node (Ln 15)";
         } else if (mode == 3) { // Python
-            editorBuffer = keel::String::from(
+            editorDoc.SetText(
                 "# Python Neural Spectral Filter Trainer\n"
                 "import math\n\n"
                 "class SpectralTrainer:\n"
@@ -330,9 +336,10 @@ struct CodeEditorState {
             );
             breakpoints.assign({10, 12});
             executionLine = 11;
+            showDebugToolbar = true;
             lastDebugEvent = "Paused in SpectralTrainer.fit_epoch (Ln 11)";
-        } else { // Custom DSL
-            editorBuffer = keel::String::from(
+        } else if (mode == 4) { // Custom DSL
+            editorDoc.SetText(
                 "# Custom Rule Engine DSL (Declarative SyntaxConfig)\n"
                 "rule OverheatProtection {\n"
                 "    when Sensor.temp > 85.5 then {\n"
@@ -343,40 +350,98 @@ struct CodeEditorState {
             );
             breakpoints.assign({3, 4});
             executionLine = 4;
+            showDebugToolbar = true;
             lastDebugEvent = "Rule engine triggered on line 4";
+        } else if (mode == 5) { // 1,000,000 Lines Stress Test (C++20)
+            constexpr keel::usize kTargetLines = 1000000u;
+            keel::String big;
+            big.reserve(kTargetLines * 44u);
+            big.append("// === GuiKit Piece-Tree Stress Test: 1,000,000 Lines ===\n");
+            big.append("// Try Ctrl+G (e.g. 500800 or 999990), Ctrl+F, Word Wrap, Folding, or live typing!\n");
+            keel::usize lineNo = 2u;
+            auto appendUsize = [&](keel::usize v) {
+                char numBuf[24];
+                keel::usize d = 0u;
+                do {
+                    numBuf[d++] = keel::as<char>('0' + (v % 10u));
+                    v /= 10u;
+                } while (v > 0u);
+                while (d > 0u) big.push_back(numBuf[--d]);
+            };
+            while (lineNo < kTargetLines) {
+                if (lineNo == 500000u) {
+                    big.append("/* === 1,500-Line Multiline Block Comment Checkpoint Test ===\n");
+                    ++lineNo;
+                    for (keel::usize k = 0u; k < 1498u && lineNo + 1u < kTargetLines; ++k, ++lineNo) {
+                        big.append("   checkpointed comment body line ");
+                        appendUsize(lineNo + 1u);
+                        big.push_back('\n');
+                    }
+                    big.append("   End of 1,500-line multiline block comment */\n");
+                    ++lineNo;
+                    continue;
+                }
+                const keel::usize mod = lineNo % 5u;
+                if (mod == 0u) {
+                    big.append("inline keel::f64 ComputeStage_");
+                    appendUsize(lineNo);
+                    big.append("(keel::f64 x) noexcept {\n");
+                } else if (mod == 1u) {
+                    big.append("    const keel::f64 gain = 1.25 + 0.001 * ");
+                    appendUsize(lineNo);
+                    big.append(".0;\n");
+                } else if (mod == 2u) {
+                    big.append("    keel::f64 acc = x * gain + 42.0; // line ");
+                    appendUsize(lineNo + 1u);
+                    big.push_back('\n');
+                } else if (mod == 3u) {
+                    big.append("    return acc * 0.5;\n");
+                } else {
+                    if (lineNo + 1u < kTargetLines) big.append("}\n");
+                    else big.append("}");
+                }
+                ++lineNo;
+            }
+            editorDoc.SetText(big.as_ref());
+            breakpoints.clear();
+            executionLine = 0;
+            showDebugToolbar = false;
+            lastDebugEvent = "1,000,000-line Piece-Tree document ready";
+        } else { // 10 MB Single Line Stress Test (JSON)
+            constexpr keel::usize kTargetBytes = 10u * 1024u * 1024u;
+            keel::String hugeLine;
+            hugeLine.reserve(kTargetBytes);
+            hugeLine.append("{\"dataset\":\"guikit_10mb_single_line\",\"items\":[");
+            const keel::StringRef item = "{\"id\":12345,\"sensor\":\"radar_ch0\",\"gain\":1.85,\"ok\":true},";
+            while (hugeLine.size() + item.size() + 32u < kTargetBytes) {
+                hugeLine.append(item);
+            }
+            hugeLine.append("{\"id\":999999,\"tail\":true}]}");
+            editorDoc.SetText(hugeLine.as_ref());
+            breakpoints.clear();
+            executionLine = 0;
+            showDebugToolbar = false;
+            lastDebugEvent = "10 MB single-line JSON document ready";
         }
+        lastLoadMs = keel::as<keel::f64>(keel::monotonic_ns() - t0) * 1e-6;
         RebuildDynamicDebugData();
     }
 
     keel::usize CountLines() const {
-        keel::usize count = 1;
-        for (char c : editorBuffer) {
-            if (c == '\n') ++count;
-        }
-        return count;
+        return editorDoc.LineCount();
     }
 
     bool IsLineExecutable(keel::usize line1Based) const {
-        const keel::StringRef buf = editorBuffer.as_ref();
-        keel::usize cur = 1;
-        keel::usize pos = 0;
-        while (pos <= buf.size()) {
-            const keel::usize nextNl = buf.find('\n', pos);
-            const keel::usize len = (nextNl == keel::StringRef::npos) ? (buf.size() - pos) : (nextNl - pos);
-            if (cur == line1Based) {
-                const keel::StringRef trimmed = buf.substr(pos, len).trim();
-                if (trimmed.empty()) return false;
-                if (trimmed.starts_with("//") || trimmed.starts_with("#") || trimmed.starts_with("%") ||
-                    trimmed.starts_with("/*") || trimmed.starts_with("*") || trimmed == "{" || trimmed == "}") {
-                    return false;
-                }
-                return true;
-            }
-            if (nextNl == keel::StringRef::npos) break;
-            pos = nextNl + 1;
-            ++cur;
+        if (line1Based == 0u || line1Based > editorDoc.LineCount()) return false;
+        keel::String scratch;
+        editorDoc.ReadLineSlice(line1Based - 1u, 0u, 128u, scratch);
+        const keel::StringRef trimmed = scratch.as_ref().trim();
+        if (trimmed.empty()) return false;
+        if (trimmed.starts_with("//") || trimmed.starts_with("#") || trimmed.starts_with("%") ||
+            trimmed.starts_with("/*") || trimmed.starts_with("*") || trimmed == "{" || trimmed == "}") {
+            return false;
         }
-        return false;
+        return true;
     }
 
     void HandleDebugAction(CodeDebugAction action) {
@@ -391,7 +456,8 @@ struct CodeEditorState {
         } else if (action == CodeDebugAction::StepOver || action == CodeDebugAction::StepInto) {
             ++stepCounter;
             keel::usize nextLine = (executionLine == 0) ? 1 : (executionLine + 1);
-            for (keel::usize tries = 0; tries < totalLines; ++tries) {
+            const keel::usize maxTries = keel::min<keel::usize>(totalLines, 512u);
+            for (keel::usize tries = 0; tries < maxTries; ++tries) {
                 if (nextLine > totalLines) nextLine = 1;
                 if (IsLineExecutable(nextLine)) break;
                 ++nextLine;
@@ -434,6 +500,21 @@ void RenderCodeEditorInspector(guikit::Context& ui, DemoContext& ctx) {
             s_state.LoadPreset(s_state.syntaxMode);
             ui.InvalidateAll();
         }
+    }
+
+    if (s_state.syntaxMode >= 5u) {
+        const keel::f64 sizeMb = keel::as<keel::f64>(s_state.editorDoc.ByteLength()) / (1024.0 * 1024.0);
+        guikit::Text(
+            ui,
+            ui.Format(
+                "Piece Tree: {} lines | {:.2f} MB | {} pieces | load {:.1f} ms",
+                s_state.editorDoc.LineCount(),
+                sizeMb,
+                s_state.editorDoc.PieceCount(),
+                s_state.lastLoadMs
+            ),
+            {.role = guikit::TextRole::LabelSmall, .variant = guikit::UiVariant::Info}
+        );
     }
 
     if (auto el = guikit::Element(ui, {.label = "Syntax Color Scheme"})) {
@@ -501,11 +582,11 @@ void RenderCodeEditorInspector(guikit::Context& ui, DemoContext& ctx) {
 
 void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
     guikit::SyntaxConfig synCfg = guikit::SyntaxConfig::Plain();
-    if (s_state.syntaxMode == 0) {
+    if (s_state.syntaxMode == 0 || s_state.syntaxMode == 5) {
         synCfg = guikit::SyntaxConfig::Cpp();
     } else if (s_state.syntaxMode == 1) {
         synCfg = guikit::SyntaxConfig::Matlab();
-    } else if (s_state.syntaxMode == 2) {
+    } else if (s_state.syntaxMode == 2 || s_state.syntaxMode == 6) {
         synCfg = guikit::SyntaxConfig::Json();
     } else if (s_state.syntaxMode == 3) {
         synCfg = guikit::SyntaxConfig::Python();
@@ -548,7 +629,7 @@ void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
         .description = s_state.showDesc ? s_state.lastDebugEvent.as_ref() : keel::StringRef{},
         .size = ctx.controlsSize
     })) {
-        resp = guikit::TextArea(ui, s_state.editorBuffer, {
+        resp = guikit::CodeEditor(ui, s_state.editorDoc, {
             .autoHeight = false,
             .readOnly = s_state.readOnly,
             .showLineNumbers = s_state.lineNumbers,
@@ -585,7 +666,7 @@ void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
         });
     }
 
-    if (resp.lineDelta != 0) {
+    if (resp.lineDelta != 0 && s_state.syntaxMode < 5u) {
         s_state.RebuildDynamicDebugData();
     }
 
@@ -599,7 +680,7 @@ void RenderCodeEditorStage(guikit::Context& ui, DemoContext& ctx) {
 keel::String GenerateCodeEditorCode(const DemoContext& ctx) {
     keel::StringRef synLine = "guikit::SyntaxConfig::Cpp()";
     if (s_state.syntaxMode == 1) synLine = "guikit::SyntaxConfig::Matlab()";
-    else if (s_state.syntaxMode == 2) synLine = "guikit::SyntaxConfig::Json()";
+    else if (s_state.syntaxMode == 2 || s_state.syntaxMode == 6) synLine = "guikit::SyntaxConfig::Json()";
     else if (s_state.syntaxMode == 3) synLine = "guikit::SyntaxConfig::Python()";
     else if (s_state.syntaxMode == 4) synLine = "customSyntaxConfig";
 
@@ -633,7 +714,9 @@ keel::String GenerateCodeEditorCode(const DemoContext& ctx) {
         : keel::String{};
 
     return keel::format(
-        "auto resp = guikit::TextArea(ui, sourceBuffer, {{\n"
+        "// Zero-copy Piece-Tree document (1M+ lines & multi-MB single lines):\n"
+        "// guikit::TextDocument doc(sourceText);\n"
+        "auto resp = guikit::CodeEditor(ui, doc, {{\n"
         "    .readOnly = {},\n"
         "    .showLineNumbers = {},\n"
         "    .wordWrap = {},\n"
